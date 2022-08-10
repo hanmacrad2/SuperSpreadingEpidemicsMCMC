@@ -1,0 +1,2 @@
+# SuperSpreadingEpidemicsMCMC
+ Package for SuperSpreadingEpidemicsMCMC
