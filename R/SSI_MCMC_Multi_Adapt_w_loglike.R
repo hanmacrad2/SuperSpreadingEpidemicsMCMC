@@ -1,3 +1,43 @@
+#' Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
+#'
+#' Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+#'
+#' @param data data from the epidemic, namely daily infection counts
+#' @param x A vector containing the three model parameters \code{"a, b"} and \code{"c"}
+#'
+#' @return Log likelihood of the SSI model
+#' @export
+#'
+LOG_LIKE_SSI_MULTI <- function(data, x){
+
+  #PARAMS
+  aX =  x[1]; bX = x[2]; cX = x[3]
+
+  #data
+  n = data[[1]]; s = data[[2]]
+
+  #Params
+  num_days = length(n)
+  shape_gamma = 6; scale_gamma = 1
+  logl = 0
+
+  #INFECTIOUSNESS  - Difference of 2 GAMMA distributions. Discretized
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+
+  for (t in 1:num_days) { #*1 or 2
+
+    #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
+    lambda_t = sum((n[1:(t-1)] + cX*s[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+
+    #LOG-LIKELIHOOD
+    logl_add = - lambda_t*(aX + bX) + n[t]*(log(aX) + log(lambda_t)) + s[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(n[t]) - lfactorial(s[t])
+    logl = logl + logl_add
+  }
+
+  logl
+
+}
 #' MCMC algorithm for Super-Spreading Individuals (SSI) epidemic model
 #'
 #' MCMC algorithm for obtaining samples from the parameters of a
@@ -23,7 +63,7 @@
 #' @return mcmc_samples
 #' @export
 #'
-SSI_MCMC_MULTI_ADADPT <- function(data,
+SSI_MCMC_MULTI_ADADPT_II <- function(data,
                                   mcmc_inputs = list(n_mcmc = n_mcmc,
                                                      mod_start_points = mod_start_points,  burn_in_pc = 0.05,
                                                      dim = 3, alpha_star = 0.4, v0 = 100, vec_min = c(0,0,0),
