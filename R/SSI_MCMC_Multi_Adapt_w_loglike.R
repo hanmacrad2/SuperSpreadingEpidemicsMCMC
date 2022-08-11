@@ -1,4 +1,4 @@
-#' Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
+#' Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
 #'
 #' Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #'
@@ -7,6 +7,14 @@
 #'
 #' @return Log likelihood of the SSI model
 #' @export
+#'
+#' @author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#'x = c(0.8, 0.01, 15)
+#'
+#' log_like = LOG_LIKE_SSI_MULTI(epidemic_data, x)
 #'
 LOG_LIKE_SSI_MULTI <- function(data, x){
 
@@ -44,9 +52,9 @@ LOG_LIKE_SSI_MULTI <- function(data, x){
 #' super-spreading individuals epidemic model
 #'
 #' @param data data from the epidemic, namely daily infection counts
-#' @param mcmc_inputs A list of mcmc_inputs including
+#' @param mcmc_inputs A list of mcmc specifications including
 #' \itemize{
-#'   \item \code{"n_mcmc"} - Number of iterations the mcmc sampler
+#'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler
 #'   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm begins sampling from
 #'   \item \code{"burn_in_pc"} - Burn-in percentage; the percentage of the total mcmc iterations disgarded as burn-in
 #'   \item \code{"dim"} - dimension of model or number of unknown model parameters
@@ -60,10 +68,36 @@ LOG_LIKE_SSI_MULTI <- function(data, x){
 #'   \item \code{"b_prior_exp"} - rate of exponential prior on b, default rate of 1
 #'   \item \code{"c_prior_exp"}  - rate of exponential prior on c, default rate of 0.1
 #' }
-#' @return mcmc_samples
+#' @param FLAGS_LIST A list of boolean variables for switching on/off certain functionality
+#' \itemize{
+#'   \item \code{"DATA_AUG"} - Data Augmentation implemented as part of the SSI model if TRUE
+#'   \item \code{"B_PRIOR_EXP"}  - An exponential prior on b if TRUE
+#'   \item \code{"C_PRIOR_EXP"}  - An exponential prior on c if TRUE
+#'   \item \code{"THIN"}  - Return a thinned mcmc sample if TRUE, reduced by a factor of \code{"thinning_factor"}
+#' }
+#' @return MCMC samples & other output
+#' \itemize{
+#'   \item \code{"x_matrix"} - A matrix of size \code{"mcmc_vec_size"} x \code{"dim"}, i.e each column corresponds to the mcmc samples of a model parameter
+#'   \item \code{"log_like_vec"}  - A vector containing the log likelihood at each of the mcmc iterations, of size of \code{"mcmc_vec_size"}
+#'   \item \code{"lambda_vec"}  - A vector containing the value of lambda in the adaptive algorithm at each of the mcmc iterations, of \code{"mcmc_vec_size"}
+#'   \item \code{"accept_rate"}  - The acceptance rate of the mcmc algorithm
+#'   \item \code{"accept_rate_da"}  - The acceptance rate of the data augmentation step in the mcmc algorithm
+#'   \item \code{"non_ss"}  - The augmented epidemic data corresponding to the non super-spreaders (non-ss) for each iteration of the mcmc
+#'   \item \code{"ss"}  - The augmented epidemic data corresponding to the super-spreaders (ss) for each iteration of the mcmc
+#'   }
 #' @export
 #'
-SSI_MCMC_MULTI_ADADPT_II <- function(data,
+#'@author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#'mcmc_inputs = list(n_mcmc = 500000, mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), burn_in_pc = 0.05,
+#' dim = 3, alpha_star = 0.4, v0 = 100, vec_min = c(0,0,1), thinning_factor = 10)
+#'
+#' #START MCMC
+#'mcmc_ssi_output = MCMC_SSI_MULTI_ADADPT(epidemic_data, mcmc_inputs)
+#'
+SSI_MCMC_MULTI_ADADPT <- function(data,
                                   mcmc_inputs = list(n_mcmc = n_mcmc,
                                                      mod_start_points = mod_start_points,  burn_in_pc = 0.05,
                                                      dim = 3, alpha_star = 0.4, v0 = 100, vec_min = c(0,0,0),
@@ -246,7 +280,5 @@ SSI_MCMC_MULTI_ADADPT_II <- function(data,
 
   return(list(x_matrix = x_matrix, log_like_vec = log_like_vec, lambda_vec = lambda_vec,
               accept_rate = accept_rate, accept_rate_da = accept_rate_da,
-              non_ss = non_ss, ss = ss,
-              non_ss_mean = colMeans(non_ss),
-              ss_mean = colMeans(ss)))
+              non_ss = non_ss, ss = ss))
 }

@@ -23,7 +23,7 @@
 #' @return mcmc_samples
 #' @export
 #'
-SSI_MCMC_MULTI_ADADPT <- function(data,
+SSI_MCMC_MULTI_ADADPT_V0 <- function(data,
                                   mcmc_inputs = list(n_mcmc = n_mcmc,
                                                      mod_start_points = mod_start_points,  burn_in_pc = 0.05,
                                                      dim = 3, alpha_star = 0.4, v0 = 100, vec_min = c(0,0,0),

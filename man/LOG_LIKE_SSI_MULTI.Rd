@@ -2,7 +2,7 @@
 % Please edit documentation in R/SSI_MCMC_Multi_Adapt_w_loglike.R
 \name{LOG_LIKE_SSI_MULTI}
 \alias{LOG_LIKE_SSI_MULTI}
-\title{Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model}
+\title{Log likelihood of the Super-Spreading Individuals (SSI) epidemic model}
 \usage{
 LOG_LIKE_SSI_MULTI(data, x)
 }
@@ -16,4 +16,14 @@ Log likelihood of the SSI model
 }
 \description{
 Returns the Log likelihood of the Super-Spreading Individuals (SSI) epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+}
+\examples{
+
+x = c(0.8, 0.01, 15)
+
+log_like = LOG_LIKE_SSI_MULTI(epidemic_data, x)
+
+}
+\author{
+Hannah Craddock, Xavier Didelot, Simon Spencer
 }
