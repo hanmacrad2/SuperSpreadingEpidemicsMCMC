@@ -24,7 +24,7 @@ PLOT_SS_MCMC_GRID(
 
 \item{mcmc_specs}{A list of mcmc specifications
 \itemize{
-  \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler
+  \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler (integer)
   \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm started sampling from
   \item \code{"mod_par_names"} - Names of the model parameters, e.g \code{"a, b, c"}
