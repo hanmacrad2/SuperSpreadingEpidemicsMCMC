@@ -6,7 +6,7 @@
 \usage{
 SSE_MCMC_ADAPTIVE(
   epidemic_data,
-  mcmc_inputs = list(n_mcmc = 100, mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 =
+  mcmc_inputs = list(n_mcmc = 1000, mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 =
     10), alpha_star = 0.4, thinning_factor = 10),
   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
     beta_prior_exp = c(0.1, 0), gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1, 0)),
