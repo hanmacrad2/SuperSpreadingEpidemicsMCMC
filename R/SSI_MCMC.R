@@ -103,7 +103,7 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
 SSI_MCMC_ADAPTIVE <- function(data,
-                              mcmc_inputs = list(n_mcmc = 10,
+                              mcmc_inputs = list(n_mcmc = 100,
                                                  mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
@@ -148,7 +148,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
   log_like_vec[1] <- LOG_LIKE_SSI(data, a_vec[1], b_vec[1], c_vec[1])
 
   #INITIALISE RUNNING PARAMS
-  a = mcmc_inputs$mod_start_points$m1; b =  mcmc_inputs$mod_start_points$m2;
+  a = mcmc_inputs$mod_start_points$m1; b = mcmc_inputs$mod_start_points$m2;
   c = mcmc_inputs$mod_start_points$m3; log_like = log_like_vec[1]
 
   #SIGMA
@@ -184,7 +184,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
                             count_accept4 = 0, count_accept5 = 0, count_accept6 = 0)
 
   #DATA AUG OUTPUT
-  mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
+  #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
   non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
   ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
 
@@ -267,8 +267,8 @@ SSI_MCMC_ADAPTIVE <- function(data,
 
     #Priors
     if(FLAGS_LIST$C_PRIOR_GAMMA){
-      log_accept_ratio = log_accept_ratio + dgamma(c_dash, shape = priors_list$c_prior[1], scale = priors_list$c_prior[1], log = TRUE) -
-        dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior[2], log = TRUE)
+      log_accept_ratio = log_accept_ratio + dgamma(c_dash, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[1], log = TRUE) -
+        dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
     } else {
       log_accept_ratio = log_accept_ratio - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
       if (i == 3)print('exp prior on')
@@ -292,7 +292,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
     if(FLAGS_LIST$BCA_TRANSFORM){
 
       c_dash <- c + rnorm(1, sd = sigma4)
-      #Prior > 1 #*** TRY WITHOUT REFLECTION!
+      #Prior > 1 #* TRY WITHOUT REFLECTION
       if(c_dash < 1){
         c_dash = 2 - c_dash
       }
@@ -418,8 +418,8 @@ SSI_MCMC_ADAPTIVE <- function(data,
         #CRITERIA FOR S_T & N_T
         if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
           #Store
-          non_ss[i, t] = data[[1]][t]
-          ss[i, t] = data[[2]][t]
+          non_ss[i/thinning_factor, t] = data[[1]][t]
+          ss[i/thinning_factor, t] = data[[2]][t]
           next
         }
 
@@ -432,13 +432,13 @@ SSI_MCMC_ADAPTIVE <- function(data,
           #ACCEPT
           data <- data_dash
           log_like <- logl_new
-          mat_count_da[i, t] = mat_count_da[i, t] + 1
+          #mat_count_da[i, t] = mat_count_da[i, t] + 1
           list_accept_counts$count_accept6 = list_accept_counts$count_accept6 + 1
         }
 
         #Store
-        non_ss[i, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
-        ss[i, t] = data[[2]][t]
+        non_ss[i/thinning_factor, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
+        ss[i/thinning_factor, t] = data[[2]][t]
       }
     }
 
@@ -476,7 +476,6 @@ SSI_MCMC_ADAPTIVE <- function(data,
   return(list(a_vec = a_vec, b_vec = b_vec, c_vec = c_vec, r0_vec = r0_vec,
               log_like_vec = log_like_vec, sigma = sigma,
               list_accept_rates = list_accept_rates,
-              data = data, mat_count_da = mat_count_da, #13, 14
-              non_ss = non_ss, ss = ss))
+              data = data, non_ss = non_ss, ss = ss))
 }
 
