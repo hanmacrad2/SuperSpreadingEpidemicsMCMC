@@ -1,0 +1,388 @@
+#' Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
+#'
+#' Returns the Log likelihood of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+#'
+#' @param data data from the epidemic, namely daily infection counts
+#' @param alpha_X SSI model parameter \code{"\alpha"}
+#' @param beta_X SSI model parameter \code{"\beta"}
+#' @param gamma_X SSI model parameter \code{"\gamma"}
+#' @return Log likelihood of the SSE model
+#' @export
+#'
+#' @author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#' log_like = LOG_LIKE_SSE_LSE(epidemic_data, 0.8, 0.02, 20)
+#'
+LOG_LIKE_SSE_LSE <- function(sim_data, alphaX, betaX, gammaX){
+
+  #Initialise parameters
+  num_days = length(x);  logl = 0
+  shape_gamma = 6; scale_gamma = 1
+
+  #Infectiousness (Discrete gamma)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)),  shape = shape_gamma, scale = scale_gamma)
+
+  for (t in 2:num_days) {
+
+    lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
+
+    if((x[t] == 0) | is.na(x[t])) { #y_t also equal to zero
+
+      logl = logl -(alphaX*lambda_t) -
+        (betaX*lambda_t*log(gammaX +1))
+
+    } else {
+
+      #Terms in inner sum
+      inner_sum_vec <- vector('numeric', x[t])
+
+      for (y_t in 0:x[t]){ #Sum for all values of y_t up to x_t
+
+        #Store inner L(x_i) term in vector position
+        inner_sum_vec[y_t + 1] = (-(alphaX*lambda_t) - lfactorial(y_t) + y_t*log(alphaX*lambda_t) +
+                                    lgamma((x[t] - y_t) + (betaX*lambda_t)) - lgamma(betaX*lambda_t) -
+                                    lfactorial(x[t] - y_t) - (betaX*lambda_t*log(gammaX +1)) +
+                                    (x[t] - y_t)*log(gammaX) -(x[t] - y_t)*log(gammaX + 1))
+
+      }
+
+      #Calculate max element in inner vector, for all y_t for alphagiven t, x[t]
+      lx_max = max(inner_sum_vec)
+
+      #Calculate lse
+      lse = lx_max + log(sum(exp(inner_sum_vec - lx_max) ))
+
+      #Add to overall log likelihood
+      logl = logl + lse
+
+    }
+  }
+  logl
+}
+
+###
+
+#************************************************************************
+#1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
+#************************************************************************
+SSE_MCMC_ADAPTIVE <- function(data,
+                              mcmc_inputs = list(n_mcmc = 100,
+                                                 mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
+                                                 thinning_factor = 10),
+                              priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
+                                                 gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
+                              FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, ABG_TRANSFORM = TRUE,
+                                                PRIOR = TRUE, beta_prior_gaMMA = TRUE, gamma_prior_gaMMA = TRUE,
+                                                THIN = TRUE)) {
+
+  'Returns MCMC samples of SSI model parameters (a, b, c, r0 = alpha+ b*c)
+  w/ acceptance rates.
+  INCLUDES; ADAPTATION, DATA AUGMENTATION, B-C & A-C transform'
+
+  'Priors
+  p(a) = exp(rate) = rate*exp(-rate*x). log(r*exp(-r*x)) = log(r) - rx
+      -> E.g exp(1) = 1*exp(-1*a) = exp(-a). log(exp(-a)) = - a
+  p(b) = exp(1) or p(b) = g(shape, scale), for e.g g(3, 2)
+  p(c) = exp(1) + 1 = 1 + exp(-c) = exp(c - 1)'
+
+
+  #**********************************************
+  #INITIALISE PARAMS
+  #**********************************************
+  time = length(data[[1]]); n_mcmc = mcmc_inputs$n_mcmc;
+
+  #THINNING FACTOR
+  if(FLAGS_LIST$THIN){
+    thinning_factor = mcmc_inputs$thinning_factor
+    mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
+  } else {
+    thinning_factor = 1
+    mcmc_vec_size = n_mcmc
+  }
+
+  #INITIALISE MCMC VECTORS
+  alpha_vec <- vector('numeric', mcmc_vec_size); beta_vec <- vector('numeric', mcmc_vec_size)
+  gamma_vec <- vector('numeric', mcmc_vec_size); r0_vec <- vector('numeric', mcmc_vec_size)
+  log_like_vec <- vector('numeric', mcmc_vec_size);
+
+  #INITIALISE MCMC[1]
+  alpha_vec[1] <- mcmc_inputs$mod_start_points$m1; beta_vec[1] <- mcmc_inputs$mod_start_points$m2
+  gamma_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*c_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSE_LSE(data, alpha_vec[1], beta_vec[1], gamma_vec[1])
+
+  #INITIALISE RUNNING PARAMS
+  alpha= alpha_vec[1]; beta= beta_vec[1]; gamma= gamma_vec[1]; log_like = log_like_vec[1]
+
+  #SIGMA
+  sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
+  sigma3 = 0.5*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
+  sigma5 = 0.85*mcmc_inputs$mod_start_points$m3
+
+  #SIGMA; INITIALISE FOR ADAPTIVE MCMC
+  if (FLAGS_LIST$ADAPTIVE){
+
+    #SIGMA
+    sigma1_vec <- vector('numeric', mcmc_vec_size); sigma2_vec <- vector('numeric', mcmc_vec_size)
+    sigma3_vec <- vector('numeric', mcmc_vec_size); sigma4_vec <- vector('numeric', mcmc_vec_size)
+    sigma5_vec <- vector('numeric', mcmc_vec_size);
+
+    #SIGMA; INITIALISE FIRST ELEMENT
+    sigma1_vec[1] =  sigma1; sigma2_vec[1] =  sigma2; sigma3_vec[1] =  sigma3
+    sigma4_vec[1] =  sigma4; sigma5_vec[1] =  sigma5
+
+    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
+    sigma = list(sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
+                 sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
+
+    #Other adaptive parameters
+    delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
+
+  } else {
+
+    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
+    sigma = list(sigma1 <- sigma1, sigma2 <- sigma2,
+                 sigma3 <- sigma3, sigma4 <- sigma4,
+                 sigma5 <- sigma5)
+  }
+
+  #INITIALISE: ACCEPTANCE COUNTS
+  list_accept_counts = list(count_accept1 = 0, count_accept2 = 0, count_accept3 = 0,
+                            count_accept4 = 0, count_accept5 = 0, count_accept6 = 0)
+
+  #DATA AUG OUTPUT
+  #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
+  non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+
+  #******************************
+  #MCMC CHAIN
+  #******************************
+  for(i in 2:n_mcmc) {
+
+    #****************************************************** s
+    #a
+    alpha_dash <- alpha+ rnorm(1, sd = sigma1)
+
+    if(a_dash < 0){
+      alpha_dash= abs(a_dash)
+    }
+
+    #log a
+    logl_new = LOG_LIKE_SSE_LSE(data, a_dash, b, c)
+    log_accept_ratio = logl_new - log_like  #+ prior1 - prior
+    #Priors
+    if (FLAGS_LIST$PRIOR){
+      log_accept_ratio = log_accept_ratio - alpha_dash + alpha #*Actually this is the Acceptance RATIO. ACCEPTANCE PROB = MIN(1, EXP(ACCPET_PROB))
+    }
+
+    #Metropolis Acceptance Step
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+      alpha<- a_dash
+      list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
+      log_like = logl_new
+    }
+
+    #Sigma (Adaptive)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma1 =  sigma1*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+    }
+
+    #************************************************************************ Only if (b > 0){ ?
+    #b
+    beta_dash <- beta + rnorm(1, sd = sigma2)
+    if(beta_dash < 0){
+      beta_dash = abs(beta_dash)
+    }
+
+    #loglikelihood
+    logl_new = LOG_LIKE_SSE_LSE(data, alpha, beta_dash, c)
+    log_accept_ratio = logl_new - log_like
+
+    #Priors
+    if (FLAGS_LIST$beta_prior_gaMMA){
+      log_accept_ratio = log_accept_ratio +
+        dgamma(beta_dash, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
+        dgamma(b, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
+    } else {
+      log_accept_ratio = log_accept_ratio - beta_dash + b
+    }
+
+    #Metropolis Acceptance Step
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+      beta<- beta_dash
+      log_like = logl_new
+      list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
+    }
+
+    #Sigma (Adpative)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma2 =  sigma2*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+    }
+
+    #************************************************************************
+    #c
+    gamma_dash <- gamma+ rnorm(1, sd = sigma3)
+    if(gamma_dash < 1){
+      gamma_dash = 2 - gamma_dash #Prior on c: > 1
+    }
+    #Acceptance Probability
+    logl_new = LOG_LIKE_SSE_LSE(data, alpha, b, gamma_dash)
+    log_accept_ratio = logl_new - log_like
+
+    #Priors
+    if(FLAGS_LIST$gamma_prior_gaMMA){
+      log_accept_ratio = log_accept_ratio + dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[1], log = TRUE) -
+        dgamma(c, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
+    } else {
+      log_accept_ratio = log_accept_ratio - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*c
+      if (i == 3) print('exp prior on')
+    }
+
+    #Metropolis Acceptance Step
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+      gamma<- gamma_dash
+      log_like <- logl_new
+      list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
+    }
+
+    #Sigma (Adpative)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma3 =  sigma3*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+    }
+
+    #*****************************************************
+    #Beta-Gamma TRANSFORM
+    if(FLAGS_LIST$ABG_TRANSFORM){
+      gamma_dash <- gamma+ rnorm(1, sd = sigma4)
+
+      #Prior > 1 #* TRY WITHOUT REFLECTION
+      if(gamma_dash < 1){
+        gamma_dash = 2 - gamma_dash
+      }
+      #New b
+       beta_transform = ((alpha + beta*gamma) - alpha)/gamma_dash #beta = (r0 - a)c
+
+      if( beta_transform >= 0){ #Only accept values of beta> 0
+
+        logl_new = LOG_LIKE_SSE_LSE(data, alpha, beta_transform, gamma_dash)
+        log_accept_ratio = logl_new - log_like
+
+        #PRIORS
+        #beta prior
+        if (FLAGS_LIST$beta_prior_gaMMA) {
+          tot_b_prior = dgamma(beta_transform, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
+            dgamma(beta, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
+        } else {
+          tot_b_prior = -  beta_transform + beta #exp(1) piror
+        }
+
+        #c prior
+        if (FLAGS_LIST$gamma_prior_gaMMA) {
+          tot_c_prior = dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE) -
+            dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
+        } else {
+          tot_c_prior = - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
+        }
+
+        #LOG ACCEPT PROB
+        log_accept_ratio = log_accept_ratio + tot_b_prior + tot_c_prior
+
+        #Metropolis Step
+        if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+          beta<-  beta_transform
+          gamma<- gamma_dash
+          log_like <- logl_new
+          list_accept_counts$count_accept4 = list_accept_counts$count_accept4 + 1
+        }
+
+        #Sigma (Adpative)
+        if (FLAGS_LIST$ADAPTIVE){
+          accept_prob = min(1, exp(log_accept_ratio))
+          sigma4 = sigma4*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+        }
+      }
+    }
+
+    #*****************************************************
+    #A-C TRANSFORM
+    if(FLAGS_LIST$ABG_TRANSFORM){
+
+      gamma_dash <- gamma+ rnorm(1, sd = sigma5)
+      #Prior > 1
+      if(gamma_dash < 1){
+        gamma_dash = 2 - gamma_dash
+      }
+      #New a
+       alpha_transform = (alpha + beta*gamma) - b*gamma_dash #alpha = (r0 - beta*gamma)
+
+      if( alpha_transform >= 0){ #Only accept values of beta> 0
+
+        logl_new = LOG_LIKE_SSE_LSE(data, alpha_transform, beta, gamma_dash)
+        log_accept_ratio = logl_new - log_like
+
+        #PRIORS
+        #c prior
+        if (FLAGS_LIST$gamma_prior_gaMMA) {
+          tot_gamma_prior = dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE) -
+            dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
+        } else {
+          tot_gamma_prior = - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
+        }
+
+        #LOG ACCEPT PROB
+        log_accept_ratio = log_accept_ratio - alpha_transform + alpha + tot_gamma_prior
+
+        #Metropolis Step
+        if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+          alpha <- alpha_transform
+          gamma <- gamma_dash
+          log_like <- logl_new
+          list_accept_counts$count_accept5 = list_accept_counts$count_accept5 + 1
+        }
+
+        #Sigma (Adpative)
+        if (FLAGS_LIST$ADAPTIVE){
+          accept_prob = min(1, exp(log_accept_ratio))
+          sigma5 = sigma5*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+        }
+      }
+    }
+
+    #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
+    if (i%%thinning_factor == 0) {
+      i_thin = i/thinning_factor
+      alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
+      gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha+ beta*gamma
+      log_like_vec[i_thin] <- log_like
+      sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
+      sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
+    }
+  }
+
+  #Final stats
+  accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
+  accept_rate2 = 100*list_accept_counts$count_accept2/(n_mcmc-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
+  accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
+  accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
+  accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
+  accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
+
+  #Acceptance rates
+  list_accept_rates = list(accept_rate1 = accept_rate1,
+                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
+                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
+                           accept_rate6 = accept_rate6)
+  print(list_accept_rates)
+
+  #Return a, acceptance rate
+  return(list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
+              log_like_vec = log_like_vec, sigma = sigma,
+              list_accept_rates = list_accept_rates))
+}
+
