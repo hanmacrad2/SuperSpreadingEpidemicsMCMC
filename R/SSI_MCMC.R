@@ -107,7 +107,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BCA_TRANSFORM = TRUE,
-                                                PRIOR = TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE,
+                                                PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 
   'Returns MCMC samples of SSI model parameters (a, b, c, r0 = a + b*c)
