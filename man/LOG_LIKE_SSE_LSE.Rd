@@ -7,7 +7,7 @@
 LOG_LIKE_SSE_LSE(x, alphaX, betaX, gammaX)
 }
 \arguments{
-\item{data}{data from the epidemic, namely daily infection counts}
+\item{epidemic_data}{data from the epidemic, namely daily infection counts}
 
 \item{alpha_X}{SSI model parameter \code{"\alpha"}}
 
@@ -19,7 +19,7 @@ LOG_LIKE_SSE_LSE(x, alphaX, betaX, gammaX)
 Log likelihood of the SSE model
 }
 \description{
-Returns the Log likelihood of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+Returns the Log likelihood of the super-spreading individuals (SSI)epidemic model for given \code{"epidemic_data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 }
 \examples{
 
