@@ -120,7 +120,7 @@ LOG_LIKE_SSE_LSE <- function(x, alphaX, betaX, gammaX){
 #1. SSE MCMC
 #************************************************************************
 SSE_MCMC_ADAPTIVE <- function(epidemic_data,
-                              mcmc_inputs = list(n_mcmc = 1000,
+                              mcmc_inputs = list(n_mcmc = 500000,
                                                  mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 = 10), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
@@ -144,6 +144,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
   #INITIALISE PARAMS
   #**********************************************
   n_mcmc = mcmc_inputs$n_mcmc;
+  print(paste0('num mcmc iters = ', n_mcmc))
 
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -401,6 +402,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0) {
+      print(paste0('i = ', i))
       i_thin = i/thinning_factor
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
