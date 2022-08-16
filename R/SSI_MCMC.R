@@ -13,9 +13,7 @@
 #'
 #' @examples
 #'
-#'x = c(0.8, 0.01, 15)
-#'
-#' log_like = LOG_LIKE_SSI_MULTI(epidemic_data, x)
+#' log_like = LOG_LIKE_SSI(epidemic_data, 0.8, 0.02, 20)
 #'
 LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 
@@ -103,7 +101,7 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
 SSI_MCMC_ADAPTIVE <- function(data,
-                              mcmc_inputs = list(n_mcmc = 100,
+                              mcmc_inputs = list(n_mcmc = 1000,
                                                  mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
@@ -148,8 +146,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
   log_like_vec[1] <- LOG_LIKE_SSI(data, a_vec[1], b_vec[1], c_vec[1])
 
   #INITIALISE RUNNING PARAMS
-  a = mcmc_inputs$mod_start_points$m1; b = mcmc_inputs$mod_start_points$m2;
-  c = mcmc_inputs$mod_start_points$m3; log_like = log_like_vec[1]
+  a = a_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
 
   #SIGMA
   sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
@@ -159,14 +156,18 @@ SSI_MCMC_ADAPTIVE <- function(data,
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
 
-    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list(sigma1 <- vector('numeric', mcmc_vec_size), sigma2 <- vector('numeric', mcmc_vec_size),
-                 sigma3 <- vector('numeric', mcmc_vec_size), sigma4 <- vector('numeric', mcmc_vec_size),
-                 sigma5 <- vector('numeric', mcmc_vec_size))
+    #SIGMA
+    sigma1_vec <- vector('numeric', mcmc_vec_size); sigma2_vec <- vector('numeric', mcmc_vec_size)
+    sigma3_vec <- vector('numeric', mcmc_vec_size); sigma4_vec <- vector('numeric', mcmc_vec_size)
+    sigma5_vec <- vector('numeric', mcmc_vec_size);
 
     #SIGMA; INITIALISE FIRST ELEMENT
-    sigma$sigma1[1] =  sigma1; sigma$sigma2[1] =  sigma2; sigma$sigma3[1] =  sigma3
-    sigma$sigma4[1] =  sigma4; sigma$sigma5[1] =  sigma5
+    sigma1_vec[1] =  sigma1; sigma2_vec[1] =  sigma2; sigma3_vec[1] =  sigma3
+    sigma4_vec[1] =  sigma4; sigma5_vec[1] =  sigma5
+
+    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
+    sigma = list(sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
+                 sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
 
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
@@ -216,7 +217,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
       log_like = logl_new
     }
 
-    #Sigma (Adpative)
+    #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
       sigma1 =  sigma1*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
@@ -271,7 +272,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
         dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
     } else {
       log_accept_ratio = log_accept_ratio - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
-      if (i == 3)print('exp prior on')
+      if (i == 3) print('exp prior on')
     }
 
     #Metropolis Acceptance Step
@@ -458,12 +459,12 @@ SSI_MCMC_ADAPTIVE <- function(data,
   }
 
   #Final stats
-  accept_rate1 = 100*list_accept_counts$count_accept1/(mcmc_vec_size-1)
-  accept_rate2 = 100*list_accept_counts$count_accept2/(mcmc_vec_size-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
-  accept_rate3 = 100*list_accept_counts$count_accept3/(mcmc_vec_size-1)
-  accept_rate4 = 100*list_accept_counts$count_accept4/(mcmc_vec_size-1)
-  accept_rate5 = 100*list_accept_counts$count_accept5/(mcmc_vec_size-1)
-  accept_rate6 = 100*list_accept_counts$count_accept6/((mcmc_vec_size-1)*time) #i x t
+  accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
+  accept_rate2 = 100*list_accept_counts$count_accept2/(n_mcmc-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
+  accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
+  accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
+  accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
+  accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
 
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,

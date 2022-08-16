@@ -22,3 +22,5 @@ canada_bool = canadaX > 1
 canada_ss = as.integer(canada_bool)
 canada_ns = canadaX - canada_ss
 sim_data_canadaX2 = list(canada_ns, canada_ss)
+
+#APPLY

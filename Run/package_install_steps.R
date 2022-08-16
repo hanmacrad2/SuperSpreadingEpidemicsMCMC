@@ -30,3 +30,9 @@
 # help(plotcolours)
 
 
+#R TRICKS
+
+#List of named vectors
+#USE = sign, not ->
+
+
