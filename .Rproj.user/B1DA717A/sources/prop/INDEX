@@ -1,3 +1,4 @@
+~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2FMODEL_COMPARISON.R="50D5B8DB"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2FSSE_MCMC.R="B5D7DAA5"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2FSSI_MCMC.R="E5A6C97C"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2FSSI_MCMC_Multi_ADAPT.R="2D491EEA"
@@ -5,6 +6,7 @@
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2FSSI_MCMC_Multi_Adapt_w_loglike.R="64EF0498"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2Fhello.R="1181B778"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FR%2Fplot_ss_grid.R="509D5EEA"
+~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FRun%2FApply_Model_Comparison.R="6C0E92B0"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FRun%2FApply_SSI_model.R="96655111"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2FRun%2Fpackage_install_steps.R="7EDB630A"
 ~%2FGitHub%2FSuperSpreadingEpidemicsMCMC%2Fman%2FSSI_MCMC_MULTI_ADADPT.Rd="55C23E9E"
