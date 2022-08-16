@@ -6,12 +6,12 @@
 \usage{
 SSI_MCMC_ADAPTIVE(
   data,
-  mcmc_inputs = list(n_mcmc = n_mcmc, mod_start_points = mod_start_points, alpha_star =
-    0.4, thinning_factor = 10),
+  mcmc_inputs = list(n_mcmc = 10, mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 =
+    22), alpha_star = 0.4, thinning_factor = 10),
   priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp =
     c(0.1, 0), c_prior_ga = c(10, 1), c_prior_exp = c(0.1, 0)),
-  FLAGS_LIST = list(DATA_AUG = TRUE, BCA_TRANSFORM = TRUE, PRIOR = TRUE, B_PRIOR_GAMMA
-    = TRUE, C_PRIOR_GAMMA = TRUE, THIN = TRUE)
+  FLAGS_LIST = list(ADAPTATION = TRUE, DATA_AUG = TRUE, BCA_TRANSFORM = TRUE, PRIOR =
+    TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE, THIN = TRUE)
 )
 }
 \arguments{
@@ -36,6 +36,7 @@ SSI_MCMC_ADAPTIVE(
 
 \item{FLAGS_LIST}{A list of Boolean variables for switching on/off certain functionality
 \itemize{
+  \item \code{"ADAPTIVE"} - Adaptive MCMC algorithm implemented if TRUE
   \item \code{"DATA_AUG"} - Data Augmentation implemented as part of the SSI model if TRUE
   \item \code{"BCA_TRANSFORM"} - Transform update step proposed as part of MCMC algorithm if TRUE **
   \item \code{"PRIOR"}  - Apply prior distributions to model parameters
@@ -52,7 +53,7 @@ MCMC samples, acceptance rates etc.
   \item \code{"c_vec"} - A vector containing MCMC samples of the SSI model parameter c. Vector size \code{"mcmc_vec_size"}
   \item \code{"r0_vec"} - A vector containing samples of the SSI model parameter r0 obained via; r0 = a + b*c. Vector size \code{"mcmc_vec_size"}
   \item \code{"log_like_vec"}  - A vector containing the log likelihood at each of the mcmc iterations, of size of \code{"mcmc_vec_size"}
-  \item \code{"sigma"} - A list of vectors containing the adapted sigma for each of the model parameters at each iteration of the MCMC. Vector size \code{"mcmc_vec_size"}
+  \item \code{"sigma"} - A list of vectors containing the adapted sigma for each of the model parameters at each iteration of the MCMC, if \code{"FLAGS_LIST$ADAPTIVE"} is TRUE. Otherwise sigma is a list of constant sigma values for each of the model parameters
   \item \code{"list_accept_rates"}  - A list of the MCMC acceptance rates (%) for each of the model parameters
   \item \code{"non_ss"}  - The augmented epidemic data corresponding to the non super-spreaders (non-ss) for each iteration of the mcmc
   \item \code{"ss"}  - The augmented epidemic data corresponding to the super-spreaders (ss) for each iteration of the mcmc
@@ -60,7 +61,7 @@ MCMC samples, acceptance rates etc.
 }
 \description{
 MCMC algorithm with Adaptation for obtaining samples from the parameters of a
-super-spreading individuals (SSI) epidemic model
+super-spreading individuals (SSI) epidemic model. Includes; Adaptation, Data Augmentation, B-C & A-C transform
 }
 \examples{
 
