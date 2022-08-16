@@ -15,7 +15,7 @@
 #'
 #' log_like = LOG_LIKE_SSE_LSE(epidemic_data, 0.8, 0.02, 20)
 #'
-LOG_LIKE_SSE_LSE <- function(sim_data, alphaX, betaX, gammaX){
+LOG_LIKE_SSE_LSE <- function(x, alphaX, betaX, gammaX){
 
   #Initialise parameters
   num_days = length(x);  logl = 0
@@ -70,12 +70,12 @@ LOG_LIKE_SSE_LSE <- function(sim_data, alphaX, betaX, gammaX){
 #************************************************************************
 SSE_MCMC_ADAPTIVE <- function(data,
                               mcmc_inputs = list(n_mcmc = 100,
-                                                 mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
+                                                 mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 = 10), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
                                                  gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, ABG_TRANSFORM = TRUE,
-                                                PRIOR = TRUE, beta_prior_gaMMA = TRUE, gamma_prior_gaMMA = TRUE,
+                                                PRIOR = TRUE, BETA_PRIOR_GA = TRUE, GAMMA_PRIOR_GA = TRUE,
                                                 THIN = TRUE)) {
 
   'Returns MCMC samples of SSI model parameters (a, b, c, r0 = alpha+ b*c)
@@ -110,15 +110,15 @@ SSE_MCMC_ADAPTIVE <- function(data,
 
   #INITIALISE MCMC[1]
   alpha_vec[1] <- mcmc_inputs$mod_start_points$m1; beta_vec[1] <- mcmc_inputs$mod_start_points$m2
-  gamma_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*c_vec[1]
+  gamma_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
   log_like_vec[1] <- LOG_LIKE_SSE_LSE(data, alpha_vec[1], beta_vec[1], gamma_vec[1])
 
   #INITIALISE RUNNING PARAMS
-  alpha= alpha_vec[1]; beta= beta_vec[1]; gamma= gamma_vec[1]; log_like = log_like_vec[1]
+  alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
 
   #SIGMA
   sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
-  sigma3 = 0.5*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
+  sigma3 = 0.4*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
   sigma5 = 0.85*mcmc_inputs$mod_start_points$m3
 
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
@@ -143,14 +143,14 @@ SSE_MCMC_ADAPTIVE <- function(data,
   } else {
 
     #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list(sigma1 <- sigma1, sigma2 <- sigma2,
-                 sigma3 <- sigma3, sigma4 <- sigma4,
-                 sigma5 <- sigma5)
+    sigma = list(sigma1 = sigma1, sigma2 = sigma2,
+                 sigma3 = sigma3, sigma4 = sigma4,
+                 sigma5 = sigma5)
   }
 
   #INITIALISE: ACCEPTANCE COUNTS
   list_accept_counts = list(count_accept1 = 0, count_accept2 = 0, count_accept3 = 0,
-                            count_accept4 = 0, count_accept5 = 0, count_accept6 = 0)
+                            count_accept4 = 0, count_accept5 = 0)
 
   #DATA AUG OUTPUT
   #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
@@ -164,14 +164,14 @@ SSE_MCMC_ADAPTIVE <- function(data,
 
     #****************************************************** s
     #a
-    alpha_dash <- alpha+ rnorm(1, sd = sigma1)
+    alpha_dash <- alpha + rnorm(1, sd = sigma1)
 
-    if(a_dash < 0){
-      alpha_dash= abs(a_dash)
+    if(alpha_dash < 0){
+      alpha_dash = abs(alpha_dash)
     }
 
     #log a
-    logl_new = LOG_LIKE_SSE_LSE(data, a_dash, b, c)
+    logl_new = LOG_LIKE_SSE_LSE(data, alpha_dash, beta, gamma)
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     #Priors
     if (FLAGS_LIST$PRIOR){
@@ -180,7 +180,7 @@ SSE_MCMC_ADAPTIVE <- function(data,
 
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-      alpha<- a_dash
+      alpha <- alpha_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
     }
@@ -199,21 +199,21 @@ SSE_MCMC_ADAPTIVE <- function(data,
     }
 
     #loglikelihood
-    logl_new = LOG_LIKE_SSE_LSE(data, alpha, beta_dash, c)
+    logl_new = LOG_LIKE_SSE_LSE(data, alpha, beta_dash, gamma)
     log_accept_ratio = logl_new - log_like
 
     #Priors
-    if (FLAGS_LIST$beta_prior_gaMMA){
+    if (FLAGS_LIST$BETA_PRIOR_GA){
       log_accept_ratio = log_accept_ratio +
         dgamma(beta_dash, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
-        dgamma(b, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
+        dgamma(beta, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
     } else {
-      log_accept_ratio = log_accept_ratio - beta_dash + b
+      log_accept_ratio = log_accept_ratio - beta_dash + beta
     }
 
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-      beta<- beta_dash
+      beta <- beta_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
     }
@@ -226,26 +226,26 @@ SSE_MCMC_ADAPTIVE <- function(data,
 
     #************************************************************************
     #c
-    gamma_dash <- gamma+ rnorm(1, sd = sigma3)
+    gamma_dash <- gamma + rnorm(1, sd = sigma3)
     if(gamma_dash < 1){
       gamma_dash = 2 - gamma_dash #Prior on c: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSE_LSE(data, alpha, b, gamma_dash)
+    logl_new = LOG_LIKE_SSE_LSE(data, alpha, beta, gamma_dash)
     log_accept_ratio = logl_new - log_like
 
     #Priors
-    if(FLAGS_LIST$gamma_prior_gaMMA){
+    if(FLAGS_LIST$GAMMA_PRIOR_GA){
       log_accept_ratio = log_accept_ratio + dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[1], log = TRUE) -
-        dgamma(c, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
+        dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
     } else {
-      log_accept_ratio = log_accept_ratio - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*c
+      log_accept_ratio = log_accept_ratio - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
       if (i == 3) print('exp prior on')
     }
 
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-      gamma<- gamma_dash
+      gamma <- gamma_dash
       log_like <- logl_new
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
     }
@@ -259,7 +259,7 @@ SSE_MCMC_ADAPTIVE <- function(data,
     #*****************************************************
     #Beta-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
-      gamma_dash <- gamma+ rnorm(1, sd = sigma4)
+      gamma_dash <- gamma + rnorm(1, sd = sigma4)
 
       #Prior > 1 #* TRY WITHOUT REFLECTION
       if(gamma_dash < 1){
@@ -274,29 +274,29 @@ SSE_MCMC_ADAPTIVE <- function(data,
         log_accept_ratio = logl_new - log_like
 
         #PRIORS
-        #beta prior
-        if (FLAGS_LIST$beta_prior_gaMMA) {
-          tot_b_prior = dgamma(beta_transform, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
+        #Beta prior
+        if (FLAGS_LIST$BETA_PRIOR_GA) {
+          tot_beta_prior = dgamma(beta_transform, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
             dgamma(beta, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
         } else {
-          tot_b_prior = -  beta_transform + beta #exp(1) piror
+          tot_beta_prior = - beta_transform + beta #exp(1) prior
         }
 
-        #c prior
-        if (FLAGS_LIST$gamma_prior_gaMMA) {
-          tot_c_prior = dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE) -
+        #gamma prior
+        if (FLAGS_LIST$GAMMA_PRIOR_GA) {
+          tot_gamma_prior = dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE) -
             dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
         } else {
-          tot_c_prior = - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
+          tot_gamma_prior = - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
         }
 
         #LOG ACCEPT PROB
-        log_accept_ratio = log_accept_ratio + tot_b_prior + tot_c_prior
+        log_accept_ratio = log_accept_ratio + tot_beta_prior + tot_gamma_prior
 
         #Metropolis Step
         if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          beta<-  beta_transform
-          gamma<- gamma_dash
+          beta <- beta_transform
+          gamma <- gamma_dash
           log_like <- logl_new
           list_accept_counts$count_accept4 = list_accept_counts$count_accept4 + 1
         }
@@ -310,7 +310,7 @@ SSE_MCMC_ADAPTIVE <- function(data,
     }
 
     #*****************************************************
-    #A-C TRANSFORM
+    #Alpha-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
 
       gamma_dash <- gamma+ rnorm(1, sd = sigma5)
@@ -318,8 +318,8 @@ SSE_MCMC_ADAPTIVE <- function(data,
       if(gamma_dash < 1){
         gamma_dash = 2 - gamma_dash
       }
-      #New a
-       alpha_transform = (alpha + beta*gamma) - b*gamma_dash #alpha = (r0 - beta*gamma)
+      #New alpha
+       alpha_transform = (alpha + beta*gamma) - beta*gamma_dash #alpha = (r0 - beta*gamma)
 
       if( alpha_transform >= 0){ #Only accept values of beta> 0
 
@@ -327,8 +327,8 @@ SSE_MCMC_ADAPTIVE <- function(data,
         log_accept_ratio = logl_new - log_like
 
         #PRIORS
-        #c prior
-        if (FLAGS_LIST$gamma_prior_gaMMA) {
+        #gamma prior
+        if (FLAGS_LIST$GAMMA_PRIOR_GA) {
           tot_gamma_prior = dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE) -
             dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
         } else {
@@ -358,10 +358,10 @@ SSE_MCMC_ADAPTIVE <- function(data,
     if (i%%thinning_factor == 0) {
       i_thin = i/thinning_factor
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
-      gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha+ beta*gamma
+      gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
-      sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
-      sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
+      sigma$sigma1_vec[i_thin] = sigma1; sigma$sigma2_vec[i_thin] = sigma2; sigma$sigma3_vec[i_thin] = sigma3
+      sigma$sigma4_vec[i_thin] = sigma4; sigma$sigma5_vec[i_thin] = sigma5
     }
   }
 
@@ -371,13 +371,11 @@ SSE_MCMC_ADAPTIVE <- function(data,
   accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
   accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
   accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
-  accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
 
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,
                            accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
-                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
-                           accept_rate6 = accept_rate6)
+                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5)
   print(list_accept_rates)
 
   #Return a, acceptance rate

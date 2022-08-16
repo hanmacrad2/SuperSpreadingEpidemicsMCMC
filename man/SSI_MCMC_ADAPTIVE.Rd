@@ -6,11 +6,11 @@
 \usage{
 SSI_MCMC_ADAPTIVE(
   data,
-  mcmc_inputs = list(n_mcmc = 10, mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 =
-    22), alpha_star = 0.4, thinning_factor = 10),
+  mcmc_inputs = list(n_mcmc = 1000, mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3
+    = 22), alpha_star = 0.4, thinning_factor = 10),
   priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp =
     c(0.1, 0), c_prior_ga = c(10, 1), c_prior_exp = c(0.1, 0)),
-  FLAGS_LIST = list(ADAPTATION = TRUE, DATA_AUG = TRUE, BCA_TRANSFORM = TRUE, PRIOR =
+  FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BCA_TRANSFORM = TRUE, PRIOR =
     TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE, THIN = TRUE)
 )
 }

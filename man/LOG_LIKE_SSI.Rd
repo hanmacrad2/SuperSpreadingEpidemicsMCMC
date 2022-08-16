@@ -23,9 +23,7 @@ Returns the Log likelihood of the super-spreading individuals (SSI)epidemic mode
 }
 \examples{
 
-x = c(0.8, 0.01, 15)
-
-log_like = LOG_LIKE_SSI_MULTI(epidemic_data, x)
+log_like = LOG_LIKE_SSI(epidemic_data, 0.8, 0.02, 20)
 
 }
 \author{
