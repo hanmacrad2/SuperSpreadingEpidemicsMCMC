@@ -126,7 +126,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
                               priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
                                                  gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, ABG_TRANSFORM = TRUE,
-                                                PRIOR = TRUE, BETA_PRIOR_GA = TRUE, GAMMA_PRIOR_GA = TRUE,
+                                                PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
                                                 THIN = TRUE)) {
 
   'Returns MCMC samples of SSI model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
@@ -209,7 +209,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
   for(i in 2:n_mcmc) {
 
     #****************************************************** s
-    #a
+    #alpha
     alpha_dash <- alpha + rnorm(1, sd = sigma1)
 
     if(alpha_dash < 0){
@@ -238,7 +238,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
     }
 
     #************************************************************************ Only if (b > 0){ ?
-    #b
+    #beta
     beta_dash <- beta + rnorm(1, sd = sigma2)
     if(beta_dash < 0){
       beta_dash = abs(beta_dash)
@@ -271,7 +271,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
     }
 
     #************************************************************************
-    #c
+    #gamma
     gamma_dash <- gamma + rnorm(1, sd = sigma3)
     if(gamma_dash < 1){
       gamma_dash = 2 - gamma_dash #Prior on c: > 1
