@@ -51,10 +51,9 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                                                                  model_type = 'SSI', seed_count = 1, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                                         FLAGS_LIST = list(BURN_IN = TRUE, THIN = TRUE,
+                                         FLAGS_LIST = list(SSI = TRUE, BURN_IN = TRUE, THIN = TRUE,
                                                            DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
-                                                           SSI = TRUE,
-                                                           PRIOR = TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE)){
+                                                           PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE)){
 
   #PLOT
   plot.new()
@@ -64,6 +63,9 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   if (FLAGS_LIST$SSI){
     non_ss_start = epidemic_data[[1]]; ss_start = epidemic_data[[2]]
     epidemic_data = non_ss_start + ss_start
+    a_rte_d_aug = round(mcmc_output$list_accept_rates$accept_rate6, 2)
+  } else {
+    a_rte_d_aug = 'N/A'
   }
 
   #EXTRACT MCMC SAMPLES
@@ -81,7 +83,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   } else {
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
     m2_mcmc = mcmc_output[2]; m2_mcmc = unlist(m2_mcmc);  m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
-    m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  (m3_mcmc) = (m3_mcmc)[!is.na((m3_mcmc))]
+    m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  m3_mcmc = m3_mcmc[!is.na(m3_mcmc)]
     r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
   }
 
@@ -96,7 +98,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
 
   #BURN IN
   if (FLAGS_LIST$BURN_IN){
-    burn_in = mcmc_inputs$burn_in_size*mcmc_vec_size
+    burn_in = mcmc_specs$burn_in_size*mcmc_vec_size
     m1_mcmc = m1_mcmc[burn_in:mcmc_vec_size]
     m2_mcmc = m2_mcmc[burn_in:mcmc_vec_size]
     m3_mcmc = m3_mcmc[burn_in:mcmc_vec_size]
@@ -110,19 +112,16 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #m1
   m1_mean = cumsum(m1_mcmc)/seq_along(m1_mcmc)
   m1_lim =  max(mcmc_specs$mod_start_points$m1[[1]], max(m1_mcmc, na.rm = TRUE))
-  print(paste0('a lim =', m1_lim))
   #m2
   m2_mean = cumsum(m2_mcmc)/seq_along(m2_mcmc)
   m2_lim = max(mcmc_specs$mod_start_points$m2[[1]], max(m2_mcmc, na.rm = TRUE))
-  print(paste0('b lim =', m2_lim))
+  
   #m3
   m3_mean = cumsum(m3_mcmc)/seq_along(m3_mcmc)
   m3_lim =  max(mcmc_specs$mod_start_points$m3[[1]], max(m3_mcmc, na.rm = TRUE))
-  print(paste0('b lim =', m3_lim))
   #r0
   r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
   r0_lim = max(r0_start, max(r0_mcmc, na.rm = TRUE))
-  print(paste0('r0 lim =', r0_lim))
 
   #PRIORS
   #m1
@@ -147,13 +146,14 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #************************
   #ROW 1: DATA INFECTIONS
   #************************
-
+  
   #i. TOTAL INFECTIONS
   inf_tite = paste0(mcmc_specs$seed_count, ' ', mcmc_specs$model_type, " Data")
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
           main = inf_tite,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-
+  
+  if (FLAGS_LIST$SSI){
   #**********************
   #ii DATA - NON SS
   #**********************
@@ -178,6 +178,12 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
           main = 'SS - Mean T1 (prp), Mean T2 (or)', col = 'orange')
   lines(colMeans(mcmc_output$ss[1:(mcmc_vec_size/2), ]), col = 'blueviolet', lwd = 2)
 
+  #SSE DATA
+  } else {
+    plot.ts(0, xlab = '', ylab = ''); plot.ts(0, xlab = '', ylab = '')
+    plot.ts(0, xlab = '', ylab = ''); plot.ts(0, xlab = '', ylab = '')
+  }
+  
   #************************
   #ROW 2: MCMC TRACE PLOTS
   #************************
@@ -190,7 +196,8 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                          "Start: ", mcmc_specs$mod_start_points$m1),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   } else {
-    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), ylim=c(0, max(m1_mcmc)),
+    sig1 = mcmc_output$sigma$sigma1
+    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
             main = paste(mcmc_specs$mod_par_names[1], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m1, ', Sigma (red)'),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
@@ -230,22 +237,15 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #***************
   #r0
   plot.ts(r0_mcmc, ylab = "R0", #ylim=c(0, r0_lim),
-          main = paste("R0 MCMC, burn-in for params =  ", burn_in),
+          main = paste0("R0. N = ", n_mcmc, ", Thinned=", mcmc_vec_size),  
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
 
   #***************
   #LOG LIKELIHOOD
   plot.ts(log_like_mcmc, ylab = "log likelihood",
-          main = paste("Log Likelihood"),
+          main = paste("Log Likelihood. Burn-in =", burn_in),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  # if (FLAGS_LIST$ADAPTIVE){
-  #   plot.ts(log_like_mcmc, ylab = "log likelihood",
-  #           main = paste("Log Likelihood"),
-  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  # } else {
-  #   plot.new()
-  # }
-
+  
   #**********************************************************
   #ROW 3:  HISTOGRAMS OF PARARMS (a, b, c, r0, loglike)
   #************************************************************
