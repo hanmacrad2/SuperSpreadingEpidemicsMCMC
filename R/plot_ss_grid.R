@@ -46,15 +46,16 @@
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
 PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
-                                         mcmc_specs = list(n_mcmc = n_mcmc, burn_in_size = 0.05,
-                                                                 mod_start_points = mod_start_points, mod_par_names = c('a', 'b', 'c'),
-                                                                 model_type = 'SSI', seed_count = seed_count, thinning_factor = 10),
+                                         mcmc_specs = list(n_mcmc = 500000, burn_in_size = 0.05,
+                                                           mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), mod_par_names = c('a', 'b', 'c'),
+                                                                 model_type = 'SSI', seed_count = 1, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                                         FLAGS_LIST = list(BURN_IN = TRUE, THIN = FALSE,
-                                                           DATA_AUG = TRUE, ADAPTIVE = FALSE, MULTI_ALG = FALSE,
-                                                           SSI = FALSE,
+                                         FLAGS_LIST = list(BURN_IN = TRUE, THIN = TRUE,
+                                                           DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
+                                                           SSI = TRUE,
                                                            PRIOR = TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE)){
+
   #PLOT
   plot.new()
   par(mfrow=c(5,5))
@@ -66,6 +67,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   }
 
   #EXTRACT MCMC SAMPLES
+  n_mcmc = mcmc_specs$n_mcmc
   r0_start = mcmc_specs$mod_start_points$m1 + (mcmc_specs$mod_start_points$m2*mcmc_specs$mod_start_points$m3)
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
 
@@ -78,8 +80,8 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
 
   } else {
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m2_mcmc = mcmc_output[2]; m2_mcmc = unlist(m2_mcmc);  m2_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  m2_mcmc = m1_mcmc[!is.na(m1_mcmc)]
+    m2_mcmc = mcmc_output[2]; m2_mcmc = unlist(m2_mcmc);  m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
+    m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  (m3_mcmc) = (m3_mcmc)[!is.na((m3_mcmc))]
     r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
   }
 
@@ -188,7 +190,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                          "Start: ", mcmc_specs$mod_start_points$m1),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   } else {
-    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(0, m1_lim),
+    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), ylim=c(0, max(m1_mcmc)),
             main = paste(mcmc_specs$mod_par_names[1], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m1, ', Sigma (red)'),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
@@ -198,7 +200,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #***************
   #b
   if (!FLAGS_LIST$ADAPTIVE){
-    plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], #ylim=c(0, m2_lim),
+    plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
             main = paste(mcmc_specs$mod_par_names[2], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m2),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
