@@ -7,14 +7,14 @@
 PLOT_SS_MCMC_GRID(
   epidemic_data,
   mcmc_output,
-  mcmc_specs = list(n_mcmc = n_mcmc, burn_in_size = 0.05, mod_start_points =
-    mod_start_points, mod_par_names = c("a", "b", "c"), model_type = "SSI", seed_count =
-    seed_count, thinning_factor = 10),
+  mcmc_specs = list(model_type = "SSI", n_mcmc = 5e+05, mod_start_points = list(m1 =
+    0.72, m2 = 0.0038, m3 = 22), mod_par_names = c("a", "b", "c"), seed_count = 1,
+    burn_in_size = 0.05, thinning_factor = 10),
   priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp =
     c(0.1, 0), c_prior_ga = c(10, 1), c_prior_exp = c(0.1, 0)),
-  FLAGS_LIST = list(BURN_IN = TRUE, THIN = FALSE, DATA_AUG = TRUE, ADAPTIVE = FALSE,
-    MULTI_ALG = FALSE, SSI = FALSE, PRIOR = TRUE, B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA =
-    TRUE)
+  FLAGS_LIST = list(SSI = TRUE, BURN_IN = TRUE, THIN = TRUE, DATA_AUG = TRUE, ADAPTIVE
+    = TRUE, MULTI_ALG = FALSE, PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA =
+    FALSE)
 )
 }
 \arguments{
@@ -24,12 +24,12 @@ PLOT_SS_MCMC_GRID(
 
 \item{mcmc_specs}{A list of mcmc specifications
 \itemize{
+  \item \code{"model_type"} - Model type; Super Spreading Individuals \code{'SSI'} or Super Spreading Events \code{'SSE'}
   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler (integer)
-  \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm started sampling from
   \item \code{"mod_par_names"} - Names of the model parameters, e.g \code{"a, b, c"}
-  \item \code{"model_type"} - Model type; Super Spreading Individuals or Events
   \item \code{"seed_count"} - Seed for data generation & mcmc iteration
+  \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept
 }}
 

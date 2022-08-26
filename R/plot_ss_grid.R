@@ -6,12 +6,12 @@
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
 #' @param mcmc_specs A list of mcmc specifications
 #' \itemize{
+#'   \item \code{"model_type"} - Model type; Super Spreading Individuals \code{'SSI'} or Super Spreading Events \code{'SSE'}
 #'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler (integer)
-#'   \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
 #'   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm started sampling from
 #'   \item \code{"mod_par_names"} - Names of the model parameters, e.g \code{"a, b, c"}
-#'   \item \code{"model_type"} - Model type; Super Spreading Individuals or Events
 #'   \item \code{"seed_count"} - Seed for data generation & mcmc iteration
+#'   \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
 #'   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept
 #' }
 #' @param priors_list A list of prior parameters used
@@ -46,9 +46,9 @@
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
 PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
-                                         mcmc_specs = list(n_mcmc = 500000, burn_in_size = 0.05,
+                                         mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000,
                                                            mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), mod_par_names = c('a', 'b', 'c'),
-                                                                 model_type = 'SSI', seed_count = 1, thinning_factor = 10),
+                                                                  seed_count = 1,  burn_in_size = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                                          FLAGS_LIST = list(SSI = TRUE, BURN_IN = TRUE, THIN = TRUE,
@@ -445,7 +445,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
       a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
       a_rte_m2_m3 = round(mcmc_output$list_accept_rates$accept_rate4, 2),
       a_rte_m1_m3 = round(mcmc_output$list_accept_rates$accept_rate5, 2),
-      a_rte_d_aug = round(mcmc_output$list_accept_rates$accept_rate6, 2),
+      a_rte_d_aug = a_rte_d_aug,
       a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
       b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
       c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],

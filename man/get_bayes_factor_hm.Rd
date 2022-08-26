@@ -11,6 +11,9 @@ get_bayes_factor_hm(harmonic_mean1, harmonic_mean2)
 
 \item{harmonic_mean2}{harmonic mean obtained from model 2}
 }
+\value{
+\code{"bayes_factor"} bayes factor of two models up for comparison. Obtained via their harmonic means
+}
 \description{
 Bayes Factor of two competing models obtained via the ratio of their two harmonic means
 }

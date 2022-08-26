@@ -10,10 +10,10 @@ get_harmonic_mean(log_like_vec)
 \item{log_like_vec}{Log Likelihood at each iteration of the MCMC algorithm}
 }
 \value{
-harmonic_mean  harmonic mean of log likelihood vector
+\code{"harmonic_mean"}  harmonic mean of log likelihood vector
 }
 \description{
-Harmonic mean of Log likelihood. Used in conjunction with \code{"get_bayes_factor_hm"} to get the Bayes Factor between two competing models
+Harmonic mean of Log likelihood. Used in conjunction with \code{"get_bayes_factor_harmonic_means"} to get the Bayes Factor between two competing models
 }
 \examples{
 
