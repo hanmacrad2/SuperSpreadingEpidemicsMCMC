@@ -14,7 +14,7 @@
 #' @examples
 #'
 #' p_value = GET_P_VALUE(column_true_val, column_summary_stat)
-
+#' 
 GET_P_VALUE <- function(column_true_val, column_summary_stat) {
   'Get p values - comparing  summary stat columns to true value'
   
@@ -29,29 +29,26 @@ GET_P_VALUE <- function(column_true_val, column_summary_stat) {
   
 }
 
-#'P value derived by comparing the true summary statistics of the true epidemic data with that of the summary statistics of the simulated data  
-#'
-#' Returns the p value 
+#'Calculate a set of summary statistics of the data
+#' Returns the summary statistics of the data in a dataframe or list format
 #' 
-#' @param column_true_val Column of the true summary stat values of the epidemic data 
-#' @param column_summary_stat Column of summary stats of the simulated data
-#' @return p-value 
+#' @param data Data for which the summary statistics are calculated
+#' @param FLAG_MAKE_DF Flag to indiciate whether to return a dataframe or a list of summary statistics 
+#' @return summary statistics of the data in a dataframe or list format 
 #' @export
 #'
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
 #' @examples
 #'
-#' p_value = GET_P_VALUE(column_true_val, column_summary_stat)
+#' summary_stats_results = GET_SUMMARY_STATS(data, FLAG_MAKE_DF = TRUE)
+#' 
+GET_SUMMARY_STATS <- function(data, FLAG_MAKE_DF){
 
-GET_SUMMARY_STATS <- function(data, flag_create){
-  
-  'Calculate summary statistics of the simulated data'
-  #Summary stats params
   start_half2 = (length(data)/2)+1
   stop_half2 = length(data)
   
-  if (flag_create){
+  if (FLAG_MAKE_DF){
     
     #Df of summary stats (20)
     summary_stats_results = data.frame( 
@@ -85,13 +82,11 @@ GET_SUMMARY_STATS <- function(data, flag_create){
       med_dif_normII = median(diff(data)/(rollapply(data, 2, mean, by = 1) +1)),
       med_dif_normIII = median(diff(data)/(data[1:length(data)-1]/(data[2:length(data)]+1)+1))
       
-      #med_dif2nd_I = median(diff(diff(data))/(data[1:length(data)-1]+1)),
-      #med_dif_2ndII = median(diff(diff(data))/(rollapply(data, 2, mean, by = 1)+1))
-      
     )
     
   } else {
-    #List if df already created
+    
+    #List if Dataframe already created
     summary_stats_results = list(sum(data), sum(data[1:(length(data)/2)]), sum(data[start_half2:stop_half2]),
                                  median(data), max(data), sd(data),
                                  quantile(data)[4][1][1], quantile(data, probs = seq(0, 1, 0.125))[8][1][1],
@@ -102,10 +97,20 @@ GET_SUMMARY_STATS <- function(data, flag_create){
                                  median(diff(data)/(data[1:length(data)-1]+1)), median(diff(data)/(rollapply(data, 2, mean, by = 1)+1)),
                                  median(diff(data)/(data[1:length(data)-1]/(data[2:length(data)]+1)+1))
                                  
-                                 
     )
   }
   
   summary_stats_results
   
 }
+
+####################
+RUN_MCMC_REPS(N_REPS){}
+
+##############################
+#2B. TOTAL SUMMARY STATS 
+get_sum_stats_total <- function(base_folder_current, thinning_factor, n_reps, n_mcmc){
+  
+##############################
+#3. GET P VALUES FOR ALL  REPS
+get_p_values_total <- function(base_folder_current, n_reps){ }
