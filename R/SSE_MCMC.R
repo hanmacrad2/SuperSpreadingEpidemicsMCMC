@@ -402,7 +402,7 @@ SSE_MCMC_ADAPTIVE <- function(epidemic_data,
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0) {
-      print(paste0('i = ', i))
+      #print(paste0('i = ', i))
       i_thin = i/thinning_factor
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
