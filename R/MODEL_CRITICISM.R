@@ -104,7 +104,31 @@ GET_SUMMARY_STATS <- function(data, FLAG_MAKE_DF){
   
 }
 
-####################
+#' Run MCMC sampler for a number of reps to facilitate Model Criticism 
+#'
+#' MCMC algorithm with Adaptation for obtaining samples from the parameters of a
+#' super-spreading events (SSE) epidemic model
+#'
+#' @param epidemic_data data from the epidemic, namely daily infection counts
+#' @param root_folder root folder location in which to store the mcmc results for \code{"n_reps"}
+#' @param model_type A list of indicators of type boolean to indicate the type of epidemic model to fit and corresponding MCMC sampler to run;
+#' \itemize{
+#'   \item \code{"FLAG_BASE"} - if TRUE the baseline model MCMC sampler is implemented 
+#'   \item \code{"FLAG_SSE"} - if TRUE the super-spreading events (SSE) model MCMC sampler is implemented 
+#'   \item \code{"FLAG_SSI"} - if TRUE the super-spreading individuals (SSI) model MCMC sampler is implemented 
+#' @param modelling_specs A list of specifications;
+#' \itemize{
+#'   \item \code{"n_reps"} - Number of repetitions of the mcmc sampler. Multiple runs required for model criticism
+#'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler }
+#' @return saves the \code{"mcmc_output"} int the \code{"root_foler"}/\code{"rep"} location
+#' @export
+#'
+#' @author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#'RUN_MCMC_REPS(epidemic_data, results_folder)
+#' 
 RUN_MCMC_REPS <- function(epidemic_data, root_folder,
                           model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
                           modelling_specs = list(n_reps = 500, n_mcmc = 500000)){
@@ -121,7 +145,8 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     #MCMC 
     if (model_type$FLAG_BASE){
       
-      mcmc_output = 
+      mcmc_output = **
+        
     } else if (model_type$FLAG_SSE) {
       
       mcmc_output = SSE_MCMC_ADAPTIVE(epidemic_data)
@@ -135,45 +160,11 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     mcmc_params = mcmc_sse(sim_data, n, sigma, thinning_factor, folder_rep, rep, burn_in)
     
     #SAVE MCMC PARAMS 
-    saveRDS(mcmc_params, file = paste0(folder_rep, '/mcmc_params_rep_', rep, '.rds' ))
+    saveRDS(mcmc_output, file = paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
   }
-  
   
 }
 
-run_mcmc_reps_ss <- function(n, n_reps, model_params, sigma, flag_dt, base_folder, burn_in){
-  
-  'Run mcmc for n_reps iterations and save'
-  
-  #Get model parameters
-  alphaX = model_params[1]; betaX = model_params[2]
-  gammaX = model_params[3]; r0 = model_params[4];
-  
-  #Data_type
-  flag1 = flag_dt[1]; flag2 = flag_dt[2]; flag3 = flag_dt[3] 
-  start_rep = 1
-  cat('r0 = ', r0, '\n');
-  
-  # if (flag1){
-  #   start_rep = 462
-  # } else {
-  #   start_rep = 1
-  # }
-  
-  #Repeat for n reps
-  for(rep in start_rep:n_reps) {
-    
-    cat('\n rep =', rep, '\n')
-    folder_rep = paste0(base_folder, '/rep_', rep)
-    ifelse(!dir.exists(file.path(folder_rep)), dir.create(file.path(folder_rep), recursive = TRUE), FALSE)
-    
-    #MCMC 
-    mcmc_params = mcmc_sse(sim_data, n, sigma, thinning_factor, folder_rep, rep, burn_in)
-    
-    #SAVE MCMC PARAMS 
-    saveRDS(mcmc_params, file = paste0(folder_rep, '/mcmc_params_rep_', rep, '.rds' ))
-  }
-}
 
 ##############################
 #GET_SUM_STATS_TOTAL <- function()

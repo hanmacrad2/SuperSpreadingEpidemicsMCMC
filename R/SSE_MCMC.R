@@ -63,7 +63,7 @@ LOG_LIKE_SSE_LSE <- function(x, alphaX, betaX, gammaX){
   logl
 }
 
-#' MCMC adaptive algorithm for Super-Spreading Evemts epidemic model
+#' MCMC adaptive algorithm for Super-Spreading Events epidemic model
 #'
 #' MCMC algorithm with Adaptation for obtaining samples from the parameters of a
 #' super-spreading events (SSE) epidemic model
