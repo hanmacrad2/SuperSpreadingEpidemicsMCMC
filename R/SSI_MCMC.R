@@ -450,7 +450,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0) {
-      print(paste0('i = ', i))
+      #print(paste0('i = ', i))
       i_thin = i/thinning_factor
       a_vec[i_thin] <- a; b_vec[i_thin] <- b
       c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
