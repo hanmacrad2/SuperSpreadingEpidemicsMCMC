@@ -15,7 +15,7 @@
 #'
 #' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
 #'
-SIMULATE_BASELINE_EPIDEMIC = function(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2) {
+SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
   
   'Baseline simulation model'
   
@@ -57,7 +57,7 @@ SIMULATE_BASELINE_EPIDEMIC = function(num_days = 50, shape_gamma = 6, scale_gamm
 #' tot_daily_sse_infections = SIMULATE_SS_EVENTS(num_days = 50, shape_gamma = 6, scale_gamma = 1,
 #'  alphaX = 0.8, betaX = 0.02, gammaX = 20)
 #'
-SIMULATE_SS_EVENTS = function(num_days = 50, shape_gamma = 6, scale_gamma = 1, alphaX, betaX, gammaX) {
+SIMULATE_SS_EVENTS = function(alphaX, betaX, gammaX, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
   
   #Initialise parameters 
   tot_daily_sse_infections = vector('numeric', num_days)

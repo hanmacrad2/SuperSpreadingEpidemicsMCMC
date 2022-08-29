@@ -34,7 +34,7 @@ GET_P_VALUE <- function(column_true_val, column_summary_stat) {
 #' Returns the summary statistics of the data in a dataframe or list format
 #' 
 #' @param data Data for which the summary statistics are calculated
-#' @param FLAG_MAKE_DF Flag to indicate whether to return a dataframe or a list of summary statistics 
+#' @param FLAG_DF_CREATE Flag to indicate whether to return a dataframe or a list of summary statistics 
 #' @return summary statistics of the data in a dataframe or list format 
 #' @export
 #'
@@ -42,14 +42,14 @@ GET_P_VALUE <- function(column_true_val, column_summary_stat) {
 #'
 #' @examples
 #'
-#' summary_stats_results = GET_SUMMARY_STATS(data, FLAG_MAKE_DF = TRUE)
+#' summary_stats_results = GET_SUMMARY_STATS(data, FLAG_DF_CREATE = TRUE)
 #' 
-GET_SUMMARY_STATS <- function(data, FLAG_MAKE_DF){
+GET_SUMMARY_STATS <- function(data, FLAG_DF_CREATE = TRUE){
 
   #Initialise
   mid_point = length(data)/2; end = length(data)
   
-  if (FLAG_MAKE_DF){
+  if (FLAG_DF_CREATE){
     
     #Data-frame of summary statistics (20)
     summary_stats_results = data.frame( 
@@ -132,7 +132,7 @@ GET_SUMMARY_STATS <- function(data, FLAG_MAKE_DF){
 #' 
 RUN_MCMC_REPS <- function(epidemic_data, root_folder,
                           model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
-                          modelling_specs = list(n_reps = 500, n_mcmc = 500000)){
+                          modelling_specs = list(n_reps = 500, n_mcmc = 500000, burn_in_factor = )){
   
   'Run mcmc for n_reps iterations and save' 
   
@@ -144,16 +144,13 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     ifelse(!dir.exists(file.path(folder_rep)), dir.create(file.path(folder_rep), recursive = TRUE), FALSE)
     
     #MCMC 
-    if (model_type$FLAG_BASE){
-      
+    if (model_type$FLAG_BASE) {
       mcmc_output = BASELINE_MCMC_ADAPTIVE(epidemic_data)
-        
-    } else if (model_type$FLAG_SSE) {
       
+    } else if (model_type$FLAG_SSE) {
       mcmc_output = SSE_MCMC_ADAPTIVE(epidemic_data)
       
     } else if (model_type$FLAG_SSI) {
-      
       #Data (Fix to SSI?)
       mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
     }
@@ -163,73 +160,151 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     #SAVE MCMC PARAMS 
     saveRDS(mcmc_output, file = paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
   }
-  
 }
 
-
-##############################
+#GET_SUM_STATS_TOTAL
 GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
                                  model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
-                                 modelling_specs = list(n_reps = 500, n_mcmc = 500000)) { #thinning factor?
+                                 modelling_specs = list(n_reps = 500, n_mcmc = 500000, thinning_factor = 10, 
+                                                        burn_in_size = 0.01)) { #thinning factor?
   
-  'Get summary stats and p vals for all mcmc reps'
-  n_reps = modelling_specs$n_reps
+  'Get summary stats and p valuess for all mcmc reps'
 
-  for(rep in 1:n_reps) {
+  #MODELLING SPECS
+  burn_in = modelling_specs$burn_in_size*modelling_specs$n_mcmc
+  num_days = length(epidemic_data)
+  
+  for(rep in 1:modelling_specs$n_reps) {
     
     #GET RESULTS
     print(paste0('rep = ', rep))
     folder_rep = paste0(root_folder, "/rep_", rep, '/')
-
-    true_rep_sim = readRDS(paste0(folder_rep, '/sim_data.rds'))
+    
+    #MCMC
     mcmc_output <- readRDS(paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
-    #Get true summary statistics 
-    df_true_ss = get_summary_stats(true_rep_sim, TRUE)
-    #Save 
-    saveRDS(df_true_ss, file = paste0(folder_rep, 'df_true_sum_stats_rep_', rep, '.rds' ))
     
-    #Get parameters
-    alpha_mcmc = mcmc_output[1]; alpha_mcmc = unlist(alpha_mcmc)
-    beta_mcmc = mcmc_output[2]; beta_mcmc = unlist(beta_mcmc)
-    gamma_mcmc = mcmc_output[3]; gamma_mcmc = unlist(gamma_mcmc)
-    r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc)
+    #GET SUMMARY STATS (TRUE)
+    df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
+    saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' )) #save
     
-    #Simulate data using thinned params
-    for(i in seq(burn_in, n_mcmc, by = thinning_factor)){
-      #print(paste0("mcmc summary stat rep ", i))
-      #Simulate data
-      sim_data_model_crit = simulate_branching_ss(num_days, shape_gamma, scale_gamma, alpha_mcmc[i], beta_mcmc[i], gamma_mcmc[i])
-      #Save data
-      saveRDS(sim_data_model_crit, file = paste0(folder_rep, 'mcmc/sim_data_iter_', i, '.rds' ))
+    #GET MCMC PARAMETERS
+    # if (model_type$FLAG_BASE) {
+    #   mcmc_output = BASELINE_MCMC_ADAPTIVE(epidemic_data)
+    # 
+    # } else if (model_type$FLAG_SSE) {
+    #   mcmc_output = SSE_MCMC_ADAPTIVE(epidemic_data)
+    # 
+    # } else if (model_type$FLAG_SSI) {
+    #   #Data (Fix to SSI?)
+    #   mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
+    # }
+    # 
+    # #Get parameters -> in function
+    # alpha_mcmc = mcmc_output[1]; alpha_mcmc = unlist(alpha_mcmc)
+    # beta_mcmc = mcmc_output[2]; beta_mcmc = unlist(beta_mcmc)
+    # gamma_mcmc = mcmc_output[3]; gamma_mcmc = unlist(gamma_mcmc)
+    # r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc)
+    
+    #SIMULATE DATA (THINNED)
+    for(i in seq(burn_in, modelling_specs$n_mcmc, by = modelling_specs$thinning_factor)){
       
-      #Get summary stats. 
+      if (model_type$FLAG_BASE) {
+        R0 = mcmc_output$r0_vec[i]
+        sim_data = SIMULATE_BASELINE_EPIDEMIC(R0, num_days = num_days) 
+      }  else if (model_type$FLAG_SSE) {
+        
+        sim_data = SIMULATE_SS_EVENTS(mcmc_output$alpha_vec[i], mcmc_output$beta_vec[i], mcmc_output$gamma_vec[i])
+
+      } else if (model_type$FLAG_SSI) {
+
+        sim_data = SSI_MCMC_ADAPTIVE(mcmc_output$a_vec[i], mcmc_output$b_vec[i], mcmc_output$c_vec[i])
+      }
+
+      #Save data
+      saveRDS(sim_data, file = paste0(folder_rep, 'mcmc/sim_data_iter_', i, '.rds' ))
+      
+      #GET SUMMARY STAT RESULTS
       if (i == burn_in) { #first rep
-        #cat('CREATE  df_summary_stats')
-        flag_create = TRUE
-        df_summary_stats = get_summary_stats(sim_data_model_crit, flag_create)
-        flag_create = FALSE 
-        #Get indices of iterations
+        df_summary_stats = GET_SUMMARY_STATS(sim_data)
         list_ss_iters = c(i)
       } else {
-        df_summary_stats[nrow(df_summary_stats) + 1, ] = get_summary_stats(sim_data_model_crit, flag_create)
+        df_summary_stats[nrow(df_summary_stats) + 1, ] = GET_SUMMARY_STATS(sim_data, FLAG_DF_CREATE = FALSE)
         list_ss_iters = c(list_ss_iters, i)
       }
       
     }
     
-    #Save summary stats
+    #SAVE SUMMARY STATISTICS + ITERATIONS
     saveRDS(df_summary_stats, file = paste0(folder_rep, '/df_summary_stats_', rep, ".rds"))
-    #print(paste0('df_summary_stats', df_summary_stats))
-    #Save ss iterations
     saveRDS(list_ss_iters, file = paste0(folder_rep, '/list_ss_iters_i', rep, '.rds'))  
-    
   }
 }
 
-
-#2B. TOTAL SUMMARY STATS 
-get_sum_stats_total <- function(root_folder, thinning_factor, n_reps, n_mcmc){
-  
-##############################
+#
 #3. GET P VALUES FOR ALL  REPS
 get_p_values_total <- function(root_folder, n_reps){ }
+
+#####
+get_p_values_total <- function(base_folder_current, n_reps){
+  
+  for(rep in 1:n_reps) {
+    cat('rep = ', rep)
+    #Get results
+    folder_rep = paste0(base_folder_current, "/rep_", rep, '/')
+    cat('folder_rep', folder_rep)
+    true_rep_sim = readRDS(paste0(folder_rep, '/sim_data.rds'))
+    #Get true summary statistics 
+    df_true_ss = get_summary_stats(true_rep_sim, TRUE)
+    
+    #Data
+    df_summary_stats_rep <- readRDS(paste0(folder_rep, '/df_summary_stats_', rep, '.rds' ))
+    
+    #Get p values
+    list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values(df_summary_stats_rep[,x], df_true_ss[,x]))
+    saveRDS(list_p_vals, file = paste0(folder_rep, '/list_p_vals_rep', rep, ".rds"))
+    
+    list_all_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values_list(df_summary_stats_rep[,x], df_true_ss[,x]))
+    saveRDS(list_all_p_vals, file = paste0(folder_rep, '/list_all_p_vals_rep_', rep, ".rds"))
+    
+    #Save all 
+    if (!exists("df_p_values")) {
+      df_p_values = data.frame(sum_infects = list_p_vals[1],
+                               sum_1st_half = list_p_vals[2],
+                               sum_2nd_half = list_p_vals[3],
+                               median_infect = list_p_vals[4],
+                               max_infect = list_p_vals[5],
+                               sd_infect = list_p_vals[6],
+                               infect_q_75 = list_p_vals[7],
+                               infect_q_87_5 = list_p_vals[8],
+                               max_dif = list_p_vals[9],
+                               med_dif  = list_p_vals[10],
+                               max_dif2nd =  list_p_vals[11],
+                               med_dif2nd =  list_p_vals[12],
+                               max_dif_normI =  list_p_vals[13],
+                               max_dif_normII =  list_p_vals[14],
+                               max_dif_normIII = list_p_vals[15],
+                               max_dif2nd_I =  list_p_vals[16],
+                               max_dif_2ndII =  list_p_vals[17],
+                               med_dif_normI =  list_p_vals[18],
+                               med_dif_normII =  list_p_vals[19],
+                               med_dif_normIII =  list_p_vals[20]
+                               
+      )
+      print(paste0('df_p_values', df_p_values))
+      
+    } else {
+      df_p_values[nrow(df_p_values) + 1, ] = list_p_vals
+    }
+    
+  }
+  
+  #Ensure its a df
+  df_p_values = as.data.frame(df_p_values)
+  
+  #SaveRDS
+  saveRDS(df_p_values, file = paste0(base_folder_current, '/total_p_values_iter_', iter, '.rds' ))
+  
+  #Return p values
+  df_p_values
+  
+}
