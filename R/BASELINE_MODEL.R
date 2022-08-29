@@ -35,6 +35,127 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   log_likelihood
 }
 
+#' Log likelihood of the baseline epidemic model
+#'
+#' Returns the log likelihood of the baseline epidemic model for given \code{"epidemic_data"} and reproduction number \code{"R0"}
+#'
+#' MCMC adaptive algorithm for the baseline epidemic model
+#'
+#' MCMC algorithm with Adaptation for obtaining samples from the parameters of a
+#' super-spreading events (SSE) epidemic model
+#'
+#' @param epidemic_data data from the epidemic, namely daily infection counts
+#' @param mcmc_inputs A list of mcmc specifications including
+#' \itemize{
+#'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler
+#'   \item \code{"r0_start"} - Model parameter starting points; where the mcmc algorithm begins sampling the reproduction number R0 from
+#'   \item \code{"alpha_star"} - target acceptance rate; used in the adaptive algorithm
+#'   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept
+#' }
+#************************************************************************
+#1. SSE MCMC
+#************************************************************************
+BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
+                                   mcmc_inputs = list(n_mcmc = 500000, r0_start = 1.1,
+                                                      thinning_factor = 10, r0_prior_exp = c(1, 0)), 
+                                   FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE)) {
+  
+  'Returns MCMC samples of the reproduction number \code{"R0"} of the data
+  and acceptance rates'
+  
+  'Prior
+  p(a) = exp(rate) = rate*exp(-rate*x). log(r*exp(-r*x)) = log(r) - rx
+      -> E.g exp(1) = 1*exp(-1*a) = exp(-a). log(exp(-a)) = - a'
+  
+  #**********************************************
+  #INITIALISE PARAMS
+  #**********************************************
+  n_mcmc = mcmc_inputs$n_mcmc; print(paste0('num mcmc iters = ', n_mcmc))
+  count_accept = 0
+  
+  #THINNING FACTOR
+  if(FLAGS_LIST$THIN){
+    thinning_factor = mcmc_inputs$thinning_factor
+    mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
+  } else {
+    thinning_factor = 1; mcmc_vec_size = n_mcmc
+  }
+  
+  #MCMC VECTORS - INITIALISE
+  r0_vec <- vector('numeric', mcmc_vec_size); log_like_vec <- vector('numeric', mcmc_vec_size)
+  r0_vec[1] <- mcmc_inputs$r0_start
+  log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
+  #Running parameters
+  r0 = r0_vec[1]; log_likelihood = log_like_vec[1]
+  
+  #SIGMA - INITIALISE
+  sigmaX =  0.5*mcmc_inputs$r0_start
+  
+  if (FLAGS_LIST$ADAPTIVE){
+    
+    #SIGMA
+    sigma_vec <- vector('numeric', mcmc_vec_size); sigma_vec[1] =  sigmaX;
+    #Other adaptive parameters
+    delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
+  } else {
+    sigma_vec = sigmaX
+  }
+  
+  #******************************
+  #MCMC CHAIN
+  #******************************
+  for(i in 2:n_mcmc) {
+    
+    #****************************************************** s
+    #R0 proposal
+    r0_dash <- r0 + rnorm(1, sd = sigmaX)
+    
+    if(r0_dash < 0){
+      r0_dash = abs(r0_dash)
+    }
+    
+    loglike_new = LOG_LIKE_BASELINE(epidemic_data, r0_dash)
+    log_accept_ratio = loglike_new - log_likelihood 
+    
+    #Priors
+    if (FLAGS_LIST$PRIOR){
+      log_accept_ratio = log_accept_ratio - r0_dash + r0 #Acceptance RATIO. Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
+    }
+    
+    #Metropolis Acceptance Step
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+      r0 <- r0_dash
+      count_accept = count_accept + 1
+      log_likelihood = loglike_new
+    }
+    
+    #Sigma (Adaptive)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
+      sigmaX =  sigmaX*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+    }
+    
+    #POPULATE MCMC VECTOR (ONLY STORE THINNED SAMPLE)
+    if (i%%thinning_factor == 0) {
+      i_thin = i/thinning_factor
+      r0_vec[i_thin] <- r0
+      log_like_vec[i_thin] <- log_like
+      
+      if (FLAGS_LIST$ADAPTIVE){
+        sigma_vec[i_thin] = sigmaX
+      }
+    }
+  }
+  
+  #Final stats
+  accept_rate = 100*count_accept/(n_mcmc-1)
+  print(paste0('accept_rate = ', accept_rate))
+  
+  #Return a, acceptance rate
+  return(list(r0_vec = r0_vec, log_like_vec = log_like_vec, sigma_vec = sigma_vec,
+              accept_rate = accept_rate))
+}
+
 #' MCMC adaptive algorithm for Super-Spreading Events epidemic model
 #'
 #' MCMC algorithm with Adaptation for obtaining samples from the parameters of a
