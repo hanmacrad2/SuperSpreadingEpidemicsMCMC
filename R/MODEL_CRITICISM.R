@@ -15,6 +15,7 @@
 #'
 #' p_value = GET_P_VALUE(column_true_val, column_summary_stat)
 #' 
+#' 
 GET_P_VALUE <- function(column_true_val, column_summary_stat) {
   'Get p values - comparing  summary stat columns to true value'
   
@@ -145,7 +146,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     #MCMC 
     if (model_type$FLAG_BASE){
       
-      mcmc_output = **
+      mcmc_output = BASELINE_MCMC_ADAPTIVE(epidemic_data)
         
     } else if (model_type$FLAG_SSE) {
       
@@ -157,7 +158,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
       mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
     }
     
-    mcmc_params = mcmc_sse(sim_data, n, sigma, thinning_factor, folder_rep, rep, burn_in)
+    mcmc_output = mcmc_sse(sim_data, n, sigma, thinning_factor, folder_rep, rep, burn_in)
     
     #SAVE MCMC PARAMS 
     saveRDS(mcmc_output, file = paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
@@ -167,29 +168,31 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
 
 
 ##############################
-#GET_SUM_STATS_TOTAL <- function()
-  
-get_sum_stats_total <- function(base_folder_current, thinning_factor, n_reps, n_mcmc){
+GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
+                                 model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
+                                 modelling_specs = list(n_reps = 500, n_mcmc = 500000)) { #thinning factor?
   
   'Get summary stats and p vals for all mcmc reps'
-  
+  n_reps = modelling_specs$n_reps
+
   for(rep in 1:n_reps) {
     
-    #Get results
-    folder_rep = paste0(base_folder_current, "/rep_", rep, '/')
-    cat('rep = ', rep)
+    #GET RESULTS
+    print(paste0('rep = ', rep))
+    folder_rep = paste0(root_folder, "/rep_", rep, '/')
+
     true_rep_sim = readRDS(paste0(folder_rep, '/sim_data.rds'))
-    mcmc_params <- readRDS(paste0(folder_rep, '/mcmc_params_rep_', rep, '.rds' ))
+    mcmc_output <- readRDS(paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
     #Get true summary statistics 
     df_true_ss = get_summary_stats(true_rep_sim, TRUE)
     #Save 
     saveRDS(df_true_ss, file = paste0(folder_rep, 'df_true_sum_stats_rep_', rep, '.rds' ))
     
     #Get parameters
-    alpha_mcmc = mcmc_params[1]; alpha_mcmc = unlist(alpha_mcmc)
-    beta_mcmc = mcmc_params[2]; beta_mcmc = unlist(beta_mcmc)
-    gamma_mcmc = mcmc_params[3]; gamma_mcmc = unlist(gamma_mcmc)
-    r0_mcmc = mcmc_params[4]; r0_mcmc = unlist(r0_mcmc)
+    alpha_mcmc = mcmc_output[1]; alpha_mcmc = unlist(alpha_mcmc)
+    beta_mcmc = mcmc_output[2]; beta_mcmc = unlist(beta_mcmc)
+    gamma_mcmc = mcmc_output[3]; gamma_mcmc = unlist(gamma_mcmc)
+    r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc)
     
     #Simulate data using thinned params
     for(i in seq(burn_in, n_mcmc, by = thinning_factor)){
@@ -225,8 +228,8 @@ get_sum_stats_total <- function(base_folder_current, thinning_factor, n_reps, n_
 
 
 #2B. TOTAL SUMMARY STATS 
-get_sum_stats_total <- function(base_folder_current, thinning_factor, n_reps, n_mcmc){
+get_sum_stats_total <- function(root_folder, thinning_factor, n_reps, n_mcmc){
   
 ##############################
 #3. GET P VALUES FOR ALL  REPS
-get_p_values_total <- function(base_folder_current, n_reps){ }
+get_p_values_total <- function(root_folder, n_reps){ }
