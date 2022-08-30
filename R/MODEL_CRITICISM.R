@@ -193,7 +193,7 @@ GET_SUMMARY_STATS <- function(data, FLAG_DF_CREATE = TRUE){
 GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
                                  model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
                                  modelling_specs = list(n_reps = 500, n_mcmc = 500000, thinning_factor = 10, 
-                                                        burn_in_size = 0.01)) { #thinning factor?
+                                                        burn_in_size = 0.01)) { 
   
   'Get summary stats and p valuess for all mcmc reps'
 
@@ -203,7 +203,7 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
   
   for(rep in 1:modelling_specs$n_reps) {
     
-    #GET RESULTS
+    #REP
     print(paste0('rep = ', rep))
     folder_rep = paste0(root_folder, "/rep_", rep, '/')
     
@@ -212,9 +212,9 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     
     #GET SUMMARY STATS (TRUE)
     df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
-    saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' )) #save
+    saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' ))
     
-    #SIMULATE DATA (THINNED)
+    #REPLICATED DATA (THINNED)
     for(i in seq(burn_in, modelling_specs$n_mcmc, by = modelling_specs$thinning_factor)){
       
       if (model_type$FLAG_BASE) {
@@ -230,10 +230,10 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
         sim_data = SSI_MCMC_ADAPTIVE(mcmc_output$a_vec[i], mcmc_output$b_vec[i], mcmc_output$c_vec[i])
       }
 
-      #Save data
+      #SAVE DATA
       saveRDS(sim_data, file = paste0(folder_rep, 'mcmc/sim_data_iter_', i, '.rds' ))
       
-      #GET SUMMARY STAT RESULTS
+      #SUMMARY STATISTICS
       if (i == burn_in) { 
         df_summary_stats = GET_SUMMARY_STATS(sim_data)
         list_ss_iters = c(i)
@@ -241,7 +241,6 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
         df_summary_stats[nrow(df_summary_stats) + 1, ] = GET_SUMMARY_STATS(sim_data, FLAG_DF_CREATE = FALSE)
         list_ss_iters = c(list_ss_iters, i)
       }
-      
     }
     
     #SAVE SUMMARY STATISTICS + ITERATIONS
@@ -250,38 +249,46 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
   }
 }
 
-#
-#3. GET P VALUES FOR ALL  REPS
-get_p_values_total <- function(root_folder, n_reps){ }
-
-#####
-get_p_values_total <- function(root_folder, n_reps){
+#' Get and save the posterior predictive p value (ppp-value) for each summary statistic  
+#'
+#'  Get and save the posterior predictive p value (ppp-value) for each summary statistic across all reps. The ppp-value of each summary statistic is calculated and stored together in a dataframe. 
+#'
+#' @param epidemic_data data from the epidemic, namely daily infection counts
+#' @param root_folder root folder location in which to store the MCMC results for \code{"n_reps"}
+#' @param n_reps Total number of repetitions of the MCMC sampler ran. Ppp-values calculated on the aggregate of all reps. 
+#' @return A Dataframe of ppp-values for all the summary statistics \code{"df_p_values"}. Also saves the dataframe in the \code{"root_foler"} location
+#' @export
+#'
+#' @author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#'GET_P_VALUES_TOTAL(root_folder, n_reps)
+#' 
+GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
   
   for(rep in 1:n_reps) {
     
+    #FOLDER REP
     print(paste0('rep = ', rep))
-    
-    #GET RESULTS
     folder_rep = paste0(root_folder, "/rep_", rep, '/')
     print(paste0('folder_rep = ', folder_rep))
+
+    #GET TRUE SUMMARY STATISTICS 
+    df_true_ss = readRDS(folder_rep, 'df_ss_true_rep_', rep, '.rds' ))
+    #df_true_ss = get_summary_stats(true_rep_sim, TRUE)
     
-    
-    true_rep_sim = readRDS(paste0(folder_rep, '/sim_data.rds'))
-    
-    #Get true summary statistics 
-    df_true_ss = get_summary_stats(true_rep_sim, TRUE)
-    
-    #Data
+    #GET REPLICATED SUMMARY STATISTICS 
     df_summary_stats_rep <- readRDS(paste0(folder_rep, '/df_summary_stats_', rep, '.rds' ))
     
-    #Get p values
+    #GET P VALUES
     list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values(df_summary_stats_rep[,x], df_true_ss[,x]))
     saveRDS(list_p_vals, file = paste0(folder_rep, '/list_p_vals_rep', rep, ".rds"))
     
-    list_all_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values_list(df_summary_stats_rep[,x], df_true_ss[,x]))
-    saveRDS(list_all_p_vals, file = paste0(folder_rep, '/list_all_p_vals_rep_', rep, ".rds"))
+    #list_all_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values_list(df_summary_stats_rep[,x], df_true_ss[,x]))
+    #saveRDS(list_all_p_vals, file = paste0(folder_rep, '/list_all_p_vals_rep_', rep, ".rds"))
     
-    #Save all 
+    #DATAFRAME OF P VALUES 
     if (!exists("df_p_values")) {
       df_p_values = data.frame(sum_infects = list_p_vals[1],
                                sum_1st_half = list_p_vals[2],
@@ -302,24 +309,20 @@ get_p_values_total <- function(root_folder, n_reps){
                                max_dif_2ndII =  list_p_vals[17],
                                med_dif_normI =  list_p_vals[18],
                                med_dif_normII =  list_p_vals[19],
-                               med_dif_normIII =  list_p_vals[20]
-                               
-      )
+                               med_dif_normIII =  list_p_vals[20])
       print(paste0('df_p_values', df_p_values))
-      
     } else {
       df_p_values[nrow(df_p_values) + 1, ] = list_p_vals
     }
-    
   }
   
-  #Ensure its a df
+  #DATAFRAME
   df_p_values = as.data.frame(df_p_values)
   
-  #SaveRDS
+  #SAVE DATAFRAME
   saveRDS(df_p_values, file = paste0(root_folder, '/total_p_values_iter_', iter, '.rds' ))
   
-  #Return p values
+  #RETURN P VALUES
   df_p_values
   
 }
