@@ -11,7 +11,7 @@
 #'   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm started sampling from
 #'   \item \code{"mod_par_names"} - Names of the model parameters, e.g \code{"a, b, c"}
 #'   \item \code{"seed_count"} - Seed for data generation & mcmc iteration
-#'   \item \code{"burn_in_size"} - Proportion of mcmc samples to remove at the start as burn-in
+#'   \item \code{"burn_in_pc"} - Proportion of mcmc samples to remove at the start as burn-in
 #'   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept
 #' }
 #' @param priors_list A list of prior parameters used
@@ -24,7 +24,7 @@
 #' }
 #' @param FLAGS_LIST A list of boolean variables for switching on/off certain functionality
 #' \itemize{
-#' \item \code{"BURN_IN"}  - Burn-in applied to mcmc samples if TRUE of size \code{"mcmc_specs$burn_in_size"}
+#' \item \code{"BURN_IN"}  - Burn-in applied to mcmc samples if TRUE of size \code{"mcmc_specs$burn_in_pc"}
 #'   \item \code{"THIN"}  - Return a thinned mcmc sample if TRUE, reduced by a factor of \code{"thinning_factor"}
 #'   \item \code{"DATA_AUG"} - Data Augmentation was implemented as part of the SSI model if TRUE
 #'   \item \code{"ADAPTIVE"} - Adaptive Algorithm applied to MCMC samples if TRUE
@@ -48,7 +48,7 @@
 PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                                          mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000,
                                                            mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), mod_par_names = c('a', 'b', 'c'),
-                                                                  seed_count = 1,  burn_in_size = 0.05, thinning_factor = 10),
+                                                                  seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                                          FLAGS_LIST = list(SSI = TRUE, BURN_IN = TRUE, THIN = TRUE,
@@ -98,7 +98,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
 
   #BURN IN
   if (FLAGS_LIST$BURN_IN){
-    burn_in = mcmc_specs$burn_in_size*mcmc_vec_size
+    burn_in = mcmc_specs$burn_in_pc*mcmc_vec_size
     m1_mcmc = m1_mcmc[burn_in:mcmc_vec_size]
     m2_mcmc = m2_mcmc[burn_in:mcmc_vec_size]
     m3_mcmc = m3_mcmc[burn_in:mcmc_vec_size]
