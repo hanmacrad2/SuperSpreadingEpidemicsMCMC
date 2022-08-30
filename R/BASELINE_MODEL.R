@@ -30,9 +30,10 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   for (t in 2:num_days) {
     
     lambda = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
-    log_likelihood = logl + epidemic_data[t]*log(lambda) - lambda - lfactorial([t]) #Need to include normalizing constant 
+    log_likelihood = log_likelihood + epidemic_data[t]*log(lambda) - lambda - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     
   }
+  
   log_likelihood
 }
 
@@ -79,11 +80,11 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #'
 #'
 BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
-                                   mcmc_inputs = list(n_mcmc = 500000, r0_start = 1.1, r0_prior_exp = c(1, 0),
+                                   mcmc_inputs = list(n_mcmc = 1000, r0_start = 1.1, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE)) {
   
-  'Returns MCMC samples of the reproduction number \code{"R0"} of the data
+  'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
   
   'Prior
@@ -93,7 +94,8 @@ BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  n_mcmc = mcmc_inputs$n_mcmc; print(paste0('num mcmc iters = ', n_mcmc))
+  n_mcmc = mcmc_inputs$n_mcmc
+  print(paste0('num mcmc iters = ', n_mcmc))
   count_accept = 0
   
   #THINNING FACTOR
@@ -162,7 +164,7 @@ BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
     if (i%%thinning_factor == 0) {
       i_thin = i/thinning_factor
       r0_vec[i_thin] <- r0
-      log_like_vec[i_thin] <- log_like
+      log_like_vec[i_thin] <- log_likelihood
       
       if (FLAGS_LIST$ADAPTIVE){
         sigma_vec[i_thin] = sigmaX
