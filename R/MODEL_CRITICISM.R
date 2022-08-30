@@ -148,19 +148,21 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     
     #MCMC
     mcmc_output <- readRDS(paste0(folder_rep, 'mcmc_output_rep_', rep, '.rds'))
-    print('passed')
+    print('passed 1')
     
     #GET SUMMARY STATS (TRUE)
     df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
     saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' ))
-    print('passed')
+    print('passed 2')
     
     #REPLICATED DATA (THINNED)
     for(i in seq(burn_in, modelling_specs$n_mcmc, by = modelling_specs$thinning_factor)){
       
       if (model_type$FLAG_BASE) {
         R0 = mcmc_output$r0_vec[i]
-        sim_data = SIMULATE_BASELINE_EPIDEMIC(R0, num_days = num_days) 
+        sim_data = SIMULATE_BASELINE_EPIDEMIC(R0, num_days = num_days)
+        print(sim_data)
+        print('passed 3')
         
       }  else if (model_type$FLAG_SSE) {
         
@@ -172,7 +174,11 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
       }
 
       #SAVE DATA
-      saveRDS(sim_data, file = paste0(folder_rep, 'mcmc/sim_data_iter_', i, '.rds' ))
+      folder_rep_data = paste0(folder_rep, '/replicated_data/')
+      ifelse(!dir.exists(file.path(folder_rep_data)), dir.create(file.path(folder_rep_data), recursive = TRUE), FALSE)
+      
+      saveRDS(sim_data, file = paste0(folder_rep_data, 'sim_data_iter_', i, '.rds' ))
+      print('passed 4')
       
       #SUMMARY STATISTICS
       if (i == burn_in) { 
@@ -185,8 +191,9 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     }
     
     #SAVE SUMMARY STATISTICS + ITERATIONS
-    saveRDS(df_summary_stats, file = paste0(folder_rep, '/df_summary_stats_', rep, ".rds"))
-    saveRDS(list_ss_iters, file = paste0(folder_rep, '/list_ss_iters_i', rep, '.rds'))  
+    saveRDS(df_summary_stats, file = paste0(folder_rep, '/df_replicated_summary_stats_', rep, ".rds"))
+    saveRDS(list_ss_iters, file = paste0(folder_rep, '/list_ss_iters_i', rep, '.rds'))
+    print('passed 5')
   }
 }
 
