@@ -30,13 +30,13 @@ RUN_MODEL_CRITICISM <- function(epidemic_data, root_folder,
                                 modelling_specs = list(n_reps = 10, n_mcmc = 1000)){
   
   #1. RUN MCMC 
-  RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
+  #RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
   
   #2. GET SUMMARY STATS
   GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
   
   #3. GET SUMMARY STATS
-  GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
+  #GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
   
   #4. GET P VALUES TOTAL
   GET_P_VALUES_TOTAL(root_folder, modelling_specs$n_reps)
@@ -79,6 +79,8 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     #Folder 
     cat('\n rep =', rep, '\n')
     folder_rep = paste0(root_folder, '/rep_', rep)
+    print(paste0('folder_rep = ', folder_rep))
+    
     ifelse(!dir.exists(file.path(folder_rep)), dir.create(file.path(folder_rep), recursive = TRUE), FALSE)
     
     #MCMC 
@@ -96,7 +98,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     #SAVE MCMC PARAMS 
     saveRDS(mcmc_output, file = paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
   }
-} #list(n_reps = 500, n_mcmc = 500000)
+}
 
 #' Get and save the summary statistics of the real and replicated data  
 #'
@@ -142,13 +144,16 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     #REP
     print(paste0('rep = ', rep))
     folder_rep = paste0(root_folder, "/rep_", rep, '/')
+    print(paste0('folder_rep = ', folder_rep))
     
     #MCMC
-    mcmc_output <- readRDS(paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
+    mcmc_output <- readRDS(paste0(folder_rep, 'mcmc_output_rep_', rep, '.rds'))
+    print('passed')
     
     #GET SUMMARY STATS (TRUE)
     df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
     saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' ))
+    print('passed')
     
     #REPLICATED DATA (THINNED)
     for(i in seq(burn_in, modelling_specs$n_mcmc, by = modelling_specs$thinning_factor)){
