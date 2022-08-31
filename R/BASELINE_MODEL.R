@@ -80,7 +80,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #'
 #'
 BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
-                                   mcmc_inputs = list(n_mcmc = 1000, r0_start = 1.1, r0_prior_exp = c(1, 0),
+                                   mcmc_inputs = list(n_mcmc = 10000, r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE)) {
   
