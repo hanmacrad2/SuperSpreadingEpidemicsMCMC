@@ -2,7 +2,7 @@
 % Please edit documentation in R/SSE_MCMC.R
 \name{SSE_MCMC_ADAPTIVE}
 \alias{SSE_MCMC_ADAPTIVE}
-\title{MCMC adaptive algorithm for Super-Spreading Evemts epidemic model}
+\title{MCMC adaptive algorithm for Super-Spreading Events epidemic model}
 \usage{
 SSE_MCMC_ADAPTIVE(
   epidemic_data,
