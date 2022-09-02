@@ -17,7 +17,7 @@
 #'
 LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 
-  #Data
+  #Datawdf
   n = sim_data[[1]]; s = sim_data[[2]]
 
   #Params

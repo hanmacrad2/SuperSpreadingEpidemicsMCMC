@@ -1,5 +1,6 @@
 #APPLY MODEL CRITICISM
 library(zoo)
+library(devtools)
 library(SuperSpreadingEpidemicsMCMC)
 #library(coda)
 

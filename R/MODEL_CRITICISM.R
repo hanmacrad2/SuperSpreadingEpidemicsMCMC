@@ -16,7 +16,7 @@
 #'   \item \code{"n_reps"} - Number of repetitions of the mcmc sampler. Multiple runs required for model criticism
 #'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler }
 #' @return saves the \code{"mcmc_output"} int the \code{"root_foler"}/\code{"rep"} location
-#' @export
+#' @export RUN_MODEL_CRITICISM
 #'
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
@@ -33,7 +33,7 @@ RUN_MODEL_CRITICISM <- function(epidemic_data, root_folder,
   #RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
   
   #2. GET SUMMARY STATS
-  GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
+  #GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
   
   #3. GET P VALUES TOTAL
   GET_P_VALUES_TOTAL(root_folder, modelling_specs$n_reps)
@@ -210,7 +210,7 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
 #' @param root_folder root folder location in which to store the MCMC results for \code{"n_reps"}
 #' @param n_reps Total number of repetitions of the MCMC sampler ran. Ppp-values calculated on the aggregate of all reps. 
 #' @return A Dataframe of ppp-values for all the summary statistics \code{"df_p_values"}. Also saves the dataframe in the \code{"root_foler"} location
-#' @export
+#' @export GET_P_VALUES_TOTAL
 #'
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
@@ -227,15 +227,17 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
     folder_rep = paste0(root_folder, "/rep_", rep, '/')
     print(paste0('folder_rep = ', folder_rep))
 
-    #GET TRUE SUMMARY STATISTICS 
-    df_true_ss = readRDS(folder_rep, 'df_ss_true_rep_', rep, '.rds' )
+    #GET TRUE SUMMARY STATISTICS
+    df_true_ss = readRDS(paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' )) #RENAME!!
+    print('passed I')
     #df_true_ss = get_summary_stats(true_rep_sim, TRUE)
     
     #GET REPLICATED SUMMARY STATISTICS 
-    df_summary_stats_rep <- readRDS(paste0(folder_rep, '/df_summary_stats_', rep, '.rds' ))
+    df_summary_stats_rep <- readRDS(paste0(folder_rep, 'df_replicated_summary_stats_', rep, '.rds' ))
+    print('passed II')
     
     #GET P VALUES
-    list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values(df_summary_stats_rep[,x], df_true_ss[,x]))
+    list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) GET_P_VALUE(df_summary_stats_rep[,x], df_true_ss[,x]))
     saveRDS(list_p_vals, file = paste0(folder_rep, '/list_p_vals_rep', rep, ".rds"))
     
     #list_all_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values_list(df_summary_stats_rep[,x], df_true_ss[,x]))
@@ -273,7 +275,7 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
   df_p_values = as.data.frame(df_p_values)
   
   #SAVE DATAFRAME
-  saveRDS(df_p_values, file = paste0(root_folder, '/total_p_values_iter_', iter, '.rds' ))
+  saveRDS(df_p_values, file = paste0(root_folder, '/df_total_p_values.rds' ))
   
   #RETURN P VALUES
   df_p_values
@@ -300,10 +302,10 @@ GET_P_VALUE <- function(column_true_val, column_summary_stat) {
   'Get p values - comparing  summary stat columns to true value'
   
   #Final val
-  num_iters = length(column_sum_stat)# - 1
+  num_iters = length(column_summary_stat)# - 1
   #P value
-  prop_lt = length(which(column_sum_stat < column_true_val))/num_iters + 0.5*(length(which(column_sum_stat == column_true_val)))/num_iters
-  prop_gt = length(which(column_sum_stat > column_true_val))/num_iters + 0.5*(length(which(column_sum_stat == column_true_val)))/num_iters
+  prop_lt = length(which(column_summary_stat < column_true_val))/num_iters + 0.5*(length(which(column_summary_stat == column_true_val)))/num_iters
+  prop_gt = length(which(column_summary_stat > column_true_val))/num_iters + 0.5*(length(which(column_summary_stat == column_true_val)))/num_iters
   pvalue = min(prop_lt, prop_gt); pvalue = 2*pvalue
   
   pvalue
