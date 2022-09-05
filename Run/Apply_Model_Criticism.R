@@ -33,3 +33,12 @@ mcmc_output <- readRDS(paste0(folder_rep, 'mcmc_output_rep_', rep, '.rds'))
 R0 = mcmc_output1$r0_vec[10]
 print(R0)
 sim_data = SIMULATE_BASELINE_EPIDEMIC(R0, num_days = 50)
+
+#RESULTS
+list_p_vals <- readRDS(paste0(results_rep, 'list_p_vals_rep', rep, '.rds'))
+
+df_p_vals =  readRDS(paste0(RESULTS_FOLDER, '/df_total_p_values.rds'))
+
+
+#Plot p values
+PLOT_P_VALUES(df_p_vals, 'Baseline')
