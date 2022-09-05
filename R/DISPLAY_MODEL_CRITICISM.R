@@ -16,9 +16,11 @@
 #'
 #' @examples PLOT_P_VALUES(df_p_values, 'SSE')
 
-PLOT_P_VALUES <- function(df_p_values, model_type){
+PLOT_P_VALUES <- function(RESULTS_FOLDER, model_type){ #*OR ROOT FOLDER
   
   'Plot histograms of the ppp-values'
+  df_p_vals =  readRDS(paste0(RESULTS_FOLDER, '/df_total_p_values.rds'))
+  
   par(mfrow=c(4,5)) #c(3,4)
   num_iters = length(df_p_values[,1])
   val_05 = 0.05
@@ -66,11 +68,19 @@ PLOT_P_VALUES <- function(df_p_values, model_type){
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
 #' @examples PLOT_P_VALUES(df_p_values, 'SSE')
-
-plot_summary_stats <- function(true_r0, model_type, sim_data_rep, df_sum_stats, df_true_sum_stats,
-                               list_p_vals, upper_quant, trim_flag){
+# 
+# plot_summary_stats <- function(true_r0, model_type, sim_data_rep, df_sum_stats, df_true_sum_stats,
+#                                list_p_vals, upper_quant, trim_flag){
   
+  plot_summary_stats <- function(results_folder, epidemic_data, rep_of_interest) {
   'Plot sim data, summary stats and true summary stat for a given mcmc rep' 
+    
+  #DATA
+  list_p_vals <- readRDS(paste0(results_rep, 'list_p_vals_rep', rep, '.rds'))
+  df_p_vals =  readRDS(paste0(RESULTS_FOLDER, '/df_total_p_values.rds'))
+  df_summary_stats = 
+  #list_p_vals = rea
+  sim_data_rep = 
   #Setup
   par(mfrow = c(5, 5)) 
   len_data = length(list_p_vals)
