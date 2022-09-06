@@ -423,10 +423,10 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
 
   #FINAL MEAN Stats
   data_10_pc = 0.5*mcmc_vec_size #50%
-  m1_mean_tail = round(mean(m1_mcmc[mcmc_vec_size - data_10_pc:mcmc_vec_size]), 2)
-  m2_mean_tail = round(mean(m2_mcmc[mcmc_vec_size - data_10_pc:mcmc_vec_size]), 2)
-  m3_mean_tail = round(mean(m3_mcmc[mcmc_vec_size - data_10_pc:mcmc_vec_size]), 2)
-  m4_mean_tail = round(mean(r0_mcmc[mcmc_vec_size - data_10_pc:mcmc_vec_size]), 2)
+  m1_mean_tail = round(mean(m1_mcmc[mcmc_vec_size/2: mcmc_vec_size]), 2)
+  m2_mean_tail = round(mean(m2_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
+  m3_mean_tail = round(mean(m3_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
+  m4_mean_tail = round(mean(r0_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
 
   if (!FLAGS_LIST$MULTI_ALG){
     df_results <- data.frame(

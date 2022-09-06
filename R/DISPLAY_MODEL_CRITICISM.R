@@ -1,5 +1,16 @@
 #DISPLAY MODEL CRITICISM RESULTS
 
+DISPLAY_MODEL_CRITICISM <- function(RESULTS_FOLDER, epidemic_data, model_type, rep){
+  
+  #PLOT RESULTS
+  PLOT_P_VALUES(RESULTS_FOLDER, MODEL_TYPE)
+  PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, data_type, rep)
+  PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, rep, data_type)
+  PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, data_type)
+  
+}
+
+
 #***************
 #PLOT P VALUES
 #' Plot histograms of the ppp-values for each summary statistic 
@@ -16,27 +27,29 @@
 #'
 #' @examples PLOT_P_VALUES(df_p_values, 'SSE')
 
-PLOT_P_VALUES <- function(FOLDER_REP, model_type){ #*OR ROOT FOLDER
+PLOT_P_VALUES <- function(RESULTS_FOLDER, model_type){ 
   
   'Plot histograms of the ppp-values'
-  df_p_vals =  readRDS(paste0(FOLDER_REP, '/df_total_p_values.rds'))
   
-  par(mfrow=c(4,5)) #c(3,4)
+  #DATA
+  df_p_values =  readRDS(paste0(RESULTS_FOLDER, 'df_total_p_values.rds'))
   num_iters = length(df_p_values[,1])
   val_05 = 0.05
   
-  for (i in c(1:20)){ 
+  #PLOTS
+  par(mfrow=c(4,5)) 
+  for (i in 1:20){ 
     
-    #ppp-value <0.05
+    #Ppp-value <0.05
     percent_lt_05 = (length(which(df_p_values[,i] < val_05))/num_iters)*100
     
     #Histogram
     if (i == 1){
       print(paste0('i = ', i))
-      hist(df_p_vals[,i], breaks = 100, #freq = FALSE, 
+      hist(df_p_values[,i], breaks = 100, #freq = FALSE, 
            xlab = paste0('p value, < 0.05: ', percent_lt_05, '%'),
            ylab = 'Num Samples', col = 'green',
-           main = paste('', toupper(colnames(df_p_vals)[i]),', Model:', model_type),
+           main = paste('', toupper(colnames(df_p_values)[i]),', Model:', model_type),
            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
       abline(v = 0.05, col = 'red', lwd = 2)
       
@@ -68,9 +81,6 @@ PLOT_P_VALUES <- function(FOLDER_REP, model_type){ #*OR ROOT FOLDER
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
 #' @examples PLOT_SUMMARY_STATS(df_p_values, 'SSE')
-# 
-# PLOT_SUMMARY_STATS <- function(true_r0, model_type, sim_data_rep, df_summary_stats, df_true_sum_stats,
-#                                list_p_vals, upper_quant, trim_flag){
   
 PLOT_SUMMARY_STATS <- function(FOLDER_REP, epidemic_data, data_type, rep) {
 'Plot sim data, summary stats and true summary stat for a given mcmc rep' 
@@ -82,13 +92,13 @@ PLOT_SUMMARY_STATS <- function(FOLDER_REP, epidemic_data, data_type, rep) {
   len_data = length(list_p_vals)
   
   #PLOT SETUPT
-  par(mfrow = c(5, 5)) 
+  par(mfrow = c(4, 5)) 
   colorsX <- rainbow(len_data+1); colors_line <- rainbow(c(15:15+len_data+1))
   
   #PLOTS
   #i. EPIDEMIC DATA
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count', 
-          main = paste0(data_type, "epidemic data"), 
+          main = paste0(data_type, " Epidemic data"), 
           col = colorsX[1],
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   
@@ -124,7 +134,7 @@ PLOT_SUMMARY_STATS <- function(FOLDER_REP, epidemic_data, data_type, rep) {
   
 }
 
-#'
+#' Plot replicated data
 #'
 #'
 PLOT_REPLICATED_DATA <- function(FOLDER_REP, epidemic_data, rep, data_type){

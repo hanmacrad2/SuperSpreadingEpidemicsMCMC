@@ -33,7 +33,7 @@ RUN_MODEL_CRITICISM <- function(epidemic_data, root_folder,
   #RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
   
   #2. GET SUMMARY STATS
-  #GET_SUM_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
+  #GET_SUMMARY_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
   
   #3. GET P VALUES TOTAL
   GET_P_VALUES_TOTAL(root_folder, modelling_specs$n_reps)
@@ -123,9 +123,9 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
 #'
 #' @examples
 #'
-#'GET_SUM_STATS_TOTAL(epidemic_data, root_folder)
+#'GET_SUMMARY_STATS_TOTAL(epidemic_data, root_folder)
 #' 
-GET_SUM_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
+GET_SUMMARY_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
                                  model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
                                  modelling_specs = list(n_reps = 10, n_mcmc = 10000, thinning_factor = 10, 
                                                         burn_in_size = 0.01, FLAG_THIN = TRUE)) { 
