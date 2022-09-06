@@ -75,10 +75,10 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     
     #Folder 
     cat('\n rep =', rep, '\n')
-    folder_rep = paste0(root_folder, '/rep_', rep)
-    print(paste0('folder_rep = ', folder_rep))
+    FOLDER_REP = paste0(root_folder, '/rep_', rep)
+    print(paste0('FOLDER_REP = ', FOLDER_REP))
     
-    ifelse(!dir.exists(file.path(folder_rep)), dir.create(file.path(folder_rep), recursive = TRUE), FALSE)
+    ifelse(!dir.exists(file.path(FOLDER_REP)), dir.create(file.path(FOLDER_REP), recursive = TRUE), FALSE)
     
     #MCMC 
     if (model_type$FLAG_BASE) {
@@ -93,7 +93,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
     }
     
     #SAVE MCMC PARAMS 
-    saveRDS(mcmc_output, file = paste0(folder_rep, '/mcmc_output_rep_', rep, '.rds' ))
+    saveRDS(mcmc_output, file = paste0(FOLDER_REP, '/mcmc_output_rep_', rep, '.rds' ))
   }
 }
 
@@ -125,7 +125,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
 #'
 #'GET_SUM_STATS_TOTAL(epidemic_data, root_folder)
 #' 
-GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
+GET_SUM_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
                                  model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
                                  modelling_specs = list(n_reps = 10, n_mcmc = 10000, thinning_factor = 10, 
                                                         burn_in_size = 0.01, FLAG_THIN = TRUE)) { 
@@ -148,16 +148,16 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     
     #REP
     print(paste0('rep = ', rep))
-    folder_rep = paste0(root_folder, "/rep_", rep, '/')
-    print(paste0('folder_rep = ', folder_rep))
+    FOLDER_REP = paste0(ROOT_FOLDER, "rep_", rep, '/')
+    print(paste0('FOLDER_REP = ', FOLDER_REP))
     
     #MCMC
-    mcmc_output <- readRDS(paste0(folder_rep, 'mcmc_output_rep_', rep, '.rds'))
+    mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', rep, '.rds'))
     print('passed 1')
     
     #GET SUMMARY STATS (TRUE)
     df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
-    saveRDS(df_ss_true, file = paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' ))
+    saveRDS(df_ss_true, file = paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds' ))
     print('passed 2')
     
     #REPLICATED DATA (THINNED)
@@ -179,10 +179,10 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
       }
 
       #SAVE DATA
-      folder_rep_data = paste0(folder_rep, '/replicated_data/')
-      ifelse(!dir.exists(file.path(folder_rep_data)), dir.create(file.path(folder_rep_data), recursive = TRUE), FALSE)
+      FOLDER_REP_data = paste0(FOLDER_REP, '/replicated_data/')
+      ifelse(!dir.exists(file.path(FOLDER_REP_data)), dir.create(file.path(FOLDER_REP_data), recursive = TRUE), FALSE)
       
-      saveRDS(sim_data, file = paste0(folder_rep_data, 'sim_data_iter_', i, '.rds' ))
+      saveRDS(sim_data, file = paste0(FOLDER_REP_data, 'sim_data_iter_', i, '.rds' ))
       print('passed 4')
       
       #SUMMARY STATISTICS
@@ -196,8 +196,8 @@ GET_SUM_STATS_TOTAL <- function(epidemic_data, root_folder,
     }
     
     #SAVE SUMMARY STATISTICS + ITERATIONS
-    saveRDS(df_summary_stats, file = paste0(folder_rep, '/df_replicated_summary_stats_', rep, ".rds"))
-    saveRDS(list_ss_iters, file = paste0(folder_rep, '/list_ss_iters_i', rep, '.rds'))
+    saveRDS(df_summary_stats, file = paste0(FOLDER_REP, 'df_replicated_summary_stats_', rep, ".rds"))
+    saveRDS(list_ss_iters, file = paste0(FOLDER_REP, 'list_ss_iters_i', rep, '.rds'))
     print('passed 5')
   }
 }
@@ -224,24 +224,24 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
     
     #FOLDER REP
     print(paste0('rep = ', rep))
-    folder_rep = paste0(root_folder, "/rep_", rep, '/')
-    print(paste0('folder_rep = ', folder_rep))
+    FOLDER_REP = paste0(root_folder, "/rep_", rep, '/')
+    print(paste0('FOLDER_REP = ', FOLDER_REP))
 
     #GET TRUE SUMMARY STATISTICS
-    df_true_ss = readRDS(paste0(folder_rep, 'df_ss_true_rep_', rep, '.rds' )) #RENAME!!
+    df_true_ss = readRDS(paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds' )) #RENAME!!
     print('passed I')
     #df_true_ss = get_summary_stats(true_rep_sim, TRUE)
     
     #GET REPLICATED SUMMARY STATISTICS 
-    df_summary_stats_rep <- readRDS(paste0(folder_rep, 'df_replicated_summary_stats_', rep, '.rds' ))
+    df_summary_stats_rep <- readRDS(paste0(FOLDER_REP, 'df_replicated_summary_stats_', rep, '.rds' ))
     print('passed II')
     
     #GET P VALUES
     list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) GET_P_VALUE(df_summary_stats_rep[,x], df_true_ss[,x]))
-    saveRDS(list_p_vals, file = paste0(folder_rep, '/list_p_vals_rep', rep, ".rds"))
+    saveRDS(list_p_vals, file = paste0(FOLDER_REP, '/list_p_vals_rep', rep, ".rds"))
     
     #list_all_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) get_p_values_list(df_summary_stats_rep[,x], df_true_ss[,x]))
-    #saveRDS(list_all_p_vals, file = paste0(folder_rep, '/list_all_p_vals_rep_', rep, ".rds"))
+    #saveRDS(list_all_p_vals, file = paste0(FOLDER_REP, '/list_all_p_vals_rep_', rep, ".rds"))
     
     #DATAFRAME OF P VALUES 
     if (!exists("df_p_values")) {

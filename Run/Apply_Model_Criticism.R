@@ -17,17 +17,15 @@ modelling_specs = list(n_reps = 10, n_mcmc = 10000)
 #APPLY
 RUN_MODEL_CRITICISM(canadaX, RESULTS_FOLDER, modelling_specs = modelling_specs)
 
-#Run
-rep = 1
-mcmc_output1 <- readRDS(paste0(RESULTS_FOLDER, '/rep_1/mcmc_output_rep_', rep, '.rds'))
-
 #REP
+rep = 1
 print(paste0('rep = ', rep))
-folder_rep = paste0(root_folder, "/rep_", rep, '/')
-print(paste0('folder_rep = ', folder_rep))
+FOLDER_REP = paste0(RESULTS_FOLDER, "/rep_", rep, '/')
+print(paste0('FOLDER_REP = ', FOLDER_REP))
 
-#MCMC
-mcmc_output <- readRDS(paste0(folder_rep, 'mcmc_output_rep_', rep, '.rds'))
+#***********
+#MCMC RESULTS
+mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', rep, '.rds'))
 
 #BASE MODEL
 R0 = mcmc_output1$r0_vec[10]
@@ -42,3 +40,22 @@ df_p_vals =  readRDS(paste0(RESULTS_FOLDER, '/df_total_p_values.rds'))
 
 #Plot p values
 PLOT_P_VALUES(df_p_vals, 'Baseline')
+
+#OUTPUT 
+list_p_vals <- readRDS(paste0(FOLDER_REP, 'list_p_vals_rep', rep, '.rds'))
+df_p_vals <- readRDS(paste0(FOLDER_REP, 'df_total_p_values.rds'))
+df_p_vals
+df_summary_stats <- readRDS(paste0(FOLDER_REP, 'df_replicated_summary_stats_', rep, '.rds'))
+df_summary_stats
+df_true_sum_stats <- readRDS(paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds')) 
+df_true_sum_stats
+list_ss_iters_i1 <- readRDS(paste0(FOLDER_REP, 'list_ss_iters_i1.rds'))
+list_ss_iters_i1
+length(list_ss_iters_i1)
+len_data = length(list_p_vals)
+len_data
+
+#DISPLAY SUMMARY STATS
+PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, data_type, rep)
+
+PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, rep, data_type)
