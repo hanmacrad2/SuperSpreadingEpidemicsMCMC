@@ -1,12 +1,12 @@
 #DISPLAY MODEL CRITICISM RESULTS
 
-DISPLAY_MODEL_CRITICISM <- function(RESULTS_FOLDER, epidemic_data, model_type, rep){
+DISPLAY_MODEL_CRITICISM <- function(RESULTS_FOLDER, epidemic_data, MODEL_TYPE, DATA_TYPE, REP){
   
   #PLOT RESULTS
   PLOT_P_VALUES(RESULTS_FOLDER, MODEL_TYPE)
-  PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, data_type, rep)
-  PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, rep, data_type)
-  PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, data_type)
+  PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
+  PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
+  PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
   
 }
 
@@ -141,7 +141,6 @@ PLOT_REPLICATED_DATA <- function(FOLDER_REP, epidemic_data, rep, data_type){
   
   #DATA REPLICATED
   FOLDER_REP_DATA = paste0(FOLDER_REP, 'replicated_data/')
-  print(FOLDER_REP_DATA)
   mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', rep, '.rds'))
   list_rep_idx <- readRDS(paste0(FOLDER_REP, 'list_ss_iters_i', rep, '.rds'))
   sample_reps =  sort(sample(list_rep_idx, size = 11)); coloursX <- rainbow(length(sample_reps)+1)
@@ -156,8 +155,6 @@ PLOT_REPLICATED_DATA <- function(FOLDER_REP, epidemic_data, rep, data_type){
   
   #ii. REPLICATED DATA
   for (i in 1:length(sample_reps)){
-    
-    print(paste0(FOLDER_REP_DATA, 'sim_data_iter_', sample_reps[i], '.rds'))
     #DATA
     replicated_data = readRDS(paste0(FOLDER_REP_DATA, 'sim_data_iter_', sample_reps[i], '.rds'))
     #PLOT
