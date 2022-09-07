@@ -26,6 +26,12 @@ FOLDER_REP = paste0(RESULTS_FOLDER, "/REP_", REP, '/')
 #* 2. DISPLAY MODEL CRITICISM RESULTS
 DISPLAY_MODEL_CRITICISM(RESULTS_FOLDER, canadaX, MODEL_TYPE, DATA_TYPE, REP)
 
+#DISPLAY RESULTS
+PLOT_P_VALUES(RESULTS_FOLDER, MODEL_TYPE)
+PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
+PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
+PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
+
 #*********************************************************************
 #BRAINSTORM
 #*********************************************************************
@@ -42,15 +48,18 @@ PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
 list_p_vals <- readRDS(paste0(FOLDER_REP, 'list_p_vals_REP', REP, '.rds'))
 df_p_vals <- readRDS(paste0(FOLDER_REP, 'df_total_p_values.rds'))
 df_p_vals
-df_summary_stats <- readRDS(paste0(FOLDER_REP, 'df_REPlicated_summary_stats_', REP, '.rds'))
+df_summary_stats <- readRDS(paste0(FOLDER_REP, 'df_replicated_summary_stats_', REP, '.rds'))
 df_summary_stats
-df_true_sum_stats <- readRDS(paste0(FOLDER_REP, 'df_ss_true_REP_', REP, '.rds')) 
+df_true_sum_stats <- readRDS(paste0(FOLDER_REP, 'df_ss_true_rep_', REP, '.rds')) 
 df_true_sum_stats
 list_ss_iters_i1 <- readRDS(paste0(FOLDER_REP, 'list_ss_iters_i1.rds'))
 list_ss_iters_i1
 length(list_ss_iters_i1)
 len_data = length(list_p_vals)
 len_data
+
+#P VALUES
+df_p_values =  readRDS(paste0(RESULTS_FOLDER, 'df_total_p_values.rds'))
 
 #MCMC RESULTS
 mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_REP_', REP, '.rds'))

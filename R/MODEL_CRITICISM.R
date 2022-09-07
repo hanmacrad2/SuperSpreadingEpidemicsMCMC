@@ -30,7 +30,7 @@ RUN_MODEL_CRITICISM <- function(epidemic_data, root_folder,
                                 modelling_specs = list(n_reps = 1000, n_mcmc = 50000)){
   
   #1. RUN MCMC 
-  RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
+  #RUN_MCMC_REPS(epidemic_data, root_folder, model_type = model_type, modelling_specs = modelling_specs)
   
   #2. GET SUMMARY STATS
   GET_SUMMARY_STATS_TOTAL(epidemic_data, root_folder, model_type = model_type)
@@ -127,7 +127,7 @@ RUN_MCMC_REPS <- function(epidemic_data, root_folder,
 #' 
 GET_SUMMARY_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
                                  model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
-                                 modelling_specs = list(n_reps = 10, n_mcmc = 10000, thinning_factor = 10, 
+                                 modelling_specs = list(n_reps = 1000, n_mcmc = 50000, thinning_factor = 10, 
                                                         burn_in_size = 0.01, FLAG_THIN = TRUE)) { 
   
   'Get summary stats and p valuess for all mcmc reps'
@@ -149,25 +149,22 @@ GET_SUMMARY_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
     #REP
     print(paste0('rep = ', rep))
     FOLDER_REP = paste0(ROOT_FOLDER, "rep_", rep, '/')
-    print(paste0('FOLDER_REP = ', FOLDER_REP))
+    #print(paste0('FOLDER_REP = ', FOLDER_REP))
     
     #MCMC
     mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', rep, '.rds'))
-    print('passed 1')
     
     #GET SUMMARY STATS (TRUE)
     df_ss_true = GET_SUMMARY_STATS(epidemic_data) 
     saveRDS(df_ss_true, file = paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds' ))
-    print('passed 2')
     
     #REPLICATED DATA (THINNED)
     for(i in seq(burn_in, mcmc_vec_size, by = modelling_specs$thinning_factor)){
-      print(paste0('i = ', i))
+      
       if (model_type$FLAG_BASE) {
+        
         R0 = mcmc_output$r0_vec[i]
         sim_data = SIMULATE_BASELINE_EPIDEMIC(R0, num_days = num_days)
-        print(sim_data)
-        print('passed 3')
         
       }  else if (model_type$FLAG_SSE) {
         
@@ -183,7 +180,6 @@ GET_SUMMARY_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
       ifelse(!dir.exists(file.path(FOLDER_REP_data)), dir.create(file.path(FOLDER_REP_data), recursive = TRUE), FALSE)
       
       saveRDS(sim_data, file = paste0(FOLDER_REP_data, 'sim_data_iter_', i, '.rds' ))
-      print('passed 4')
       
       #SUMMARY STATISTICS
       if (i == burn_in) { 
@@ -198,7 +194,6 @@ GET_SUMMARY_STATS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
     #SAVE SUMMARY STATISTICS + ITERATIONS
     saveRDS(df_summary_stats, file = paste0(FOLDER_REP, 'df_replicated_summary_stats_', rep, ".rds"))
     saveRDS(list_ss_iters, file = paste0(FOLDER_REP, 'list_ss_iters_i', rep, '.rds'))
-    print('passed 5')
   }
 }
 
