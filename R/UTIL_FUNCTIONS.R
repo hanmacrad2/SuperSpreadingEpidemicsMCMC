@@ -28,7 +28,7 @@ LOG_SUM_EXP <- function(vectorX){
 }
 
 
-X = c(-1000, -1000, -1000)
-lse = LOG_SUM_EXP(X)
-X2 = exp(X - lse) 
-X2
+ll = c(-1000, -1000, -1000)
+lse = LOG_SUM_EXP(ll)
+ll_norm = exp(ll - lse) 
+ll_norm
