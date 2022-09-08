@@ -17,11 +17,11 @@
 #'
 #'
 #Get harmonic mean
-get_harmonic_mean <- function(log_like_vec){
+get_harmonic_mean <- function(likelihood_vec){
 
-  'Returns harmonic mean of log likehlihood vector'
+  'Returns harmonic mean of the vector'
 
-  return(1/(mean(1/log_like_vec)))
+  return(1/(mean(1/likelihood_vec)))
 
 }
 
