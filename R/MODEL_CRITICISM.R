@@ -224,12 +224,12 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
 
     #GET TRUE SUMMARY STATISTICS
     df_true_ss = readRDS(paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds' )) #RENAME!!
-    print('passed I')
+    #print('passed I')
     #df_true_ss = GET_SUMMARY_STATISTICS(true_rep_sim, TRUE)
     
     #GET REPLICATED SUMMARY STATISTICS 
     df_summary_stats_rep <- readRDS(paste0(FOLDER_REP, 'df_replicated_summary_stats_', rep, '.rds' ))
-    print('passed II')
+    #print('passed II')
     
     #GET P VALUES
     list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) GET_P_VALUE(df_true_ss[,x], df_summary_stats_rep[,x]))
@@ -359,33 +359,46 @@ GET_SUMMARY_STATISTICS <- function(epidemic_data, FLAG_DF_CREATE = TRUE){
       #Norm Differences
       max_dif_normI = max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]+1)),
       max_dif_normII = max(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)), #mean of consecutive counts 
-      max_dif_normIII = max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:(length(epidemic_data)]+1)+1)), #ratio of consecutive counts
+      max_dif_normIII = max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)])+1)), #ratio of consecutive counts
       
       max_dif2nd_I = max(diff(diff(epidemic_data))/(epidemic_data[1:length(epidemic_data)-1]+1)),
       max_dif_2ndII = max(diff(diff(epidemic_data))/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
       
       med_dif_normI = median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]+1)),
       med_dif_normII = median(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1) +1)),
-      med_dif_normIII = median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)]+1)+1))
+      med_dif_normIII = median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)])+1))
       
     )
     
   } else {
     
-    #List if Dataframe already created
-    summary_stats_results = list(sum(epidemic_data), sum(epidemic_data[1:mid_point]), sum(epidemic_data[(mid_point+1):end_point]),
+    #Sum stats
+    summary_stats_results = list(sum(epidemic_data), sum(epidemic_data[1:(length(epidemic_data)/2)]), sum(epidemic_data[mid_point:end_point]),
                                  median(epidemic_data), max(epidemic_data), sd(epidemic_data),
                                  quantile(epidemic_data)[4][1][1], quantile(epidemic_data, probs = seq(0, 1, 0.125))[8][1][1],
                                  max(diff(epidemic_data)), median(diff(epidemic_data)), max(diff(diff(epidemic_data))), median(diff(diff(epidemic_data))),
-                                 max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1]+1)), max(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
-                                 max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)]+1)+1)),
-                                 max(diff(diff(epidemic_data))/(epidemic_data[1:(length(epidemic_data)-1)]+1)),  max(diff(diff(epidemic_data))/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
-                                 median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]+1)), median(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
-                                 median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)]+1)+1))
-                                 
-    )
+                                 max(diff(epidemic_data)/(epidemic_data[1:length(epidemic_data)-1]+1)), max(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+                                 max(diff(epidemic_data)/(epidemic_data[1:length(epidemic_data)-1]/(epidemic_data[2:length(epidemic_data)]+1)+1)),
+                                 max(diff(diff(epidemic_data))/(epidemic_data[1:length(epidemic_data)-1]+1)),  max(diff(diff(epidemic_data))/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+                                 median(diff(epidemic_data)/(epidemic_data[1:length(epidemic_data)-1]+1)), median(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+                                 median(diff(epidemic_data)/(epidemic_data[1:length(epidemic_data)-1]/(epidemic_data[2:length(epidemic_data)]+1)+1)))
+    
+    return(summary_stats_results)
+    
   }
-  
-  summary_stats_results
-  
 }
+
+#Erro
+    #List if Dataframe already created
+    # summary_stats_results = list(sum(epidemic_data), sum(epidemic_data[1:mid_point]), sum(epidemic_data[(mid_point+1):end_point]),
+    #                              median(epidemic_data), max(epidemic_data), sd(epidemic_data),
+    #                              quantile(epidemic_data)[4][1][1], quantile(epidemic_data, probs = seq(0, 1, 0.125))[8][1][1],
+    #                              max(diff(epidemic_data)), median(diff(epidemic_data)), max(diff(diff(epidemic_data))), median(diff(diff(epidemic_data))),
+    #                              max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1]+1))), max(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+    #                              max(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)])+1)),
+    #                              max(diff(diff(epidemic_data))/(epidemic_data[1:(length(epidemic_data)-1)]+1)),  max(diff(diff(epidemic_data))/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+    #                              median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]+1)), median(diff(epidemic_data)/(rollapply(epidemic_data, 2, mean, by = 1)+1)),
+    #                              median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)])+1))
+    #                              
+    # )
+  }

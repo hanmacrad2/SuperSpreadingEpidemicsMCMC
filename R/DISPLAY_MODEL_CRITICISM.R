@@ -98,7 +98,7 @@ PLOT_SUMMARY_STATS <- function(FOLDER_REP, epidemic_data, data_type, rep) {
   #PLOTS
   #i. EPIDEMIC DATA
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count', 
-          main = paste0(data_type, " Epidemic data"), 
+          main = paste0(data_type, " Epidemic data. Rep: ", rep), 
           col = colorsX[1],
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   
@@ -149,7 +149,7 @@ PLOT_REPLICATED_DATA <- function(FOLDER_REP, epidemic_data, rep, data_type){
   par(mfrow=c(3,4))
   #i. EPIDEMIC DATA
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count', 
-          main = paste0(data_type, " Epidemic data"), 
+          main = paste0(data_type, " Epidemic data. Rep: ", rep), 
           col = coloursX[1],
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   
@@ -159,7 +159,7 @@ PLOT_REPLICATED_DATA <- function(FOLDER_REP, epidemic_data, rep, data_type){
     replicated_data = readRDS(paste0(FOLDER_REP_DATA, 'sim_data_iter_', sample_reps[i], '.rds'))
     #PLOT
     plot.ts(replicated_data, xlab = 'Time', ylab = 'Daily Infections count',
-            main = paste0("Iter_", i, 'R0:', round(mcmc_output$r0_vec[i], 3)),
+            main = paste0("Iter_", sample_reps[i], ' R0:', round(mcmc_output$r0_vec[i], 3)),
             col = coloursX[i], lwd = 2,
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   }

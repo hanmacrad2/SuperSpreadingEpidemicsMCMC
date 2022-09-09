@@ -18,19 +18,24 @@ modelling_specs = list(n_reps = 1000, n_mcmc = 50000)
 #APPLY MCMC
 RUN_MODEL_CRITICISM(canadaX, ROOT_FOLDER, modelling_specs = modelling_specs)
 
-#REP
-REP = 1; print(paste0('REP = ', REP))
-FOLDER_REP = paste0(ROOT_FOLDER, "/REP_", REP, '/')
-
 #*************
 #* 2. DISPLAY MODEL CRITICISM RESULTS
 DISPLAY_MODEL_CRITICISM(ROOT_FOLDER, canadaX, MODEL_TYPE, DATA_TYPE, REP)
 
 #DISPLAY RESULTS
 PLOT_P_VALUES(ROOT_FOLDER, MODEL_TYPE)
-PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
-PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
+
+#MCMC OUTPUT
 PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
+
+#REPLICATED DATA (SPECIFIC RESULTS)
+REP = 350; print(paste0('REP = ', REP))
+FOLDER_REP = paste0(ROOT_FOLDER, "/REP_", REP, '/')
+#SUMMARY STATS
+PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
+#REPLICATED DATA
+PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
+
 
 #*********************************************************************
 #BRAINSTORM
@@ -65,7 +70,7 @@ len_data
 df_p_values =  readRDS(paste0(ROOT_FOLDER, 'df_total_p_values.rds'))
 
 #MCMC RESULTS
-mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_REP_', REP, '.rds'))
+mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', REP, '.rds'))
 
 #BASE MODEL
 R0 = mcmc_output1$r0_vec[10]
