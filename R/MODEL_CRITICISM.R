@@ -159,7 +159,8 @@ GET_SUMMARY_STATISTICS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
     saveRDS(df_ss_true, file = paste0(FOLDER_REP, 'df_ss_true_rep_', rep, '.rds' ))
     
     #REPLICATED DATA (THINNED)
-    for(i in seq(burn_in, mcmc_vec_size, by = modelling_specs$thinning_factor)){
+    #for(i in seq(burn_in, mcmc_vec_size, by = modelling_specs$thinning_factor)){
+    for(i in 1:mcmc_vec_size){
       
       if (model_type$FLAG_BASE) {
         
@@ -182,7 +183,7 @@ GET_SUMMARY_STATISTICS_TOTAL <- function(epidemic_data, ROOT_FOLDER,
       saveRDS(sim_data, file = paste0(FOLDER_REP_DATA, 'sim_data_iter_', i, '.rds' ))
       
       #SUMMARY STATISTICS
-      if (i == burn_in) { 
+      if (i == 1) { 
         df_summary_stats = GET_SUMMARY_STATISTICS(sim_data)
         list_ss_iters = c(i)
       } else {

@@ -6,30 +6,30 @@ library(SuperSpreadingEpidemicsMCMC)
 
 #FOLDER
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_criticism_II/"
-ITER = 'iter_2/'
+ITER = 'iter_22/'
 MODEL_TYPE = 'baseline'; DATA_TYPE = 'Canadian'
 ROOT_FOLDER =  paste0(OUTER_FOLDER, ITER, MODEL_TYPE, '/')
 print(ROOT_FOLDER)
 #MCMC
 modelling_specs = list(n_reps = 1000, n_mcmc = 50000)
 
-#*************
+#*************************************************
 #* 1. MODEL CRITICISM
 #APPLY MCMC
 RUN_MODEL_CRITICISM(canadaX, ROOT_FOLDER, modelling_specs = modelling_specs)
 
-#*************
+#**************************************************
 #* 2. DISPLAY MODEL CRITICISM RESULTS
 DISPLAY_MODEL_CRITICISM(ROOT_FOLDER, canadaX, MODEL_TYPE, DATA_TYPE, REP)
 
+#****************************************************
 #DISPLAY RESULTS
+
+#TOTAL P VALUES 
 PLOT_P_VALUES(ROOT_FOLDER, MODEL_TYPE)
 
-#MCMC OUTPUT
-PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
-
 #REPLICATED DATA (SPECIFIC RESULTS)
-REP = 350; print(paste0('REP = ', REP))
+REP = 500; print(paste0('REP = ', REP))
 FOLDER_REP = paste0(ROOT_FOLDER, "/REP_", REP, '/')
 #SUMMARY STATS
 PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
@@ -37,8 +37,12 @@ PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
 PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
 
 
+#MCMC OUTPUT
+mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', REP, '.rds'))
+PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
+
 #*********************************************************************
-#BRAINSTORM
+#OUTPUT - INSPECT
 #*********************************************************************
 FOLDER_REP = paste0(ROOT_FOLDER, "/REP_", REP, '/')
 print(paste0('FOLDER_REP = ', FOLDER_REP))
@@ -47,7 +51,6 @@ print(paste0('FOLDER_REP = ', FOLDER_REP))
 PLOT_P_VALUES(ROOT_FOLDER, MODEL_TYPE)
 PLOT_SUMMARY_STATS(FOLDER_REP, canadaX, DATA_TYPE, REP)
 PLOT_REPLICATED_DATA(FOLDER_REP, canadaX, REP, DATA_TYPE)
-PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
 
 #OUTPUT 
 list_p_vals <- readRDS(paste0(FOLDER_REP, 'list_p_vals_REP', REP, '.rds'))
@@ -71,6 +74,9 @@ df_p_values =  readRDS(paste0(ROOT_FOLDER, 'df_total_p_values.rds'))
 
 #MCMC RESULTS
 mcmc_output <- readRDS(paste0(FOLDER_REP, 'mcmc_output_rep_', REP, '.rds'))
+
+#MCMC OUTPUT
+PLOT_BASELINE_R0_MCMC(canadaX, mcmc_output, DATA_TYPE)
 
 #BASE MODEL
 R0 = mcmc_output1$r0_vec[10]
