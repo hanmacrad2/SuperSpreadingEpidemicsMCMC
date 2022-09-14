@@ -6,7 +6,7 @@ library(SuperSpreadingEpidemicsMCMC)
 
 #FOLDER
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_criticism_II/"
-ITER = 'iter_22/'
+ITER = 'iter_2/'
 MODEL_TYPE = 'baseline'; DATA_TYPE = 'Canadian'
 ROOT_FOLDER =  paste0(OUTER_FOLDER, ITER, MODEL_TYPE, '/')
 print(ROOT_FOLDER)
