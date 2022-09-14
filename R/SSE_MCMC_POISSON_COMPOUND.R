@@ -366,20 +366,10 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   print(list_accept_rates)
   
   #Return a, acceptance rate
-  return(list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
-              log_like_vec = log_like_vec, sigma = sigma,
-              list_accept_rates = list_accept_rates))
+  mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
+                     log_like_vec = log_like_vec, sigma = sigma,
+                     list_accept_rates = list_accept_rates)
+  saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
+  
+  return(mcmc_output)
 }
-
-
-#APPLY
-
-#MCMC SPECS
-mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000, 
-                  mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10),
-                  mod_par_names = c('alpha', 'beta', 'gamma'),
-                  seed_count = 1, burn_in_pc = 0.05, thinning_factor = 10)
-
-#2. RUN SSE MODEL
-mcmc_sse_output = SSE_POI_MCMC_ADAPTIVE(canadaX)
-saveRDS(mcmc_sse_output, file = 'mcmc_sse_output_poisson_comp_.rds')

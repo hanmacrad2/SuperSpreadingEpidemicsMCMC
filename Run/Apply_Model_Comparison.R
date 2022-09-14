@@ -32,7 +32,7 @@ df_sse = PLOT_SS_MCMC_GRID(canadaX, mcmc_sse_output,
                                                 seed_count = 1, burn_in_pc = 0.05, thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                              FLAGS_LIST = list(SSI = FALSE, BURN_IN = FALSE, THIN = TRUE,
+                              FLAGS_LIST = list(SSI = FALSE, BURN_IN = TRUE, THIN = TRUE,
                                                 DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                                 PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE))
 
