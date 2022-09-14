@@ -26,23 +26,18 @@ LOG_LIKE_SSE_POISSON <- function(x, alphaX, betaX, gammaX){
       inner_sum_xt = inner_sum_xt + 
         exp(-alphaX*lambda_t)*(1/factorial(yt))*(alphaX*lambda_t)^yt*
         PROBABILITY_ZT(zt, lambda_t, alphaX, betaX, gammaX)
-      
-      
-      
     } 
     
     logl = logl + log(inner_sum_xt) 
-    
   }
   
   return(logl)
-  
 }
 
 #2. PROBABILITY OF ZT
 PROBABILITY_ZT <- function(zt, lambda_t, alphaX, betaX, gammaX, max_nt = 5) {
   
-  'Probability of zt'
+  'Probability of Zt'
   
   #Initialise
   prob_zt = 0
