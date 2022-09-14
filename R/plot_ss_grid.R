@@ -51,7 +51,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                                                                   seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                                         FLAGS_LIST = list(SSI = TRUE, BURN_IN = TRUE, THIN = TRUE,
+                                         FLAGS_LIST = list(SSI = TRUE, BURN_IN = FALSE, THIN = TRUE,
                                                            DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                                            PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE)){
 
@@ -94,6 +94,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   } else {
     thinning_factor = 1
     mcmc_vec_size = n_mcmc
+    print(paste0('mcmc vec size = ', mcmc_vec_size))
   }
 
   #BURN IN
@@ -196,12 +197,12 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                          "Start: ", mcmc_specs$mod_start_points$m1),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   } else {
-    sig1 = mcmc_output$sigma$sigma1
-    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
+    sig1 = mcmc_output$sigma$sigma1_vec
+    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
             main = paste(mcmc_specs$mod_par_names[1], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m1, ', Sigma (red)'),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma1, col = 'red')
+    lines(mcmc_output$sigma$sigma1_vec, col = 'red')
   }
 
   #***************
@@ -216,7 +217,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
             main = paste(mcmc_specs$mod_par_names[2], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m2, ', Sigma (blue)'),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma2, col = 'blue')
+    lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
   }
 
   #***************
@@ -231,7 +232,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
             main = paste(mcmc_specs$mod_par_names[3], "MCMC",
                          "Start: ", mcmc_specs$mod_start_points$m3, ', Sigma (green)'),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma3, col = 'green')
+    lines(mcmc_output$sigma$sigma3_vec, col = 'green')
   }
 
   #***************
@@ -422,18 +423,18 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #********************
 
   #FINAL MEAN Stats
-  data_10_pc = 0.5*mcmc_vec_size #50%
-  m1_mean_tail = round(mean(m1_mcmc[mcmc_vec_size/2: mcmc_vec_size]), 2)
-  m2_mean_tail = round(mean(m2_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
-  m3_mean_tail = round(mean(m3_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
-  m4_mean_tail = round(mean(r0_mcmc[[mcmc_vec_size/2: mcmc_vec_size]), 2)
+  m1_mean_tail = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  print(paste0('m1_mean_tail: ', m1_mean_tail))
+  m2_mean_tail = round(mean(m2_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  m3_mean_tail = round(mean(m3_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  m4_mean_tail = round(mean(r0_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
 
   if (!FLAGS_LIST$MULTI_ALG){
     df_results <- data.frame(
       rep = mcmc_specs$seed_count,
       mcmc_vec_size = mcmc_vec_size,
       m1 = mcmc_specs$mod_start_points$m1[[1]],
-      m1_mc = m1_mean_tail,
+      m1_mc = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2),
       m2 = mcmc_specs$mod_start_points$m2[[1]],
       m2_mc = m2_mean_tail,
       m3 = mcmc_specs$mod_start_points$m3[[1]],
@@ -451,6 +452,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
       c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
       d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]],
       time_elap = format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
+    
   } else {
 
     df_results <- data.frame(
@@ -475,6 +477,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   }
 
   print(df_results)
+  
   return(df_results)
 
 }
