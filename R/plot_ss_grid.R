@@ -47,12 +47,12 @@
 
 PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
                                          mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000,
-                                                           mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), mod_par_names = c('a', 'b', 'c'),
+                                                           mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10), mod_par_names = c('a', 'b', 'c'),
                                                                   seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                                         FLAGS_LIST = list(SSI = TRUE, BURN_IN = FALSE, THIN = TRUE,
-                                                           DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
+                                         FLAGS_LIST = list(SSI = FALSE, BURN_IN = FALSE, THIN = TRUE,
+                                                           DATA_AUG = FALSE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                                            PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE)){
 
   #PLOT
