@@ -3,10 +3,16 @@
 #*********************
 #* MODEL COMPARISON BY RATIO OF MODEL EVIDENCES
 #***********
-MODEL_EVIDENCE <- function(loglike_vec){
+LOG_MODEL_EVIDENCE <- function(loglike_vec){
+    
+LOG_MODEL_EVIDENCE <- function(loglike_vec){
+}
+
+LOG_MODEL_EVIDENCE <- function(loglike_vec){
   
   'Model evidence via log-sum-exp trick'
   
+  loglike_vec = - loglike_vec
   m = max(loglike_vec, na.rm = TRUE)
   log_model_ev = m + log(mean(exp(loglike_vec - m)))
   
