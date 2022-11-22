@@ -3,7 +3,7 @@ source("R/UTIL_FUNCTIONS.R")
 source("R/SSID_MCMC_ADAPTIVE.R")
 
 #OUTPUT
-OUTPUT_FOLDER = ""
+OUTER_FOLDER = ""
   
 #PARAMS
 num_days = 110
@@ -22,13 +22,19 @@ for(i in seq_along(alpha_vec)){
 }
 
 #MCMC SSE POISSON COMPOUND
+seedX = 4
+set.seed(4)
+data = SIMULATE_SSID(); dataI = data$epidemic_data
+plot.ts(dataI)
+
 #START MCMC
 Rprof(tmp <- tempfile())
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_ssid = MCMC_ADAPTIVE_SSID(canadaX, 20)
+mcmc_ssid = MCMC_ADAPTIVE_SSID(dataI, OUTER_FOLDER, seedX)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
 mcmc_ssid$time_elap = time_elap
 Rprof()
 summaryRprof(tmp)
+

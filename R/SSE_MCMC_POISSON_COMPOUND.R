@@ -43,7 +43,6 @@ LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
   #Params
   num_days = length(x); loglike = 0
   #prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  loglike = 0
   
   for (t in 2:num_days) {
     
@@ -75,11 +74,8 @@ PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5) {
   prob_zt = 0
   
   for (nt in 0:max_nt){
-    
-    #prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
-    prob_zt = prob_zt + poisson_density(nt, betaX*lambda_t)*poisson_density(zt, gammaX*nt)
-    
-    
+    prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
+    #probX =  poisson_density(nt, betaX*lambda_t)*poisson_density(zt, gammaX*nt)
   }
   
   return(prob_zt)
@@ -160,7 +156,6 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   
   #INITIALISE RUNNING PARAMS
   alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
-  
   #SIGMA
   sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
   sigma3 = 0.4*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
@@ -203,7 +198,6 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   for(i in 2:n_mcmc) {
     
     if (i%%100 == 0) {
-      
       print(paste0('i = ', i))
     }
     
@@ -427,48 +421,8 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma = sigma,
                      list_accept_rates = list_accept_rates)
-  saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
+  #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
   
   return(mcmc_output)
 }
-
-#PLOT
-#************
-#* PROB ZT
-PLOB_ZT <- function(x, alphaX, betaX, gammaX, max_nt = 5) {
-  
-  'Probability of zt'
-  plot.new()
-  par(mfrow = c(2,3))
-  t = 97
-  ind_zt = c(0:15)
-  
-  for (zt in ind_zt){
-    
-    #Initialise (max = 25, 97)
-    vec_prob_zt = vector("numeric"); 
-    num_days = length(x); prob_zt = 0; shape_gamma = 6; scale_gamma = 1
-    prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-    
-    #for (t in 2:num_days){
-    #print(paste0('t = ', t))
-    lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    
-    for (nt in 0:max_nt){
-      
-      prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
-      
-    }
-    vec_prob_zt[zt] = prob_zt
-  }
-  
-  #Plot
-  plot(ind_zt, vec_prob_zt, col = 'blue',
-       xlab = 'n_t', ylab = 'P(n_t)', #type = '*',
-       main = title, lwd = 3)
-}
-
-#Apply
-PLOT_ZT(canadaX, alphaX, betaX, gammaX)
-
 

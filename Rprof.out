@@ -1,5 +1,0 @@
-sample.interval=20000
-".External" "f" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "withCallingHandlers" ".rs.callAs" "Rprof" 
-"gzfile" "readRDS" "FUN" "lapply" "find.package" "library" 
-"parse" "sys.source" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "try" "loadNamespace" "doTryCatch" "tryCatchOne" "tryCatchList" "tryCatch" "library" 
-"lazyLoadDBfetch" "FUN" "vapply" "same.isFn" "checkConflicts" "library" 
