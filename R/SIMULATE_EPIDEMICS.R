@@ -57,7 +57,7 @@ SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_
 #' tot_daily_sse_infections = SIMULATE_SS_EVENTS(num_days = 50, shape_gamma = 6, scale_gamma = 1,
 #'  alphaX = 0.8, betaX = 0.02, gammaX = 20)
 #'
-SIMULATE_SS_EVENTS = function(alphaX, betaX, gammaX, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
+SIMULATE_SS_EVENTS_NB = function(alphaX, betaX, gammaX, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
   
   #Initialise parameters 
   tot_daily_sse_infections = vector('numeric', num_days)
@@ -128,4 +128,40 @@ SIMULATE_SS_INDIVIDUALS = function(num_days, shape_gamma, scale_gamma, aX, bX, c
   }
   
   return(list(nssi_infections, ssi_infections))
+}
+
+#************
+SIMULATE_SSE_BRANCHING = function(shape_gamma, scale_gamma, alphaX, betaX, gammaX) {
+  'Simulate an epidemic with Superspreading events
+  prop_ss = Proportion of superspreading days
+  magnitude_ss = increased rate of superspreading event'
+  
+  #Set up
+  total_infecteds = vector('numeric', num_days)
+  nsse_infecteds = vector('numeric', num_days)
+  sse_infecteds = vector('numeric', num_days)
+  total_infecteds[1] = 2
+  nsse_infecteds[1] = 2
+  sse_infecteds[1] = 0
+  
+  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
+  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  #Days of Infection Spreading
+  for (t in 2:num_days) {
+    
+    #Regular infecteds (tot_rate = lambda) fix notation
+    lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
+    tot_rate = alphaX*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    
+    #Super-spreaders
+    n_t = rpois(1, betaX*lambda_t) #Number of super-spreading events (beta)
+    sse_infecteds[t] = rpois(1, gammaX*n_t) #z_t: Total infecteds due to super-spreading event - num of events x Num individuals
+    
+    total_infecteds[t] = nsse_infecteds[t] + sse_infecteds[t]
+  }
+  
+  total_infecteds
 }

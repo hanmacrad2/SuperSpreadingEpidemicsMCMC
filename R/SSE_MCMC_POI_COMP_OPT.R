@@ -1,73 +1,94 @@
 #*************************************
 #SSE MODEL - POISSON-POISSON COMPOUND
 #*************************************
-
-SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
-  'Simulate an epidemic with Superspreading events
-  prop_ss = Proportion of superspreading days
-  magnitude_ss = increased rate of superspreading event'
+#*
+#1. LOG LIKELIHOOD
+LOG_LIKE_SSE_POI_FLAG <- function(x, lambda_vec, alphaX, betaX, gammaX,
+                                  FLAG_ALPHA = FALSE, FLAG_BETA = FALSE,
+                                  FLAG_GAMMA = FALSE){
   
-  #Set up
-  total_infecteds = vector('numeric', num_days)
-  nsse_infecteds = vector('numeric', num_days)
-  sse_infecteds = vector('numeric', num_days)
-  total_infecteds[1] = 2
-  nsse_infecteds[1] = 2
-  sse_infecteds[1] = 0
+  #Params
+  num_days = length(x);   logl = 0
   
-  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
-  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  #Days of Infection Spreading
-  for (t in 2:num_days) {
+  #ALPHA
+  if(FLAG_ALPHA){
     
-    #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = alphaX*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    
-    #Super-spreaders
-    n_t = rpois(1, betaX*lambda_t) #Number of super-spreading events (beta)
-    sse_infecteds[t] = rpois(1, gammaX*n_t) #z_t: Total infecteds due to super-spreading event - num of events x Num individuals
-    
-    total_infecteds[t] = nsse_infecteds[t] + sse_infecteds[t]
+    for (t in 2:num_days) {
+      
+      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
+      inner_sum_xt = 0
+      term1_alpha = exp(-alphaX*lambda_vec[t]); term2_alpha = alphaX*lambda_vec[t]
+      
+      for (yt in 0:x[t]){ #Sum for all values of yt
+        
+        #Log likelihood
+        #zt = x[t] - yt
+        inner_sum_xt = inner_sum_xt + 
+          term1_alpha*(term2_alpha)^yt* #(1/factorial(yt))
+          PROBABILITY_ZT(zt, lambda_vec[t], alphaX, betaX, gammaX)
+      } 
+      
+      logl = logl + log(inner_sum_xt) 
+    }
   }
   
-  total_infecteds
+  if(FLAG_BETA) {
+    for (t in 2:num_days) {
+      
+      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
+      inner_sum_xt = 0
+      #term_alpha1 = exp(-alphaX*lambda_vec[t]); term_alpha2 = alphaX*lambda_vec[t]
+      
+      for (yt in 0:x[t]){ #Sum for all values of yt
+        
+        #Log likelihood
+        zt = x[t] - yt
+        inner_sum_xt = inner_sum_xt + 
+          PROBABILITY_ZT(zt, lambda_vec[t], alphaX, betaX, gammaX)
+      } 
+      
+      logl = logl + log(inner_sum_xt) 
+    }
+  } 
+  
+  return(logl)
 }
 
 #1. LOG LIKELIHOOD
 LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   #Params
-  num_days = length(x); loglike = 0
+  num_days = length(x)
+  #shape_gamma = 6; scale_gamma = 1
+  
+  #Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between 
   #prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  loglike = 0
+  logl = 0
   
   for (t in 2:num_days) {
     
     #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
     inner_sum_xt = 0
-    term1_alpha = exp(-alphaX*lambda_vec[t]); term2_alpha = alphaX*lambda_vec[t]
+    term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
     
     for (yt in 0:x[t]){ #Sum for all values of yt
       
       #Log likelihood
       zt = x[t] - yt
       inner_sum_xt = inner_sum_xt + 
-        term1_alpha*(term2_alpha)^yt* #(1/factorial(yt))
-        PROBABILITY_ZT(zt, lambda_vec[t], betaX, gammaX)
+        term1*(term2)^yt* #(1/factorial(yt))
+        PROBABILITY_ZT(zt, lambda_vec[t], alphaX, betaX, gammaX)
     } 
     
-    loglike = loglike + log(inner_sum_xt) 
+    logl = logl + log(inner_sum_xt) 
   }
   
-  return(loglike)
+  return(logl)
 }
 
 #2. PROBABILITY OF ZT
-PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5) {
+PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5,
+                           FLAG_BETA = FALSE, FLAG_GAMMA = FALSE) {
   
   'Probability of Zt'
   
@@ -85,10 +106,33 @@ PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5) {
   return(prob_zt)
 }
 
+PROBABILITY_ZT_FLAG <- function(zt, lambda_t, betaX, gammaX, max_nt = 5,
+                                FLAG_BETA = FALSE, FLAG_GAMMA = FALSE) {
+  
+  'Probability of Zt'
+  
+  #Initialise
+  prob_zt = 0
+  if(FLAG_BETA){
+    for (nt in 0:max_nt){
+      
+      #prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
+      prob_zt = prob_zt + poisson_density(nt, betaX*lambda_t)
+    }
+  } else if (FLAG_GAMMA){
+    
+    for (nt in 0:max_nt){
+      prob_zt = prob_zt + poisson_density(zt, gammaX*nt)
+    }
+    
+  }
+  
+  return(prob_zt)
+}
+
 #LAMBDA FUNCTION
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
-  '#Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between '
   #Parameters
   num_days = length(epidemic_data)
   lambda_vec = vector("numeric", num_days)
@@ -210,6 +254,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
     #****************************************************** s
     #alpha
     alpha_dash <- alpha + rnorm(1, sd = sigma1)
+    
     if(alpha_dash < 0){
       alpha_dash = abs(alpha_dash)
     }
@@ -431,44 +476,5 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   
   return(mcmc_output)
 }
-
-#PLOT
-#************
-#* PROB ZT
-PLOB_ZT <- function(x, alphaX, betaX, gammaX, max_nt = 5) {
-  
-  'Probability of zt'
-  plot.new()
-  par(mfrow = c(2,3))
-  t = 97
-  ind_zt = c(0:15)
-  
-  for (zt in ind_zt){
-    
-    #Initialise (max = 25, 97)
-    vec_prob_zt = vector("numeric"); 
-    num_days = length(x); prob_zt = 0; shape_gamma = 6; scale_gamma = 1
-    prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-    
-    #for (t in 2:num_days){
-    #print(paste0('t = ', t))
-    lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    
-    for (nt in 0:max_nt){
-      
-      prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
-      
-    }
-    vec_prob_zt[zt] = prob_zt
-  }
-  
-  #Plot
-  plot(ind_zt, vec_prob_zt, col = 'blue',
-       xlab = 'n_t', ylab = 'P(n_t)', #type = '*',
-       main = title, lwd = 3)
-}
-
-#Apply
-PLOT_ZT(canadaX, alphaX, betaX, gammaX)
 
 
