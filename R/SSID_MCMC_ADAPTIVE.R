@@ -2,7 +2,6 @@
 #1. INDIVIDUAL R0 MCMC ADAPTIVE SHAPING                           
 #********************************************************
 library(MASS)
-source('R/UTIL_FUNCTIONS.R')
 
 #*********************************************
 #* SIMULATE ETA
@@ -125,8 +124,8 @@ MCMC_ADAPTIVE_SSID <- function(dataX, OUTER_FOLDER, seed_count,
   #MCMC (#RENAME ssid_params AS PARAMS)
   for(i in 2:n_mcmc) {
     
-    print(paste0('i = ', i))
-    #if(i%%100 == 0) print(paste0('i = ', i))
+    #print(paste0('i = ', i))
+    if(i%%100 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
     ssid_params_dash = c(ssid_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = lambda_i*c_star*sigma_i)) 

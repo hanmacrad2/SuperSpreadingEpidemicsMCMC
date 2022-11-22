@@ -2,6 +2,7 @@
 #SSE MODEL - POISSON-POISSON COMPOUND
 #*************************************
 library(coda)
+
 SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
   prop_ss = Proportion of superspreading days
@@ -62,6 +63,7 @@ LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
     loglike = loglike + log(inner_sum_xt) 
   }
   
+  print(loglike)
   return(loglike)
 }
 
@@ -74,8 +76,8 @@ PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5) {
   prob_zt = 0
   
   for (nt in 0:max_nt){
-    prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
-    #probX =  poisson_density(nt, betaX*lambda_t)*poisson_density(zt, gammaX*nt)
+    #prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
+    prob_zt = prob_zt + poisson_density(nt, betaX*lambda_t)*poisson_density(zt, gammaX*nt)
   }
   
   return(prob_zt)
@@ -109,8 +111,8 @@ poisson_density <- function(x, rate){
 #1. SSE MCMC
 #************************************************************************
 SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
-                                  mcmc_inputs = list(n_mcmc = 1000,
-                                                     mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10), alpha_star = 0.4,
+                                  mcmc_inputs = list(n_mcmc = 20000,
+                                                     mod_start_points = list(m1 = 1.0, m2 = 0.05, m3 = 10), alpha_star = 0.4,
                                                      thinning_factor = 10), #10
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
@@ -204,6 +206,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
     #****************************************************** s
     #alpha
     alpha_dash <- alpha + rnorm(1, sd = sigma1)
+    
     if(alpha_dash < 0){
       alpha_dash = abs(alpha_dash)
     }
