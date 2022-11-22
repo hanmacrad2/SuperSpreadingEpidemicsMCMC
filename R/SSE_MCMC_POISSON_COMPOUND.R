@@ -1,7 +1,7 @@
 #*************************************
 #SSE MODEL - POISSON-POISSON COMPOUND
 #*************************************
-
+library(coda)
 SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
   prop_ss = Proportion of superspreading days

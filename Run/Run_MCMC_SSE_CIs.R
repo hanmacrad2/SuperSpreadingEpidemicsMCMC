@@ -1,7 +1,9 @@
 #RUN MCMC CREDIBLE INTERVALS
-
+setwd('~/Documents/GitHub/SuperSpreadingEpidemicsMCMC/')
+source('R/UTIL_FUNCTIONS.R')
+source('R/SSE_MCMC_POISSON_COMPOUND.R')
 #OUTPUT
-OUTPUT_FOLDER = 
+OUTER_FOLDER =""
   
 #PARAMS
 num_days = 110
