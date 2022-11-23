@@ -69,7 +69,7 @@ LOG_LIKELIHOOD_SSID <- function(x, infectivity_vec, ssid_params, eta){ #eta - a 
 #1. INDIVIDUAL R0 MCMC ADAPTIVE SHAPING                           
 #********************************************************
 MCMC_ADAPTIVE_SSID <- function(dataX, OUTER_FOLDER, seed_count,
-                              mcmc_inputs = list(n_mcmc = 1000, #00,
+                              mcmc_inputs = list(n_mcmc = 20000, #00,
                                                  mod_start_points = c(1.2, 0.16),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10),
@@ -214,7 +214,7 @@ MCMC_ADAPTIVE_SSID <- function(dataX, OUTER_FOLDER, seed_count,
     
   } #END FOR LOOP
   
-  #SAVE
+  #SAVE 
   #saveRDS(dataX, file = paste0(OUTER_FOLDER, 'dataX', seed_count, '.rds' ))
   #saveRDS(ssid_params_matrix, file = paste0(OUTER_FOLDER, 'ssid_params_matrix_', seed_count, '.rds' ))
   #saveRDS(eta_matrix, file = paste0(OUTER_FOLDER, 'eta_matrix_', seed_count, '.rds' ))
