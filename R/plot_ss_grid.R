@@ -45,8 +45,8 @@
 #'
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
-PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
-                                         mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000,
+PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
+                                         mcmc_specs = list(model_type = 'SSI',
                                                            mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10), mod_par_names = c('a', 'b', 'c'),
                                                                   seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
@@ -69,7 +69,6 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   }
 
   #EXTRACT MCMC SAMPLES
-  n_mcmc = mcmc_specs$n_mcmc
   r0_start = mcmc_specs$mod_start_points$m1 + (mcmc_specs$mod_start_points$m2*mcmc_specs$mod_start_points$m3)
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
 
@@ -423,24 +422,24 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output,
   #********************
 
   #FINAL MEAN Stats
-  m1_mean_tail = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  print(paste0('m1_mean_tail: ', m1_mean_tail))
-  m2_mean_tail = round(mean(m2_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  m3_mean_tail = round(mean(m3_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  m4_mean_tail = round(mean(r0_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  # m1_mean_tail = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  # print(paste0('m1_mean_tail: ', m1_mean_tail))
+  # m2_mean_tail = round(mean(m2_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  # m3_mean_tail = round(mean(m3_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
+  # m4_mean_tail = round(mean(r0_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
 
   if (!FLAGS_LIST$MULTI_ALG){
     df_results <- data.frame(
       rep = mcmc_specs$seed_count,
       mcmc_vec_size = mcmc_vec_size,
       m1 = mcmc_specs$mod_start_points$m1[[1]],
-      m1_mc = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2),
+      m1_mc = round(mean(m1_mcmc), 2),
       m2 = mcmc_specs$mod_start_points$m2[[1]],
-      m2_mc = m2_mean_tail,
+      m2_mc = round(mean(m2_mcmc), 2),
       m3 = mcmc_specs$mod_start_points$m3[[1]],
-      m3_mc = m3_mean_tail,
+      m3_mc = round(mean(m3_mcmc), 2),
       R0 = r0_start,
-      R0_mc = m4_mean_tail,
+      R0_mc = round(mean(r0_mcmc), 2), 
       accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
       a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
       a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),

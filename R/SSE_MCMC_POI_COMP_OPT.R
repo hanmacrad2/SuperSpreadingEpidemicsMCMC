@@ -1,6 +1,7 @@
 #*************************************
 #SSE MODEL - POISSON-POISSON COMPOUND
 #*************************************
+library(coda)
 
 #SIMULATE
 SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
@@ -36,59 +37,6 @@ SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, s
   }
   
   total_infecteds
-}
-
-
-#1. LOG LIKELIHOOD
-LOG_LIKE_SSE_POI_FLAG <- function(x, lambda_vec, alphaX, betaX, gammaX,
-                                  FLAG_ALPHA = FALSE, FLAG_BETA = FALSE,
-                                  FLAG_GAMMA = FALSE){
-  
-  #Params
-  num_days = length(x);   logl = 0
-  
-  #ALPHA
-  if(FLAG_ALPHA){
-    
-    for (t in 2:num_days) {
-      
-      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-      inner_sum_xt = 0
-      term1_alpha = exp(-alphaX*lambda_vec[t]); term2_alpha = alphaX*lambda_vec[t]
-      
-      for (yt in 0:x[t]){ #Sum for all values of yt
-        
-        #Log likelihood
-        #zt = x[t] - yt
-        inner_sum_xt = inner_sum_xt + 
-          term1_alpha*(term2_alpha)^yt* #(1/factorial(yt))
-          PROBABILITY_ZT(zt, lambda_vec[t], alphaX, betaX, gammaX)
-      } 
-      
-      logl = logl + log(inner_sum_xt) 
-    }
-  }
-  
-  if(FLAG_BETA) {
-    for (t in 2:num_days) {
-      
-      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-      inner_sum_xt = 0
-      #term_alpha1 = exp(-alphaX*lambda_vec[t]); term_alpha2 = alphaX*lambda_vec[t]
-      
-      for (yt in 0:x[t]){ #Sum for all values of yt
-        
-        #Log likelihood
-        zt = x[t] - yt
-        inner_sum_xt = inner_sum_xt + 
-          PROBABILITY_ZT(zt, lambda_vec[t], alphaX, betaX, gammaX)
-      } 
-      
-      logl = logl + log(inner_sum_xt) 
-    }
-  } 
-  
-  return(logl)
 }
 
 #1. LOG LIKELIHOOD
@@ -141,30 +89,6 @@ PROBABILITY_ZT <- function(zt, lambda_t, betaX, gammaX, max_nt = 5){
   return(prob_zt)
 }
 
-PROBABILITY_ZT_FLAG <- function(zt, lambda_t, betaX, gammaX, max_nt = 5,
-                                FLAG_BETA = FALSE, FLAG_GAMMA = FALSE) {
-  
-  'Probability of Zt'
-  
-  #Initialise
-  prob_zt = 0
-  if(FLAG_BETA){
-    for (nt in 0:max_nt){
-      
-      #prob_zt = prob_zt + dpois(nt, betaX*lambda_t)*dpois(zt, gammaX*nt)
-      prob_zt = prob_zt + poisson_density(nt, betaX*lambda_t)
-    }
-  } else if (FLAG_GAMMA){
-    
-    for (nt in 0:max_nt){
-      prob_zt = prob_zt + poisson_density(zt, gammaX*nt)
-    }
-    
-  }
-  
-  return(prob_zt)
-}
-
 #LAMBDA FUNCTION
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
@@ -191,9 +115,8 @@ poisson_density <- function(x, rate){
 #************************************************************************
 #1. SSE MCMC
 #************************************************************************
-SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
-                                  mcmc_inputs = list(n_mcmc = 1000,
-                                                     mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10), alpha_star = 0.4,
+SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
+                                  mcmc_inputs = list(mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 = 10), alpha_star = 0.4,
                                                      thinning_factor = 10), #10
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100), beta_prior_exp = c(0.1,0),
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
@@ -215,7 +138,6 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  n_mcmc = mcmc_inputs$n_mcmc;
   print(paste0('num mcmc iters = ', n_mcmc))
   lambda_vec = get_lambda(epidemic_data)
   
@@ -281,7 +203,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data,
   #******************************
   for(i in 2:n_mcmc) {
     
-    if (i%%100 == 0) {
+    if (i%%1000 == 0) {
       
       print(paste0('i = ', i))
     }
