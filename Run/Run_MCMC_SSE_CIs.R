@@ -4,12 +4,16 @@ source('R/UTIL_FUNCTIONS.R')
 source('R/SSE_MCMC_POISSON_COMPOUND.R')
 
 #OUTPUT
-OUTER_FOLDER =""
+OUTER_FOLDER = ""
   
-#PARAMS
+#PARAMETERS
 num_days = 110
 alpha_vec = seq(from = 0.7, to = 3, length = 50) #TIME OF 1000
+alphaX = 1.4
+data_sse = SIMULATION_SSE(alpha_vec[i])
 
+
+#APPLY MULTIPLE TIME - CREDIBLE INTERVALS 
 #MCMC FOR EACH VALUE
 par(mfrow = c(4,5))
 
