@@ -45,9 +45,8 @@
 #'
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
-PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
-                                         mcmc_specs = list(model_type = 'SSI',
-                                                           mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10), mod_par_names = c('a', 'b', 'c'),
+PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = list(m1 = 0.8, m2 = 0.05, m3 = 10),
+                                         mcmc_specs = list(model_type = 'SSI', mod_par_names = c('a', 'b', 'c'),
                                                                   seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                          priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                             c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
@@ -69,7 +68,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   }
 
   #EXTRACT MCMC SAMPLES
-  r0_start = mcmc_specs$mod_start_points$m1 + (mcmc_specs$mod_start_points$m2*mcmc_specs$mod_start_points$m3)
+  r0_start = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
 
   if (FLAGS_LIST$MULTI_ALG){
@@ -111,14 +110,14 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #CUMULATIVE MEANS + PARAM SAMPLE LIMITS
   #m1
   m1_mean = cumsum(m1_mcmc)/seq_along(m1_mcmc)
-  m1_lim =  max(mcmc_specs$mod_start_points$m1[[1]], max(m1_mcmc, na.rm = TRUE))
+  m1_lim =  max(sim_vals$m1, max(m1_mcmc, na.rm = TRUE))
   #m2
   m2_mean = cumsum(m2_mcmc)/seq_along(m2_mcmc)
-  m2_lim = max(mcmc_specs$mod_start_points$m2[[1]], max(m2_mcmc, na.rm = TRUE))
+  m2_lim = max(sim_vals$m2, max(m2_mcmc, na.rm = TRUE))
   
   #m3
   m3_mean = cumsum(m3_mcmc)/seq_along(m3_mcmc)
-  m3_lim =  max(mcmc_specs$mod_start_points$m3[[1]], max(m3_mcmc, na.rm = TRUE))
+  m3_lim =  max(sim_vals$m3, max(m3_mcmc, na.rm = TRUE))
   #r0
   r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
   r0_lim = max(r0_start, max(r0_mcmc, na.rm = TRUE))
@@ -190,49 +189,67 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
 
   #****
   #a
-  if (!FLAGS_LIST$ADAPTIVE){
-    plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], #ylim=c(0, m1_lim),
-            main = paste(mcmc_specs$mod_par_names[1], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m1),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  } else {
-    sig1 = mcmc_output$sigma$sigma1_vec
-    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
-            main = paste(mcmc_specs$mod_par_names[1], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m1, ', Sigma (red)'),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma1_vec, col = 'red')
-  }
+  plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], #ylim=c(0, m1_lim),
+          main = paste(mcmc_specs$mod_par_names[1], "MCMC",
+                       "Sim: ", sim_vals$m1),
+          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(h = sim_vals$m1, col = 'red', lwd = 2)
+  
+  # if (!FLAGS_LIST$ADAPTIVE){
+  #   plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], #ylim=c(0, m1_lim),
+  #           main = paste(mcmc_specs$mod_par_names[1], "MCMC",
+  #                        "Start: ", sim_vals$m1),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  # } else {
+  #   sig1 = mcmc_output$sigma$sigma1_vec
+  #   plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
+  #           main = paste(mcmc_specs$mod_par_names[1], "MCMC",
+  #                        "Start: ", sim_vals$m1, ', Sigma (red)'),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  #   lines(mcmc_output$sigma$sigma1_vec, col = 'red')
+  # }
 
   #***************
   #b
-  if (!FLAGS_LIST$ADAPTIVE){
-    plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
-            main = paste(mcmc_specs$mod_par_names[2], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m2),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  } else {
-    plot.ts(m2_mcmc, ylab = paste0(mcmc_specs$mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
-            main = paste(mcmc_specs$mod_par_names[2], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m2, ', Sigma (blue)'),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
-  }
+  plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
+          main = paste(mcmc_specs$mod_par_names[2], "MCMC",
+                       "Sim: ", sim_vals$m2),
+          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(h = sim_vals$m2, col = 'blue', lwd = 2)
+
+  # if (!FLAGS_LIST$ADAPTIVE){
+  #   plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
+  #           main = paste(mcmc_specs$mod_par_names[2], "MCMC",
+  #                        "Start: ", sim_vals$m2),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  # } else {
+  #   plot.ts(m2_mcmc, ylab = paste0(mcmc_specs$mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
+  #           main = paste(mcmc_specs$mod_par_names[2], "MCMC",
+  #                        "Start: ", sim_vals$m2, ', Sigma (blue)'),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  #   lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
+  # }
 
   #***************
   #c
-  if (!FLAGS_LIST$ADAPTIVE){
-    plot.ts(m3_mcmc,  ylab = mcmc_specs$mod_par_names[3], #ylim=c(0, m3_lim),
-            main = paste(mcmc_specs$mod_par_names[3], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m3),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  } else {
-    plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
-            main = paste(mcmc_specs$mod_par_names[3], "MCMC",
-                         "Start: ", mcmc_specs$mod_start_points$m3, ', Sigma (green)'),
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma3_vec, col = 'green')
-  }
+  plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
+          main = paste(mcmc_specs$mod_par_names[3], "MCMC",
+                       "Sim: ", sim_vals$m3, ', Sigma (green)'),
+          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(h = sim_vals$m3, col = 'green', lwd = 2)
+  
+  # if (!FLAGS_LIST$ADAPTIVE){
+  #   plot.ts(m3_mcmc,  ylab = mcmc_specs$mod_par_names[3], #ylim=c(0, m3_lim),
+  #           main = paste(mcmc_specs$mod_par_names[3], "MCMC",
+  #                        "Start: ", sim_vals$m3),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  # } else {
+  #   plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
+  #           main = paste(mcmc_specs$mod_par_names[3], "MCMC",
+  #                        "Start: ", sim_vals$m3, ', Sigma (green)'),
+  #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  #   lines(mcmc_output$sigma$sigma3_vec, col = 'green')
+  # }
 
   #***************
   #r0
@@ -258,6 +275,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
                     " prior:", m1_prior),
        xlim=c(0, m1_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(v = sim_vals$m1, col = 'red', lwd = 2)
 
   #PRIOR PLOT
   if (FLAGS_LIST$PRIOR) {
@@ -276,7 +294,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
                     " prior:", m2_prior),
        xlim=c(0, m2_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = mcmc_specs$mod_start_points$m2[[1]], col = 'blue', lwd = 2)
+  abline(v = sim_vals$m2, col = 'blue', lwd = 2)
 
   #PRIOR PLOT
   if (FLAGS_LIST$B_PRIOR_GAMMA) {
@@ -297,7 +315,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
                     " prior:", m3_prior),
        xlim=c(0, m3_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = mcmc_specs$mod_start_points$m3[[1]], col = 'green', lwd = 2)#
+  abline(v = sim_vals$m3, col = 'green', lwd = 2)
 
   #PRIOR PLOT
   if (FLAGS_LIST$C_PRIOR_GAMMA) {
@@ -340,24 +358,27 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   plot(seq_along(m1_mean), m1_mean,
        ylim=c(0, m1_lim),
        xlab = 'Time', ylab =  mcmc_specs$mod_par_names[1],
-       main = paste(mcmc_specs$mod_par_names[1], "MCMC mean, Start:", mcmc_specs$mod_start_points$m1),
+       main = paste(mcmc_specs$mod_par_names[1], "MCMC mean, Start:", sim_vals$m1),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(h = sim_vals$m1, col = 'red', lwd = 2)
 
   #m2 mean
   plot(seq_along(m2_mean), m2_mean,
        ylim=c(0, m2_lim),
        xlab = 'Time', ylab = 'm2',
-       main = paste(mcmc_specs$mod_par_names[2], "MCMC mean, Start:", mcmc_specs$mod_start_points$m2),
+       main = paste(mcmc_specs$mod_par_names[2], "MCMC mean, Sim:", sim_vals$m2),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        lwd = 1)
+  abline(h = sim_vals$m2, col = 'blue', lwd = 2)
 
   #m3 Mean
   plot(seq_along(m3_mean), m3_mean,
        xlab = 'Time', ylab = 'm3',
-       main = paste(mcmc_specs$mod_par_names[3], "MCMC mean, Start:", mcmc_specs$mod_start_points$m3),
+       main = paste(mcmc_specs$mod_par_names[3], "MCMC mean, Sim:", sim_vals$m3),
        ylim=c(0, m3_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        lwd = 1)
+  abline(h = sim_vals$m3, col = 'green', lwd = 2)
 
   #r0 mean
   plot(seq_along(r0_mean), r0_mean, #ylim=c(0, r0_lim),
@@ -432,11 +453,11 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
     df_results <- data.frame(
       rep = mcmc_specs$seed_count,
       mcmc_vec_size = mcmc_vec_size,
-      m1 = mcmc_specs$mod_start_points$m1[[1]],
+      m1 = sim_vals$m1,
       m1_mc = round(mean(m1_mcmc), 2),
-      m2 = mcmc_specs$mod_start_points$m2[[1]],
+      m2 = sim_vals$m2,
       m2_mc = round(mean(m2_mcmc), 2),
-      m3 = mcmc_specs$mod_start_points$m3[[1]],
+      m3 = sim_vals$m3,
       m3_mc = round(mean(m3_mcmc), 2),
       R0 = r0_start,
       R0_mc = round(mean(r0_mcmc), 2), 
@@ -457,11 +478,11 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
     df_results <- data.frame(
       rep = mcmc_specs$seed_count,
       mcmc_vec_size = mcmc_vec_size,
-      m1 = mcmc_specs$mod_start_points$m1[[1]],
+      m1 = sim_vals$m1,
       m1_mc = m1_mean_tail,
-      m2 = mcmc_specs$mod_start_points$m2[[1]],
+      m2 = sim_vals$m2,
       m2_mc = m2_mean_tail,
-      m3 = mcmc_specs$mod_start_points$m3[[1]],
+      m3 = sim_vals$m3,
       m3_mc = m3_mean_tail,
       R0 = r0_start,
       R0_mc = m4_mean_tail,
