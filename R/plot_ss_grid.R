@@ -68,7 +68,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   }
 
   #EXTRACT MCMC SAMPLES
-  r0_start = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
+  r0_sim = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
 
   if (FLAGS_LIST$MULTI_ALG){
@@ -108,19 +108,15 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   }
 
   #CUMULATIVE MEANS + PARAM SAMPLE LIMITS
-  #m1
-  m1_mean = cumsum(m1_mcmc)/seq_along(m1_mcmc)
-  m1_lim =  max(sim_vals$m1, max(m1_mcmc, na.rm = TRUE))
-  #m2
-  m2_mean = cumsum(m2_mcmc)/seq_along(m2_mcmc)
-  m2_lim = max(sim_vals$m2, max(m2_mcmc, na.rm = TRUE))
+  #Means
+  m1_mean = cumsum(m1_mcmc)/seq_along(m1_mcmc);  m2_mean = cumsum(m2_mcmc)/seq_along(m2_mcmc)
+  m3_mean = cumsum(m3_mcmc)/seq_along(m3_mcmc); r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
   
-  #m3
-  m3_mean = cumsum(m3_mcmc)/seq_along(m3_mcmc)
+  #Plot limits
+  m1_lim =  max(sim_vals$m1, max(m1_mcmc, na.rm = TRUE))
+  m2_lim = max(sim_vals$m2, max(m2_mcmc, na.rm = TRUE))
   m3_lim =  max(sim_vals$m3, max(m3_mcmc, na.rm = TRUE))
-  #r0
-  r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
-  r0_lim = max(r0_start, max(r0_mcmc, na.rm = TRUE))
+  r0_lim = max(r0_sim, max(r0_mcmc, na.rm = TRUE))
 
   #PRIORS
   #m1
@@ -234,7 +230,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   #c
   plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
           main = paste(mcmc_specs$mod_par_names[3], "MCMC",
-                       "Sim: ", sim_vals$m3, ', Sigma (green)'),
+                       "Sim: ", sim_vals$m3),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m3, col = 'green', lwd = 2)
   
@@ -256,6 +252,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   plot.ts(r0_mcmc, ylab = "R0", #ylim=c(0, r0_lim),
           main = paste0("R0. N = ", n_mcmc, ", Thinned=", mcmc_vec_size),  
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(h = r0_sim, col = 'orange', lwd = 2)
 
   #***************
   #LOG LIKELIHOOD
@@ -334,6 +331,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
        xlab = 'R0 total', #ylab = 'Density',
        main = 'R0 total', #xlim=c(0, r0_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  abline(v = r0_sim, col = 'orange', lwd = 2)
 
   #***********
   #HIST log_like_vec
@@ -384,7 +382,8 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   plot(seq_along(r0_mean), r0_mean, #ylim=c(0, r0_lim),
        xlab = 'Time', ylab = 'R0', main = "R0 MCMC Mean",
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       lwd = 1)
+       ylim = c(0, r0_lim),lwd = 1)
+  abline(h = r0_sim, col = 'orange', lwd = 2)
 
   #loglike mean
   plot(seq_along(cumsum(log_like_mcmc)/seq_along(log_like_mcmc)), cumsum(log_like_mcmc)/seq_along(log_like_mcmc),
@@ -459,7 +458,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
       m2_mc = round(mean(m2_mcmc), 2),
       m3 = sim_vals$m3,
       m3_mc = round(mean(m3_mcmc), 2),
-      R0 = r0_start,
+      R0 = r0_sim,
       R0_mc = round(mean(r0_mcmc), 2), 
       accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
       a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
@@ -484,7 +483,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
       m2_mc = m2_mean_tail,
       m3 = sim_vals$m3,
       m3_mc = m3_mean_tail,
-      R0 = r0_start,
+      R0 = r0_sim,
       R0_mc = m4_mean_tail,
       accept_rate_x = round(mcmc_output$accept_rate, 2),
       a_rte_d_aug = round(mcmc_output$accept_rate_da, 2),

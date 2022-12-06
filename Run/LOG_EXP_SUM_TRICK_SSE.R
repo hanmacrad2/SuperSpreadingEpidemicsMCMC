@@ -12,6 +12,8 @@ LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX) {
       #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)])); inner_sum_xt = 0
       term1_alpha = alphaX*lambda_vec[t]
       
+      # if (is.na(x[t])) { #FLAG WARNING
+      
       if ((x[t] == 0) | is.na(x[t])) {
         loglike = loglike - term1_alpha + LSE_ZT(0, lambda_vec[t], betaX, gammaX)
         

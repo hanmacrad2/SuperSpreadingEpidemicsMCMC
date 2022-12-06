@@ -3,11 +3,12 @@
 #*************************************
 library(coda)
 
-#SIMULATE
+#SIMULATE SSEB 
 SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
-  prop_ss = Proportion of superspreading days
-  magnitude_ss = increased rate of superspreading event'
+  alpha - rate of non super-spreading events/days
+  Beta = Proportion of superspreading events/days
+  gamma = increased rate of superspreading event'
   
   #Set up
   total_infecteds = vector('numeric', num_days)
@@ -424,7 +425,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma = sigma,
                      list_accept_rates = list_accept_rates)
-  saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
+  #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
   
   return(mcmc_output)
 }
