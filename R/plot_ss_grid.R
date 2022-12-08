@@ -329,7 +329,7 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
   #HIST r0
   hist(r0_mcmc, freq = FALSE, breaks = 100,
        xlab = 'R0 total', #ylab = 'Density',
-       main = 'R0 total', #xlim=c(0, r0_lim),
+       main = 'R0 total', xlim=c(0, r0_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = r0_sim, col = 'orange', lwd = 2)
 
@@ -436,68 +436,35 @@ PLOT_SS_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = lis
        xlab = mcmc_specs$mod_par_names[2], ylab = mcmc_specs$mod_par_names[3], main = paste(mcmc_specs$mod_par_names[2], 'vs', mcmc_specs$mod_par_names[3]),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
-
+  #m2_mean_tail = round(mean(m2_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
   #********************
-  #v. DATAFRAME
+  #v. DATAFRAME       
   #********************
-
-  #FINAL MEAN Stats
-  # m1_mean_tail = round(mean(m1_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  # print(paste0('m1_mean_tail: ', m1_mean_tail))
-  # m2_mean_tail = round(mean(m2_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  # m3_mean_tail = round(mean(m3_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-  # m4_mean_tail = round(mean(r0_mcmc[(mcmc_vec_size/2): mcmc_vec_size]), 2)
-
-  if (!FLAGS_LIST$MULTI_ALG){
-    df_results <- data.frame(
-      rep = mcmc_specs$seed_count,
-      mcmc_vec_size = mcmc_vec_size,
-      m1 = sim_vals$m1,
-      m1_mc = round(mean(m1_mcmc), 2),
-      m2 = sim_vals$m2,
-      m2_mc = round(mean(m2_mcmc), 2),
-      m3 = sim_vals$m3,
-      m3_mc = round(mean(m3_mcmc), 2),
-      R0 = r0_sim,
-      R0_mc = round(mean(r0_mcmc), 2), 
-      accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
-      a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
-      a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
-      a_rte_m2_m3 = round(mcmc_output$list_accept_rates$accept_rate4, 2),
-      a_rte_m1_m3 = round(mcmc_output$list_accept_rates$accept_rate5, 2),
-      a_rte_d_aug = a_rte_d_aug,
-      a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
-      b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
-      c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
-      d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]],
-      time_elap = format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
-    
-  } else {
-
-    df_results <- data.frame(
-      rep = mcmc_specs$seed_count,
-      mcmc_vec_size = mcmc_vec_size,
-      m1 = sim_vals$m1,
-      m1_mc = m1_mean_tail,
-      m2 = sim_vals$m2,
-      m2_mc = m2_mean_tail,
-      m3 = sim_vals$m3,
-      m3_mc = m3_mean_tail,
-      R0 = r0_sim,
-      R0_mc = m4_mean_tail,
-      accept_rate_x = round(mcmc_output$accept_rate, 2),
-      a_rte_d_aug = round(mcmc_output$accept_rate_da, 2),
-      a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
-      b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
-      c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
-      d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]],
-      time_elap = format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
-
-  }
+  df_results <- data.frame(
+    rep = mcmc_specs$seed_count,
+    mcmc_vec_size = mcmc_vec_size,
+    m1 = sim_vals$m1,
+    m1_mc = round(mean(m1_mcmc), 2),
+    m2 = sim_vals$m2,
+    m2_mc = round(mean(m2_mcmc), 2),
+    m3 = sim_vals$m3,
+    m3_mc = round(mean(m3_mcmc), 2),
+    R0 = r0_sim,
+    R0_mc = round(mean(r0_mcmc), 2), 
+    accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
+    a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
+    a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
+    a_rte_m2_m3 = round(mcmc_output$list_accept_rates$accept_rate4, 2),
+    a_rte_m1_m3 = round(mcmc_output$list_accept_rates$accept_rate5, 2),
+    a_rte_d_aug = a_rte_d_aug,
+    a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
+    b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
+    c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
+    d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]],
+    time_elap = format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
 
   print(df_results)
   
   return(df_results)
 
 }
-

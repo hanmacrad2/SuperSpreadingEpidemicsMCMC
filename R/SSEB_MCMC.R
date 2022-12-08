@@ -3,8 +3,9 @@
 #*************************************
 library(coda)
 
-#SIMULATE SSEB 
-SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, scale_gamma = 1) {
+#SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
+SIMULATE_EPI_SSEB <- function(num_days, alphaX = 0.8, betaX = 0.1, gammaX = 10,
+                              shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
   alpha - rate of non super-spreading events/days
   Beta = Proportion of superspreading events/days
@@ -41,15 +42,10 @@ SIMULATION_SSE <- function(alphaX, betaX = 0.05, gammaX = 10, shape_gamma = 6, s
 }
 
 #1. LOG LIKELIHOOD
-LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
+LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   #Params
-  num_days = length(x)
-  #shape_gamma = 6; scale_gamma = 1
-  
-  #Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between 
-  #prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  logl = 0
+  num_days = length(x); logl = 0
   
   for (t in 2:num_days) {
     
@@ -63,7 +59,7 @@ LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
       st = x[t] - nt
       inner_sum_xt = inner_sum_xt + 
         term1*(term2)^nt*(1/factorial(nt))*
-        PROBABILITY_ZT(st, lambda_vec[t], alphaX, betaX, gammaX)
+        PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
     } 
     
     logl = logl + log(inner_sum_xt) 
@@ -73,7 +69,7 @@ LOG_LIKE_SSE_POISSON <- function(x, lambda_vec, alphaX, betaX, gammaX){
 }
 
 #2. PROBABILITY OF ZT
-PROBABILITY_ZT <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
+PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
   'Probability of Zt'
   
@@ -89,29 +85,12 @@ PROBABILITY_ZT <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   return(prob_st)
 }
 
-#LAMBDA FUNCTION
-get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
-  
-  #Parameters
-  num_days = length(epidemic_data)
-  lambda_vec = vector("numeric", num_days)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
-    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  #Lambda -> days of the infection
-  for (t in 1:num_days){
-    lambda_vec[t] = sum(epidemic_data[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-  }
-  
-  return(lambda_vec)
-}
-
 #************************************************************************
-#1. SSE MCMC
+#1. SSEB MCMC
 #************************************************************************
-SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                                   mcmc_inputs = 
-                                    list(mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 = 10),
+                                    list(mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10),
                                          alpha_star = 0.4, thinning_factor = 10), #10
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
                                                      beta_prior_exp = c(0.1,0),
@@ -153,7 +132,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
   #INITIALISE MCMC[1]
   alpha_vec[1] <- mcmc_inputs$mod_start_points$m1; beta_vec[1] <- mcmc_inputs$mod_start_points$m2
   gamma_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
-  log_like_vec[1] <- LOG_LIKE_SSE_POISSON(epidemic_data, lambda_vec, alpha_vec[1], beta_vec[1], gamma_vec[1])
+  log_like_vec[1] <- LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_vec[1], beta_vec[1], gamma_vec[1])
   
   #INITIALISE RUNNING PARAMS
   alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
@@ -213,7 +192,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
     }
     
     #log a
-    logl_new = LOG_LIKE_SSE_POISSON(epidemic_data, lambda_vec, alpha_dash, beta, gamma)
+    logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, beta, gamma)
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     #Priors
     if (FLAGS_LIST$PRIOR){
@@ -241,7 +220,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
     }
     
     #loglikelihood
-    logl_new = LOG_LIKE_SSE_POISSON(epidemic_data,  lambda_vec, alpha, beta_dash, gamma)
+    logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta_dash, gamma)
     log_accept_ratio = logl_new - log_like
     
     #Priors
@@ -273,7 +252,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
       gamma_dash = 2 - gamma_dash #Prior on c: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSE_POISSON(epidemic_data,  lambda_vec, alpha, beta, gamma_dash)
+    logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta, gamma_dash)
     log_accept_ratio = logl_new - log_like
     
     #Priors
@@ -312,7 +291,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
       
       if( beta_transform >= 0){ #Only accept values of beta> 0
         
-        logl_new = LOG_LIKE_SSE_POISSON(epidemic_data,  lambda_vec, alpha, beta_transform, gamma_dash)
+        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta_transform, gamma_dash)
         log_accept_ratio = logl_new - log_like
         
         #PRIORS
@@ -365,7 +344,7 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
       
       if( alpha_transform >= 0){ #Only accept values of beta> 0
         
-        logl_new = LOG_LIKE_SSE_POISSON(epidemic_data,  lambda_vec, alpha_transform, beta, gamma_dash)
+        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha_transform, beta, gamma_dash)
         log_accept_ratio = logl_new - log_like
         
         #PRIORS
@@ -429,5 +408,3 @@ SSE_POI_MCMC_ADAPTIVE <- function(epidemic_data, n_mcmc,
   
   return(mcmc_output)
 }
-
-
