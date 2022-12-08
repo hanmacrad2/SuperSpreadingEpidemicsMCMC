@@ -6,7 +6,7 @@ source('R/SSEB_MCMC.R')
 
 #OUTPUT FOLDER
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/sseb"
-seedX = 10
+seedX = 7
 
 #CREATE OUTPUT FOLDER
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
@@ -23,23 +23,23 @@ epi_data_sseb = SIMULATE_EPI_SSEB(num_days)
 plot.ts(epi_data_sseb)
 #SAVE DATA
 saveRDS(epi_data_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_sseb_', seedX, '.rds' ))
-epi_data_sseb = sim10
+epi_data_sseb = sim7
 #2.RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_sseb_output10 = MCMC_INFER_SSEB(epi_data_sseb, n_mcmc)
+mcmc_sseb_output7 = MCMC_INFER_SSEB(epi_data_sseb, n_mcmc)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_sseb_output10$time_elap = time_elap
+mcmc_sseb_output7$time_elap = time_elap
 
 #SAVE MCMC RESULTS
-saveRDS(mcmc_sseb_output10, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', seedX, '.rds' ))
+saveRDS(mcmc_sseb_output7, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', seedX, '.rds' ))
 
 #SEED
 seedX = seedX + 1
 
 ########################
-#CREDIBLE INTERVALS
+#MULTIPLE RUNS - CREDIBLE INTERVALS
 alpha_vec 
 alpha_vec = c(0.7, 0.8, 0.9, 1.0, 1.1, 0.7, 0.8, 0.9, 1.0, 1.1)
 beta_vec = c(.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.1, 0.1, 0.1, 0.1)

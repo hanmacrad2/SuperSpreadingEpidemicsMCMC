@@ -27,7 +27,8 @@ df_results_sseb = PLOT_SS_MCMC_GRID(epi_data_sseb, mcmc_sseb_output, n_mcmc,
 
 #PLOT 2
 sim_vals10 = list(m1 = 1.1, m2 = 0.1, m3 = 10)
-df_results_sseb = PLOT_SS_MCMC_GRID(epi_data_sseb, mcmc_sseb_output10, n_mcmc, sim_vals10,
+sim_vals7 = list(m1 = 0.8, m2 = 0.1, m3 = 10)
+df_results_sseb = PLOT_SS_MCMC_GRID(epi_data_sseb, mcmc_sseb_output7, n_mcmc, sim_vals7,
                                     mcmc_specs = list(model_type = 'SSEB',
                                                       mod_par_names = c('alpha', 'beta', 'gamma'),
                                                       seed_count = seedX, burn_in_pc = 0.05, thinning_factor = 10),
