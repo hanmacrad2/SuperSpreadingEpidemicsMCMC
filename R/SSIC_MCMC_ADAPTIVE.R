@@ -4,9 +4,9 @@
 library(MASS)
 
 #*********************************************
-#* SIMULATE ETA
+#* SIMULATE SSIC Model - Individual reproduction number
 #**********************************************
-SIMULATE_SSID = function(num_days = 110, alphaX = 1.2, k = 0.16,
+SIMULATE_SSIC = function(num_days = 110, alphaX = 1.2, k = 0.16,
                         shape_gamma = 6, scale_gamma = 1) {
   
   'Simulate from the Negative Binomial model'
