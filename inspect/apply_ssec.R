@@ -35,6 +35,9 @@ for (i in seq_along(range_r0)){
 range_k1 = c(rep(0.01, 4), rep(0.05, 4), rep(0.1, 4), rep(0.25, 4))
 range_k1
 
+range_k1 = rep(c(0.01, 0.05, 0.1, 0.25), 4)
+range_k1
+
 range_k2 = c(rep(0.5, 4), rep(0.75, 4), rep(1.0, 4), rep(5, 4))
 range_k2
 
@@ -46,19 +49,42 @@ plot.new()
 par(mfrow = c(4, 4))
 
 #LOOP VALUES
-for (i in seq_along(range_k2)){
+for (i in seq_along(range_k1)){
   print(i)
   #Data
-  ssec_data = SIMULATE_EPI_SSEC(num_days = 110, k = range_k2[i])
+  ssec_data = SIMULATE_EPI_SSEC(num_days = 110, k = range_k1[i])
   #Plot
   if (i == 1){
     plot.ts(ssec_data,
             main = bquote(bold("SSEC data ~ NegBin(R0 * " ~ lambda ~ ", k). " ~
-            k: ~ .(range_k2[i]) ~ ". R0: " ~ .(R0X))),
+            k: ~ .(range_k1[i]) ~ ". R0: " ~ .(R0X))),
             ylab = 'Daily infection count')
   } else {
     plot.ts(ssec_data,
-            main = bquote(bold(k: ~ .(range_k2[i]) ~ ". " ~ R0: ~ .(R0X))),
+            main = bquote(bold(k: ~ .(range_k1[i]) ~ ". " ~ R0: ~ .(R0X))),
+            ylab = 'Daily infection count')
+  }
+}
+
+#***********
+#3. RANGE OF R0 + K
+range_r0 = c(rep(0.8, 4), rep(1.2, 4), rep(1.6, 4), rep(2.0, 4))
+range_r0
+
+#LOOP VALUES
+for (i in seq_along(range_k2)){
+  print(i)
+  #Data
+  ssec_data = SIMULATE_EPI_SSEC(num_days = 110, R0 = range_r0[i], k = range_k2[i])
+  #Plot
+  if (i == 1){
+    plot.ts(ssec_data,
+            main = bquote(bold("SSEC data ~ NegBin(R0 * " ~ lambda ~ ", k). " ~
+                                 k: ~ .(range_k2[i]) ~ ". R0: " ~ .(range_r0[i]))),
+            ylab = 'Daily infection count')
+  } else {
+    plot.ts(ssec_data,
+            main = bquote(bold(k: ~ .(range_k2[i]) ~ ". " ~ R0: ~ .(range_r0[i]))),
             ylab = 'Daily infection count')
   }
 }

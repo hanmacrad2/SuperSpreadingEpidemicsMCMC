@@ -19,13 +19,25 @@ SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = R0*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    x[t] = rnbinom(1, size = k, mu = tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
   
   x
 }
 
-#APPLY
-ssec_data = SIMULATE_EPI_SSEC()
-plot.ts(ssec_data)
+#************************
+#* LOG LIKELIHOOD SSEC
+#* ***********************
+LOG_LIKE_SSEC <- function(x, lambda_vec, R0, k){
+  
+  #Params
+  num_days = length(x); loglike = 0
+  
+  for (t in 2:num_days) {
+
+    loglike = loglike + dnbinom(1, size = k, mu =  R0*lambda_vec[t], log = TRUE)
+    
+  }
+  
+  return(loglike)
+}
