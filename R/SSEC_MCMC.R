@@ -1,7 +1,7 @@
 #SSEC model
 
 #SIMULATE
-SIMULATE_EPI_SSEC <- function(num_days = 50, alphaX = 0.8, betaX = 0.1, gammaX = 10,
+SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1) {
   
   'Simulate an epidemic with Superspreading events
@@ -19,8 +19,8 @@ SIMULATE_EPI_SSEC <- function(num_days = 50, alphaX = 0.8, betaX = 0.1, gammaX =
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = alphaX*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    x[t] = rnbinom(1, size = 1, mu = tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    tot_rate = R0*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    x[t] = rnbinom(1, size = k, mu = tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
   
   x
