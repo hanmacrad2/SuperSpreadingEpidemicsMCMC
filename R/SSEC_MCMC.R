@@ -132,7 +132,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
      accept_prob = 0
     }
     
-    #LAMBDA ADAPTIVE SCALING
+    #ADAPTIVE SCALING (needs acceptance probability)
     scaling =  scaling*exp(delta/i*(accept_prob - mcmc_inputs$target_acceptance_rate))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)

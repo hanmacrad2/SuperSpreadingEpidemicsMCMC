@@ -170,7 +170,7 @@ PLOT_SSEC_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   plot(seq_along(m1_mean), m1_mean,
        ylim= m1_lim,
        xlab = 'Time', ylab =  mcmc_specs$mod_par_names[1],
-       main = bquote(R[0] ~ "MCMC mean, Start:" ~ mcmc_specs$mod_start_points$m1),
+       main = bquote(bold(R[0] ~ "MCMC mean, Start:" ~ .(mcmc_specs$mod_start_points$m1))),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = mcmc_specs$mod_start_points$m1, col = 'red', lwd = 2)
   
