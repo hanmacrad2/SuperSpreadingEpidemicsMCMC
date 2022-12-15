@@ -110,7 +110,7 @@ ETA_CREDIBLE_INTERVALS <- function(eta_matrix, eta_true, pchX = 16,
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output) 
 
 #PLOT MCMC GRID
-PLOT_SSID_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
+PLOT_SSIC_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
                                 log_like_sim, n_mcmc,
                                 simulated = list(m1 = 1.0, m2 = 0.16),
                                mcmc_specs = list(model_type = 'Simulated',
@@ -131,8 +131,8 @@ PLOT_SSID_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
   
   if (FLAGS_LIST$MULTI_ALG){
-    m1_mcmc = mcmc_output$ssid_params_matrix[,1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m2_mcmc = mcmc_output$ssid_params_matrix[,2]; m2_mcmc = unlist(m2_mcmc); m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
+    m1_mcmc = mcmc_output$ssic_params_matrix[,1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
+    m2_mcmc = mcmc_output$ssic_params_matrix[,2]; m2_mcmc = unlist(m2_mcmc); m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
     m3_mcmc = mcmc_output$eta_matrix[, mcmc_specs$eta_time_point]; m3_mcmc = unlist(m3_mcmc); m3_mcmc = m3_mcmc[!is.na(m3_mcmc)]
     sigma_eta_X = mcmc_output$sigma_eta_matrix[, mcmc_specs$eta_time_point]; sigma_eta_X = unlist(sigma_eta_X); sigma_eta_X = sigma_eta_X[!is.na(sigma_eta_X)]
     eta_sim_val = eta_sim[mcmc_specs$eta_time_point]
