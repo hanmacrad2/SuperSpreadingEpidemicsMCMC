@@ -3,6 +3,7 @@
 #*************************************
 library(coda)
 
+#**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
 SIMULATE_EPI_SSEB <- function(num_days, alphaX = 0.8, betaX = 0.1, gammaX = 10,
                               shape_gamma = 6, scale_gamma = 1) {
