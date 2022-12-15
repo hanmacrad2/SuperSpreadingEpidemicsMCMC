@@ -36,7 +36,7 @@ LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params){
   
   for (t in 2:num_days) {
 
-    loglike = loglike + dnbinom(1, size = k, mu =  R0*lambda_vec[t], log = TRUE)
+    loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE)
     
   }
   

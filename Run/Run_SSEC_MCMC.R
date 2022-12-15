@@ -14,7 +14,7 @@ ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
 
 #PARAMETERS 
-n_mcmc = 10000 #50000 
+n_mcmc = 100000 #50000 
 #alphaX = 0.8; num_days = 50 #110 #Question: 50 days ok? Run 110 now. 1000 runs takes x mins
 
 #1.SIMULATE DATA
