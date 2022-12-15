@@ -6,7 +6,7 @@ source('R/SSEC_MCMC.R')
 
 #OUTPUT FOLDER
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/ssec"
-seedX = 1
+seedX = 4
 
 #CREATE OUTPUT FOLDER
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
@@ -14,12 +14,13 @@ ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
 
 #PARAMETERS 
-n_mcmc = 50000 
+n_mcmc = 1000 #50000 
 #alphaX = 0.8; num_days = 50 #110 #Question: 50 days ok? Run 110 now. 1000 runs takes x mins
 
 #1.SIMULATE DATA
+seedX = seedX + 1
 set.seed(seedX)
-epi_data_ssec = SIMULATE_EPI_SSEC(num_days)
+epi_data_ssec = SIMULATE_EPI_SSEC()
 plot.ts(epi_data_ssec)
 #SAVE DATA
 saveRDS(epi_data_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_sseb_', seedX, '.rds' ))

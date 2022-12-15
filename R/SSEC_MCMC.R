@@ -1,5 +1,5 @@
 #SSEC model
-
+library(MASS)
 #SIMULATE
 SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1) {
@@ -47,7 +47,7 @@ LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params){
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
-                            mcmc_inputs = list(mod_start_points = list(m1 = 0.8, m2 = 0.1),
+                            mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10),
                             priors_list = list(r0_prior = c(1,0), k_prior = c(1, 0)),
@@ -78,7 +78,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   ssec_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssec_params = ssec_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSEC(epidemic_data, scaling_vec, ssec_params);  log_like = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params);  log_like = log_like_vec[1]
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -95,7 +95,8 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
     if(i%%100 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
-    ssec_params_dash = c(ssec_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
+    ssec_params_dash = c(ssec_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim),
+                                               Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
     if (min(ssec_params_dash - vec_min) >= 0){ 
