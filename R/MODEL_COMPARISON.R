@@ -16,14 +16,14 @@ LOG_MODEL_EVIDENCE <- function(loglike_vec){
   m = max(loglike_vec, na.rm = TRUE)
   log_model_ev = m + log(mean(exp(loglike_vec - m)))
   
-  return(log_model_ev)
+  return(-log_model_ev)
 }
 
 get_bayes_factor <- function(loglike_vec1, loglike_vec2){
   
   'Get Bayes factor via ratio of the model evidence'
   
-  bayes_factor = MODEL_EVIDENCE(loglike_vec1)/MODEL_EVIDENCE(loglike_vec2)
+  bayes_factor = LOG_MODEL_EVIDENCE(loglike_vec1)/LOG_MODEL_EVIDENCE(loglike_vec2)
   
   return(bayes_factor)
 }
