@@ -8,6 +8,17 @@ mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000,
                   mod_par_names = c('alpha', 'beta', 'gamma'),
                   seed_count = 1, burn_in_pc = 0.05, thinning_factor = 10)
 
+#******************************
+#* 1. Base Model vs SSIB Model
+#* ****************************
+
+#1. Simulate Base model data
+
+
+#*************************
+#* 2. SSEB VS SSIB Model
+#* ***********************
+
 #1. RUN SSI MODEL
 mcmc_ssi_output = SSI_MCMC_ADAPTIVE(sim_data_canadaX1)
 

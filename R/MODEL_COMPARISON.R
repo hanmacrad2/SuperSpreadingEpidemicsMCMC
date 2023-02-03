@@ -3,10 +3,6 @@
 #*********************
 #* MODEL COMPARISON BY RATIO OF MODEL EVIDENCES
 #***********
-LOG_MODEL_EVIDENCE <- function(loglike_vec){
-    
-LOG_MODEL_EVIDENCE <- function(loglike_vec){
-}
 
 LOG_MODEL_EVIDENCE <- function(loglike_vec){
   
@@ -19,14 +15,34 @@ LOG_MODEL_EVIDENCE <- function(loglike_vec){
   return(-log_model_ev)
 }
 
-get_bayes_factor <- function(loglike_vec1, loglike_vec2){
+#GET BAYES FACTORS
+GET_BAYES_FACTORS <- function(loglike_vec1, loglike_vec2){
   
   'Get Bayes factor via ratio of the model evidence'
   
-  bayes_factor = LOG_MODEL_EVIDENCE(loglike_vec1)/LOG_MODEL_EVIDENCE(loglike_vec2)
+  bayes_factor = MODEL_EVIDENCE(loglike_vec1)/MODEL_EVIDENCE(loglike_vec2) 
+  
+  log_bf = #logmodel1  - log_model2
+  bf = exp(log_bf)
   
   return(bayes_factor)
 }
+
+#MODEL COMPARISON VIA POSTERIOR MODEL PROBABILITIES
+#Add Do all calculations on log scale and take exp as final step 
+#0.5*base_model/(0.5*base_model + (1/8)*S + (1/8)*m2 + (1/8)*m3 + (1/8)*m4)  #An 1/8 for each of 4 other models
+
+#STEPS
+#1. Store log likelihood vectors for each model
+#2. Possible to do all combinations 
+
+#Compare base model vs SSEB model using both RJMCMC & harmonic mean and compare results.
+
+#1. Simulate data from both the base model & sseb 
+# Apply to simulated & real
+#1. Start with one simulated data (but repeat harmonic mean estimate multiple times) & review 
+#Want to repeat harmonic mean estimate 
+
 
 #'Harmonic mean of Log likelihood
 #'

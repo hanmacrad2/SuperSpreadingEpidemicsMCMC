@@ -402,4 +402,3 @@ GET_SUMMARY_STATISTICS <- function(epidemic_data, FLAG_DF_CREATE = TRUE){
     #                              median(diff(epidemic_data)/(epidemic_data[1:(length(epidemic_data)-1)]/(epidemic_data[2:length(epidemic_data)])+1))
     #                              
     # )
-  }

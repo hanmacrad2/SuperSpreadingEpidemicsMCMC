@@ -1,5 +1,15 @@
 #Package install steps
 
+#1. SET WD to Parent directory
+#Code: cd ~/Documents/GitHub
+
+#2. BUILD PACKAGE
+#Code: R CMD SuperSpreadingEpidemicsMCMC
+
+#3. INSTALL PACKAGE
+#Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
+
+
 #PART 1: TERMINAL INSTALL
 #1. Set wd to parent directory
 
