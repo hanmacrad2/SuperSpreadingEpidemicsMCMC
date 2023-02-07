@@ -1,6 +1,47 @@
 #*******************************************************************************
 # BASELINE MODEL
 #*******************************************************************************
+
+#1. SIMULATE FROM BASE MODEL
+#' Simulate an epidemic outbreak
+#'
+#' Returns daily infection counts from a simulated epidemic outbreak
+#'
+#' @param num_days Number of days of the epidemic
+#' @param shape_gamma Shape of the gamma distribution representing the time-varying infectivity curve of each infected individual
+#' @param scale_gamma Scale of the gamma distribution representing the time-varying infectivity curve of each infected individual
+#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambda_t} 
+#' @return Total infections; Total daily infection counts of length \code{'num_days'}
+#' @export
+#'
+#' @author Hannah Craddock, Xavier Didelot, Simon Spencer
+#'
+#' @examples
+#'
+#' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
+#'
+SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
+  
+  'Baseline simulation model'
+  
+  #Initialisation 
+  tot_daily_infections = vector('numeric', num_days)
+  tot_daily_infections[1] = 2
+  
+  #Infectiousness Pressure - Sum of all infected individuals infectivety curves 
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  #Days of Infection Spreading
+  for (t in 2:num_days) {
+    
+    #Total rate
+    tot_rate = R0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
+    tot_daily_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+  }
+  
+  tot_daily_infections
+}
+
 #*
 #' Log likelihood of the baseline epidemic model
 #'
@@ -79,7 +120,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #'
-BASELINE_MCMC_ADAPTIVE <- function(epidemic_data,
+MCMC_INFER_BASELINE <- function(epidemic_data,
                                    mcmc_inputs = list(n_mcmc = 50000, r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE)) {

@@ -9,6 +9,9 @@
 #3. INSTALL PACKAGE
 #Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
 
+#library(SuperSpreadingEpidemicsMCMC)
+
+#Note: Need to delete unused functions in man and delete Namespace and re-build
 
 #PART 1: TERMINAL INSTALL
 #1. Set wd to parent directory
@@ -16,6 +19,7 @@
 #2. R CMD build brocolors
 
 #3. R CMD INSTALL brocolors_0.1.tar.gz
+
 
 #PART 2:R Console
 

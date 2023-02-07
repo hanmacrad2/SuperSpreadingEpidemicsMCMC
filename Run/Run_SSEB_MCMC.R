@@ -1,8 +1,6 @@
 #RUN SSEB MCMC 
 #FOLDERS
-setwd('~/GitHub/SuperSpreadingEpidemicsMCMC/')
-source('R/UTIL_FUNCTIONS.R'); source('R/EPI_FUNCTIONS.R')
-source('R/SSEB_MCMC.R')
+library(SuperSpreadingEpidemicsMCMC)                                            #setwd('~/GitHub/SuperSpreadingEpidemicsMCMC/') #source('R/UTIL_FUNCTIONS.R')
 
 #OUTPUT FOLDER
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/sseb"
