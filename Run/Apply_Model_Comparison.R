@@ -13,10 +13,16 @@ CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
 ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
 
+#CREATE OUTPUT FOLDER
+CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_sseb', seedX)
+ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
+       dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
+
 #******************************
 #* 1. BASE MODEL vs SSEB Model
 #* ****************************
 true_r0 = 1.6
+
 #1. SIMULATE BASE MODEL DATA
 data_baseI = SIMULATE_BASELINE_EPIDEMIC(R0 = true_r0)
 plot.ts(data_baseI)
@@ -44,7 +50,7 @@ log_mod_ev1 = LOG_MODEL_EVIDENCE(mcmc_base_1$log_like_vec)
 list_log_ev = c(log_mod_ev1)
 
 #REPEAT MODEL EVIDENCE FOR BASE MODEL
-RUN_MODEL_EV_BASE <- function(data_base){
+RUN_MODEL_EV_BASE <- function(data_base, n_reps = 100){
   
   #List of model evidences
   list_log_ev = c()
@@ -79,10 +85,19 @@ list_model_ev_base = RUN_MODEL_EV_BASE(dataI)
 saveRDS(list_model_ev_base, file = paste0(CURRENT_OUTPUT_FOLDER, '/list_model_ev_base.rds' ))
 
 #PLOT MODEL EVIDENCE
-plot.ts(list_model_ev_base, ylim = c(min(list_model_ev_base)-5, max(list_model_ev_base)+5), lwd = 2,
-        main = 'Base model log evidence data I')
-plot.ts(list_model_ev_base, lwd = 2,
-        main = 'Base model log evidence data I (Close-up)')
+par(mfrow = c(2,1))
+
+#PLOT 1
+plot(seq_along(list_model_ev_base), list_model_ev_base,
+     ylim = c(min(list_model_ev_base)-50, max(list_model_ev_base)+50), lwd = 1, pch = 19,
+     main = 'Base Model - Model Evidence(log)',
+     xlab = 'mcmc iteration', ylab = 'log(model evidence)')
+
+#PLOT 2 (Close up)
+plot(seq_along(list_model_ev_base), list_model_ev_base,
+     ylim = c(min(list_model_ev_base)-0.5, max(list_model_ev_base)+0.5), lwd = 1, pch = 19,
+        main = 'Base Model - Model Evidence(log) (Close-up)',
+     xlab = 'mcmc iteration', ylab = 'log(model evidence)')
 
 #**********************************************************************************
 #2. SSEB
@@ -91,7 +106,7 @@ plot.ts(list_model_ev_base, lwd = 2,
 mcmc_sse_output = MCMC_INFER_SSEB(dataI, n_mcmc)
 
 #2. SSE
-df_sse = PLOT_SS_MCMC_GRID(dataI, mcmc_sse_output,
+df_sse = PLOT_SS_MCMC_GRID(dataI, mcmc_sse_output, n_mcmc,
                            mcmc_specs = list(model_type = 'SSE', n_mcmc = 50000, 
                                              mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10),
                                              mod_par_names = c('alpha', 'beta', 'gamma'),
@@ -102,14 +117,13 @@ df_sse = PLOT_SS_MCMC_GRID(dataI, mcmc_sse_output,
                                              DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                              PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE))
 
-#MCMC SPECS
-mcmc_specs = list(model_type = 'SSI', n_mcmc = 500000, 
-                  mod_start_points = list(m1 = 0.8, m2 = 0.05, m3 = 10),
-                  mod_par_names = c('alpha', 'beta', 'gamma'),
-                  seed_count = 1, burn_in_pc = 0.05, thinning_factor = 10)
+#************* FIX!! 
 
 #EDIT FUNCTION & RUN
-RUN_MODEL_EV_SSEB <- function(data_base){
+RUN_MODEL_EV_SSEB <- function(data_base, n_reps = 50){
+  
+  #INITIALISE
+  list_log_ev = c()
   
   for(i in 1:n_reps){
     
@@ -117,7 +131,7 @@ RUN_MODEL_EV_SSEB <- function(data_base){
     #RUN MCMC
     start_time = Sys.time()
     print(paste0('start_time:', start_time))
-    mcmc_sseb = MCMC_INFER_BASELINE(data_base)
+    mcmc_sseb = MCMC_INFER_SSEB(data_base, n_mcmc)
     end_time = Sys.time()
     time_elap = get_time(start_time, end_time)
     mcmc_sseb$time_elap = time_elap
@@ -129,12 +143,20 @@ RUN_MODEL_EV_SSEB <- function(data_base){
     print(log_mod_ev)
     
   }
+  
+  return(list_log_ev)
 }
 
 
 #APPLY
-list_model_ev_base = RUN_MODEL_EV_BASE(data_baseI)
-saveRDS(list_model_ev_base, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base', i, '.rds' ))
+list_model_ev_base_sseb = RUN_MODEL_EV_SSEB(dataI)
+saveRDS(list_model_ev_base_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/list_model_ev_sseb_base.rds' ))
+
+#***************************
+#* Bayes Factor
+#***************************
+log_bf = list_model_ev_base[1] -  LOG_MODEL_EVIDENCE(mcmc_sse_output$log_like_vec)
+bayes_factor1 = exp(log_bf)
 
 #*************************
 #* 2. SSEB VS SSIB Model

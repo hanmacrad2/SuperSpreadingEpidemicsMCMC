@@ -20,10 +20,9 @@ GET_BAYES_FACTORS <- function(loglike_vec1, loglike_vec2){
   
   'Get Bayes factor via ratio of the model evidence'
   
-  bayes_factor = MODEL_EVIDENCE(loglike_vec1)/MODEL_EVIDENCE(loglike_vec2) 
-  
-  log_bf = #logmodel1  - log_model2
-  bf = exp(log_bf)
+  #bayes_factor = MODEL_EVIDENCE(loglike_vec1)/MODEL_EVIDENCE(loglike_vec2) 
+  log_bf = LOG_MODEL_EVIDENCE(loglike_vec1)  - LOG_MODEL_EVIDENCE(loglike_vec2)
+  bayes_factor = exp(log_bf)
   
   return(bayes_factor)
 }
