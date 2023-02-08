@@ -91,8 +91,9 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #************************************************************************
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                                   mcmc_inputs = 
-                                    list(mod_start_points = list(m1 = 0.8, m2 = 0.1, m3 = 10),
-                                         alpha_star = 0.4, thinning_factor = 10), #10
+                                    list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
+                                         alpha_star = 0.4, thinning_factor = 10), 
+                            sigma_starts = list(sigma_a = 0.3, sigma_b = 0.03, sigma_g = 3, sigma_bg = 5, sigma_ag = 5)
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
                                                      beta_prior_exp = c(0.1,0),
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
@@ -131,48 +132,47 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   log_like_vec <- vector('numeric', mcmc_vec_size);
   
   #INITIALISE MCMC[1]
-  alpha_vec[1] <- mcmc_inputs$mod_start_points$m1; beta_vec[1] <- mcmc_inputs$mod_start_points$m2
-  gamma_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
+  alpha_vec[1] <- mcmc_inputs$param_starts$alpha_start; beta_vec[1] <- mcmc_inputs$param_starts$beta_start
+  gamma_vec[1] <- mcmc_inputs$param_starts$gamma_start; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
   log_like_vec[1] <- LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_vec[1], beta_vec[1], gamma_vec[1])
   
   #INITIALISE RUNNING PARAMS
   alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
   
   #SIGMA
-  sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
-  sigma3 = 0.4*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
-  sigma5 = 0.85*mcmc_inputs$mod_start_points$m3
+  sigma_alpha = sigma_starts$sigma_alpha; sigma_beta = sigma_starts$sigma_beta; 
+  sigma_gamma = sigma_starts$sigma_gamma = 3; sigma_bg = sigma_starts$sigma_bg; sigma_ag = sigma_starts$sigma_ag
   
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
     
     #SIGMA
-    sigma1_vec <- vector('numeric', mcmc_vec_size); sigma2_vec <- vector('numeric', mcmc_vec_size)
-    sigma3_vec <- vector('numeric', mcmc_vec_size); sigma4_vec <- vector('numeric', mcmc_vec_size)
-    sigma5_vec <- vector('numeric', mcmc_vec_size);
+    sigma_alpha_vec <- vector('numeric', mcmc_vec_size); sigma_beta_vec <- vector('numeric', mcmc_vec_size)
+    sigma_gamma_vec <- vector('numeric', mcmc_vec_size); sigma_bg_vec <- vector('numeric', mcmc_vec_size)
+    sigma_ag_vec <- vector('numeric', mcmc_vec_size);
     
     #SIGMA; INITIALISE FIRST ELEMENT
-    sigma1_vec[1] =  sigma1; sigma2_vec[1] =  sigma2; sigma3_vec[1] =  sigma3
-    sigma4_vec[1] =  sigma4; sigma5_vec[1] =  sigma5
+    sigma_alpha_vec[1] =  sigma_alpha; sigma_beta_vec[1] = sigma_beta; sigma_gamma_vec[1] =  sigma_gamma
+    sigma_bg_vec[1] =  sigma_bg; sigma_ag_vec[1] =  sigma_ag
     
     #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list(sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
-                 sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
+    sigma_list = list(sigma_alpha_vec = sigma_alpha_vec, sigma_beta_vec = sigma_beta_vec, sigma_gamma_vec = sigma_gamma_vec,
+                 sigma_bg_vec = sigma_bg_vec, sigma_ag_vec = sigma_ag_vec)
     
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
     
   } else {
     
-    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list(sigma1 = sigma1, sigma2 = sigma2,
-                 sigma3 = sigma3, sigma4 = sigma4,
-                 sigma5 = sigma5)
+    #SIGMA;sigma vectors for each iteration of the MCMC algorithm
+    sigma_list = list(sigma_alpha = sigma_alpha, sigma_beta = sigma_beta,
+                      sigma_gamma = sigma_gamma, sigma_bg = sigma_bg,
+                      sigma_ag = sigma_ag)
   }
   
   #INITIALISE: ACCEPTANCE COUNTS
-  list_accept_counts = list(count_accept1 = 0, count_accept2 = 0, count_accept3 = 0,
-                            count_accept4 = 0, count_accept5 = 0)
+  list_accept_counts = list(count_accept_alpha = 0, count_accept_beta = 0, count_accept_gamma = 0,
+                            count_accept_bg = 0, count_accept_ag = 0)
   
   #******************************
   #MCMC CHAIN
@@ -186,7 +186,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     
     #****************************************************** s
     #alpha
-    alpha_dash <- alpha + rnorm(1, sd = sigma1)
+    alpha_dash <- alpha + rnorm(1, sd = sigma_alpha)
     
     if(alpha_dash < 0){
       alpha_dash = abs(alpha_dash)
@@ -203,19 +203,19 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       alpha <- alpha_dash
-      list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
+      list_accept_counts$count_accept_alpha = list_accept_counts$count_accept_alpha + 1
       log_like = logl_new
     }
     
     #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
-      sigma1 =  sigma1*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #************************************************************************ Only if (b > 0)
     #beta
-    beta_dash <- beta + rnorm(1, sd = sigma2)
+    beta_dash <- beta + rnorm(1, sd = sigma_beta)
     if(beta_dash < 0){
       beta_dash = abs(beta_dash)
     }
@@ -237,23 +237,23 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       beta <- beta_dash
       log_like = logl_new
-      list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
+      list_accept_counts$count_accept_beta = list_accept_counts$count_accept_beta + 1
     }
     
     #Sigma (Adpative)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
-      sigma2 =  sigma2*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #************************************************************************
     #gamma
-    gamma_dash <- gamma + rnorm(1, sd = sigma3)
+    gamma_dash <- gamma + rnorm(1, sd = sigma_gamma)
     if(gamma_dash < 1){
       gamma_dash = 2 - gamma_dash #Prior on c: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta, gamma_dash)
+    logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha, beta, gamma_dash)
     log_accept_ratio = logl_new - log_like
     
     #Priors
@@ -269,19 +269,19 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
       log_like <- logl_new
-      list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
+      list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
     }
     
     #Sigma (Adpative)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
-      sigma3 =  sigma3*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      sigma_gamma =  sigma_gamma*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #*****************************************************
     #Beta-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
-      gamma_dash <- gamma + rnorm(1, sd = sigma4)
+      gamma_dash <- gamma + rnorm(1, sd = sigma_bg)
       
       #Prior > 1 #* TRY WITHOUT REFLECTION
       if(gamma_dash < 1){
@@ -320,13 +320,13 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
           beta <- beta_transform
           gamma <- gamma_dash
           log_like <- logl_new
-          list_accept_counts$count_accept4 = list_accept_counts$count_accept4 + 1
+          list_accept_counts$count_accept_bg = list_accept_counts$count_accept_bg + 1
         }
         
         #Sigma (Adpative)
         if (FLAGS_LIST$ADAPTIVE){
           accept_prob = min(1, exp(log_accept_ratio))
-          sigma4 = sigma4*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+          sigma_bg = sigma_bg*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
         }
       }
     }
@@ -335,7 +335,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     #Alpha-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
       
-      gamma_dash <- gamma+ rnorm(1, sd = sigma5)
+      gamma_dash <- gamma+ rnorm(1, sd = sigma_ag)
       #Prior > 1
       if(gamma_dash < 1){
         gamma_dash = 2 - gamma_dash
@@ -365,13 +365,13 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
           alpha <- alpha_transform
           gamma <- gamma_dash
           log_like <- logl_new
-          list_accept_counts$count_accept5 = list_accept_counts$count_accept5 + 1
+          list_accept_counts$count_accept_ag = list_accept_counts$count_accept_ag + 1
         }
         
         #Sigma (Adpative)
         if (FLAGS_LIST$ADAPTIVE){
           accept_prob = min(1, exp(log_accept_ratio))
-          sigma5 = sigma5*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+          sigma_ag = sigma_ag*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
         }
       }
     }
@@ -383,27 +383,27 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
-      sigma$sigma1_vec[i_thin] = sigma1; sigma$sigma2_vec[i_thin] = sigma2; sigma$sigma3_vec[i_thin] = sigma3
-      sigma$sigma4_vec[i_thin] = sigma4; sigma$sigma5_vec[i_thin] = sigma5
+      sigma$sigma_alpha_vec[i_thin] = sigma_alpha; sigma$sigma_beta_vec[i_thin] = sigma_beta; sigma$sigma_gamma_vec[i_thin] = sigma_gamma
+      sigma$sigma_bg_vec[i_thin] = sigma_bg; sigma$sigma_ag_vec[i_thin] = sigma_ag
     }
   }
   
   #Final stats
-  accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
-  accept_rate2 = 100*list_accept_counts$count_accept2/(n_mcmc-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
-  accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
-  accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
-  accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
+  accept_rate_a = 100*list_accept_counts$count_accept_alpha/(n_mcmc-1)
+  accept_rate_b = 100*list_accept_counts$count_accept_beta/(n_mcmc-1) #(list_accept_counts$count_accept_beta + list_reject_counts$count_accept_beta)
+  accept_rate_g = 100*list_accept_counts$count_accept_gamma/(n_mcmc-1)
+  accept_rate_bg = 100*list_accept_counts$count_accept_bg/(n_mcmc-1)
+  accept_rate_ag = 100*list_accept_counts$count_accept_ag/(n_mcmc-1)
   
   #Acceptance rates
-  list_accept_rates = list(accept_rate1 = accept_rate1,
-                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
-                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5)
+  list_accept_rates = list(accept_rate_a = accept_rate_a,
+                           accept_rate_b = accept_rate_b, accept_rate_g = accept_rate_g,
+                           accept_rate_bg = accept_rate_bg, accept_rate_ag = accept_rate_ag)
   print(list_accept_rates)
   
-  #Return a, acceptance rate
+  #OUTPUT
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
-                     log_like_vec = log_like_vec, sigma = sigma,
+                     log_like_vec = log_like_vec, sigma_list = sigma_list,
                      list_accept_rates = list_accept_rates)
   #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
   
