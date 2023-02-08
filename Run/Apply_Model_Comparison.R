@@ -8,12 +8,12 @@ seedX = 0
 set.seed(seedX)
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/1_base_sseb"
 
-#CREATE OUTPUT FOLDER
+#BASE CREATE OUTPUT FOLDER
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
 ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
 
-#CREATE OUTPUT FOLDER
+#SSEB CREATE OUTPUT FOLDER
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_sseb', seedX)
 ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
@@ -117,10 +117,9 @@ df_sse = PLOT_SS_MCMC_GRID(dataI, mcmc_sse_output, n_mcmc,
                                              DATA_AUG = TRUE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                              PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE))
 
-#************* FIX!! 
 
 #EDIT FUNCTION & RUN
-RUN_MODEL_EV_SSEB <- function(data_base, n_reps = 50){
+RUN_MODEL_EV_SSEB <- function(data_base, CURRENT_OUTPUT_FOLDER, n_reps = 50){
   
   #INITIALISE
   list_log_ev = c()
@@ -147,16 +146,52 @@ RUN_MODEL_EV_SSEB <- function(data_base, n_reps = 50){
   return(list_log_ev)
 }
 
-
 #APPLY
 list_model_ev_base_sseb = RUN_MODEL_EV_SSEB(dataI)
 saveRDS(list_model_ev_base_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/list_model_ev_sseb_base.rds' ))
 
+#PLOT LOG EVIDENCE
+plot(seq_along(list_model_ev_base_sseb), list_model_ev_base_sseb,
+     ylim = c(min(list_model_ev_base_sseb)-50, max(list_model_ev_base_sseb)+50), lwd = 1, pch = 19,
+     main = 'SSEB Model - Model Evidence(log). Baseline data',
+     xlab = 'mcmc iteration', ylab = 'log(model evidence)')
+
+#PLOT 2 (Close up)
+plot(seq_along(list_model_ev_base_sseb), list_model_ev_base_sseb,
+     ylim = c(min(list_model_ev_base_sseb)-0.5, max(list_model_ev_base_sseb)+0.5), lwd = 1, pch = 19,
+     main = 'SSEB Model - Model Evidence(log) (Close-up). Baseline data',
+     xlab = 'mcmc iteration', ylab = 'log(model evidence)')
+
+
 #***************************
-#* Bayes Factor
+#* Bayes Factors
 #***************************
-log_bf = list_model_ev_base[1] -  LOG_MODEL_EVIDENCE(mcmc_sse_output$log_like_vec)
-bayes_factor1 = exp(log_bf)
+log_bfs1 = list_model_ev_base[1:50] - list_model_ev_base_sseb #LOG_MODEL_EVIDENCE(mcmc_sse_output$log_like_vec)
+bayes_factors1 = exp(log_bfs1)
+
+#PLOT BFS
+hist(bayes_factors1, breaks = 200,
+     lwd = 1, pch = 19, freq = FALSE,
+     main = 'Bayes Factors. Baseline vs SSEB. Baseline data',
+     xlab = 'Bayes Factor')
+axis(side=1, at=seq(0,200, 5), labels=seq(0,200,5))
+
+plot(seq_along(bayes_factors1), bayes_factors1,
+     lwd = 1, pch = 19, 
+     ylim = c(min(bayes_factors1)-2, max(bayes_factors1)+2), 
+     main = 'Bayes Factors. Baseline vs SSEB. Baseline data',
+     xlab = 'mcmc iteration', ylab = 'Bayes Factor')
+
+#*************************
+#* RJMCMC_BASE_SSEB
+#**************************
+rj_out1 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
+
+bf = rj_out1$bf
+
+#MULTIPLE BFS (50?)
+
+
 
 #*************************
 #* 2. SSEB VS SSIB Model

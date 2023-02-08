@@ -93,7 +93,8 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
                                          alpha_star = 0.4, thinning_factor = 10), 
-                            sigma_starts = list(sigma_a = 0.3, sigma_b = 0.03, sigma_g = 3, sigma_bg = 5, sigma_ag = 5)
+                            sigma_starts = list(sigma_a = 0.3, sigma_b = 0.03,
+                                                sigma_g = 3, sigma_bg = 5, sigma_ag = 5),
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
                                                      beta_prior_exp = c(0.1,0),
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
@@ -116,7 +117,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   #INITIALISE PARAMS
   #**********************************************
   print(paste0('num mcmc iters = ', n_mcmc))
-  lambda_vec = get_lambda(epidemic_data)
+  lambda_vec = get_lambda(epidemic_data); 
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
