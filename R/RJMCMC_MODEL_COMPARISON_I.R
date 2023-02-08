@@ -45,21 +45,17 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   gamma_vec <- vector('numeric', mcmc_vec_size); r0_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec <- vector('numeric', mcmc_vec_size);
   
-  print('PASSED 1')
   #INITIALISE MCMC[1]
   alpha_vec[1] <- mcmc_inputs$param_starts$alpha_start; beta_vec[1] <- mcmc_inputs$param_starts$beta_start
   gamma_vec[1] <- mcmc_inputs$param_starts$gamma_start; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
   log_like_vec[1] <- LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_vec[1], beta_vec[1], gamma_vec[1])
-  print('PASSED 2')
   
   #INITIALISE RUNNING PARAMS
   alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
-  print('PASSED 3')
   
   #SIGMA
   sigma_alpha = sigma_starts$sigma_alpha; sigma_beta = sigma_starts$sigma_beta; 
   sigma_gamma = sigma_starts$sigma_gamma = 3; sigma_bg = sigma_starts$sigma_bg; sigma_ag = sigma_starts$sigma_ag
-  print('PASSED 4')
   
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
@@ -67,16 +63,15 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     #SIGMA
     sigma_alpha_vec <- vector('numeric', mcmc_vec_size); sigma_beta_vec <- vector('numeric', mcmc_vec_size)
     sigma_gamma_vec <- vector('numeric', mcmc_vec_size); sigma_bg_vec <- vector('numeric', mcmc_vec_size)
-    sigma_ag_vec <- vector('numeric', mcmc_vec_size);
-    print('PASSED 5')
+    #sigma_ag_vec <- vector('numeric', mcmc_vec_size);
     
     #SIGMA; INITIALISE FIRST ELEMENT
     sigma_alpha_vec[1] =  sigma_alpha; sigma_beta_vec[1] = sigma_beta; sigma_gamma_vec[1] =  sigma_gamma
-    sigma_bg_vec[1] =  sigma_bg; sigma_ag_vec[1] =  sigma_ag
+    sigma_bg_vec[1] =  sigma_bg #sigma_ag_vec[1] =  sigma_ag
     
     #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
     sigma_list = list(sigma_alpha_vec = sigma_alpha_vec, sigma_beta_vec = sigma_beta_vec, sigma_gamma_vec = sigma_gamma_vec,
-                      sigma_bg_vec = sigma_bg_vec, sigma_ag_vec = sigma_ag_vec)
+                      sigma_bg_vec = sigma_bg_vec) #sigma_ag_vec = sigma_ag_vec)
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
     
@@ -85,23 +80,18 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     #SIGMA;sigma vectors for each iteration of the MCMC algorithm
     sigma_list = list(sigma_alpha = sigma_alpha, sigma_beta = sigma_beta,
                       sigma_gamma = sigma_gamma, sigma_bg = sigma_bg)
-    
-    print('PASSED 6')
   }
   
   #INITIALISE: ACCEPTANCE COUNTS
   list_accept_counts = list(count_accept_alpha = 0, count_accept_beta = 0, count_accept_gamma = 0,
                             count_accept_bg = 0, count_accept_m1 = 0,  count_accept_m2 = 0,
                             count_reject_m1 = 0,  count_reject_m2 = 0)
-  
-  print('PASSED 7')
-  
+
   #******************************
   #MCMC CHAIN
   #******************************
   for(i in 2:n_mcmc) {
-    
-    print('PASSED 8')
+
     if (i%%1000 == 0) {
       
       print(paste0('i = ', i))
@@ -114,7 +104,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     if(alpha_dash < 0){
       alpha_dash = abs(alpha_dash)
     }
-    print('PASSED 9')
+
     #log a
     logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, beta, gamma)
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
@@ -129,13 +119,13 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       list_accept_counts$count_accept_alpha = list_accept_counts$count_accept_alpha + 1
       log_like = logl_new
     }
-    print('PASSED 10')
+    
     #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
       sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
-    print('PASSED 1')
+
     #************************************************************************ Only if (b > 0)
     #beta
     beta_dash <- beta + rnorm(1, sd = sigma_beta)
@@ -168,8 +158,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       accept_prob = min(1, exp(log_accept_ratio))
       sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
-    
-    print('PASSED 2')
+
     #************************************************************************
     #gamma
     gamma_dash <- gamma + rnorm(1, sd = sigma_gamma)
@@ -201,7 +190,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       accept_prob = min(1, exp(log_accept_ratio))
       sigma_gamma =  sigma_gamma*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
-    print('PASSED 3')
+
     #*****************************************************
     #Beta-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
@@ -254,7 +243,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         }
       }
     }
-    print('PASSED 4')
+
     #*****************************************************
     #Alpha-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
@@ -299,7 +288,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         }
       }
     }
-    print('PASSED 5')
+
     #************************************************************
     #RJMCMC STEP 
     #************************************************************
@@ -316,32 +305,27 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       if (FLAGS_LIST$alpha_transform) {  #(R0_base) = alpha_sse + beta_sse*gamma_sse (R0_SSE)
         alpha_dash = alpha + beta*gamma #Increase. as alpha_dash is actually the new R_0. Encapsulates 'total R0'          
       } else alpha_dash = alpha #alpha + rnorm(1, sd = sigma_a) - simple stochastic update
-      print('PASSED 100')
       
       #Check alpha positive ==
       if (alpha_dash > 0) { #Automatically satisfied as we've increased alpha. *Remove
-        
         #Acceptance probability (everything cancels)
-        logl_new = LOG_LIKE_BASELINE(data, alpha_dash)
+        logl_new = LOG_LIKE_BASELINE(epidemic_data, alpha_dash)
+        
         log_accept_prob = logl_new - log_like - alpha_dash + alpha
-        print('PASSED 200')
         #logl_prev. #Multiply by 100 for example. Increase prior ratio so more likely to accept some M1/spends adequate time in  
         
         #Metropolis Step
         if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) { #+log(1000)
-          print('PASSED 300')
           beta <- beta_dash
           gamma <- gamma_dash
           alpha <- alpha_dash
           log_like <- logl_new
           list_accept_counts$count_accept_m1 =  list_accept_counts$count_accept_m1 + 1
           
-          print('PASSED 400')
           
         } else  list_accept_counts$count_reject_m1 =  list_accept_counts$count_reject_m1 + 1
       } else  list_accept_counts$count_reject_m1 =  list_accept_counts$count_reject_m1 + 1
-      
-      print('PASSED 6')
+
     } else { 
       
       #************************************************************
@@ -360,7 +344,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       if (alpha_dash > 0) {
         
         #Everything cancels 
-        logl_new = LOG_LIKE_SSEB(data, lambda_vec, alpha_dash, beta_dash, gamma_dash)
+        logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, beta_dash, gamma_dash)
         log_accept_prob = logl_new - log_like - alpha_dash + alpha
         
         #Metropolis Step
@@ -382,10 +366,10 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
-      sigma$sigma_alpha_vec[i_thin] = sigma_alpha; sigma$sigma_beta_vec[i_thin] = sigma_beta; sigma$sigma_gamma_vec[i_thin] = sigma_gamma
-      sigma$sigma_bg_vec[i_thin] = sigma_bg; #sigma$sigma_ag_vec[i_thin] = sigma_ag
+      sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_beta_vec[i_thin] = sigma_beta; 
+      sigma_list$sigma_gamma_vec[i_thin] = sigma_gamma
+      sigma_list$sigma_bg_vec[i_thin] = sigma_bg; #sigma$sigma_ag_vec[i_thin] = sigma_ag
     }
-    print('PASSED 7')
   }
   
   #Final stats
