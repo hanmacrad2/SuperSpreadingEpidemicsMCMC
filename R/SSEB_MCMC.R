@@ -101,7 +101,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                                                     PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
                                                     THIN = TRUE)) {
   
-  'Returns MCMC samples of SSE model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
+  'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rates.
   INCLUDES; ADAPTATION, beta-gamma & alpha-gamma transform'
   
@@ -335,7 +335,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
     #Alpha-Gamma TRANSFORM
     if(FLAGS_LIST$ABG_TRANSFORM){
       
-      gamma_dash <- gamma+ rnorm(1, sd = sigma_ag)
+      gamma_dash <- gamma + rnorm(1, sd = sigma_ag)
       #Prior > 1
       if(gamma_dash < 1){
         gamma_dash = 2 - gamma_dash
