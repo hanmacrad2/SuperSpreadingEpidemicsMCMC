@@ -189,6 +189,10 @@ rj_out1 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
 
 bf = rj_out1$bf
 
+#Fix
+rj_out1$list_accept_rates$accept_rate_b = 0
+rj_out1$list_accept_rates$accept_rate_g = 0
+
 #MULTIPLE BFS (50?)
 
 #PLOT
