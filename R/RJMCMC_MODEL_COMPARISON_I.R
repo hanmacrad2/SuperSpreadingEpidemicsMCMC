@@ -12,7 +12,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
                                                gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, ABG_TRANSFORM = TRUE,
                                               PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
-                                              THIN = TRUE, alpha_transform = FALSE)) { #?alpha_transform
+                                              THIN = TRUE, alpha_transform = TRUE)) { #???alpha_transform
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rates.
@@ -83,7 +83,8 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   
   #INITIALISE: ACCEPTANCE COUNTS
   list_accept_counts = list(count_accept_alpha = 0, count_accept_beta = 0, count_accept_gamma = 0,
-                            count_accept_bg = 0, count_accept_m1 = 0,  count_accept_m2 = 0,
+                            count_accept_bg = 0, count_accept_ag =0, 
+                            count_accept_m1 = 0,  count_accept_m2 = 0,
                             count_reject_m1 = 0,  count_reject_m2 = 0)
 
   #******************************
@@ -91,7 +92,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   #******************************
   for(i in 2:n_mcmc) {
 
-    if (i%%1000 == 0) {
+    if (i%%1 == 0) { #1000
       
       print(paste0('i = ', i))
     }
@@ -146,7 +147,9 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    unif1 = log(runif(1))
+    print(paste0('Beta1: unif1:', unif1, 'log_accept_ratio:', log_accept_ratio))
+    if(!(is.na(log_accept_ratio)) && unif1 < log_accept_ratio) {
       beta <- beta_dash
       log_like = logl_new
       list_accept_counts$count_accept_beta = list_accept_counts$count_accept_beta + 1
@@ -178,7 +181,9 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    unif1 = log(runif(1))
+    print(paste0('Gamma: unif1:', unif1, 'log_accept_ratio:', log_accept_ratio))
+    if(!(is.na(log_accept_ratio)) && unif1 < log_accept_ratio) {
       gamma <- gamma_dash
       log_like <- logl_new
       list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
@@ -200,20 +205,20 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         gamma_dash = 2 - gamma_dash
       }
       #New b
-      beta_transform = ((alpha + beta*gamma) - alpha)/gamma_dash #beta = (r0 - a)c
+      beta_dash = ((alpha + beta*gamma) - alpha)/gamma_dash #beta = (r0 - a)c
       
-      if( beta_transform >= 0){ #Only accept values of beta> 0
+      if( beta_dash >= 0){ #Only accept values of beta> 0
         
-        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta_transform, gamma_dash)
+        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta_dash, gamma_dash)
         log_accept_ratio = logl_new - log_like
         
         #PRIORS
         #Beta prior
         if (FLAGS_LIST$BETA_PRIOR_GA) {
-          tot_beta_prior = dgamma(beta_transform, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
+          tot_beta_prior = dgamma(beta_dash, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
             dgamma(beta, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
         } else {
-          tot_beta_prior = - beta_transform + beta #exp(1) prior
+          tot_beta_prior = - beta_dash + beta #exp(1) prior
         }
         
         #gamma prior
@@ -229,7 +234,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         
         #Metropolis Step
         if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          beta <- beta_transform
+          beta <- beta_dash
           gamma <- gamma_dash
           log_like <- logl_new
           list_accept_counts$count_accept_bg = list_accept_counts$count_accept_bg + 1
@@ -253,11 +258,11 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         gamma_dash = 2 - gamma_dash
       }
       #New alpha
-      alpha_transform = (alpha + beta*gamma) - beta*gamma_dash #alpha = (r0 - beta*gamma)
+      alpha_dash = (alpha + beta*gamma) - beta*gamma_dash #alpha = (r0 - beta*gamma)
       
-      if( alpha_transform >= 0){ #Only accept values of beta> 0
+      if( alpha_dash >= 0){ #Only accept values of beta> 0
         
-        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha_transform, beta, gamma_dash)
+        logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha_dash, beta, gamma_dash)
         log_accept_ratio = logl_new - log_like
         
         #PRIORS
@@ -270,11 +275,11 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
         }
         
         #LOG ACCEPT PROB
-        log_accept_ratio = log_accept_ratio - alpha_transform + alpha + tot_gamma_prior
+        log_accept_ratio = log_accept_ratio - alpha_dash + alpha + tot_gamma_prior
         
         #Metropolis Step
         if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          alpha <- alpha_transform
+          alpha <- alpha_dash
           gamma <- gamma_dash
           log_like <- logl_new
           list_accept_counts$count_accept_ag = list_accept_counts$count_accept_ag + 1
@@ -373,17 +378,18 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   
   #Final stats
   accept_rate_a = 100*list_accept_counts$count_accept_alpha/(n_mcmc-1)
-  accept_rate_b = 100*list_accept_counts$count_accept_beta/(list_accept_counts$count_accept_beta + list_accept_counts$count_reject_beta)
-  accept_rate_g = 100*list_accept_counts$count_accept_gamma/(list_accept_counts$count_accept_gamma + list_accept_counts$count_reject_gamma)
-  accept_rate_bg = 100*list_accept_counts$count_accept_bg/(list_accept_counts$count_accept_bg + list_accept_counts$count_reject_bg)
+  accept_rate_b = 100*list_accept_counts$count_accept_beta/(n_mcmc-1)#(list_accept_counts$count_accept_beta + list_accept_counts$count_reject_beta)
+  accept_rate_g = 100*list_accept_counts$count_accept_gamma/(n_mcmc-1) #(list_accept_counts$count_accept_gamma + list_accept_counts$count_reject_gamma)
+  accept_rate_bg = 100*list_accept_counts$count_accept_bg/(n_mcmc-1) #(list_accept_counts$count_accept_bg + list_accept_counts$count_reject_bg)
+  accept_rate_ag = 100*list_accept_counts$count_accept_ag/(n_mcmc-1) #(list_accept_counts$count_accept_ag + list_accept_counts$count_reject_bg)
   #RJMCMC Steps 
-  accept_rate_m1 = 100*list_accept_counts$count_accept_m1/(list_accept_counts$count_accept_m1 +list_accept_counts$ count_reject_m1) #Check count_accept + count_reject = n_mcmc 
+  accept_rate_m1 = 100*list_accept_counts$count_accept_m1/(list_accept_counts$count_accept_m1 +list_accept_counts$count_reject_m1) #Check count_accept + count_reject = n_mcmc 
   accept_rate_m2 = 100*list_accept_counts$count_accept_m2/(list_accept_counts$count_accept_m2 + list_accept_counts$count_reject_m2)
   
   #Acceptance rates
   list_accept_rates = list(accept_rate_a = accept_rate_a,
                            accept_rate_b = accept_rate_b, accept_rate_g = accept_rate_g,
-                           accept_rate_bg = accept_rate_bg, 
+                           accept_rate_bg = accept_rate_bg, accept_rate_ag = accept_rate_ag,
                            accept_rate_m1 = accept_rate_m1, accept_rate_m2 = accept_rate_m2)
   print(list_accept_rates)
   
@@ -401,6 +407,3 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   
   return(mcmc_output)
 }
-
-
-

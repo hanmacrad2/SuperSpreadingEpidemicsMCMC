@@ -198,6 +198,11 @@ rj_out1$list_accept_rates$accept_rate_g = 0
 #PLOT
 PLOT_SSB_MCMC_REAL_DATA(dataI, rj_out1, n_mcmc, true_r0)
 
+#RUN ii
+n_mcmc = 10
+rj_out11 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
+
+
 
 #*************************
 #* 2. SSEB VS SSIB Model
