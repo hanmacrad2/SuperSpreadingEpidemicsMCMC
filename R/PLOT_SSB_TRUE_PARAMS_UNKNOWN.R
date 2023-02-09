@@ -281,12 +281,12 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim,
   
   #***********
   #HIST m2
-  hist(m2_mcmc, freq = FALSE, breaks = 100,
+  hist(m2_mcmc, freq = FALSE, breaks = 200,
        xlab = mcmc_specs$mod_par_names[2], #ylab = 'Density',
        main = paste(mcmc_specs$mod_par_names[2],
-                    " prior:", m2_prior),
-       xlim=c(0, m2_lim),
+                    " prior:", m2_prior), #xlim=c(0, m2_lim)
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
   
   #PRIOR PLOT
   if (FLAGS_LIST$B_PRIOR_GAMMA) {
@@ -301,12 +301,12 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim,
   
   #***********
   #Hist m3
-  hist(m3_mcmc, freq = FALSE, breaks = 100,
+  hist(m3_mcmc, freq = FALSE, breaks = 200,
        xlab = mcmc_specs$mod_par_names[3], #ylab = 'Density',
        main = paste(mcmc_specs$mod_par_names[3],
-                    " prior:", m3_prior),
-       xlim=c(0, m3_lim),
+                    " prior:", m3_prior), #xlim=c(0, m3_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  #axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
   
   #PRIOR PLOT
   if (FLAGS_LIST$C_PRIOR_GAMMA) {

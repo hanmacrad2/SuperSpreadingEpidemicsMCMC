@@ -186,26 +186,22 @@ plot(seq_along(bayes_factors1), bayes_factors1,
 #* RJMCMC_BASE_SSEB
 #**************************
 rj_out1 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
-
 bf = rj_out1$bf
-
 #Fix
 rj_out1$list_accept_rates$accept_rate_b = 0
 rj_out1$list_accept_rates$accept_rate_g = 0
-
-#MULTIPLE BFS (50?)
 
 #PLOT
 PLOT_SSB_MCMC_REAL_DATA(dataI, rj_out1, n_mcmc, true_r0)
 
 #RUN ii
-n_mcmc = 10
-rj_out11 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
+rj_out2 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
 
-
+#PLOT
+PLOT_SSB_MCMC_REAL_DATA(dataI, rj_out2, n_mcmc, true_r0)
 
 #*************************
-#* 2. SSEB VS SSIB Model
+#* 3. SSEB VS SSIB Model
 #************************
 
 #1. RUN SSI MODEL

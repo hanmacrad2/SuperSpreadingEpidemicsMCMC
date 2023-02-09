@@ -92,7 +92,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   #******************************
   for(i in 2:n_mcmc) {
 
-    if (i%%1 == 0) { #1000
+    if (i%%1000 == 0) {
       
       print(paste0('i = ', i))
     }
@@ -147,9 +147,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    unif1 = log(runif(1))
-    print(paste0('Beta1: unif1:', unif1, 'log_accept_ratio:', log_accept_ratio))
-    if(!(is.na(log_accept_ratio)) && unif1 < log_accept_ratio) {
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       beta <- beta_dash
       log_like = logl_new
       list_accept_counts$count_accept_beta = list_accept_counts$count_accept_beta + 1
@@ -181,9 +179,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    unif1 = log(runif(1))
-    print(paste0('Gamma: unif1:', unif1, 'log_accept_ratio:', log_accept_ratio))
-    if(!(is.na(log_accept_ratio)) && unif1 < log_accept_ratio) {
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
       log_like <- logl_new
       list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
