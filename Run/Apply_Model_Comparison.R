@@ -191,6 +191,8 @@ bf = rj_out1$bf
 
 #MULTIPLE BFS (50?)
 
+#PLOT
+PLOT_SSB_MCMC_REAL_DATA(dataI, rj_out1, n_mcmc, true_r0)
 
 
 #*************************

@@ -394,7 +394,8 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
   #OUTPUT
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma_list = sigma_list,
-                     list_accept_rates = list_accept_rates, beta_pc0 = beta_pc0, bayes_factor = bayes_factor)
+                     list_accept_rates = list_accept_rates,
+                     beta_pc0 = beta_pc0, bayes_factor = bayes_factor)
   
   #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
   
