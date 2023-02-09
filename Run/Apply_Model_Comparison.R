@@ -1,6 +1,8 @@
 #Apply Model Comparison
 library(coda)
 library(SuperSpreadingEpidemicsMCMC)
+plot.new()
+par(mfrow=c(1,1))
 
 #FOLDER
 n_mcmc = 50000
@@ -8,6 +10,9 @@ seedX = 0
 set.seed(seedX)
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/1_base_sseb"
 
+#*****************
+#BASE
+#*****************
 #BASE CREATE OUTPUT FOLDER
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
 ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
@@ -18,9 +23,19 @@ CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_sseb', seedX)
 ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
        dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
 
+
+#*****************
+#SSEB FOLDER
+#*****************
+OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/2_sseb_base"
+#SSEB CREATE OUTPUT FOLDER
+CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
+ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
+       dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
+
 #******************************
-#* 1. BASE MODEL vs SSEB Model
-#* ****************************
+#* 1. PART I: BASE MODEL vs SSEB Model
+#*****************************
 true_r0 = 1.6
 
 #1. SIMULATE BASE MODEL DATA
@@ -199,6 +214,16 @@ rj_out2 = RJMCMC_BASE_SSEB(dataI, n_mcmc)
 
 #PLOT
 PLOT_SSB_MCMC_REAL_DATA(dataI, rj_out2, n_mcmc, true_r0)
+
+
+#*************************************
+#* 1. PART II: BASE MODEL vs SSEB Model
+#* ***********************************
+
+#DATA
+data_sseb1 = SIMULATE_EPI_SSEB()
+plot.ts(data_sseb1)
+
 
 #*************************
 #* 3. SSEB VS SSIB Model

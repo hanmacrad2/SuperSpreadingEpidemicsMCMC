@@ -57,9 +57,10 @@ RUN_MODEL_EV_BASE <- function(data_base, n_reps = 100){
   
 }
 
-RUN_MODEL_EV_SSEB <- function(data_base, CURRENT_OUTPUT_FOLDER, n_reps = 50){
+RUN_MODEL_EV_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
   
   #INITIALISE
+  n_mcmc = 30000
   list_log_ev = c()
   
   for(i in 1:n_reps){
@@ -68,7 +69,7 @@ RUN_MODEL_EV_SSEB <- function(data_base, CURRENT_OUTPUT_FOLDER, n_reps = 50){
     #RUN MCMC
     start_time = Sys.time()
     print(paste0('start_time:', start_time))
-    mcmc_sseb = MCMC_INFER_SSEB(data_base, n_mcmc)
+    mcmc_sseb = MCMC_INFER_SSEB(epidemic_data, n_mcmc)
     end_time = Sys.time()
     time_elap = get_time(start_time, end_time)
     mcmc_sseb$time_elap = time_elap
