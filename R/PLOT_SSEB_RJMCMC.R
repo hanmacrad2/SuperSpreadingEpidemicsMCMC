@@ -45,8 +45,8 @@
 #'
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
-PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_vals = list(alpha = 0.8, beta = 0.1, gamma = 10),
-                                    mcmc_specs = list(data_type = 'Baseline', model_type = 'SSEB', 
+PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = list(alpha = 0.8, beta = 0.1, gamma = 10),
+                                    mcmc_specs = list(data_type = 'SSEB', model_type = 'SSEB', 
                                                       mod_par_names = c('alpha', 'beta', 'gamma'),
                                                       seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
                                     priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
@@ -70,6 +70,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
   }
   
   #EXTRACT MCMC SAMPLES
+  r0_sim = sim_vals$alpha + (sim_vals$beta*sim_vals$gamma)
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
   
   if (FLAGS_LIST$MULTI_ALG){
@@ -189,18 +190,18 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
   plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], #ylim=c(0, m1_lim),
           main = paste(mcmc_specs$mod_par_names[1], "MCMC"),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m1, col = 'red', lwd = 2)
+  abline(h = sim_vals$alpha, col = 'red', lwd = 2)
   
   # if (!FLAGS_LIST$ADAPTIVE){
   #   plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], #ylim=c(0, m1_lim),
   #           main = paste(mcmc_specs$mod_par_names[1], "MCMC",
-  #                        "Start: ", sim_vals$m1),
+  #                        "Start: ", sim_vals$alpha),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   # } else {
   #   sig1 = mcmc_output$sigma$sigma1_vec
   #   plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
   #           main = paste(mcmc_specs$mod_par_names[1], "MCMC",
-  #                        "Start: ", sim_vals$m1, ', Sigma (red)'),
+  #                        "Start: ", sim_vals$alpha, ', Sigma (red)'),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   #   lines(mcmc_output$sigma$sigma1_vec, col = 'red')
   # }
@@ -210,17 +211,17 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
   plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
           main = paste(mcmc_specs$mod_par_names[2], "MCMC"),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m2, col = 'blue', lwd = 2)
+  abline(h = sim_vals$beta, col = 'blue', lwd = 2)
   
   # if (!FLAGS_LIST$ADAPTIVE){
   #   plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[3], ylim=c(0, max(m2_mcmc)),
   #           main = paste(mcmc_specs$mod_par_names[2], "MCMC",
-  #                        "Start: ", sim_vals$m2),
+  #                        "Start: ", sim_vals$beta),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   # } else {
   #   plot.ts(m2_mcmc, ylab = paste0(mcmc_specs$mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
   #           main = paste(mcmc_specs$mod_par_names[2], "MCMC",
-  #                        "Start: ", sim_vals$m2, ', Sigma (blue)'),
+  #                        "Start: ", sim_vals$beta, ', Sigma (blue)'),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   #   lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
   # }
@@ -230,17 +231,17 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
   plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
           main = paste(mcmc_specs$mod_par_names[3], "MCMC"),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m3, col = 'green', lwd = 2)
+  abline(h = sim_vals$gamma, col = 'green', lwd = 2)
   
   # if (!FLAGS_LIST$ADAPTIVE){
   #   plot.ts(m3_mcmc,  ylab = mcmc_specs$mod_par_names[3], #ylim=c(0, m3_lim),
   #           main = paste(mcmc_specs$mod_par_names[3], "MCMC",
-  #                        "Start: ", sim_vals$m3),
+  #                        "Start: ", sim_vals$gamma),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   # } else {
   #   plot.ts(m3_mcmc,  ylab =  paste0(mcmc_specs$mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
   #           main = paste(mcmc_specs$mod_par_names[3], "MCMC",
-  #                        "Start: ", sim_vals$m3, ', Sigma (green)'),
+  #                        "Start: ", sim_vals$gamma, ', Sigma (green)'),
   #           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   #   lines(mcmc_output$sigma$sigma3_vec, col = 'green')
   # }
@@ -273,7 +274,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
                     " prior:", m1_prior),
        xlim=c(0, m1_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = sim_vals$m1, col = 'red', lwd = 2)
+  abline(v = sim_vals$alpha, col = 'red', lwd = 2)
   
   #PRIOR PLOT
   if (FLAGS_LIST$PRIOR) {
@@ -292,7 +293,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
                     " prior:", m2_prior), #xlim=c(0, m2_lim)
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
-  abline(v = sim_vals$m2, col = 'blue', lwd = 2)
+  abline(v = sim_vals$beta, col = 'blue', lwd = 2)
   
   #PRIOR PLOT
   if (FLAGS_LIST$B_PRIOR_GAMMA) {
@@ -313,7 +314,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
                     " prior:", m3_prior), #xlim=c(0, m3_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   #axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
-  abline(v = sim_vals$m3, col = 'green', lwd = 2)
+  abline(v = sim_vals$gamma, col = 'green', lwd = 2)
   
   #PRIOR PLOT
   if (FLAGS_LIST$C_PRIOR_GAMMA) {
@@ -362,7 +363,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
        xlab = 'Time', ylab =  mcmc_specs$mod_par_names[1],
        main = paste(mcmc_specs$mod_par_names[1], "MCMC mean"),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m1, col = 'red', lwd = 2)
+  abline(h = sim_vals$alpha, col = 'red', lwd = 2)
   
   #m2 mean
   plot(seq_along(m2_mean), m2_mean,
@@ -371,7 +372,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
        main = paste(mcmc_specs$mod_par_names[2], "MCMC mean"), 
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        lwd = 1)
-  abline(h = sim_vals$m2, col = 'blue', lwd = 2)
+  abline(h = sim_vals$beta, col = 'blue', lwd = 2)
   
   #m3 Mean
   plot(seq_along(m3_mean), m3_mean,
@@ -380,7 +381,7 @@ PLOT_SSEB_RJMCMC <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim, sim_val
        ylim=c(0, m3_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        lwd = 1)
-  abline(h = sim_vals$m3, col = 'green', lwd = 2)
+  abline(h = sim_vals$gamma, col = 'green', lwd = 2)
   
   #r0 mean
   plot(seq_along(r0_mean), r0_mean, #ylim=c(0, r0_lim),
