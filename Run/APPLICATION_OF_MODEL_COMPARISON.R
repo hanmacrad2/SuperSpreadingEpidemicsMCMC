@@ -135,7 +135,7 @@ PLOT_SSEB_RJMCMC(data_sseb1, rj_sse10, n_mcmc)
 
 #****************************
 #* BASE DATA
-#* **************************
+#***************************
 
 #RUN RJMCMC
 true_r0 = 1.6
