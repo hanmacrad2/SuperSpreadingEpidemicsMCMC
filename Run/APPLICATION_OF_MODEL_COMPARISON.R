@@ -1,5 +1,8 @@
 #APPLY MODEL COMPARISON
 
+OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/rjmcmc_rjmcmc_ssebbase1"
+CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
+
 #*************************************
 #* PART II:  SSEB Model vs BASE MODEL
 #************************************

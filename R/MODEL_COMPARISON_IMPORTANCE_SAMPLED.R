@@ -14,6 +14,6 @@ means = colMeans(mcmc_output)
 #DEFENSE MIXTURE
 t_dist = rmvt(100, sigma = cov(mcmc_output), df = 3) + means
 out = 0.95*dmvt(t_dist - means, sigma = cov(mcmc_output), df = 3, log = FALSE)
+out
 
-
-out#LOAD MCMC
+#LOAD MCMC

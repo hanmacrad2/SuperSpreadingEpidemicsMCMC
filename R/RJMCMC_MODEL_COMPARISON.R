@@ -9,10 +9,11 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
                                                 sigma_gamma = 3, sigma_bg = 5, sigma_ag = 5),
                             priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
                                                beta_prior_exp = c(0.1,0),
-                                               gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
+                                               gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0),
+                                               p_m1 = 0.5, p_m2 = 0.5),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, ABG_TRANSFORM = TRUE,
                                               PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
-                                              THIN = TRUE, alpha_transform = TRUE)) { #???alpha_transform
+                                              THIN = TRUE, alpha_transform = TRUE)) { #alpha_transform = True
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rates.
@@ -133,7 +134,7 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
       beta_dash = abs(beta_dash)
     }
     
-    #loglikelihood
+    #log-likelihood
     logl_new = LOG_LIKE_SSEB(epidemic_data,  lambda_vec, alpha, beta_dash, gamma)
     log_accept_ratio = logl_new - log_like
     
@@ -294,63 +295,46 @@ RJMCMC_BASE_SSEB <- function(epidemic_data, n_mcmc,
     #************************************************************
     
     #************************************************************
-    #* M_I *#
-    if ((beta > 0) | (gamma > 0)){ #Look to it 
+    #* MI *# - Propose move to M1 (Baseline)
+    if ((beta > 0) | (gamma > 0)){ 
       
-      #print('B 0 proposal')
-      beta_dash = 0
-      gamma_dash = 0
-      
-      #alpha (alpha only parameter in model)
-      if (FLAGS_LIST$alpha_transform) {  #(R0_base) = alpha_sse + beta_sse*gamma_sse (R0_SSE)
-        alpha_dash = alpha + beta*gamma #Increase. as alpha_dash is actually the new R_0. Encapsulates 'total R0'          
-      } else alpha_dash = alpha #alpha + rnorm(1, sd = sigma_a) - simple stochastic update
-      
-      #Check alpha positive ==
-      if (alpha_dash > 0) { #Automatically satisfied as we've increased alpha. *Remove
-        #Acceptance probability (everything cancels)
-        logl_new = LOG_LIKE_BASELINE(epidemic_data, alpha_dash)
+      #Proposals 
+      beta_dash = 0; gamma_dash = 0
+      alpha_dash = alpha + beta*gamma #alpha_dash encapsulates total R0 in baseline model
         
-        log_accept_prob = logl_new - log_like - alpha_dash + alpha
-        #logl_prev. #Multiply by 100 for example. Increase prior ratio so more likely to accept some M1/spends adequate time in  
+      #Acceptance probability 
+      logl_new = LOG_LIKE_BASELINE(epidemic_data, alpha_dash)
+      log_accept_prob = logl_new - log_like - alpha_dash + alpha + log(priors_list$p_m1) - log(priors_list$p_m2)  #Multiply by 100 for example to increase prior ratio so more likely to accept M1/spends adequate time in M1
+      
+      #Metropolis Step
+      if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
+        beta <- beta_dash; gamma <- gamma_dash
+        alpha <- alpha_dash
+        log_like <- logl_new
+        list_accept_counts$count_accept_m1 =  list_accept_counts$count_accept_m1 + 1
         
-        #Metropolis Step
-        if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) { #+log(1000)
-          beta <- beta_dash
-          gamma <- gamma_dash
-          alpha <- alpha_dash
-          log_like <- logl_new
-          list_accept_counts$count_accept_m1 =  list_accept_counts$count_accept_m1 + 1
-          
-          
-        } else  list_accept_counts$count_reject_m1 =  list_accept_counts$count_reject_m1 + 1
       } else  list_accept_counts$count_reject_m1 =  list_accept_counts$count_reject_m1 + 1
 
     } else { 
       
       #************************************************************
-      #* M_II 
+      #* M_II - Propose move to M2 (SSEB)
       
-      #Independence sampler - Propose from prior. If VERY lucky value is accepted to be able to jump between models. 
+      #Independence sampler - Propose from prior (Why?) If VERY lucky value is accepted to be able to jump between models. 
       beta_dash = rexp(1) 
       gamma_dash = rexp(1) + 1 
+      alpha_dash = alpha - beta_dash*gamma_dash
       
-      #alpha
-      if (FLAGS_LIST$alpha_transform) { #alpha_sse = ro_base (alpha_base) - beta_sse*gamma_sse
-        alpha_dash = alpha - beta_dash*gamma_dash #(alpha_vec[i] - (beta_vec[i]*gamma_vec[i])) - beta_dash*gamma_dash #Preserves alpha, beta, gamma. Will we need the Jacobian?
-      } else alpha_dash = alpha #alpha + rnorm(1, sd = sigma_a) # Simple stochastic update
-      
-      #Check alpha positive==
+      #Check alpha positive
       if (alpha_dash > 0) {
         
         #Everything cancels 
         logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, beta_dash, gamma_dash)
-        log_accept_prob = logl_new - log_like - alpha_dash + alpha
+        log_accept_prob = logl_new - log_like - alpha_dash + alpha + log(priors_list$p_m2) - log(priors_list$p_m1)
         
         #Metropolis Step
         if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
-          beta <- beta_dash
-          gamma <- gamma_dash
+          beta <- beta_dash; gamma <- gamma_dash
           alpha <- alpha_dash
           log_like <- logl_new
           list_accept_counts$count_accept_m2 =  list_accept_counts$count_accept_m2 + 1
