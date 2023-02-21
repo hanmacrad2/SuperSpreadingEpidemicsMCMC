@@ -86,14 +86,12 @@ RUN_MODEL_EV_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30)
   return(list_log_ev)
 }
 
-
-
+#MULTIPLE RJMCMC
 RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 20){
   
   #INITIALISE
   n_mcmc = 30000
-  list_bfs = c()
-  list_bc0 = c()
+  list_bfs = c(); list_bc0 = c()
   
   for(i in 1:n_reps){
     
@@ -108,7 +106,6 @@ RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 20){
     saveRDS(rj_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/rjmcmc', i, '.rds' ))
     
     #MODEL EVIDENCE
-    
     list_bfs = c(list_bfs, rj_output$bayes_factor)
     print(list_bfs)
     
@@ -126,3 +123,14 @@ RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 20){
 #Add Do all calculations on log scale and take exp as final step 
 #0.5*base_model/(0.5*base_model + (1/8)*S + (1/8)*m2 + (1/8)*m3 + (1/8)*m4)  #An 1/8 for each of 4 other models
 
+#Check
+list1 = c()
+for(i in 1:10){
+  
+  list1 = c(list1, i**2)
+  #print(list1)
+
+}
+list1
+
+list2 = list(list1 = list1)
