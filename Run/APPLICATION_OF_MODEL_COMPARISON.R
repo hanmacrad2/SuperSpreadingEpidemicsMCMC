@@ -118,7 +118,7 @@ df_sseb = PLOT_SSEB_RJMCMC(data_sseb1, rj_sseb1, n_mcmc)
 #***************************************************************************************
 
 #***********************************************************************
-#BASE
+#BASELINE
 #***********************************************************************
 run = 1
 #BASE CREATE OUTPUT FOLDER
@@ -130,8 +130,41 @@ ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
 
 rj_m1 = RUN_RJMCMC_MULT(data_baseI, CURRENT_OUTPUT_FOLDER)
 
+#PLOT OUTPUT
+par(mfrow = c(2,1))
+plot(seq_along(rj_m1$list_bfs), rj_m1$list_bfs,
+     ylim = c(0, max(rj_m1$list_bfs)+20), lwd = 1, pch = 19,
+     main = 'Bayes Factors from RJMCMC: M1 (Base) vs M2 (SSE) Baseline data',
+     xlab = 'RJMCMC run (each mcmc length = 30k)', ylab = 'Bayes Factor')
+
+plot(seq_along(rj_m1$list_bfs), log(rj_m1$list_bfs),
+     lwd = 1, pch = 19, 
+     ylim = c(min(log(rj_m1$list_bfs))-0.5, max(log(rj_m1$list_bfs))+0.5), 
+     main = 'log(Bayes Factors) from RJMCMC: M1 (Base) vs M2 (SSE) Baseline data',
+     xlab = 'RJMCMC run (each mcmc length = 30k)', ylab = 'log(Bayes Factor)')
+
+plot(seq_along(rj_m1$list_bfs), log(rj_m1$list_bfs)) #, log = "y")
+
+
+plot(seq_along(rj_m1$list_bc0), rj_m1$list_bc0)
+
+#***********************************************************************
+#SSEB -- RUN MULTIPLE
+#***********************************************************************
+run = 1 
+#SSEB CREATE OUTPUT FOLDER
+OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/rjmcmc_sseb1"
+CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run)
+CURRENT_OUTPUT_FOLDER
+
+ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
+       dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
+
+rj_m2 = RUN_RJMCMC_MULT(data_sseb1, CURRENT_OUTPUT_FOLDER)
+
+
 #***************************
-#* Inspect output
+#* RUN SINGLE
 #***************************
 i = 1; r0_sim = 1.6
 rj_base1 = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/rjmcmc', i, '.rds' ))
@@ -162,17 +195,3 @@ PLOT_SSB_MCMC_REAL_DATA(dataI, rj_base_run2, n_mcmc, true_r0)
 
 #SAVE
 #saveRDS(rj_sseb1, file = paste0(CURRENT_OUTPUT_FOLDER, '/rj_sseb1', seedX, '.rds' ))
-
-
-#***********************************************************************
-#SSEB
-#***********************************************************************
-
-#SSEB CREATE OUTPUT FOLDER
-OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/rjmcmc_sseb1"
-CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', seedX)
-
-ifelse(!dir.exists(file.path(CURRENT_OUTPUT_FOLDER)),
-       dir.create(file.path(CURRENT_OUTPUT_FOLDER), recursive = TRUE), FALSE)
-
-rj_m2 = RUN_RJMCMC_MULT(data_sseb1, CURRENT_OUTPUT_FOLDER)
