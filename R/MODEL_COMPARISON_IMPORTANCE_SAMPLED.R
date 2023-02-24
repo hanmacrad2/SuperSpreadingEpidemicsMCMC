@@ -1,5 +1,7 @@
 #Model Comparison - Importance Sampled
 
+#'Model evidence estimator via importance sampling'
+
 #LIBRARIES
 library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
@@ -34,22 +36,15 @@ LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 
   p_hat_est = sum_estimate/n_samples
 }
 
-#******************************
-#* 1. APPLY WITH MCMC OUTPUT BASELINE
-#******************************
-
-
-#******************
+#************************************
 #* 2. APPLY WITH MCMC OUTPUT BASELINE
-#******************
+#************************************
 #Do multiple runs over the weekend 
 
-
-#******************
+#***************************
 #* APPLY FUNCTION WITH TOY EXAMPLE
-#******************
+#***************************
 
-#Trial
 alpha = c(0.8, 0.81, 0.805, 0.9, 0.10)
 beta = c(0.02, 0.025, 0.03, 0.5, 0.6)
 gamma = c(10, 10.2, 10.1, 11, 12)
@@ -57,6 +52,9 @@ mcmc_samples = matrix(c(alpha, beta, gamma), ncol = 3)
 lambda_vec = get_lambda(data_baseI)
 
 phat1 = ESTIMATE_MODEL_EVIDENCE(mcmc_samples, data_baseI)
+
+
+
 
 #******************
 #* TOY EXAMPLE
