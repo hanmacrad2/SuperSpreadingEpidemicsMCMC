@@ -1,0 +1,9 @@
+#APPLICATION OF MODEL EVIDENCE ESTIMATE (VIA IMPORTANCE SAMPLING)
+
+#TO DO
+
+#1. LOAD IN MCMC 
+mcmc = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/rjmcmc', i, '.rds' ))
+PLOT_SSEB_RJMCMC(data_sseb1, rj_sse10, n_mcmc)
+
+#2. CALCULATE PHAT
