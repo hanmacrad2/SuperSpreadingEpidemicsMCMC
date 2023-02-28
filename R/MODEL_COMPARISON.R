@@ -121,6 +121,7 @@ RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 10){
 
 #MODEL COMPARISON VIA POSTERIOR MODEL PROBABILITIES
 #Add Do all calculations on log scale and take exp as final step 
+#(Not one 8th)
 #0.5*base_model/(0.5*base_model + (1/8)*S + (1/8)*m2 + (1/8)*m3 + (1/8)*m4)  #An 1/8 for each of 4 other models
 
 #Check

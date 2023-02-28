@@ -13,6 +13,12 @@ get_time <- function(start_time, end_time, show = TRUE){
   time_elap
 }
 
+#FOLDER CREATION
+create_folder <- function(folder_name){
+  
+  ifelse(!dir.exists(file.path(folder_name)),
+         dir.create(file.path(folder_name), recursive = TRUE), FALSE)
+}
 
 #'Log-sum-exp of a vector
 #'
