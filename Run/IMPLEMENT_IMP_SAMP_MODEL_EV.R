@@ -37,6 +37,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
+      
       #MCMC SAMPLES
       if(FLAGS_LIST$SSEB){
         mcmc_samples = MCMC_INFER_SSEB(epidemic_data)
@@ -44,6 +45,13 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
       } else if (FLAGS_LIST$SSIB){
         mcmc_samples = SSI_MCMC_ADAPTIVE(epidemic_data)
         saveRDS(mcmc_samples, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
+      } else if (FLAGS_LIST$SSIC){
+        mcmc_samples = MCMC_INFER_SSIC(epidemic_data)
+        saveRDS(mcmc_samples, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssic_', i )) 
+        
+      } else if (FLAGS_LIST$SSEC) {
+        mcmc_samples = SSI_MCMC_ADAPTIVE(epidemic_data)
+        saveRDS(mcmc_samples, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssec_', i )) 
       }
 
       #GET PHAT ESTIMATE OF MODEL EVIDENCE

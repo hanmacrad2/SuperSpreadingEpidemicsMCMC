@@ -6,6 +6,10 @@ library(SuperSpreadingEpidemicsMCMC)
 library(compositions)
 #library(mvtnorm)
 
+#***************************************
+#1. GET IMPORTANCE SAMPLING PROPOSAL
+#***************************************
+
 #*****************
 GET_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
                                    n_samples) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
@@ -23,9 +27,6 @@ GET_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors =
   return(imp_samp_comps)
 }
 
-#***************************************
-#1B. GET IMPORTANCE SAMPLING PROPOSAL
-#***************************************
 GET_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, #priors = 
                                    n_samples) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
   
@@ -45,7 +46,6 @@ GET_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, #priors =
   
   return(imp_samp_comps)
 }
-
 
 #***************************************************
 #* GET MODEL EVIDENCE ESTIMATES VIA IMPORTANCE SAMPLING
@@ -93,7 +93,7 @@ GET_IMP_SAMP_MODEL_EV_BASE <-function(mcmc_samples, epidemic_data, n_samples = 1
 }
 
 #**********************************************
-#* 2. PHAT SSEB & SSIB MODELS
+#* 2. PHAT SSEB 
 GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -125,6 +125,9 @@ GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 1
   
   return(p_hat_est)
 }
+
+#***************
+#* PHAT SSIB
 
 GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(FLAG_SSEB = TRUE,

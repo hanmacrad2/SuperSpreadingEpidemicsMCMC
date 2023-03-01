@@ -71,7 +71,7 @@ LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
 #********************************************************
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
-MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER, seed_count,
+MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER = 'Results/SSIC/', seed_count = 1,
                               mcmc_inputs = list(n_mcmc = 20000, #00,
                                                  mod_start_points = c(1.2, 0.16),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
