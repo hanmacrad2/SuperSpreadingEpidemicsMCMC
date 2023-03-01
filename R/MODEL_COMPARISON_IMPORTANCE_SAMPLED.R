@@ -6,45 +6,6 @@ library(SuperSpreadingEpidemicsMCMC)
 library(compositions)
 #library(mvtnorm)
 
-#**********
-#*LOG LIKELIHOOD
-LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
-  
-  #Params
-  num_days = length(x); logl = 0
-  
-  for (t in 2:num_days) {
-    
-    #Time
-    #print(paste0('time =', t))
-    #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    inner_sum_xt = 0
-    term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
-    #print(paste0('term1 =', term1)); print(paste0('term2 =', term2))
-    
-    for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
-      
-      #Log likelihood
-      st = x[t] - nt
-      prob_st =  PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
-      if (is.na(prob_st)){
-        print(paste0('prob_st  =', prob_st))
-        print(paste0('nt  =', nt))
-        print(paste0('alphaX  =', alphaX))
-        print(paste0('betaX  =', betaX))
-        print(paste0('gammaX  =', gammaX))
-      }
-      
-      inner_sum_xt = inner_sum_xt + 
-        term1*(term2)^nt*(1/factorial(nt))*prob_st
-    } 
-    #print(paste0('log(inner_sum_xt)  =', log(inner_sum_xt) ))
-    logl = logl + log(inner_sum_xt) 
-  }
-  
-  return(logl)
-}
-
 #*****************
 GET_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
                                    n_samples) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
@@ -91,7 +52,7 @@ GET_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, #priors =
 #*****************************************************
 
 #**********************************************
-#* PHAT SSEB MODEL
+#* 1. PHAT BASE MODEL
 GET_IMP_SAMP_MODEL_EV_BASE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -132,7 +93,7 @@ GET_IMP_SAMP_MODEL_EV_BASE <-function(mcmc_samples, epidemic_data, n_samples = 1
 }
 
 #**********************************************
-#* PHAT SSEB MODEL
+#* 2. PHAT SSEB & SSIB MODELS
 GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -166,18 +127,27 @@ GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 1
 }
 
 GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data, 
-                                     flag_SSEB = TRUE, n_samples = 10000) {
+                                     FLAGS_LIST = list(FLAG_SSEB = TRUE,
+                                                       FLAG_SSIB = FALSE, FLAG_SSIC = FALSE),
+                                     n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
+  sum_estimate = 0
   imp_samp_comps = GET_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples
   proposal = imp_samp_comps$proposal
   
   #PRIORS 
-  priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1)) #LOGS
+  if (FLAGS_LIST$FLAG_SSEB || FLAGS_LIST$FLAG_SSIB) {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
+    lambda_vec = get_lambda(epidemic_data); 
+    
+  } else {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) 
+    infectivity = get_infectious_curve(epidemic_data)
+  }
   
   #MIXTURE
   q_defense_mixture = 0.95*proposal + 0.05*priors
@@ -185,14 +155,20 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
   #LOOP
   for(i in 1:n_samples){
     
-    if(flag_SSEB) {
+    if(FLAGS_LIST$FLAG_SSEB) {
       
       estimate = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                                theta_samples[i, 3])
-    } else {
+      
+    } else if(FLAGS_LIST$FLAG_SSIB) {
       
       estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
                                theta_samples[i, 3])
+      
+    } else if (FLAGS_LIST$FLAG_SSIC) {
+      
+      estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3])
     }
     
     sum_estimate = sum_estimate + estimate + log(priors[i]) - log(q_defense_mixture[i])
@@ -202,4 +178,3 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
   
   return(p_hat_est)
 }
-

@@ -70,7 +70,7 @@ get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   return(lambda_vec)
 }
 #GET INFECTIVITY
-get_infectivity <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
+get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
   '#Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between '
   #Parameters

@@ -100,7 +100,7 @@ MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER, seed_count,
   }
   
   #MODEL PARAMETERS
-  infectivity_vec = get_infectivity(epidemic_data)
+  infectivity_vec = get_infectious_curve(epidemic_data)
   eta = epidemic_data; eta_matrix = matrix(NA, mcmc_vec_size, num_days); 
   ssic_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
   ssic_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssic_params = ssic_params_matrix[1,] #2x1 #as.matrix
