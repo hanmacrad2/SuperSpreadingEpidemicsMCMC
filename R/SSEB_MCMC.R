@@ -89,7 +89,7 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
                                          alpha_star = 0.4, thinning_factor = 10), 

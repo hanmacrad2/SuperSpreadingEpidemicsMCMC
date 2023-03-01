@@ -165,3 +165,41 @@ GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 1
   return(p_hat_est)
 }
 
+GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data, 
+                                     flag_SSEB = TRUE, n_samples = 10000) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
+  imp_samp_comps = GET_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples
+  proposal = imp_samp_comps$proposal
+  
+  #PRIORS 
+  priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1)) #LOGS
+  
+  #MIXTURE
+  q_defense_mixture = 0.95*proposal + 0.05*priors
+  
+  #LOOP
+  for(i in 1:n_samples){
+    
+    if(flag_SSEB) {
+      
+      estimate = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                               theta_samples[i, 3])
+    } else {
+      
+      estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                               theta_samples[i, 3])
+    }
+    
+    sum_estimate = sum_estimate + estimate + log(priors[i]) - log(q_defense_mixture[i])
+  }
+  
+  p_hat_est = sum_estimate/n_samples
+  
+  return(p_hat_est)
+}
+
