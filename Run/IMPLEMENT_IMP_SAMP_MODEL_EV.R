@@ -1,20 +1,25 @@
 #IMPLEMENT MODEL EVIDENCE VIA IMPORTANCE SAMPLING 
 library(SuperSpreadingEpidemicsMCMC)
 
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+
 #***********************
-# 1. RUN AUTOMATICALLY 
+# 1. BASE DATA (RUN AUTOMATICALLY)
 #**********************
 
-#FOLDER SAVE
-OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/SSIB"
+#1. Data
+BASE_DATA_LOC = paste0(OUTER_FOLDER, 'BASE_DATA/')
+data_baseI = readRDS(file = paste0(BASE_DATA_LOC, 'epi_data_base_1.rds'))
 
-#SSIB
+#FOLDER SAVE (SSIB)
+OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSIB/')
+
+#SSIB(SSIB = TRUE)
 RUN_MCMC_MODEL_EV_IMP_SAMP(data_baseI, OUTPUT_FOLDER)
 
-
-#********************#*******
+#***************************
 # 2. MANUAL ITERATION
-#********************#*******
+#***************************
 
 #ITERATION
 run = 1

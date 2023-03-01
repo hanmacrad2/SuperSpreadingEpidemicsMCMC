@@ -130,8 +130,8 @@ GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 1
 #* PHAT SSIB
 
 GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data, 
-                                     FLAGS_LIST = list(FLAG_SSEB = TRUE,
-                                                       FLAG_SSIB = FALSE, FLAG_SSIC = FALSE),
+                                     FLAGS_LIST = list(SSEB = FALSE,
+                                                       SSIB = TRUE, SSIC = FALSE),
                                      n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -143,7 +143,7 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
   proposal = imp_samp_comps$proposal
   
   #PRIORS 
-  if (FLAGS_LIST$FLAG_SSEB || FLAGS_LIST$FLAG_SSIB) {
+  if (FLAGS_LIST$SSEB | FLAGS_LIST$SSIB) {
     priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
     lambda_vec = get_lambda(epidemic_data); 
     
@@ -158,17 +158,17 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
   #LOOP
   for(i in 1:n_samples){
     
-    if(FLAGS_LIST$FLAG_SSEB) {
+    if(FLAGS_LIST$SSEB) {
       
       estimate = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                                theta_samples[i, 3])
       
-    } else if(FLAGS_LIST$FLAG_SSIB) {
+    } else if(FLAGS_LIST$SSIB) {
       
       estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
                                theta_samples[i, 3])
       
-    } else if (FLAGS_LIST$FLAG_SSIC) {
+    } else if (FLAGS_LIST$SSIC) {
       
       estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
                               theta_samples[i, 3])
@@ -187,8 +187,8 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
 # 1. RUN AUTOMATICALLY 
 #******************************************************************************
 RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
-                                       FLAGS_LIST = list(FLAG_BASE = FALSE, FLAG_SSEB = FALSE,
-                                                         FLAG_SSIB = TRUE, FLAG_SSIC = FALSE)){
+                                       FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
+                                                         SSIB = TRUE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Run mcmc 2. Get estimate'
@@ -200,7 +200,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
   #Parameters
   estimates_vec = c()
   
-  if (FLAGS_LIST$FLAG_BASE){
+  if (FLAGS_LIST$BASE){
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
@@ -226,9 +226,9 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
         mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
           
       } else if (FLAGS_LIST$SSIB){
-        mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
+        mcmc_output = MCMC_INFER_SSIB(epidemic_data)
         saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
-        mcmc_samples =  matrix(c(mcmc_sseb$a_vec, mcmc_sseb$b_vec, mcmc_sseb$c_vec), ncol = 3)
+        mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
         
       } else if (FLAGS_LIST$SSIC){
         mcmc_output = MCMC_INFER_SSIC(epidemic_data)

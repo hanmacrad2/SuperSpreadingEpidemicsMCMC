@@ -100,8 +100,8 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
-SSI_MCMC_ADAPTIVE <- function(data,
-                              mcmc_inputs = list(n_mcmc = 500000,
+MCMC_INFER_SSIB <- function(data,
+                              mcmc_inputs = list(n_mcmc = 30000,
                                                  mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
@@ -224,7 +224,7 @@ SSI_MCMC_ADAPTIVE <- function(data,
       sigma1 =  sigma1*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
 
-    #************************************************************************ Only if (b > 0){ ?
+    #************************************************************************ Only if (b > 0) ?
     #b
     b_dash <- b + rnorm(1, sd = sigma2)
     if(b_dash < 0){
