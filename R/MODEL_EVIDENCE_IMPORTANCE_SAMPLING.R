@@ -256,3 +256,75 @@ OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparis
 
 #APPLY
 RUN_MCMC_MODEL_EV_IMP_SAMP(epidemic_data, OUTPUT_FOLDER)
+
+
+#**************************
+#* LOAD_MCMC_GET_P_EST
+
+LOAD_MCMC_GET_P_EST <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
+                                       FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
+                                                         SSIB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  Get importance sampling estimate of model evidence. 
+  1. Run mcmc 2. Get estimate'
+  
+  #FOLDER
+  CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run)
+  create_folder(CURRENT_OUTPUT_FOLDER)
+  
+  #Parameters
+  estimates_vec = c()
+  
+  if (FLAGS_LIST$BASE){
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      #READ SAMPLES
+      mcmc_samples = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base_', i ))
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_IMP_SAMP_MODEL_EV_BASE(mcmc_samples$r0_vec, epidemic_data) 
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+    }
+    #SAVE ESTIMATES
+    
+  } else if(FLAGS_LIST$SSEB){
+      print('sseb')
+      for (i in 1:n_repeats){
+        
+        print(paste0('i = ', i))
+        mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
+        mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+        
+        #GET PHAT ESTIMATE OF MODEL EVIDENCE
+        phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
+        estimates_vec[i] = phat_estimate
+        print(estimates_vec)
+        
+      }
+      
+      #SAVE ESTIMATES
+      saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_vec', i ))
+        
+      } else if (FLAGS_LIST$SSIB){
+        
+          for (i in 1:n_repeats){
+            
+            print(paste0('i = ', i))
+            mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
+            mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
+            
+            #GET PHAT ESTIMATE OF MODEL EVIDENCE
+            phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
+            estimates_vec[i] = phat_estimate
+            print(estimates_vec)
+            
+          }
+          
+          #SAVE ESTIMATES
+          saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_vec', i ))
+        
+      }
+  
+  return(estimates_vec) 
+}
