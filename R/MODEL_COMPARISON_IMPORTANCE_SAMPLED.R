@@ -211,7 +211,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_IMP_SAMP_MODEL_EV_BASE(mcmc_samples$r0_vec, epidemic_data) 
       estimates_vec[i] = phat_estimate
-      print(ests_base)
+      print(estimates_vec)
     }
   } else {
     
@@ -244,11 +244,11 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
       estimates_vec[i] = phat_estimate
-      print(ests_base)
+      print(estimates_vec)
     }
     
   }
-  
+ return(estimates_vec) 
 }
 
 #FOLDER SAVE
