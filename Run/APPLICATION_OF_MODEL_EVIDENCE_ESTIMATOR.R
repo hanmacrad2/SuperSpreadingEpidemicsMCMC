@@ -12,7 +12,6 @@ PLOT_SSEB_RJMCMC(data_sseb1, rj_sse10, n_mcmc)
 
 
 
-
 #MULTIVARIATE LOG NORMAL
 #NOT MULTI-VARIATE
 #multivariable log normal

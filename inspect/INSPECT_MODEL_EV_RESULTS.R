@@ -1,8 +1,11 @@
 #INSPECT MODEL EVIDENCE RESULTS
 #*MAKE FUNCTION
 
-#LOG of Bayes Factors
-log_bfs1 = 0.5*ests_base - 0.5*ests_base - 0.25*ests_sseb - 0.25*ests_ssib
+#LOG of Bayes
+log_bfs1 = log(0.5) + ests_base - log(0.5) - ests_base - log(0.25) - ests_sseb - log(0.25) - ests_ssib
+log_bfs1
+
+#log_bfs1 = 0.5*ests_base - 0.5*ests_base - 0.25*ests_sseb - 0.25*ests_ssib
 
 #Log bfs (recipricol)
 log_bfs2 = 0.25*ests_sseb + 0.25*ests_ssib - 0.5*ests_base- 0.25*ests_sseb - 0.25*ests_ssib

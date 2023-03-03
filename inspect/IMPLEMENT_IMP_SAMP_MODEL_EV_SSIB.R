@@ -27,7 +27,29 @@ ests_phat_base = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = lis
 
 ests_phat_sseb = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
+      
+#*******************
+#* 3 BAYES FACTORS
+#*********************
+log_bfs1 = log(0.5) + ests_phat_base - log(0.5) - ests_phat_base -log(0.25) - ests_phat_sseb - log(0.25) - ests_phat_ssib
+log_bfs1
 
+#LOG PLOTS
+plot(seq_along(log_bfs1), log_bfs1,
+     #ylim = c(min(log_bfs1)-0.05, max(log_bfs1)+0.05), #lwd = 1, pch = 19,
+     main = 'Log Model Evidence. Base data. Equal priors Base vs SS',
+     xlab = 'rep', ylab = 'Ratio of Model evidences')
+
+#Log bfs (recipricol)
+log_bfs2 = 2*log(0.25) + ests_phat_sseb + ests_phat_ssib - log(0.5) -2*log(0.25) - ests_phat_base -ests_phat_sseb  - ests_phat_ssib
+
+plot(seq_along(log_bfs2), log_bfs2,
+     ylim = c(min(log_bfs2)-0.05, max(log_bfs2)+0.05), #lwd = 1, pch = 19,
+     main = 'Log Model Evidence (Reciprocal). Base data. Equal priors SS vs Base',
+     xlab = 'rep', ylab = 'Ratio of Model evidences')
+
+#log_bfs2 = 0.25*ests_sseb + 0.25*ests_ssib - 0.5*ests_base- 0.25*ests_sseb - 0.25*ests_ssib                                                                                 
+                                                                                                                                                     
 #***************************
 # 3. MANUAL ITERATION
 #***************************
@@ -153,9 +175,6 @@ beta = c(0.02, 0.025, 0.03, 0.5, 0.6)
 gamma = c(10, 10.2, 10.1, 11, 12)
 mcmc_samples = matrix(c(alpha, beta, gamma), ncol = 3)
 
-rlnorm.rplus(100,log(mean(mcmc_samples)),cov(mcmc_samples))
-dlnorm.rplus(x,log(mean(mcmc_samples)), cov(mcmc_samples))
-imp_samp_comps1 = GET_PROPOSAL_MULTI_DIM(mcmc_samples, data_baseI) 
 
 #ESTIMATE
 phat1 = GET_IMP_SAMP_MODEL_EV_SSEB(mcmc_samples, data_baseI) #NA
