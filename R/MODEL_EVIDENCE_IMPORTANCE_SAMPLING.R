@@ -48,7 +48,7 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = 3, log = FALSE)
   prior = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
   q = 0.95*proposal + 0.05*prior
-  log_q = LOG_SUM_EXP(q)
+  log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
   return(imp_samp_comps) #log_q 
@@ -56,8 +56,8 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
 
 #P HAT FOR MODEL I
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
-                                     FLAGS_LIST = list(SSEB = FALSE,
-                                                       SSIB = TRUE, SSIC = FALSE),
+                                     FLAGS_LIST = list(SSEB = TRUE,
+                                                       SSIB = FALSE, SSIC = FALSE),
                                      n_samples = 100) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -65,8 +65,9 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
   #PARAMS
   sum_estimate = 0
   imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
-  theta_samples = imp_samp_comps$theta_samples
+  theta_samples = imp_samp_comps$theta_samples #Some samples could be negative
   log_q = imp_samp_comps$log_q
+  print(theta_samples); print(log_q)
   
   #PRIORS 
   if (FLAGS_LIST$SSEB | FLAGS_LIST$SSIB) {
@@ -78,38 +79,28 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
     infectivity = get_infectious_curve(epidemic_data)
   }
   
-  #MIXTURE
-  #q_defense_mixture = 0.95*proposal + 0.05*priors
-  
-  #LOOP
+  #LOG SUM EXP (LOOP)
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
     
     if(FLAGS_LIST$SSEB) {
       
-      estimate = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                               theta_samples[i, 3])
-      vector_log_sum_exp[i] = estimate
+      vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                               theta_samples[i, 3]) + log(priors[i]) - log_q
       
     } else if(FLAGS_LIST$SSIB) {
       
-      estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3])
-      vector_log_sum_exp[i] = estimate
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3]) + log(priors[i]) - log_q
       
     } else if (FLAGS_LIST$SSIC) {
       
-      estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3])
-      vector_log_sum_exp[i] = estimate
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3]) + log(priors[i]) - log_q
     }
-    
-    #sum_estimate = sum_estimate + estimate + log(priors[i]) - log(q_defense_mixture[i])
   }
-  
+
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
-    
-  #p_hat_est = sum_estimate/n_samples
   
   return(log_p_hat)
 }
