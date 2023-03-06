@@ -11,20 +11,27 @@ library(mvtnorm)
 #***************************************
 
 #*******************************************
-GET_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
-                                 n_samples) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
+GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
+                                 n_samples, num_dims = 1) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
   samp_size_proposal = round(0.95*n_samples); samp_size_prior =  n_samples - samp_size_proposal
   
-  #PROPOSAL 
-  theta_samples = rlnorm(n_samples, log(mean(mcmc_samples)), sd(mcmc_samples))
-  matrix(c(rexp(100), rexp(100), rexp(100)), ncol = 3)
+  #*******
+  #THETA SAMPLES: PROPOSAL + PRIOR
+  means = colMeans(mcmc_samples)
+  theta_samples_proposal = rt(samp_size_proposal, df = num_dims) + means 
+  theta_samples_prior = c(rexp(samp_size_prior))
+  theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
-  proposal = dlnorm(theta_samples, log(mean(mcmc_samples)), sd(mcmc_samples))
-  imp_samp_comps = list(theta_samples = theta_samples, proposal = proposal)
+  #DEFENSE MIXTURE
+  proposal = dt(theta_samples - means, df = num_dims, log = FALSE)
+  prior = dexp(theta_samples[,1])
+  q = 0.95*proposal + 0.05*prior
+  log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
+  imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
   return(imp_samp_comps)
 }
@@ -54,7 +61,36 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   return(imp_samp_comps) #log_q 
 }
 
-#P HAT FOR MODEL I
+#****************
+#* 1. PHAT BASE MODEL
+GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  sum_estimate = 0
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples 
+  log_q = imp_samp_comps$log_q
+  
+  #PRIORS 
+  priors = dexp(theta_samples) 
+
+  #LOG SUM EXP (LOOP)
+  vector_log_sum_exp = c()
+  for(i in 1:n_samples){
+    
+    vector_log_sum_exp[i] = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i]) +
+      log(priors[i]) - log_q
+  }
+  
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
+  
+  return(log_p_hat)
+}
+
+#****************
+#* MULTI PARAM MODELS -- P HAT FOR MODEL I
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(SSEB = TRUE,
                                                        SSIB = FALSE, SSIC = FALSE),
@@ -67,10 +103,11 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
   imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples #Some samples could be negative
   log_q = imp_samp_comps$log_q
-  print(theta_samples); print(log_q)
   
   #PRIORS 
   if (FLAGS_LIST$SSEB | FLAGS_LIST$SSIB) {
+    print(FLAGS_LIST$SSEB)
+    print(FLAGS_LIST$SSIB)
     priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
     lambda_vec = get_lambda(epidemic_data); 
     
@@ -105,23 +142,183 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
   return(log_p_hat)
 }
 
+#SSEB
+phat_sseb = GET_LOG_P_HAT(mcmc_samples, data_baseI)
+
+#Base
+phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
+
+#SSIB
+phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,
+                                                                      SSIC = FALSE))
+phat_ssib
+
+
+#*********************
+#* 2. GET POSTERIOR MODEL PROBABILITIES
+#* **********************
+GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
+                                     probs_models = list(prob_mech1 = 0.5, prob_mech2 = 0.25), #mech = mechanism; baseline or sse
+                                     log_phats = list(mod1 = mod1,
+                                                           mod2 = mod2, mod3 = mod3)){ #mod4 = mod4
+  
+  #PARAMS
+  vec_model_diffs = c()
+  
+  for(i in 2:length(num_models)){
+    print(paste0('i = ', i))
+    vec_model_diffs[i-1] = exp(log(probs_models[[2]]) + log_phats[[i]] -
+                                 log(probs_models[[1]]) - log_phats[[1]])
+  }
+  
+  posterior_prob =  1/(1 + sum(vec_model_diffs))
+  
+  return(posterior_prob)
+}
+
+
 #APPLY
-phat = GET_LOG_P_HAT(mcmc_samples, data_baseI)
+post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = mod1, mod2 = mod2, mod3 = phat_ssib, mod4 = mod4))
 
 
 
 
+GET_POSTERIOR_MODEL_PROB <- function(list_probs = list(prob_base = 0.5, prob_ss = 0.25),
+                                     list_log_phats = list(base = base,
+                                  sseb = sseb, ssib = ssib, ssic = ssic)){
+  
+  
+  denom = exp( log(prob_ss) + phat_sseb - log(prob_base) -
+                 phat_base) + exp( log(prob_ss) + phat_ssib - log(prob_base) - phat_base)
+  post_prob_base = 1/(1 + denom)
+  
+  
+}
 
 
+#TRIAL CODE
+vec_model_diffs = c(); sum_model_diffs = 0
+
+prob_ss = 0.25; prob_base = 0.5 #Set in function def
+
+#Base
+denom = exp( log(prob_ss) + phat_sseb - log(prob_base) -
+               phat_base) + exp( log(prob_ss) + phat_ssib - log(prob_base) - phat_base)
+post_prob_base = 1/(1 + denom)
+
+for(i in 1:num_models-1){
+  vec_model_diffs = exp()
+}
 
 
+# DELETE?
+
+GET_POSTERIOR_MODEL_PROB  <-function(mcmc_samples, epidemic_data, 
+                                     list_mod_ev = list(mod_ev_base = mod_ev_base,
+                                                        mod_ev_sseb = mod_ev_sseb, mod_ev_ssib = mod_ev_ssib)
+                                     FLAGS_LIST = list(BASELINE = TRUE, SSEB = FALSE,
+                                                       SSIB = FALSE, SSIC = FALSE),
+                                     n_samples = 100) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  vec_model_diffs = c()
+  
+  for(i in 1:num_models-1){
+    vec_model_diffs = exp()
+  }
+  
+  #PARAMS
+  sum_estimate = 0
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples #Some samples could be negative
+  log_q = imp_samp_comps$log_q
+  
+  #PRIORS 
+  if (FLAGS_LIST$SSEB | FLAGS_LIST$SSIB) {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
+    lambda_vec = get_lambda(epidemic_data); 
+    
+  } else {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) 
+    infectivity = get_infectious_curve(epidemic_data)
+  }
+  
+  #LOG SUM EXP (LOOP)
+  vector_log_sum_exp = c()
+  for(i in 1:n_samples){
+    
+    if(FLAGS_LIST$SSEB) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                                            theta_samples[i, 3]) + log(priors[i]) - log_q
+      
+    } else if(FLAGS_LIST$SSIB) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
+      
+    } else if (FLAGS_LIST$SSIC) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
+    }
+  }
+  
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
+  
+  return(log_p_hat)
+}
 
 
-
-
-
-
-
+GET_POSTERIOR_MODEL_PROB  <-function(mcmc_samples, epidemic_data, 
+                         FLAGS_LIST = list(BASELINE = TRUE, SSEB = FALSE,
+                                           SSIB = FALSE, SSIC = FALSE),
+                         n_samples = 100) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  sum_estimate = 0
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples #Some samples could be negative
+  log_q = imp_samp_comps$log_q
+  
+  #PRIORS 
+  if (FLAGS_LIST$SSEB | FLAGS_LIST$SSIB) {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
+    lambda_vec = get_lambda(epidemic_data); 
+    
+  } else {
+    priors = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) 
+    infectivity = get_infectious_curve(epidemic_data)
+  }
+  
+  #LOG SUM EXP (LOOP)
+  vector_log_sum_exp = c()
+  for(i in 1:n_samples){
+    
+    if(FLAGS_LIST$SSEB) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                                            theta_samples[i, 3]) + log(priors[i]) - log_q
+      
+    } else if(FLAGS_LIST$SSIB) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
+      
+    } else if (FLAGS_LIST$SSIC) {
+      
+      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
+    }
+  }
+  
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
+  
+  return(log_p_hat)
+}
 
 
 
@@ -133,46 +330,6 @@ phat = GET_LOG_P_HAT(mcmc_samples, data_baseI)
 #* GET MODEL EVIDENCE ESTIMATES VIA IMPORTANCE SAMPLING
 #*****************************************************
 
-#**********************************************
-#* 1. PHAT BASE MODEL
-GET_IMP_SAMP_MODEL_EV_BASE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
-  
-  'Estimate of model evidence for SSEB model using Importance Sampling'
-  
-  #PARAMS
-  sum_estimate = 0
-  imp_samp_comps = GET_PROPOSAL_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
-  theta_samples = imp_samp_comps$theta_samples
-  proposal = imp_samp_comps$proposal
-  
-  #PRIORS 
-  priors = dexp(theta_samples)  #dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1)) #LOGS
-  
-  #MIXTURE
-  q_defense_mixture = 0.95*proposal + 0.05*priors
-  
-  #LOOP
-  for(i in 1:n_samples){
-    
-    estimate = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i]) +
-      log(priors[i]) - log(q_defense_mixture[i])
-    
-    if(is.infinite(estimate)){
-      print('yes infinite')
-      print(paste0('LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])', LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])))
-      print(paste0('log(priors[i])', log(priors[i])))
-      print(paste0('theta_samples[i]', theta_samples[i]))
-      print(paste0('log(q_defense_mixture[i])', log(q_defense_mixture[i])))
-    }
-    
-    #print(estimate)
-    sum_estimate = sum_estimate + estimate
-  }
-  
-  p_hat_est = sum_estimate/n_samples
-  
-  return(p_hat_est)
-}
 
 #**********************************************
 #* 2. PHAT SSEB 
