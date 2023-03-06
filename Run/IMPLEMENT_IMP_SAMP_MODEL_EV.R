@@ -1,6 +1,5 @@
 #IMPLEMENT MODEL EVIDENCE VIA IMPORTANCE SAMPLING 
 library(SuperSpreadingEpidemicsMCMC)
-
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 
 #***********************
@@ -12,22 +11,35 @@ BASE_DATA_LOC = paste0(OUTER_FOLDER, 'BASE_DATA/')
 data_baseI = readRDS(file = paste0(BASE_DATA_LOC, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
 
-#FOLDER SAVE (SSIB)
+#***************************
+# 2. LOAD MCMC & GET MULTIPLE PHAT
+#***************************
 OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSEB/')
-
-#SSIB(SSIB = TRUE)
-RUN_MCMC_MODEL_EV_IMP_SAMP(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
-                                                                        SSIB = TRUE, SSIC = FALSE))
-
-#***************************
-# 2. LOAD MCMC & GET PHAT
-#***************************
-ests_phat_base = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
-                                                                     SSIB = FALSE, SSIC = FALSE))
-
-ests_phat_sseb = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
+ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
+                                     FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
-      
+OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'BASE/')
+ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
+                                     FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
+                                                       SSIB = FALSE, SSIC = FALSE))
+
+OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSIB/')
+ests_phat_ssib = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
+                                     FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
+                                                       SSIB = TRUE, SSIC = FALSE))
+
+#***************************
+# 3. GET POSTERIOR MODEL PROBABILITIES (PLOT) USE MULTIPLE PHATS
+#***************************
+post_probs_base = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+
+post_probs_sseb = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+
+post_probs_ssib = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+
+#*************
+#* WRONG
+
 #*******************
 #* 3 BAYES FACTORS
 #*********************
@@ -201,6 +213,9 @@ plot(seq_along(ests), ests,
 
 
 #SSIB RESULTS
+RUN_MCMC_MODEL_EV_IMP_SAMP(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
+                                                                        SSIB = TRUE, SSIC = FALSE))
+
 ests_phat_ssib = c(-17.97085, -17.02987, -17.66838, -17.88493, -16.89313, -17.44772, -18.76960, -17.65383,
               -18.59628, -17.03140, -16.74319, -17.76785, -17.46280, -17.16593, -18.31888, -17.84318,
               -16.95889, -17.51474, -17.38049, -17.59530, -18.18540, -17.35371, -17.78427, -18.00840,

@@ -66,8 +66,7 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
 #* 2. GET LOG P_HATS 
 #*
 #**************************
-
-GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) {
+GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -84,6 +83,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) 
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
     
+    print(paste0('i sample = ', i))
     vector_log_sum_exp[i] = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i]) +
       log(priors[i]) - log_q
   }
@@ -98,7 +98,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) 
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(SSEB = TRUE,
                                                        SSIB = FALSE, SSIC = FALSE),
-                                     n_samples = 100) {
+                                     n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -122,6 +122,7 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
     
+    print(paste0('i sample = ', i))
     if(FLAGS_LIST$SSEB) {
       
       vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
@@ -146,17 +147,15 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
 
 #SSEB
 phat_sseb = GET_LOG_P_HAT(mcmc_samples, data_baseI)
-
 #Base
 phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
-
 #SSIB
 phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,
                                                                       SSIC = FALSE))
 
 #*********************************************************
 #*
-#* 3 GET POSTERIOR MODEL PROBABILITIES. #FUNCTION WORKING :D
+#* 3. GET POSTERIOR MODEL PROBABILITIES
 #* 
 #* **********************************************************
 GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
@@ -178,6 +177,25 @@ GET_POSTERIOR_MODEL_PROB <- function(num_models = 3,
   return(posterior_prob)
 }
 
+#*
+GET_AGGREGATE_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
+                                     probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                     list_log_phats = list(mod1 = mod1,
+                                                      list_mod2 = mod2, mod3 = mod3)){ 
+  
+  #PARAMS
+  vec_model_diffs = c()
+  
+  for(i in 2:num_models){
+    print(paste0('i = ', i))
+    vec_model_diffs[i-1] = exp(log(probs_models[[2]]) + log_phats[[i]] -
+                                 log(probs_models[[1]]) - log_phats[[1]])
+  }
+  
+  posterior_prob =  1/(1 + sum(vec_model_diffs))
+  
+  return(posterior_prob)
+}
 
 #APPLY
 post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
