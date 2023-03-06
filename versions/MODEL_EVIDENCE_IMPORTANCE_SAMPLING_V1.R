@@ -12,7 +12,7 @@ library(mvtnorm)
 
 #*******************************************
 GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
-                                 n_samples, num_dims = 1) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
+                                       n_samples, num_dims = 1) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
@@ -38,7 +38,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors =
 
 #MUTLI DIM PROPOSAL
 GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROPOSAL_MULTI_DIM
-                                   n_samples) {               
+                                         n_samples) {               
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
@@ -75,7 +75,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) 
   
   #PRIORS 
   priors = dexp(theta_samples) 
-
+  
   #LOG SUM EXP (LOOP)
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
@@ -92,9 +92,9 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 100) 
 #****************
 #* MULTI PARAM MODELS -- P HAT FOR MODEL I
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
-                                     FLAGS_LIST = list(SSEB = TRUE,
-                                                       SSIB = FALSE, SSIC = FALSE),
-                                     n_samples = 100) {
+                         FLAGS_LIST = list(SSEB = TRUE,
+                                           SSIB = FALSE, SSIC = FALSE),
+                         n_samples = 100) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -123,20 +123,20 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
     if(FLAGS_LIST$SSEB) {
       
       vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                               theta_samples[i, 3]) + log(priors[i]) - log_q
+                                            theta_samples[i, 3]) + log(priors[i]) - log_q
       
     } else if(FLAGS_LIST$SSIB) {
       
       vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3]) + log(priors[i]) - log_q
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
       
     } else if (FLAGS_LIST$SSIC) {
       
       vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3]) + log(priors[i]) - log_q
+                                           theta_samples[i, 3]) + log(priors[i]) - log_q
     }
   }
-
+  
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
   return(log_p_hat)
@@ -160,7 +160,7 @@ phat_ssib
 GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
                                      probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
                                      log_phats = list(mod1 = mod1,
-                                                           mod2 = mod2, mod3 = mod3)){ 
+                                                      mod2 = mod2, mod3 = mod3)){ 
   
   #PARAMS
   vec_model_diffs = c()
@@ -186,9 +186,11 @@ post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
                                                        mod2 = phat_base, mod3 = phat_ssib))
 post_prob2
 
+
+#TRIAL CODE
 GET_POSTERIOR_MODEL_PROB <- function(list_probs = list(prob_base = 0.5, prob_ss = 0.25),
                                      list_log_phats = list(base = base,
-                                  sseb = sseb, ssib = ssib, ssic = ssic)){
+                                                           sseb = sseb, ssib = ssib, ssic = ssic)){
   
   
   denom = exp( log(prob_ss) + phat_sseb - log(prob_base) -
@@ -198,8 +200,6 @@ GET_POSTERIOR_MODEL_PROB <- function(list_probs = list(prob_base = 0.5, prob_ss 
   
 }
 
-
-#TRIAL CODE
 vec_model_diffs = c(); sum_model_diffs = 0
 
 prob_ss = 0.25; prob_base = 0.5 #Set in function def
@@ -244,7 +244,7 @@ GET_IMP_SAMP_MODEL_EV_SSEB <-function(mcmc_samples, epidemic_data, n_samples = 1
     estimate = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                              theta_samples[i, 3]) +
       log(priors[i]) - log(q_defense_mixture[i])
-
+    
     #print(estimate)
     sum_estimate = sum_estimate + estimate
   }
@@ -294,7 +294,7 @@ GET_IMP_SAMP_MODEL_EV_SSB <-function(mcmc_samples, epidemic_data,
     } else if(FLAGS_LIST$SSIB) {
       
       estimate = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                               theta_samples[i, 3])
+                              theta_samples[i, 3])
       
     } else if (FLAGS_LIST$SSIC) {
       
@@ -352,7 +352,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
         mcmc_output = MCMC_INFER_SSEB(epidemic_data)
         saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
         mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-          
+        
       } else if (FLAGS_LIST$SSIB){
         mcmc_output = MCMC_INFER_SSIB(epidemic_data)
         saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
@@ -363,7 +363,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
         saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssic_', i )) 
         #SSIC_PARAMS + ETA
         #mcmc_samples = mcmc_output$
-          
+        
       } else if (FLAGS_LIST$SSEC) {
         mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
         saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssec_', i )) 
@@ -376,7 +376,7 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
     }
     
   }
- return(estimates_vec) 
+  return(estimates_vec) 
 }
 
 #FOLDER SAVE
@@ -390,8 +390,8 @@ RUN_MCMC_MODEL_EV_IMP_SAMP(epidemic_data, OUTPUT_FOLDER)
 #* LOAD_MCMC_GET_P_EST
 
 LOAD_MCMC_GET_P_EST <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
-                                       FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
-                                                         SSIB = FALSE, SSIC = FALSE)){
+                                FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
+                                                  SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Run mcmc 2. Get estimate'
@@ -417,42 +417,42 @@ LOAD_MCMC_GET_P_EST <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     #SAVE ESTIMATES
     
   } else if(FLAGS_LIST$SSEB){
-      print('sseb')
-      for (i in 1:n_repeats){
-        
-        print(paste0('i = ', i))
-        mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
-        mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-        
-        #GET PHAT ESTIMATE OF MODEL EVIDENCE
-        phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
-        estimates_vec[i] = phat_estimate
-        print(estimates_vec)
-        
-      }
+    print('sseb')
+    for (i in 1:n_repeats){
       
-      #SAVE ESTIMATES
-      saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_vec', i ))
-        
-      } else if (FLAGS_LIST$SSIB){
-        
-          for (i in 1:n_repeats){
-            
-            print(paste0('i = ', i))
-            mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
-            mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
-            
-            #GET PHAT ESTIMATE OF MODEL EVIDENCE
-            phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
-            estimates_vec[i] = phat_estimate
-            print(estimates_vec)
-            
-          }
-          
-          #SAVE ESTIMATES
-          saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_vec', i ))
-        
-      }
+      print(paste0('i = ', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
+      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_vec', i ))
+    
+  } else if (FLAGS_LIST$SSIB){
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
+      mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_vec', i ))
+    
+  }
   
   return(estimates_vec) 
 }

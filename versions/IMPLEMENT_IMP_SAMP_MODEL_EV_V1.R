@@ -10,55 +10,21 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 #1. Data
 BASE_DATA_LOC = paste0(OUTER_FOLDER, 'BASE_DATA/')
 data_baseI = readRDS(file = paste0(BASE_DATA_LOC, 'epi_data_base_1.rds'))
-plot.ts(data_baseI)
 
 #FOLDER SAVE (SSIB)
-OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSEB/')
+OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSIB/')
 
 #SSIB(SSIB = TRUE)
-RUN_MCMC_MODEL_EV_IMP_SAMP(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
-                                                                        SSIB = TRUE, SSIC = FALSE))
+RUN_MCMC_MODEL_EV_IMP_SAMP(data_baseI, OUTPUT_FOLDER)
 
 #***************************
-# 2. LOAD MCMC & GET PHAT
-#***************************
-ests_phat_base = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
-                                                                     SSIB = FALSE, SSIC = FALSE))
-
-ests_phat_sseb = LOAD_MCMC_GET_P_EST(data_baseI, OUTPUT_FOLDER, FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
-                                                                                  SSIB = FALSE, SSIC = FALSE))
-      
-#*******************
-#* 3 BAYES FACTORS
-#*********************
-log_bfs1 = log(0.5) + ests_phat_base - log(0.5) - ests_phat_base -log(0.25) - ests_phat_sseb - log(0.25) - ests_phat_ssib
-log_bfs1
-
-#LOG PLOTS
-plot(seq_along(log_bfs1), log_bfs1,
-     #ylim = c(min(log_bfs1)-0.05, max(log_bfs1)+0.05), #lwd = 1, pch = 19,
-     main = 'Log Model Evidence. Base data. Equal priors Base vs SS',
-     xlab = 'rep', ylab = 'Ratio of Model evidences')
-
-#Log bfs (recipricol)
-log_bfs2 = 2*log(0.25) + ests_phat_sseb + ests_phat_ssib - log(0.5) -2*log(0.25) - ests_phat_base -ests_phat_sseb  - ests_phat_ssib
-
-plot(seq_along(log_bfs2), log_bfs2,
-     ylim = c(min(log_bfs2)-0.05, max(log_bfs2)+0.05), #lwd = 1, pch = 19,
-     main = 'Log Model Evidence (Reciprocal). Base data. Equal priors SS vs Base',
-     xlab = 'rep', ylab = 'Ratio of Model evidences')
-
-#log_bfs2 = 0.25*ests_sseb + 0.25*ests_ssib - 0.5*ests_base- 0.25*ests_sseb - 0.25*ests_ssib                                                                                 
-                                                                                                                                                     
-#***************************
-# 3. MANUAL ITERATION
+# 2. MANUAL ITERATION
 #***************************
 
 #ITERATION
 run = 1
 CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run)
 create_folder(CURRENT_OUTPUT_FOLDER)
-
 
 #***********
 #* 1. BASE
@@ -175,6 +141,9 @@ beta = c(0.02, 0.025, 0.03, 0.5, 0.6)
 gamma = c(10, 10.2, 10.1, 11, 12)
 mcmc_samples = matrix(c(alpha, beta, gamma), ncol = 3)
 
+rlnorm.rplus(100,log(mean(mcmc_samples)),cov(mcmc_samples))
+dlnorm.rplus(x,log(mean(mcmc_samples)), cov(mcmc_samples))
+imp_samp_comps1 = GET_PROPOSAL_MULTI_DIM(mcmc_samples, data_baseI) 
 
 #ESTIMATE
 phat1 = GET_IMP_SAMP_MODEL_EV_SSEB(mcmc_samples, data_baseI) #NA
@@ -201,7 +170,7 @@ plot(seq_along(ests), ests,
 
 
 #SSIB RESULTS
-ests_phat_ssib = c(-17.97085, -17.02987, -17.66838, -17.88493, -16.89313, -17.44772, -18.76960, -17.65383,
+ests_ssib = c(-17.97085, -17.02987, -17.66838, -17.88493, -16.89313, -17.44772, -18.76960, -17.65383,
               -18.59628, -17.03140, -16.74319, -17.76785, -17.46280, -17.16593, -18.31888, -17.84318,
               -16.95889, -17.51474, -17.38049, -17.59530, -18.18540, -17.35371, -17.78427, -18.00840,
               -17.36284, -17.00414, -17.09351, -17.34403, -17.41790, -17.21114, -17.16511, -17.66789,
