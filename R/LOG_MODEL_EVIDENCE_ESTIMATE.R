@@ -21,13 +21,13 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors =
   
   #*******
   #THETA SAMPLES: PROPOSAL + PRIOR
-  means = colMeans(mcmc_samples)
-  theta_samples_proposal = rt(samp_size_proposal, df = num_dims) + means 
+  mean_mcmc = mean(mcmc_samples)
+  theta_samples_proposal = rt(samp_size_proposal, df = num_dims) + mean_mcmc 
   theta_samples_prior = c(rexp(samp_size_prior))
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  proposal = dt(theta_samples - means, df = num_dims, log = FALSE)
+  proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = FALSE)
   prior = dexp(theta_samples[,1])
   q = 0.95*proposal + 0.05*prior
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
@@ -177,24 +177,28 @@ GET_POSTERIOR_MODEL_PROB <- function(num_models = 3,
   return(posterior_prob)
 }
 
-#*
-GET_AGGREGATE_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                     probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
-                                     list_log_phats = list(mod1 = mod1,
-                                                      list_mod2 = mod2, mod3 = mod3)){ 
+# GET_AGGREGATE_POSTERIOR_MODEL_PROB
+GET_AGG_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
+                                               probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                               list_log_phats = list(mod1 = mod1,
+                                                                     mod2 = mod2, mod3 = mod3)){ 
   
-  #PARAMS
-  vec_model_diffs = c()
+  #FOR EACH REP
+  num_reps = length(list_log_phats$mod1)
+  vec_post_probs = c()
   
-  for(i in 2:num_models){
-    print(paste0('i = ', i))
-    vec_model_diffs[i-1] = exp(log(probs_models[[2]]) + log_phats[[i]] -
-                                 log(probs_models[[1]]) - log_phats[[1]])
+  for (i in 1:num_reps){
+  
+    vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(num_models = 3, 
+                                       probs_models = probs_models,
+                                       log_phats = list(mod1 = list_log_phats$mod1[i],
+                                                        mod2 = list_log_phats$mod2[i],
+                                                        mod3 = list_log_phats$mod3[i]))
+    
   }
+
+  return(vec_post_probs)
   
-  posterior_prob =  1/(1 + sum(vec_model_diffs))
-  
-  return(posterior_prob)
 }
 
 #APPLY
@@ -204,6 +208,11 @@ post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
 post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
                                                        mod2 = phat_base, mod3 = phat_ssib))
 post_prob2
+
+#APPLY AGGREGATE
+vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
+                                                         mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
+vec_post_probs
 
 #******************************************************************************
 #*
@@ -232,7 +241,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
       #READ SAMPLES
       mcmc_samples = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base_', i ))
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      log_phat = GET_LOG_Q_PROPOSAL_UNI_VAR(mcmc_samples$r0_vec, epidemic_data) 
+      log_phat = GET_LOG_P_HAT_BASELINE(mcmc_samples$r0_vec, epidemic_data) 
       estimates_vec[i] = log_phat
       print(estimates_vec)
     }

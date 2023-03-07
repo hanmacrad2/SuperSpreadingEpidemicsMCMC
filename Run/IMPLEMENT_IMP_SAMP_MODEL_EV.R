@@ -18,6 +18,10 @@ OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSEB/')
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
+#SAVE (ADD TO FUNCTION)
+runX = 1
+saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
+
 OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
@@ -36,6 +40,22 @@ post_probs_base = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
 post_probs_sseb = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
 
 post_probs_ssib = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+
+
+#******************
+#* PLOT RESULTS
+#* ****************
+par(mfrow = c(2,1))
+
+boxplot(ests_phat_sseb,
+        ylab = 'Phat estimate (log) for SSEB',
+        main = 'Phat estimates (log) for SSEB model. Base data. 100 reps')
+
+hist(ests_phat_sseb, breaks = 50, freq = FALSE,
+     xlab = 'Phat estimate (log) for SSEB',
+     main = 'Phat estimates (log) for SSEB model. Base data. 100 reps')
+
+
 
 #*************
 #* WRONG
