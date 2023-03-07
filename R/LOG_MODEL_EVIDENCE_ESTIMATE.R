@@ -61,11 +61,11 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   return(imp_samp_comps) #log_q 
 }
 
-#***********************
+#*********************************************************
 #*
 #* 2. GET LOG P_HATS 
 #*
-#**************************
+#************************************************************
 GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -81,11 +81,16 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 
   #LOG SUM EXP (LOOP)
   vector_log_sum_exp = c()
-  for(i in 1:n_samples){
+  for(i in 1:n_samples){         
     
-    print(paste0('i sample = ', i))
-    vector_log_sum_exp[i] = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i]) +
-      log(priors[i]) - log_q
+    loglike = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])
+    
+    #NEGATIVE THETA SAMPLES -> NEGATIVE LOGLIKELIHOOD
+    if (is.na(loglike)){
+      vector_log_sum_exp[i] = log(priors[i]) - log_q
+    } else {
+      vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
+    }
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
@@ -94,7 +99,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 }
 
 
-#MULTI PARAM MODELS
+#MULTI PARAM MODELS 
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(SSEB = TRUE,
                                                        SSIB = FALSE, SSIC = FALSE),
@@ -122,16 +127,28 @@ GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data,
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
     
-    print(paste0('i sample = ', i))
     if(FLAGS_LIST$SSEB) {
+      loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3])
+      if (is.na(loglike)){
+        vector_log_sum_exp[i] = log(priors[i]) - log_q
+      } else {
+        vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
+      }
       
-      vector_log_sum_exp[i] = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                               theta_samples[i, 3]) + log(priors[i]) - log_q
+      vector_log_sum_exp[i] =  + log(priors[i]) - log_q
       
     } else if(FLAGS_LIST$SSIB) {
       
-      vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3]) + log(priors[i]) - log_q
+      loglike = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+                             theta_samples[i, 3])
+      if (is.na(loglike)){
+        vector_log_sum_exp[i] = log(priors[i]) - log_q
+      } else {
+        vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
+      }
+      
+      vector_log_sum_exp[i] =  + log(priors[i]) - log_q
       
     } else if (FLAGS_LIST$SSIC) {
       
@@ -246,6 +263,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
       print(estimates_vec)
     }
     #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_base_vec', i ))
     
   } else if(FLAGS_LIST$SSEB){
     print('sseb')

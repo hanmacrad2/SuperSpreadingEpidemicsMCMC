@@ -6,10 +6,10 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 # 1. BASE DATA (RUN AUTOMATICALLY)
 #**********************
 
-#1. Data
 BASE_DATA_LOC = paste0(OUTER_FOLDER, 'BASE_DATA/')
 data_baseI = readRDS(file = paste0(BASE_DATA_LOC, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
+runX = 1
 
 #***************************
 # 2. LOAD MCMC & GET MULTIPLE PHAT
@@ -19,8 +19,7 @@ ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
 #SAVE (ADD TO FUNCTION)
-runX = 1
-saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
+#saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
 
 OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
