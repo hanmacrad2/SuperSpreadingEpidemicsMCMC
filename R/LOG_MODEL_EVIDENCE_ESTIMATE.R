@@ -1,4 +1,3 @@
-#Model Comparison - Importance Sampled
 #'Model evidence estimator via importance sampling'
 
 #LIBRARIES
@@ -11,8 +10,8 @@ library(mvtnorm)
 #1. GET IMPORTANCE SAMPLING PROPOSAL
 #*
 #***************************************
-GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, #priors = 
-                                 n_samples, num_dims = 1) {               #1.OTHER: GET SINGLE DIM PROPSAL. SINGLE T DISTRIBUTION
+GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
+                                 n_samples, num_dims = 1) {               
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
@@ -99,7 +98,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 }
 
 
-#MULTI PARAM MODELS 
+#MULTI PARAMETER MODELS 
 GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(SSEB = TRUE,
                                                        SSIB = FALSE, SSIC = FALSE),
@@ -176,36 +175,40 @@ phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FAL
 #* 
 #***********************************************************
 GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                     probs_models = list(prob_mech1 = 0.5, prob_mech2 =0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                     probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
                                      log_phats = list(mod1 = mod1,
-                                                           mod2 = mod2, mod3 = mod3)){ 
+                                                      mod2 = mod2, mod3 = mod3)){ 
   
   #PARAMS
   vec_model_diffs = c()
   
-  for(i in 2:num_models){
-    print(paste0('i = ', i))
-    vec_model_diffs[i-1] = exp(log(probs_models[[2]]) + log_phats[[i]] -
+  for(i in 1:num_models-1){
+    vec_model_diffs[i] = exp(log(probs_models[[i+1]]) + log_phats[[i+1]] -
                                  log(probs_models[[1]]) - log_phats[[1]])
   }
   
+  print(paste0('sum(vec_model_diffs) = ', sum(vec_model_diffs)))
+  
   posterior_prob =  1/(1 + sum(vec_model_diffs))
+  
+  print(paste0('posterior_prob= ', posterior_prob))
   
   return(posterior_prob)
 }
 
 #GET_AGGREGATE_POSTERIOR_MODEL_PROB
 GET_AGG_POSTERIOR_PROB <- function(num_models = 3, 
-                                               probs_models = list(prob_mech1 = 0.5, prob_mech2 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                   probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25),
                                                list_log_phats = list(mod1 = mod1,
                                                                      mod2 = mod2, mod3 = mod3)){ 
+  'Get posterior probabilites for mulitple P_hat reps'
   
   #FOR EACH REP
   num_reps = length(list_log_phats$mod1)
   vec_post_probs = c()
   
   for (i in 1:num_reps){
-  
+    print(paste0('rep = ', i))
     vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(num_models = 3, 
                                        probs_models = probs_models,
                                        log_phats = list(mod1 = list_log_phats$mod1[i],
@@ -407,5 +410,3 @@ post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
 vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
                                                                     mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
 
-#list_models = list(mod_base = 'Baseline', mod_sseb = 'SSEB', mod_ssib = 'SSIB') 
-#FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSIB = FALSE, SSIC = FALSE))
