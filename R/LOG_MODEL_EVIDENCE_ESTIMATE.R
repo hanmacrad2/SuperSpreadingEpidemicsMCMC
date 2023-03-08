@@ -13,6 +13,9 @@ library(mvtnorm)
 GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
                                  n_samples, num_dims = 1) {               
   
+  #Code
+  'Fix samp_proposal'
+  
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
@@ -47,12 +50,12 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = 3) + means 
-  theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), rexp(samp_size_prior)), ncol = 3) 
+  theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = 3) 
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
   proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = 3, log = FALSE)
-  prior = dexp(theta_samples[,1]) + dexp(theta_samples[,2]) + dexp((theta_samples[,3] - 1))
+  prior = dexp(theta_samples[,1])*dexp(theta_samples[,2])*dexp((theta_samples[,3] - 1))
   q = 0.95*proposal + 0.05*prior
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
