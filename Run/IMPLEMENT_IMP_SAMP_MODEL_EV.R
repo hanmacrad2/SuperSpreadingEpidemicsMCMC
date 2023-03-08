@@ -12,14 +12,15 @@ plot.ts(data_baseI)
 runX = 1
 
 #***************************
-# 2. LOAD MCMC & GET MULTIPLE PHAT
+# 2. LOAD MCMC & GET MULTIPLE PHAT (log)
 #***************************
 OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSEB/')
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
-#SAVE (ADD TO FUNCTION)
+#SAVE (ADDED TO FUNCTION)
 #saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
+ests_phat_sseb = readRDS(file = paste0(OUTPUT_FOLDER, 'run_', runX, '/phat_ests_sseb_vec100.rds')) 
 
 OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
@@ -34,15 +35,19 @@ ests_phat_ssib = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
 #***************************
 # 3. GET POSTERIOR MODEL PROBABILITIES (PLOT) USE MULTIPLE PHATS
 #***************************
-post_probs_base = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+post_probs_base = GET_AGG_POSTERIOR_PROB(list_log_phats = list(mod1 = ests_phat_base, mod2 = ests_phat_sseb,
+                                                               mod3 = ests_phat_ssib))
 
-post_probs_sseb = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
+post_probs_sseb = GET_AGG_POSTERIOR_MODEL_PROB(num_models = 3, 
+                                         probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                         list_log_phats = list(mod1 = mod1,
+                                                               mod2 = mod2, mod3 = mod3))
 
 post_probs_ssib = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
 
 
 #******************
-#* PLOT RESULTS
+#* PLOT PHAT LOG RESULTS
 #* ****************
 par(mfrow = c(2,1))
 
@@ -54,7 +59,48 @@ hist(ests_phat_sseb, breaks = 50, freq = FALSE,
      xlab = 'Phat estimate (log) for SSEB',
      main = 'Phat estimates (log) for SSEB model. Base data. 100 reps')
 
+#Base
+boxplot(ests_phat_base,
+        ylab = 'Phat estimate (log) for Baseline',
+        main = 'Phat estimates (log) for Baseline model. Base data. 100 reps')
 
+hist(ests_phat_base, breaks = 50, freq = FALSE,
+     xlab = 'Phat estimate (log) for Baseline',
+     main = 'Phat estimates (log) for Baseline model. Baseline data. 100 reps')
+
+#SSIB
+boxplot(ests_phat_ssib,
+        ylab = 'Phat estimate (log) for SSIB',
+        main = 'Phat estimates (log) for SSIB model. Base data. 100 reps')
+
+hist(ests_phat_ssib, breaks = 50, freq = FALSE,
+     xlab = 'Phat estimate (log) for SSIB',
+     main = 'Phat estimates (log) for SSIB model. Base data. 100 reps')
+
+#******************
+#* PLOT POSTERIOR MODEL RESULTS
+#* ****************
+par(mfrow = c(2,1))
+
+#Base
+PLOT_MODEL_EV_RESULTS(post_probs_base)
+
+boxplot(post_probs_base,
+        ylab = 'post_probs_base for Baseline',
+        main = 'post_probs_base for Baseline model. Base data. 100 reps')
+
+hist(post_probs_base, breaks = 50, freq = FALSE,
+     xlab = 'post_probs_base for Baseline',
+     main = 'post_probs_base for Baseline model. Baseline data. 100 reps')
+
+#BASE LOG
+boxplot(log(post_probs_base),
+        ylab = 'post_probs_base (log) for Baseline',
+        main = 'post_probs_base (log) for Baseline model. Base data. 100 reps')
+
+hist(log(post_probs_base), breaks = 50, freq = FALSE,
+     xlab = 'post_probs_base (log) for Baseline',
+     main = 'post_probs_base(log) for Baseline model. Baseline data. 100 reps')
 
 #*************
 #* WRONG

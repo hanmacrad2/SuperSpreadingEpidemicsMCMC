@@ -176,7 +176,7 @@ phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FAL
 #* 
 #* **********************************************************
 GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                     probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                     probs_models = list(prob_mech1 = 0.25, prob_mech2 =0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
                                      log_phats = list(mod1 = mod1,
                                                            mod2 = mod2, mod3 = mod3)){ 
   
@@ -195,8 +195,8 @@ GET_POSTERIOR_MODEL_PROB <- function(num_models = 3,
 }
 
 # GET_AGGREGATE_POSTERIOR_MODEL_PROB
-GET_AGG_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                               probs_models = list(prob_mech1 = 1/3, prob_mech2 = 1/3), #mech = mechanism; baseline (0.5) or sse (0.25)
+GET_AGG_POSTERIOR_PROB <- function(num_models = 3, 
+                                               probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
                                                list_log_phats = list(mod1 = mod1,
                                                                      mod2 = mod2, mod3 = mod3)){ 
   
@@ -238,7 +238,7 @@ vec_post_probs
 #******************************************************************************
 
 LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
-                                FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
+                                FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                   SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
@@ -263,7 +263,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
       print(estimates_vec)
     }
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_base_vec', i ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_base_', run, '.rds' ))
     
   } else if(FLAGS_LIST$SSEB){
     print('sseb')
@@ -281,7 +281,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     }
     
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_vec', i ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
     
   } else if (FLAGS_LIST$SSIB){
     
@@ -299,15 +299,15 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     }
     
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_vec', i ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_', run, '.rds' ))
     
   }
   
   return(estimates_vec) 
 }
 
-
-
+#******************
+#NEED TO EDIT
 #RUN MCMC + GET ESTS
 RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
                                        FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
@@ -374,8 +374,31 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
  return(estimates_vec) 
 }
 
-#FOLDER SAVE
-OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/BASE"
+#***************************
+#* PLOTTING RESULTS FUNCTION
+#* *************************#
 
-#APPLY
-RUN_MCMC_MODEL_EV_IMP_SAMP(epidemic_data, OUTPUT_FOLDER)
+PLOT_MODEL_EV_RESULTS <- function(posterior_results, n_reps = 100, model_type = 'Baseline', data_type = 'Baseline', 
+                                  FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE, log = TRUE)){
+  
+  #TITLE
+  if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
+  if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model prob'
+  if (FLAG_RESULT_TYPE$log)  axis_label = paste0(result_type, ' (log) ,', model_type, ' model. ')
+  else  axis_label = paste0(result_type, model_type, ' model. ')
+  titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
+
+  #PLOT
+  par(mfrow = c(2,1))
+  boxplot(log(posterior_results),
+          ylab = axis_label,
+          main = titleX)
+  
+  hist(log(posterior_results), breaks = 50, freq = FALSE,
+       xlab = axis_label,
+       main = titleX)
+  
+}
+
+#list_models = list(mod_base = 'Baseline', mod_sseb = 'SSEB', mod_ssib = 'SSIB') 
+#FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSIB = FALSE, SSIC = FALSE))
