@@ -47,8 +47,22 @@ post_probs_ssib = GET_AGGREGATE_POSTERIOR_MODEL_PROB()
 
 
 #******************
+#* PLOT POSTERIOR MODEL RESULTS
+#*****************
+par(mfrow = c(2,1))
+
+#BASE (log)
+PLOT_MODEL_EV_RESULTS(post_probs_base)
+#BASE
+PLOT_MODEL_EV_RESULTS(post_probs_base, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
+                                                                log = FALSE))
+#SSEB
+PLOT_MODEL_EV_RESULTS(posterior_results, model_type = 'Baseline')
+
+
+#******************
 #* PLOT PHAT LOG RESULTS
-#* ****************
+#*****************
 par(mfrow = c(2,1))
 
 boxplot(ests_phat_sseb,
@@ -76,31 +90,6 @@ boxplot(ests_phat_ssib,
 hist(ests_phat_ssib, breaks = 50, freq = FALSE,
      xlab = 'Phat estimate (log) for SSIB',
      main = 'Phat estimates (log) for SSIB model. Base data. 100 reps')
-
-#******************
-#* PLOT POSTERIOR MODEL RESULTS
-#* ****************
-par(mfrow = c(2,1))
-
-#Base
-PLOT_MODEL_EV_RESULTS(post_probs_base)
-
-boxplot(post_probs_base,
-        ylab = 'post_probs_base for Baseline',
-        main = 'post_probs_base for Baseline model. Base data. 100 reps')
-
-hist(post_probs_base, breaks = 50, freq = FALSE,
-     xlab = 'post_probs_base for Baseline',
-     main = 'post_probs_base for Baseline model. Baseline data. 100 reps')
-
-#BASE LOG
-boxplot(log(post_probs_base),
-        ylab = 'post_probs_base (log) for Baseline',
-        main = 'post_probs_base (log) for Baseline model. Base data. 100 reps')
-
-hist(log(post_probs_base), breaks = 50, freq = FALSE,
-     xlab = 'post_probs_base (log) for Baseline',
-     main = 'post_probs_base(log) for Baseline model. Baseline data. 100 reps')
 
 #*************
 #* WRONG

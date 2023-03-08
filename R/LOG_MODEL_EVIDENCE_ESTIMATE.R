@@ -174,9 +174,9 @@ phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FAL
 #*
 #* 3. GET POSTERIOR MODEL PROBABILITIES
 #* 
-#* **********************************************************
+#***********************************************************
 GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                     probs_models = list(prob_mech1 = 0.25, prob_mech2 =0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                     probs_models = list(prob_mech1 = 0.5, prob_mech2 =0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
                                      log_phats = list(mod1 = mod1,
                                                            mod2 = mod2, mod3 = mod3)){ 
   
@@ -194,9 +194,9 @@ GET_POSTERIOR_MODEL_PROB <- function(num_models = 3,
   return(posterior_prob)
 }
 
-# GET_AGGREGATE_POSTERIOR_MODEL_PROB
+#GET_AGGREGATE_POSTERIOR_MODEL_PROB
 GET_AGG_POSTERIOR_PROB <- function(num_models = 3, 
-                                               probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
+                                               probs_models = list(prob_mech1 = 0.5, prob_mech2 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
                                                list_log_phats = list(mod1 = mod1,
                                                                      mod2 = mod2, mod3 = mod3)){ 
   
@@ -218,18 +218,6 @@ GET_AGG_POSTERIOR_PROB <- function(num_models = 3,
   
 }
 
-#APPLY
-post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
-                                                       mod2 = phat_sseb, mod3 = phat_ssib))
-
-post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
-                                                       mod2 = phat_base, mod3 = phat_ssib))
-post_prob2
-
-#APPLY AGGREGATE
-vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
-                                                         mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
-vec_post_probs
 
 #******************************************************************************
 #*
@@ -307,8 +295,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
 }
 
 #******************
-#NEED TO EDIT
-#RUN MCMC + GET ESTS
+#**NEED TO EDIT
 RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
                                        FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
                                                          SSIB = TRUE, SSIC = FALSE)){
@@ -374,31 +361,51 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
  return(estimates_vec) 
 }
 
-#***************************
+#******************************************************************************
 #* PLOTTING RESULTS FUNCTION
-#* *************************#
+#*
+#******************************************************************************
 
-PLOT_MODEL_EV_RESULTS <- function(posterior_results, n_reps = 100, model_type = 'Baseline', data_type = 'Baseline', 
-                                  FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE, log = TRUE)){
+PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'Baseline', data_type = 'Baseline', 
+                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
+                                                                        log = TRUE)){
   
   #TITLE
   if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
-  if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model prob'
-  if (FLAG_RESULT_TYPE$log)  axis_label = paste0(result_type, ' (log) ,', model_type, ' model. ')
-  else  axis_label = paste0(result_type, model_type, ' model. ')
+  if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model probability '
+  #LOG = TRUE
+  if (FLAG_RESULT_TYPE$log) {
+    axis_label = paste0(result_type, '(log), ', model_type, ' model. ')
+    posterior_results = log(posterior_results)
+  } else  axis_label = paste0(result_type, model_type, ' model. ')
+  
+  #Title
   titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
 
   #PLOT
   par(mfrow = c(2,1))
-  boxplot(log(posterior_results),
+  boxplot(posterior_results,
           ylab = axis_label,
           main = titleX)
   
-  hist(log(posterior_results), breaks = 50, freq = FALSE,
+  hist(posterior_results, breaks = 50, freq = FALSE,
        xlab = axis_label,
        main = titleX)
   
 }
+
+#*******************
+#* APPLICATION OF FUNCTIONS
+#APPLY
+post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
+                                                       mod2 = phat_sseb, mod3 = phat_ssib))
+
+post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
+                                                       mod2 = phat_base, mod3 = phat_ssib))
+
+#APPLY AGGREGATE
+vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
+                                                                    mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
 
 #list_models = list(mod_base = 'Baseline', mod_sseb = 'SSEB', mod_ssib = 'SSIB') 
 #FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSIB = FALSE, SSIC = FALSE))
