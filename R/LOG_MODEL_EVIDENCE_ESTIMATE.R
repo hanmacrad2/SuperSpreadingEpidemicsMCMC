@@ -224,10 +224,20 @@ GET_AGG_POSTERIOR_PROB <- function(num_models = 3,
   
 }
 
+#*********************
+#* 4. GET BAYES FACTORS
+#*********************
+GET_LOG_BAYES_FACTORS <- function (list_log_phat_mod1, list_log_phat_mod2){
+  
+  log_bf = list_log_phat_mod1 - list_log_phat_mod2
+  
+  return(log_bf)
+  
+}
 
 #******************************************************************************
 #*
-# 4. LOAD MCMC + GET POSTERIOR MODEL PROBABILITIES
+# 5. LOAD MCMC + GET POSTERIOR MODEL PROBABILITIES
 #*
 #******************************************************************************
 
@@ -371,7 +381,34 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
 #* PLOTTING RESULTS FUNCTION
 #*
 #******************************************************************************
+PLOT_MODEL_COMPARISON_RESULTS <- function(model_comp_results, 
+                                          result_type = 'Bayes Factors: Baseline vs SSEB Models. ',
+                                          data_type = 'Baseline', 
+                                  n_reps = 100, FLAG_RESULT_TYPE = list(log = TRUE)){
+  
+  #TITLE
+  if (FLAG_RESULT_TYPE$log) {
+    #axis_label = paste0(result_type, ' (log).')
+    axis_label = paste0(result_type)
+  } else  axis_label = paste0(result_type)
+  
+  #Title
+  titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
+  
+  #PLOT
+  par(mfrow = c(2,1))
+  boxplot(model_comp_results,
+          ylab = axis_label,
+          main = titleX)
+  
+  hist(model_comp_results, breaks = 100, freq = FALSE,
+       xlab = axis_label,
+       main = titleX)
+  
+}
 
+
+#MODEL EVIDENCE RESULTS
 PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'Baseline', data_type = 'Baseline', 
                                   n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
                                                                         log = TRUE)){

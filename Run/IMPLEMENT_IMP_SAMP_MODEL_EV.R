@@ -32,8 +32,31 @@ ests_phat_ssib = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
                                                        SSIB = TRUE, SSIC = FALSE))
 
+#**************************
+#* 3. GET BAYES FACTORS
+#* ***********************
+logbf1 = GET_LOG_BAYES_FACTORS(ests_phat_base, ests_phat_sseb)
+
+#**************************
+#* 3b. PLOT BAYES FACTORS
+#* ***********************
+
+#PLOT B_12
+PLOT_MODEL_COMPARISON_RESULTS(exp(logbf1))
+
+#Plot Log(B_12)
+PLOT_MODEL_COMPARISON_RESULTS(logbf1, result_type = 'Bayes Factors (log): Baseline vs SSEB Models. ')
+
+
+PLOT_MODEL_EV_RESULTS(logbf1, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
+                                                               log = FALSE))
+
+#B_12
+PLOT_MODEL_EV_RESULTS(exp(logbf1), FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
+                                                      log = FALSE))
+
 #***************************
-# 3. GET POSTERIOR MODEL PROBABILITIES (PLOT) USE MULTIPLE PHATS
+# 4. GET POSTERIOR MODEL PROBABILITIES (PLOT) USE MULTIPLE PHATS
 #***************************
 post_probs_base = GET_AGG_POSTERIOR_PROB(list_log_phats = list(mod1 = ests_phat_base, mod2 = ests_phat_sseb,
                                                                mod3 = ests_phat_ssib))
