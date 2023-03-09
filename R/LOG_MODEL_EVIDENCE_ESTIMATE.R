@@ -102,7 +102,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 
 
 #MULTI PARAMETER MODELS 
-GET_LOG_P_HAT <-function(mcmc_samples, epidemic_data, 
+GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
                                      FLAGS_LIST = list(SSEB = TRUE,
                                                        SSIB = FALSE, SSIC = FALSE),
                                      n_samples = 10000) {
