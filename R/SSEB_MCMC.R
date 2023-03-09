@@ -12,6 +12,9 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.1, gammaX =
   Beta = Proportion of superspreading events/days
   gamma = increased rate of superspreading event'
   
+  #MODEL PARAMS
+  print(paste0('alpha = ', alphaX)); print(paste0('beta = ', betaX))
+  print(paste0('gamma = ', gammaX))
   #Set up
   total_infecteds = vector('numeric', num_days)
   nsse_infecteds = vector('numeric', num_days)

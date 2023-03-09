@@ -6,15 +6,20 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 # 1. BASE DATA (RUN AUTOMATICALLY)
 #**********************
 
-BASE_DATA_LOC = paste0(OUTER_FOLDER, 'BASE_DATA/')
-data_baseI = readRDS(file = paste0(BASE_DATA_LOC, 'epi_data_base_1.rds'))
+LOC_BASE_DATA = paste0(OUTER_FOLDER, 'BASE_DATA/')
+data_baseI = readRDS(file = paste0(LOC_BASE_DATA, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
 runX = 1
+
+#*****************************************
+# 1. POSTERIOR PREDICTIVE VALUES FROM MCMC
+#*****************************************
+PLOT_POSTERIOR_PRED_EPI_DATA(data_baseI, LOC_BASE_DATA)
 
 #***************************
 # 2. LOAD MCMC & GET MULTIPLE PHAT (log)
 #***************************
-OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSEB/')
+OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'SSEB/')
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
@@ -22,12 +27,12 @@ ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
 #saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
 ests_phat_sseb = readRDS(file = paste0(OUTPUT_FOLDER, 'run_', runX, '/phat_ests_sseb_vec100.rds')) 
 
-OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'BASE/')
+OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
                                                        SSIB = FALSE, SSIC = FALSE))
 
-OUTPUT_FOLDER = paste0(BASE_DATA_LOC, 'SSIB/')
+OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'SSIB/')
 ests_phat_ssib = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
                                                        SSIB = TRUE, SSIC = FALSE))
