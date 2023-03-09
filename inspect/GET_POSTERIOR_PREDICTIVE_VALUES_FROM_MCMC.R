@@ -14,34 +14,14 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
   
   #PLOT TRUE
   par(mfrow = c(1,1))
-  data_title = bquote("Posterior Predictive data. Base (orange), SSEB (green). " ~ bold(R[0] ~ .(true_R0)))
-  plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
-          main = data_title, lwd = 3,
+  data_title = bquote("Posterior Predictive data. Baseline model (orange), SSEB model (green). " ~ bold(R[0]: ~ .(true_R0)))
+  plot.ts(true_epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
+          ylim = c(0,100),
+          main = data_title, lwd = 2,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   
-  #Parameters
-  estimates_vec = c()
-  
-  if (FLAGS_LIST$BASE){
-    #FOLDER 
-    RESULTS_FOLDER = paste0(OUTER_FOLDER, 'BASE/run_', run) 
-    for (i in 1:n_repeats){
-      
-      print(paste0('i = ', i))
-      #READ MCMC SAMPLES
-      mcmc_samples = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_base_', i ))
-      mean_r0 = mean(mcmc_samples$r0_vec)
-      posterior_pred_data = SIMULATE_BASELINE_EPIDEMIC(mean_r0)
-      #PLOT
-      lines(posterior_pred_data, col = 'orange')
-      #SAVE
-      saveRDS(posterior_pred_data, file = paste0(CURRENT_OUTPUT_FOLDER, '/post_pred_base_', i, '.rds' ))
-    }
-    #SAVE ESTIMATES
-    
-  } 
-  
-  if(FLAGS_LIST$SSEB){
+  #1.SSEB PREDICTIVE DATA
+  if(FLAGS_MODELS$SSEB){
     
     #FOLER 
     RESULTS_FOLDER = paste0(OUTER_FOLDER, 'SSEB/run_', run) 
@@ -57,10 +37,33 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
       #PLOT
       lines(posterior_pred_data, col = 'green')
       #SAVE
-      saveRDS(posterior_pred_data, file = paste0(CURRENT_OUTPUT_FOLDER, '/post_pred_sseb_', i, '.rds' ))
+      saveRDS(posterior_pred_data, file = paste0(RESULTS_FOLDER, '/post_pred_sseb_', i, '.rds' ))
       
     } 
   }
+  
+  #2. BASE PREDICTIVE DATA
+  if (FLAGS_MODELS$BASE){
+    #FOLDER 
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, 'BASE/run_', run) 
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      #READ MCMC SAMPLES
+      mcmc_samples = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_base_', i ))
+      mean_r0 = mean(mcmc_samples$r0_vec)
+      posterior_pred_data = SIMULATE_BASELINE_EPIDEMIC(mean_r0)
+      #PLOT
+      lines(posterior_pred_data, col = 'orange')
+      #SAVE
+      saveRDS(posterior_pred_data, file = paste0(RESULTS_FOLDER, '/post_pred_base_', i, '.rds' ))
+    }
+    #SAVE ESTIMATES
+    
+  } 
+  #PLOT ON TOP
+  lines(true_epidemic_data, #xlab = 'Time', ylab = 'Daily Infections count', main = data_title
+        lwd = 2, cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
 }
 
 #Apply
