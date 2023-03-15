@@ -136,7 +136,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
         log_accept_ratio = log_accept_ratio +
           dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
           dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE)
-          + dunif(k_dash/(R0_dash + k_dash)) -  dunif(k/(R0 + k))
+          + dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE)
         
       } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
         

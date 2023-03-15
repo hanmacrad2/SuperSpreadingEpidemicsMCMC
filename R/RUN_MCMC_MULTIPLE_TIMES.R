@@ -1,9 +1,8 @@
 #RUN MULTIPLE MCMC
 RUN_MULTIPLE_MCMC_SSEC <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, model_type = 'SSEC',
-                                   run_number = 1, n_reps = 100){
+                                   run_number = 1, n_reps = 100,  n_mcmc = 30000){
   
   #INITIALISE
-  n_mcmc = 30000
   RESULTS_FOLDER = paste0(CURRENT_OUTPUT_FOLDER, '/', model_type, '/run_', run_number, '/')
   create_folder(RESULTS_FOLDER)
   
