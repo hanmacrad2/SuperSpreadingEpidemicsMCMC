@@ -22,9 +22,9 @@ SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
     lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
     
     #NEGATIVE BINOMIAL PARAMETERISATION
-    if (FLAG_PARAMATERISATION$param_prob){
+    if (FLAG_NEGBIN_PARAMATERISATION$param_prob){
       x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(R0 + k)) #Neg Bin parameterisation #1
-    } else if (FLAG_PARAMATERISATION$param_mu) {
+    } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu) {
       x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Neg Bin parameterisation #2
     }
   }
@@ -45,9 +45,9 @@ LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params,
   for (t in 2:num_days) {
     
     #NEGATIVE BINOMIAL PARAMETERISATION
-    if (FLAG_PARAMATERISATION$param_prob){
-      loglike = loglike + dnbinom(x[t], size = k*lambda_t, prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
-    } else if (FLAG_PARAMATERISATION$param_mu) {
+    if (FLAG_NEGBIN_PARAMATERISATION$param_prob){
+      loglike = loglike + dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
+    } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu) {
       loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1  
     }
   }
@@ -113,7 +113,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   #MCMC
   for(i in 2:n_mcmc) {
 
-    if(i%%100 == 0) print(paste0('i = ', i))
+    if(i%%10000 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
     ssec_params_dash = c(ssec_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim),

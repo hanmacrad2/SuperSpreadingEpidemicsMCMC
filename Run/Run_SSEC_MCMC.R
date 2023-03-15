@@ -25,10 +25,11 @@ plot.ts(epi_data_ssec)
 #SAVE DATA
 saveRDS(epi_data_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_sseb_', seedX, '.rds' ))
 epi_data_sseb = sim7
+
 #2.RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_ssec_output = MCMC_INFER_SSEC(epi_data_ssec, n_mcmc)
+mcmc_ssec_output = MCMC_INFER_SSEC(epi_data_nb, n_mcmc = 1000)  #epi_data_ssec
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
 mcmc_ssec_output$time_elap = time_elap
