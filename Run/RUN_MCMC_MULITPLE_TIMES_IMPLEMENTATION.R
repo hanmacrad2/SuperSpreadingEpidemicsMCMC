@@ -26,6 +26,12 @@ mcmc1 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 ssec1 = mcmc1$ssec_params_matrix
 plot.ts(ssec1)
 
+#BURN IN
+k1 = ssec1[,1]; r01 = ssec1[,2]
+par(mfrow = c(2,1))
+plot.ts(k1[2000:length(k1)])
+plot.ts(r01[2000:length(r01)])
+
 i = 5
 mcmc5 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 ssec5 = mcmc5$ssec_params_matrix
