@@ -1,7 +1,7 @@
 #GET POSTERIOR PREDICTIVE VALUES FROM MCMC
 
 #PLOT POSTERIOR PREDICTIVE VALUES
-PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6, run = 1, n_repeats = 100,
+PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6, run = 1, n_repeats = 100, burn_in = 2000,
                                 FLAGS_MODELS = list(BASE = TRUE, SSEB = TRUE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -29,11 +29,16 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
+      #MCMC OUTPUT
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_sseb_', i ))
-      alpha_mean = mean(mcmc_output$alpha_vec);  beta_mean = mean(mcmc_output$beta_vec)
-      gamma_mean = mean(mcmc_output$gamma_vec)
+      alpha_vec = mcmc_output$alpha_vec
+      #SAMPLE
+      n_mcmc = length(alpha_vec); sample_index = sample(burn_in:n_mcmc, 1)
+      #SAMPLE PARAMETERS
+      alpha = alpha_vec[sample_index]; beta = mcmc_output$beta_vec[sample_index]
+      gamma = mcmc_output$beta_vec[sample_index]
       #POSTERIOR PRED DATA
-      posterior_pred_data = SIMULATE_EPI_SSEB(num_days = 50, alphaX = alpha_mean, betaX = beta_mean, gammaX = gamma_mean)
+      posterior_pred_data = SIMULATE_EPI_SSEB(num_days = 50, alphaX = alpha, betaX = beta, gammaX = gamma)
       #PLOT
       lines(posterior_pred_data, col = 'green')
       #SAVE
@@ -51,8 +56,12 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
       print(paste0('i = ', i))
       #READ MCMC SAMPLES
       mcmc_samples = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_base_', i ))
-      mean_r0 = mean(mcmc_samples$r0_vec)
-      posterior_pred_data = SIMULATE_BASELINE_EPIDEMIC(mean_r0)
+      r0_vec = mcmc_output$r0_vec
+      #SAMPLE
+      n_mcmc = length(r0_vec); sample_index = sample(burn_in:n_mcmc, 1)
+      #SAMPLE PARAMETERS
+      r0 = r0_vec[sample_index]; 
+      posterior_pred_data = SIMULATE_BASELINE_EPIDEMIC(r0)
       #PLOT
       lines(posterior_pred_data, col = 'orange')
       #SAVE
@@ -67,7 +76,7 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
 }
 
 #Apply
-
+PLOT_POSTERIOR_PRED_EPI_DATA
     
   # } else if (FLAGS_LIST$SSIB){
   #   
