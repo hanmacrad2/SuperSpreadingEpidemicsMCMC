@@ -2,7 +2,8 @@
 library(MASS)
 #SIMULATE
 SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
-                              shape_gamma = 6, scale_gamma = 1) {
+                              shape_gamma = 6, scale_gamma = 1,
+                              FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {
   
   'Simulate an epidemic with Superspreading events
   alpha - R0'
@@ -19,25 +20,36 @@ SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    
+    #NEGATIVE BINOMIAL PARAMETERISATION
+    if (FLAG_PARAMATERISATION$param_prob){
+      x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(R0 + k)) #Neg Bin parameterisation #1
+    } else if (FLAG_PARAMATERISATION$param_mu) {
+      x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Neg Bin parameterisation #2
+    }
   }
   
-  x
+  return(x)
 }
 
 #************************
 #* LOG LIKELIHOOD SSEC
 #* ***********************
-LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params){
+LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params, 
+                          FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)){
   
   #Params
-  R0 = ssec_params[1]; k = ssec_params[2]
+  k = ssec_params[1]; R0 = ssec_params[2]
   num_days = length(x); loglike = 0
   
   for (t in 2:num_days) {
-
-    loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE)
     
+    #NEGATIVE BINOMIAL PARAMETERISATION
+    if (FLAG_PARAMATERISATION$param_prob){
+      loglike = loglike + dnbinom(x[t], size = k*lambda_t, prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
+    } else if (FLAG_PARAMATERISATION$param_mu) {
+      loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1  
+    }
   }
   
   return(loglike)
@@ -47,11 +59,13 @@ LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params){
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
-                            mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
+                            mcmc_inputs = list(mod_start_points = c(0.16, 1.2),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10),
-                            priors_list = list(r0_prior = c(1,0), k_prior = c(1, 0)),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE)) {    
+                            priors = list(negbin_k_prior_ga_mean = 0.001, negbin_k_prior_ga_sd = 0.001,
+                                               negbin_prob_prior = c(0,1), r0_prior = c(1,0), k_prior = c(1, 0)),
+                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE),
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {    
   
   #NOTE:
   #i - 1 = n (Simon's paper); #NOTE NO REFLECTION, NO TRANSFORMS, MORE INTELLIGENT ADAPTATION
@@ -78,7 +92,14 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   ssec_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssec_params = ssec_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params);  log_like = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params, FLAG_NEGBIN_PARAMATERISATION)
+  log_like = log_like_vec[1]
+  
+  #PRIORS
+  if(FLAG_NEGBIN_PARAMATERISATION$param_prob) {
+    negbin_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
+    negbin_shape = negbin_scale*priors$negbin_k_prior_ga_mean
+  }
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -102,15 +123,29 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
     if (min(ssec_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params_dash)
+      logl_new = LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params_dash, FLAG_NEGBIN_PARAMATERISATION)
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
-      log_accept_ratio = log_accept_ratio -
-        priors_list$r0_prior[1]*ssec_params_dash[1] + priors_list$r0_prior[1]*ssec_params[1] - 
-        priors_list$k_prior[1]*ssec_params_dash[2] + priors_list$k_prior[1]*ssec_params[2] 
-      
+      k =  ssec_params[1]; k_dash = ssec_params_dash[1]
+      R0 = ssec_params[2]; R0_dash = ssec_params_dash[2]
+                    
+      if(FLAG_NEGBIN_PARAMATERISATION$param_prob) {
+        
+        log_accept_ratio = log_accept_ratio +
+          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
+          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE)
+          + dunif(k_dash/(R0_dash + k_dash)) -  dunif(k/(R0 + k))
+        
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
+        
+        log_accept_ratio = log_accept_ratio -
+          priors_list$k_prior[1]*ssec_params_dash[1] + priors_list$k_prior[1]*ssec_params[1] -
+          priors_list$r0_prior[1]*ssec_params_dash[2] + priors_list$r0_prior[1]*ssec_params[2]
+        
+      }
+ 
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
         ssec_params <- ssec_params_dash
@@ -146,9 +181,6 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
-  
-  #SAVE 
-  #saveRDS(ssec_params_matrix, file = paste0(OUTER_FOLDER, 'ssec_params_matrix_', seed_count, '.rds' ))
   
   #Return a, acceptance rate
   return(list(ssec_params_matrix = ssec_params_matrix,
