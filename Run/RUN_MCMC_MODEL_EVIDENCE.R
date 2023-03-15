@@ -14,3 +14,5 @@ plot.ts(data_baseI)
 runX = 1
 
 #1. RUN NEGATIVE BIN MODEL
+epi_data_nb = SIMULATE_EPI_SSEC()
+plot.ts(epi_data_nb)
