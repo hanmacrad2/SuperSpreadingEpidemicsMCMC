@@ -30,6 +30,15 @@ sd(list_log_ev_sseb)
 PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
 
 #***********************
+# 3. BAYES FACTORS
+#**********************
+log_bf_hm = list_log_ev_base - list_log_ev_sseb
+
+#PLOT
+PLOT_BAYES_FACTORS(log_bf_hm)
+mean(log_bf_hm)
+
+#***********************
 #* METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS
 #**********************
 
