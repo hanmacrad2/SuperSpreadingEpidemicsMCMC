@@ -381,10 +381,9 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
 #* PLOTTING RESULTS FUNCTION
 #*
 #******************************************************************************
-PLOT_MODEL_COMPARISON_RESULTS <- function(model_comp_results, 
-                                          result_type = 'Bayes Factors: Baseline vs SSEB Models. ',
+PLOT_BAYES_FACTORS <- function(bayes_factors, result_type = 'Bayes Factors via Harmonic Mean: Baseline vs SSEB Models. ',
                                           data_type = 'Baseline', 
-                                  n_reps = 100, FLAG_RESULT_TYPE = list(log = TRUE)){
+                                  n_reps = 100, FLAG_RESULT_TYPE = list(log = FALSE)){
   
   #TITLE
   if (FLAG_RESULT_TYPE$log) {
@@ -394,16 +393,16 @@ PLOT_MODEL_COMPARISON_RESULTS <- function(model_comp_results,
   
   #Title
   titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
-  
+  labelX =  'Bayes Factor'
   #PLOT
   par(mfrow = c(2,1))
-  boxplot(model_comp_results,
-          ylab = axis_label,
-          main = titleX)
+  boxplot(bayes_factors,
+          ylab =labelX,
+          main = axis_label)
   
-  hist(model_comp_results, breaks = 100, freq = FALSE,
-       xlab = axis_label,
-       main = titleX)
+  hist(bayes_factors, breaks = 100, freq = FALSE,
+       xlab =labelX,
+       main = axis_label)
   
 }
 
