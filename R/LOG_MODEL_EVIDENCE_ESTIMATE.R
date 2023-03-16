@@ -409,13 +409,14 @@ PLOT_MODEL_COMPARISON_RESULTS <- function(model_comp_results,
 
 
 #MODEL EVIDENCE RESULTS
-PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'Baseline', data_type = 'Baseline', 
-                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = TRUE,
-                                                                        log = TRUE)){
+PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB', data_type = 'Baseline', 
+                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = FALSE,
+                                                                        log_model_ev = TRUE, log = FALSE)){
   
   #TITLE
   if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
   if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model probability '
+  if(FLAG_RESULT_TYPE$log_model_ev) result_type = 'Log Model Evidence '
   #LOG = TRUE
   if (FLAG_RESULT_TYPE$log) {
     axis_label = paste0(result_type, '(log), ', model_type, ' model. ')

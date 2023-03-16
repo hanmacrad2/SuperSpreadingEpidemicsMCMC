@@ -12,7 +12,7 @@ plot.ts(data_baseI)
 run_number = 1
 
 #***********************
-# 2. RUN MCMC
+# 2. RUN SSEC MCMC
 #**********************
 RUN_MULTIPLE_MCMC_SSEC(data_baseI, CURRENT_OUTPUT_FOLDER, n_reps = 1, n_mcmc = 100000) 
 
@@ -29,10 +29,11 @@ plot.ts(ssec1)
 #BURN IN
 k1 = ssec1[,1]; r01 = ssec1[,2]
 par(mfrow = c(2,1))
-plot.ts(k1[2000:length(k1)])
-plot.ts(r01[2000:length(r01)])
+plot.ts(k1[2000:length(k1)], main = 'k (dispersion parameter) - Negative Binomial model of daily infections. ', 
+        ylab = 'k')
+plot.ts(r01[2000:length(r01)], main = 'R0 - Negative Binomial model (Burn-in = 2000, mcmc reps = 100k)', ylab = 'R0')
 
-i = 5
+i = 5 
 mcmc5 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 ssec5 = mcmc5$ssec_params_matrix
 plot.ts(ssec5)

@@ -86,6 +86,8 @@ RUN_MODEL_EV_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30)
   return(list_log_ev)
 }
 
+#LOAD MCMC + GET MODEL EVIDENCE
+
 #MULTIPLE RJMCMC
 RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 10){
   
@@ -119,19 +121,47 @@ RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 10){
   return(rjmcmc_out)
 }
 
+#LOAD MCMC & GET MODEL EVIDENCE
+LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
+                                FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
+                                                    SSIB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  1. Load MCMC. 2. Get log model evidence'
+  
+  #FOLDER
+  #FOLDERX = paste0(OUTER_FOLDER, 'run_', run)
+  list_log_model_ev = c()
+  
+  #MODEL TYPE
+  if (FLAGS_MODELS$BASE) {
+    model_type = 'base'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  } else if (FLAGS_MODELS$SSEB)  {
+    model_type = 'sseb'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  }
+  
+  #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
+  for (i in 1:n_repeats){
+    
+    print(paste0('i = ', i))
+    mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', model_type, '_', i ))
+    #LOG MODEL EVIDENCE
+    list_log_model_ev[i] = LOG_MODEL_EVIDENCE(mcmc_output$log_like_vec)
+    print(list_log_model_ev)
+  }
+  
+  #SAVE LOG MODEL EVIDENCE ESTIMATES
+  saveRDS(list_log_model_ev, file = paste0(FOLDERX, '/list_log_model_ev_', model_type, '_', run, '.rds' ))
+  
+  return(list_log_model_ev) 
+}
+
+
+
+#NOTES
 #MODEL COMPARISON VIA POSTERIOR MODEL PROBABILITIES
 #Add Do all calculations on log scale and take exp as final step 
 #(Not one 8th)
 #0.5*base_model/(0.5*base_model + (1/8)*S + (1/8)*m2 + (1/8)*m3 + (1/8)*m4)  #An 1/8 for each of 4 other models
 
-#Check
-list1 = c()
-for(i in 1:10){
-  
-  list1 = c(list1, i**2)
-  #print(list1)
-
-}
-list1
-
-list2 = list(list1 = list1)
