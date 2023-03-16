@@ -438,6 +438,44 @@ PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB', data_t
   
 }
 
+#MODEL EVIDENCE RESULTS
+BOX_PLOT_MODEL_EV_RESULTS <- function(list_mod_ev1, list_mod_ev2, list_mod_ev3, list_mod_ev4,
+                                      model_type = 'SSEB', data_type = 'Baseline', 
+                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = FALSE,
+                                                                        log_model_ev = TRUE, log = FALSE)){
+  
+  #TITLE
+  # if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
+  # if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model probability '
+  # if(FLAG_RESULT_TYPE$log_model_ev) result_type = 'Log Model Evidence '
+  # #LOG = TRUE
+  # if (FLAG_RESULT_TYPE$log) {
+  #   axis_label = paste0(result_type, '(log), ', model_type, ' model. ')
+  #   posterior_results = log(posterior_results)
+  # } else  axis_label = paste0(result_type, model_type, ' model. ')
+  
+  #Title
+  #titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
+  
+  #PLOT
+  par(mfrow = c(2,2)); ylabX = 'log( Model Evidence)'
+  boxplot(list_mod_ev1,
+          main = 'Harmonic Mean Model Evidence (log) Baseline model',
+          ylab = ylabX)
+  #2.
+  boxplot(list_mod_ev2,
+          main = 'Importance Sampling Model Evidence (log) Baseline model',
+          ylab = ylabX)
+  
+  boxplot(list_mod_ev3,
+          main = 'Harmonic Mean Model Evidence (log) SSEB model',
+          ylab = ylabX)
+  
+  boxplot(list_mod_ev4,
+          main = 'Importance Sampling Model Evidence (log) SSEB model',
+          ylab = ylabX)
+}
+
 #*******************
 #* APPLICATION OF FUNCTIONS
 #APPLY

@@ -54,6 +54,9 @@ mean(lme_sseb_is)
 sd(lme_sseb_is)
 PLOT_MODEL_EV_RESULTS(lme_sseb_is)
 
+#PLOT TOTAL RESULTS
+BOX_PLOT_MODEL_EV_RESULTS(list_log_ev_base, lme_base_is, list_log_ev_sseb, lme_sseb_is)
+
 
 
 
