@@ -56,6 +56,19 @@ LOG_SUM_EXP <- function(vectorX){
 # ll_norm = exp(ll - lse) 
 # ll_norm
 
+#************
+#* PLOTTING FUNCTIONS
+PLOT_CUM_MEAN <- function(mcmc_chain, titleX = 'MCMC chain', ylabX = 'MCMC chain') {
+  
+  #MEAN
+  #titleX = paste0(titleX, ' mean'); ylabX = paste0(ylabX, ' mean'); 
+  mcmc_mean = cumsum(mcmc_chain)/seq_along(mcmc_chain)
+  plot(seq_along(mcmc_mean), mcmc_mean,
+       xlab = 'Time', ylab = ylabX,
+       main = titleX, #bquote(bold(R[0] ~ "MCMC mean, Start:" ~ .(mcmc_specs$mod_start_points$m1))),
+       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+}
+
 #EPIDEMIC FUNCTIONS
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
@@ -73,6 +86,7 @@ get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
   return(lambda_vec)
 }
+
 #GET INFECTIVITY
 get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   

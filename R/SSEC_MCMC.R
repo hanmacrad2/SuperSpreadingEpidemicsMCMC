@@ -1,7 +1,7 @@
-#SSEC model
+#SSNB model
 library(MASS)
 #SIMULATE
-SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
+SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.2, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {
   
@@ -33,13 +33,13 @@ SIMULATE_EPI_SSEC <- function(num_days = 50, R0 = 1.2, k = 0.16,
 }
 
 #************************
-#* LOG LIKELIHOOD SSEC
+#* LOG LIKELIHOOD SSNB
 #* ***********************
-LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params, 
-                          FLAG_NEGBIN_PARAMATERISATION = FLAG_NEGBIN_PARAMATERISATION){
+LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params, 
+                          FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
   
   #Params
-  k = ssec_params[1]; R0 = ssec_params[2]
+  k = ssnb_params[1]; R0 = ssnb_params[2]
   num_days = length(x); loglike = 0
   
   for (t in 2:num_days) {
@@ -58,14 +58,14 @@ LOG_LIKE_SSEC <- function(x, lambda_vec, ssec_params,
 #********************************************************
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
-MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
+MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                             mcmc_inputs = list(mod_start_points = c(0.16, 1.2),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10),
                             priors = list(negbin_k_prior_ga_mean = 0.001, negbin_k_prior_ga_sd = 0.001, r0_prior = c(1.0,4),
                                                negbin_prob_prior = c(0,1)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE),
-                            FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {    
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE)) {    
   
   #NOTE:
   #i - 1 = n (Simon's paper); #NOTE NO REFLECTION, NO TRANSFORMS, MORE INTELLIGENT ADAPTATION
@@ -89,11 +89,11 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   
   #MODEL PARAMETERS
   lambda_vec = get_lambda(epidemic_data)
-  ssec_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
-  ssec_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssec_params = ssec_params_matrix[1,] #2x1 #as.matrix
+  ssnb_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
+  ssnb_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssnb_params = ssnb_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params, FLAG_NEGBIN_PARAMATERISATION)
+  log_like_vec[1] <- LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
   
   #PRIORS
@@ -104,9 +104,9 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
   c_star = (2.38^2)/mcmc_inputs$dim; termX = mcmc_inputs$v0 + mcmc_inputs$dim
   delta = 1/(mcmc_inputs$target_acceptance_rate*(1 - mcmc_inputs$target_acceptance_rate))
-  x_bar = 0.5*(ssec_params + ssec_params_matrix[1,])
+  x_bar = 0.5*(ssnb_params + ssnb_params_matrix[1,])
   sigma_i = diag(mcmc_inputs$dim); scaling = 1
-  sigma_i = (1/(termX + 3))*(tcrossprod(ssec_params_matrix[1,]) + tcrossprod(ssec_params) -
+  sigma_i = (1/(termX + 3))*(tcrossprod(ssnb_params_matrix[1,]) + tcrossprod(ssnb_params) -
                                2*tcrossprod(x_bar) + (termX + 1)*sigma_i) #CHANGE TO USE FUNCTIONS
   
   #MCMC
@@ -115,50 +115,52 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
     if(i%%10000 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
-    ssec_params_dash = c(ssec_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim),
+    ssnb_params_dash = c(ssnb_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim),
                                                Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
-    if (min(ssec_params_dash - vec_min) >= 0){ 
+    if (min(ssnb_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSEC(epidemic_data, lambda_vec, ssec_params_dash, FLAG_NEGBIN_PARAMATERISATION)
+      logl_new = LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params_dash, FLAG_NEGBIN_PARAMATERISATION)
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
-      k =  ssec_params[1]; k_dash = ssec_params_dash[1]
-      R0 = ssec_params[2]; R0_dash = ssec_params_dash[2]
-                    
-      if(FLAG_NEGBIN_PARAMATERISATION$param_prob) {
-        
-        log_accept_ratio = log_accept_ratio +
-          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
-          dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE) #+
-          #dunif(R0_dash, min = 0, max = 10 log = TRUE) -  dunif(R0, min = 0, max = 10 log = TRUE)
-        
-      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
-        
-        log_accept_ratio = log_accept_ratio +
-          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) #+
-          #dunif(R0_dash, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE) -
-          #dunif(R0, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE)
-          #priors_list$r0_prior[1]*ssec_params_dash[2] + priors_list$r0_prior[1]*ssec_params[2]
-      }
+      k =  ssnb_params[1]; k_dash = ssnb_params_dash[1]
+      R0 = ssnb_params[2]; R0_dash = ssnb_params_dash[2]
+      
+      #PRIORS
+                  
+      # if(FLAG_NEGBIN_PARAMATERISATION$param_prob) {
+      #   
+      #   log_accept_ratio = log_accept_ratio +
+      #     dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
+      #     dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
+      #     dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE) #+
+      #     #dunif(R0_dash, min = 0, max = 10 log = TRUE) -  dunif(R0, min = 0, max = 10 log = TRUE)
+      #   
+      # } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
+      #   
+      #   log_accept_ratio = log_accept_ratio +
+      #     dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
+      #     dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) #+
+      #     #dunif(R0_dash, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE) -
+      #     #dunif(R0, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE)
+      #     #priors_list$r0_prior[1]*ssnb_params_dash[2] + priors_list$r0_prior[1]*ssnb_params[2]
+      # }
  
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-        ssec_params <- ssec_params_dash
+        ssnb_params <- ssnb_params_dash
         count_accept = count_accept + 1
         log_like = logl_new
       }
       
       #SIGMA - ADAPTIVE SHAPING
       xbar_prev = x_bar
-      x_bar = (i-1)/i*xbar_prev + (1/i)*ssec_params
-      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(ssec_params)
+      x_bar = (i-1)/i*xbar_prev + (1/i)*ssnb_params
+      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(ssnb_params)
                                       + (i-1)*tcrossprod(xbar_prev)
                                       -i*tcrossprod(x_bar))
       
@@ -174,7 +176,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0) {
-      ssec_params_matrix[i/thinning_factor,] = ssec_params
+      ssnb_params_matrix[i/thinning_factor,] = ssnb_params
       log_like_vec[i/thinning_factor] <- log_like
       scaling_vec[i/thinning_factor] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
     }
@@ -185,7 +187,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   accept_rate = 100*count_accept/(n_mcmc-1)
   
   #Return a, acceptance rate
-  return(list(ssec_params_matrix = ssec_params_matrix,
+  return(list(ssnb_params_matrix = ssnb_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate))
 } 
