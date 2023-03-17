@@ -1,5 +1,6 @@
 #********************
 #UTIL FUNCTIONS
+library(RChronoModel)
 
 #TIME FUNCTIONS
 get_time <- function(start_time, end_time, show = TRUE){

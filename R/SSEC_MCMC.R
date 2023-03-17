@@ -65,7 +65,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
                             priors = list(negbin_k_prior_ga_mean = 0.001, negbin_k_prior_ga_sd = 0.001, r0_prior = c(1.0,4),
                                                negbin_prob_prior = c(0,1)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE),
-                            FLAG_NEGBIN_PARAMATERISATION = list(param_prob = FALSE, param_mu = TRUE)) {    
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {    
   
   #NOTE:
   #i - 1 = n (Simon's paper); #NOTE NO REFLECTION, NO TRANSFORMS, MORE INTELLIGENT ADAPTATION
@@ -74,6 +74,7 @@ MCMC_INFER_SSEC <- function(epidemic_data, n_mcmc,
   #**********************************************
   
   #MCMC PARAMS + VECTORS
+  print(FLAG_NEGBIN_PARAMATERISATION)
   num_days = length(epidemic_data)
   vec_min = rep(0, mcmc_inputs$dim)
   count_accept = 0
