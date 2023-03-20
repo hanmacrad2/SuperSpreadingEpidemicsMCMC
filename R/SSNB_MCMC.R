@@ -3,7 +3,7 @@ library(MASS)
 #SIMULATE
 SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.2, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
-                              FLAG_NEGBIN_PARAMATERISATION = list(param_prob = TRUE, param_mu = FALSE)) {
+                              FLAG_NEGBIN_PARAMATERISATION = list(param_prob = FALSE, param_mu = TRUE)) {
   
   'Simulate an epidemic with Superspreading events
   alpha - R0'
@@ -45,10 +45,10 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
   for (t in 2:num_days) {
     
     #NEGATIVE BINOMIAL PARAMETERISATION
-    if (FLAG_NEGBIN_PARAMATERISATION$param_prob){
-      loglike = loglike + dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
-    } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu) {
+    if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
       loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1  
+    } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
+      loglike = loglike + dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
     }
   }
   
@@ -64,8 +64,8 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                                                thinning_factor = 10),
                             priors = list(negbin_k_prior_ga_mean = 0.001, negbin_k_prior_ga_sd = 0.001, r0_prior = c(1.0,4),
                                                negbin_prob_prior = c(0,1)),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE),
-                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE)) {    
+                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE),
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
   
   #NOTE:
   #i - 1 = n (Simon's paper); #NOTE NO REFLECTION, NO TRANSFORMS, MORE INTELLIGENT ADAPTATION
@@ -126,29 +126,29 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
-      #PRIORS
+      #EXTRACT PARAMS FORPRIORS
       k =  ssnb_params[1]; k_dash = ssnb_params_dash[1]
       R0 = ssnb_params[2]; R0_dash = ssnb_params_dash[2]
       
       #PRIORS
                   
-      # if(FLAG_NEGBIN_PARAMATERISATION$param_prob) {
-      #   
-      #   log_accept_ratio = log_accept_ratio +
-      #     dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-      #     dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
-      #     dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE) #+
-      #     #dunif(R0_dash, min = 0, max = 10 log = TRUE) -  dunif(R0, min = 0, max = 10 log = TRUE)
-      #   
-      # } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
-      #   
-      #   log_accept_ratio = log_accept_ratio +
-      #     dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-      #     dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) #+
-      #     #dunif(R0_dash, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE) -
-      #     #dunif(R0, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE)
-      #     #priors_list$r0_prior[1]*ssnb_params_dash[2] + priors_list$r0_prior[1]*ssnb_params[2]
-      # }
+      if(FLAG_NEGBIN_PARAMATERISATION$param_mu & FLAGS_LIST$PRIOR) {
+
+        log_accept_ratio = log_accept_ratio +
+          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
+          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
+        dunif(R0_dash, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE) - #Uniform prior
+        dunif(R0, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE)
+        #priors_list$r0_prior[1]*ssnb_params_dash[2] + priors_list$r0_prior[1]*ssnb_params[2]
+
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob & FLAGS_LIST$PRIOR){
+
+        log_accept_ratio = log_accept_ratio +
+          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
+          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
+          dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE) #+
+        #dunif(R0_dash, min = 0, max = 10 log = TRUE) -  dunif(R0, min = 0, max = 10 log = TRUE)
+      }
  
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
