@@ -11,7 +11,7 @@ library(mvtnorm)
 #*
 #***************************************
 GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
-                                 n_samples, num_dims = 1) {               
+                                 n_samples, dof = 3, num_dims = 1) {               
   
   #Code
   'Fix samp_proposal'
@@ -24,14 +24,14 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   #*******
   #THETA SAMPLES: PROPOSAL + PRIOR
   mean_mcmc = mean(mcmc_samples)
-  theta_samples_proposal = rt(samp_size_proposal, df = num_dims) + mean_mcmc 
+  theta_samples_proposal = rt(samp_size_proposal, df = dof) + mean_mcmc 
   theta_samples_prior = c(rexp(samp_size_prior))
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
   proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = FALSE)
   prior = dexp(theta_samples[,1])
-  q = 0.95*proposal + 0.05*prior
+  q = 0.95*proposal + 0.05*prior #Choose stoachastically 
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -40,7 +40,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
 
 #MUTLI DIM PROPOSAL
 GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROPOSAL_MULTI_DIM
-                                   n_samples) {               
+                                   n_samples, dof = 3) {               
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
@@ -49,14 +49,14 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
-  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = 3) + means 
+  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) + means 
   theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = 3) 
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = 3, log = FALSE)
+  proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = FALSE)
   prior = dexp(theta_samples[,1])*dexp(theta_samples[,2])*dexp((theta_samples[,3] - 1))
-  q = 0.95*proposal + 0.05*prior
+  q = 0.95*proposal + 0.05*prior #** CHOOSE STOCHASTICALLY
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -377,103 +377,6 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
  return(estimates_vec) 
 }
 
-#******************************************************************************
-#* PLOTTING RESULTS FUNCTION
-#*
-#******************************************************************************
-PLOT_BAYES_FACTORS <- function(bayes_factors, result_type = 'Bayes Factors via Harmonic Mean: Baseline vs SSEB Models. ',
-                                          data_type = 'Baseline', 
-                                  n_reps = 100, FLAG_RESULT_TYPE = list(log = FALSE)){
-  
-  #TITLE
-  if (FLAG_RESULT_TYPE$log) {
-    #axis_label = paste0(result_type, ' (log).')
-    axis_label = paste0(result_type)
-  } else  axis_label = paste0(result_type)
-  
-  #Title
-  titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
-  labelX =  'Bayes Factor'
-  #PLOT
-  par(mfrow = c(2,1))
-  boxplot(bayes_factors,
-          ylab =labelX,
-          main = axis_label)
-  
-  hist(bayes_factors, breaks = 100, freq = FALSE,
-       xlab =labelX,
-       main = axis_label)
-  
-}
-
-
-#MODEL EVIDENCE RESULTS
-PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB', data_type = 'Baseline', 
-                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = FALSE,
-                                                                        log_model_ev = TRUE, log = FALSE)){
-  
-  #TITLE
-  if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
-  if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model probability '
-  if(FLAG_RESULT_TYPE$log_model_ev) result_type = 'Log Model Evidence '
-  #LOG = TRUE
-  if (FLAG_RESULT_TYPE$log) {
-    axis_label = paste0(result_type, '(log), ', model_type, ' model. ')
-    posterior_results = log(posterior_results)
-  } else  axis_label = paste0(result_type, model_type, ' model. ')
-  
-  #Title
-  titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
-
-  #PLOT
-  par(mfrow = c(2,1))
-  boxplot(posterior_results,
-          ylab = axis_label,
-          main = titleX)
-  
-  hist(posterior_results, breaks = 50, freq = FALSE,
-       xlab = axis_label,
-       main = titleX)
-  
-}
-
-#MODEL EVIDENCE RESULTS
-BOX_PLOT_MODEL_EV_RESULTS <- function(list_mod_ev1, list_mod_ev2, list_mod_ev3, list_mod_ev4,
-                                      model_type = 'SSEB', data_type = 'Baseline', 
-                                  n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = FALSE,
-                                                                        log_model_ev = TRUE, log = FALSE)){
-  
-  #TITLE
-  # if(FLAG_RESULT_TYPE$phat) result_type = 'P hat, '
-  # if(FLAG_RESULT_TYPE$post_prob) result_type = 'Posterior model probability '
-  # if(FLAG_RESULT_TYPE$log_model_ev) result_type = 'Log Model Evidence '
-  # #LOG = TRUE
-  # if (FLAG_RESULT_TYPE$log) {
-  #   axis_label = paste0(result_type, '(log), ', model_type, ' model. ')
-  #   posterior_results = log(posterior_results)
-  # } else  axis_label = paste0(result_type, model_type, ' model. ')
-  
-  #Title
-  #titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
-  
-  #PLOT
-  par(mfrow = c(2,2)); ylabX = 'log( Model Evidence)'
-  boxplot(list_mod_ev1,
-          main = 'Harmonic Mean Model Evidence (log) Baseline model',
-          ylab = ylabX)
-  #2.
-  boxplot(list_mod_ev2,
-          main = 'Importance Sampling Model Evidence (log) Baseline model',
-          ylab = ylabX)
-  
-  boxplot(list_mod_ev3,
-          main = 'Harmonic Mean Model Evidence (log) SSEB model',
-          ylab = ylabX)
-  
-  boxplot(list_mod_ev4,
-          main = 'Importance Sampling Model Evidence (log) SSEB model',
-          ylab = ylabX)
-}
 
 #*******************
 #* APPLICATION OF FUNCTIONS
