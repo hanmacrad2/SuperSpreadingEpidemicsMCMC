@@ -78,8 +78,8 @@ PLOT_SSNB_MCMC_GRID(epi_data_nb1, mcmc_nb1b, n_mcmc, likenb1)
 epi_data_nb = SIMULATE_EPI_SSNB()
 plot.ts(epi_data_nb)
 #Likelihood
-lambda_vec1 = get_lambda(epi_data_nb)
-likenb1 = LOG_LIKE_SSNB(epi_data_nb, lambda_vec1, params_nb) 
+lambda_vec = get_lambda(epi_data_nb)
+likenb = LOG_LIKE_SSNB(epi_data_nb, lambda_vec, params_nb) 
 #SAVE DATA
 saveRDS(epi_data_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_ssnb_', seedX, '.rds' ))
 
@@ -93,10 +93,26 @@ time_elap = get_time(start_time, end_time)
 mcmc_nb2$time_elap = time_elap
 
 #PLOT MAIN RESULTS
-PLOT_SSNB_MCMC_GRID(epi_data_nb, mcmc_nb2, n_mcmc, likenb1)
+PLOT_SSNB_MCMC_GRID(epi_data_nb, mcmc_nb2, n_mcmc, likenb)
 
 #SAVE MCMC RESULTS
 saveRDS(mcmc_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_SSNB_', seedX, '.rds' ))
+
+#iib.RUN MCMC + Priors
+start_time = Sys.time()
+print(paste0('start_time:', start_time))
+mcmc_nb2b = MCMC_INFER_SSNB(epi_data_nb, n_mcmc = 100000,
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE), 
+                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE))
+end_time = Sys.time()
+time_elap = get_time(start_time, end_time)
+mcmc_nb2b$time_elap = time_elap
+
+#SAVE MCMC RESULTS
+saveRDS(mcmc_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_SSNB_', seedX, '.rds' ))
+
+#PLOT MAIN RESULTS
+PLOT_SSNB_MCMC_GRID(epi_data_nb, mcmc_nb2b, n_mcmc, likenb1)
 
 #************************
 #PLOT TOTAL RESULTS
