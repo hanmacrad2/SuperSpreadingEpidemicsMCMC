@@ -1,7 +1,7 @@
 #RUN MULTIPLE MCMC ITERATIONS
 
 library(SuperSpreadingEpidemicsMCMC)
-CURRENT_OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 
 #***********************
 # 1. EPIDEMIC DATA (RUN AUTOMATICALLY)
@@ -12,18 +12,18 @@ plot.ts(data_baseI)
 run_number = 1
 
 #***********************
-# 2. RUN SSEC MCMC
+# 2. RUN SSNB MCMC
 #**********************
-RUN_MULTIPLE_MCMC_SSEC(data_baseI, CURRENT_OUTPUT_FOLDER, n_reps = 1, n_mcmc = 100000) 
+RUN_MULTIPLE_MCMC_SSNB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
 #Inspect MCMC results
-model_type = 'SSEC'; i = 100
-RESULTS_FOLDER = paste0(CURRENT_OUTPUT_FOLDER, '/', model_type, '/run_', run_number, '/')
+model_type = 'SSNB'; i = 100
+RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
 
 #MCMC RESULTS
 i = 1
 mcmc1 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
-ssec1 = mcmc1$ssec_params_matrix
+ssnb1 = mcmc1$ssec_params_matrix
 plot.ts(ssec1)
 
 #BURN IN

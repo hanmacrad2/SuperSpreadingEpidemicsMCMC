@@ -1,7 +1,7 @@
 #'Model evidence estimator via importance sampling'
 
 #LIBRARIES
-library(SuperSpreadingEpidemicsMCMC)
+#library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
 #library(compositions)
 
@@ -139,6 +139,8 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   vector_log_sum_exp = c()
   for(i in 1:n_samples){
     
+    if(i%%100 == 0) print(i)
+    
     if(FLAGS_LIST$SSEB) {
       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                               theta_samples[i, 3])
@@ -179,8 +181,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 #Base
 #phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
 #SSIB
-#phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,
-                                                                      SSIC = FALSE))
+#phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,SSIC = FALSE))
 
 #*********************************************************
 #*
