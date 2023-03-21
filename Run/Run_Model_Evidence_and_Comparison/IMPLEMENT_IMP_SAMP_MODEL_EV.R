@@ -21,7 +21,7 @@ PLOT_POSTERIOR_PRED_EPI_DATA(data_baseI, LOC_BASE_DATA)
 #***************************
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'SSEB/')
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
-                                     FLAGS_LIST = list(BASE = FALSE, SSEB = TRUE,
+                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSIC = FALSE))
 #SAVE (ADDED TO FUNCTION)
 #saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))

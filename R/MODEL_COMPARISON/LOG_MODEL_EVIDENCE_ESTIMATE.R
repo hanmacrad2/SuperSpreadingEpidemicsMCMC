@@ -11,27 +11,29 @@ library(mvtnorm)
 #*
 #***************************************
 GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
-                                 n_samples, dof = 3, num_dims = 1) {               
+                                 n_samples, dof = 3, num_dims = 1, prob = 0.95) {               
   
   #Code
   'Fix samp_proposal'
   
   #PARAMS
-  lambda_vec = get_lambda(epidemic_data)
-  sum_estimate = 0
-  samp_size_proposal = round(0.95*n_samples); samp_size_prior =  n_samples - samp_size_proposal
+  lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
+  sampling_prob = rbinom(n_samples, 1, prob)
+  samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
   
   #*******
   #THETA SAMPLES: PROPOSAL + PRIOR
-  mean_mcmc = mean(mcmc_samples)
-  theta_samples_proposal = rt(samp_size_proposal, df = dof) + mean_mcmc 
+  mean_mcmc = mean(mcmc_samples); sd_mcmc = sd(mcmc_samples)
+  theta_samples_proposal = sd_mcmc*rt(samp_size_proposal, df = dof) + mean_mcmc 
   theta_samples_prior = c(rexp(samp_size_prior))
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = FALSE)
-  prior = dexp(theta_samples[,1])
-  q = 0.95*proposal + 0.05*prior #Choose stochastically 
+  proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = TRUE) - log(sd_mcmc)
+  prior = dexp(theta_samples[,1], log = TRUE)
+  q = prob_prop*proposal + prob_prior*prior 
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -40,12 +42,15 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
 
 #MUTLI DIM PROPOSAL
 GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROPOSAL_MULTI_DIM
-                                   n_samples, dof = 3) {               
+                                   n_samples, dof = 3, prob = 0.95) {               
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
-  samp_size_proposal = round(0.95*n_samples); samp_size_prior =  n_samples - samp_size_proposal
+  sampling_prob = rbinom(n_samples, 1, prob)
+  samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
   
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
@@ -57,8 +62,8 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
   log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE)
   
-  max_el = pmax(log(0.95) + log_proposal, log(0.05) + log_prior)
-  log_q = max_el + log(exp(log(0.95) + log_proposal - max_el) + exp(log(0.05) + log_prior - max_el))
+  max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
+  log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
   
   #log_q = 0.95*proposal + 0.05*prior #** CHOOSE STOCHASTICALLY
   #log_q_s = LOG_SUM_EXP(log_q) #LOG SUM EXP OF TWO COMPONENTS
@@ -170,11 +175,11 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 }
 
 #SSEB
-phat_sseb = GET_LOG_P_HAT(mcmc_samples, data_baseI)
+#phat_sseb = GET_LOG_P_HAT(mcmc_samples, data_baseI)
 #Base
-phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
+#phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
 #SSIB
-phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,
+#phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_LIST = list(SSEB = FALSE, SSIB = TRUE,
                                                                       SSIC = FALSE))
 
 #*********************************************************
@@ -245,7 +250,6 @@ GET_LOG_BAYES_FACTORS <- function (list_log_phat_mod1, list_log_phat_mod2){
 # 5. LOAD MCMC + GET POSTERIOR MODEL PROBABILITIES
 #*
 #******************************************************************************
-
 LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                   SSIB = FALSE, SSIC = FALSE)){
@@ -260,7 +264,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
   #Parameters
   estimates_vec = c()
   
-  if (FLAGS_LIST$BASE){
+  if (FLAGS_MODELS$BASE){
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
@@ -274,7 +278,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_base_', run, '.rds' ))
     
-  } else if(FLAGS_LIST$SSEB){
+  } else if(FLAGS_MODELS$SSEB){
     print('sseb')
     for (i in 1:n_repeats){
       
@@ -292,7 +296,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
     
-  } else if (FLAGS_LIST$SSIB){
+  } else if (FLAGS_MODELS$SSIB){
     
     for (i in 1:n_repeats){
       
@@ -386,13 +390,13 @@ RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_
 #*******************
 #* APPLICATION OF FUNCTIONS
 #APPLY
-post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
-                                                       mod2 = phat_sseb, mod3 = phat_ssib))
-
-post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
-                                                       mod2 = phat_base, mod3 = phat_ssib))
-
-#APPLY AGGREGATE
-vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
-                                                                    mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
-
+# post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
+#                                                        mod2 = phat_sseb, mod3 = phat_ssib))
+# 
+# post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
+#                                                        mod2 = phat_base, mod3 = phat_ssib))
+# 
+# #APPLY AGGREGATE
+# vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
+#                                                                     mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
+# 
