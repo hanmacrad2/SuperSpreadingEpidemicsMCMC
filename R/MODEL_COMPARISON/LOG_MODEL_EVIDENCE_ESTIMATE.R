@@ -31,7 +31,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   #DEFENSE MIXTURE
   proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = FALSE)
   prior = dexp(theta_samples[,1])
-  q = 0.95*proposal + 0.05*prior #Choose stoachastically 
+  q = 0.95*proposal + 0.05*prior #Choose stochastically 
   log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -54,10 +54,15 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = FALSE)
-  prior = dexp(theta_samples[,1])*dexp(theta_samples[,2])*dexp((theta_samples[,3] - 1))
-  q = 0.95*proposal + 0.05*prior #** CHOOSE STOCHASTICALLY
-  log_q = LOG_SUM_EXP(q) #LOG SUM EXP OF TWO COMPONENTS
+  log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
+  log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE)
+  
+  max_el = pmax(log(0.95) + log_proposal, log(0.05) + log_prior)
+  log_q = max_el + log(exp(log(0.95) + log_proposal - max_el) + exp(log(0.05) + log_prior - max_el))
+  
+  #log_q = 0.95*proposal + 0.05*prior #** CHOOSE STOCHASTICALLY
+  #log_q_s = LOG_SUM_EXP(log_q) #LOG SUM EXP OF TWO COMPONENTS
+  
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
   return(imp_samp_comps) #log_q 

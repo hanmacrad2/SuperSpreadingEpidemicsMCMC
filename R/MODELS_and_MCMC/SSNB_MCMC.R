@@ -3,7 +3,7 @@ library(MASS)
 #SIMULATE
 SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.2, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
-                              FLAG_NEGBIN_PARAMATERISATION = list(param_prob = FALSE, param_mu = TRUE)) {
+                              FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
   
   'Simulate an epidemic with Superspreading events
   alpha - R0'
@@ -62,8 +62,8 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                             mcmc_inputs = list(mod_start_points = c(0.16, 1.2),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10),
-                            priors = list(negbin_k_prior_ga_mean = 0.001, negbin_k_prior_ga_sd = 0.001, r0_prior = c(1.0,4),
-                                               negbin_prob_prior = c(0,1)),
+                            priors = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
+                                               p_prob_unif = c(0,1)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE),
                             FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
   
@@ -95,10 +95,8 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
-  
-  #PRIORS
-  negbin_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
-  negbin_shape = negbin_scale*priors$negbin_k_prior_ga_mean
+  #pk_ga_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
+  #pk_ga_shape = negbin_scale*priors$negbin_k_prior_ga_mean
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -126,26 +124,25 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
+      #PRIORS
       #EXTRACT PARAMS FORPRIORS
       k =  ssnb_params[1]; k_dash = ssnb_params_dash[1]
       R0 = ssnb_params[2]; R0_dash = ssnb_params_dash[2]
-      
-      #PRIORS
-                  
+    
       if(FLAG_NEGBIN_PARAMATERISATION$param_mu & FLAGS_LIST$PRIOR) {
 
         log_accept_ratio = log_accept_ratio +
-          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
-        dunif(R0_dash, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE) - #Uniform prior
-        dunif(R0, min = priors$r0_prior[1], max = priors$r0_prior[2], log = TRUE)
-        #priors_list$r0_prior[1]*ssnb_params_dash[2] + priors_list$r0_prior[1]*ssnb_params[2]
+          dgamma(k_dash, shape = priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -
+          dgamma(k, shape = priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) +
+        dunif(R0_dash, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE) - #Uniform prior
+        dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
+        #priors_list$pr0_unif[1]*ssnb_params_dash[2] + priors_list$pr0_unif[1]*ssnb_params[2]
 
       } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob & FLAGS_LIST$PRIOR){
 
         log_accept_ratio = log_accept_ratio +
-          dgamma(k_dash, shape = negbin_shape, scale = negbin_scale, log = TRUE) -
-          dgamma(k, shape = negbin_shape, scale = negbin_scale, log = TRUE) +
+          dgamma(k_dash, shape =  priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -
+          dgamma(k, shape =  priors$pk_ga_shape,  rate = priors$pk_ga_rte, log = TRUE) +
           dunif(k_dash/(R0_dash + k_dash), log = TRUE) -  dunif(k/(R0 + k), log = TRUE) #+
         #dunif(R0_dash, min = 0, max = 10 log = TRUE) -  dunif(R0, min = 0, max = 10 log = TRUE)
       }

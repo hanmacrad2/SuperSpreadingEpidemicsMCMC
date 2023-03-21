@@ -80,6 +80,7 @@ plot.ts(epi_data_nb)
 #Likelihood
 lambda_vec = get_lambda(epi_data_nb)
 likenb = LOG_LIKE_SSNB(epi_data_nb, lambda_vec, params_nb) 
+likenb
 #SAVE DATA
 saveRDS(epi_data_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_ssnb_', seedX, '.rds' ))
 
