@@ -71,23 +71,23 @@ PLOT_SSNB_MCMC_GRID(epi_data_nb1, mcmc_nb1b, n_mcmc, likenb1)
 #*****************
 
 #1.SIMULATE DATA
-epi_data_nb2 = SIMULATE_EPI_SSNB(R0 = 1.8,
+epi_data_nb2c = SIMULATE_EPI_SSNB(R0 = 1.8,
                                 FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE))
-plot.ts(epi_data_nb2)
+plot.ts(epi_data_nb2c)
 #SAVE DATA
-saveRDS(epi_data_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_ssnb_', seedX, '.rds' ))
+saveRDS(epi_data_nb2c, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_ssnb2c_', seedX, '.rds' ))
 
 #I.RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_nb2 = MCMC_INFER_SSNB(epi_data_nb2, n_mcmc = 100000,
+mcmc_nb2c = MCMC_INFER_SSNB(epi_data_nb2c, n_mcmc = 100000,
                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE))  #epi_data_SSNB
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_nb2$time_elap = time_elap
+mcmc_nb2c$time_elap = time_elap
 
 #PLOT MAIN RESULTS
-PLOT_SSNB_MCMC_GRID(epi_data_nb2, mcmc_nb2, n_mcmc)
+PLOT_SSNB_MCMC_GRID(epi_data_nb2c, mcmc_nb2c, n_mcmc, simulated = list(m1 = 0.16, m2 = 1.8))
 
 #SAVE MCMC RESULTS
 saveRDS(mcmc_nb, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_SSNB_', seedX, '.rds' ))

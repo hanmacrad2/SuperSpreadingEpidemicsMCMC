@@ -68,6 +68,19 @@ PLOT_CUM_MEAN <- function(mcmc_chain, titleX = 'MCMC chain', ylabX = 'MCMC chain
        main = titleX, #bquote(bold(R[0] ~ "MCMC mean, Start:" ~ .(mcmc_specs$mod_start_points$m1))),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
 }
+#CUM MEAN MCMC
+PLOT_CUM_MEAN_MCMC <- function(mcmc_chain, titleX = 'MCMC chain', ylabX = 'MCMC chain',
+                               ylims = c(0, 5)) {
+  
+  #MEAN
+  #titleX = paste0(titleX, ' mean'); ylabX = paste0(ylabX, ' mean'); 
+  mcmc_mean = cumsum(mcmc_chain)/seq_along(mcmc_chain)
+  plot(seq_along(mcmc_mean), mcmc_mean,
+       xlab = 'Time', ylab = ylabX,
+       ylim = ylims,
+       main = titleX, #bquote(bold(R[0] ~ "MCMC mean, Start:" ~ .(mcmc_specs$mod_start_points$m1))),
+       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+}
 
 #EPIDEMIC FUNCTIONS
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){

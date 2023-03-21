@@ -59,13 +59,13 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
-                            mcmc_inputs = list(mod_start_points = c(0.16, 1.2),
+                            mcmc_inputs = list(mod_start_points = c(0.16, 1.8),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10),
                             priors = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
                                                p_prob_unif = c(0,1)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE),
-                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
+                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = FALSE, param_prob = TRUE)) {    
   
   #NOTE:
   #i - 1 = n (Simon's paper); #NOTE NO REFLECTION, NO TRANSFORMS, MORE INTELLIGENT ADAPTATION

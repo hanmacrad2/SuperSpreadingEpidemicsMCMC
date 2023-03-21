@@ -117,7 +117,7 @@ PLOT_SSNB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,seed_count = 
        main = bquote(bold(k) ~ ' +True +Prior: ' ~ .(m1_prior)),
        xlim= m1_lim,
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = mcmc_specs$mod_start_points$m1, col = 'blue', lwd = 2)
+  abline(v = simulated$m1, col = 'blue', lwd = 2)
   
   #Prior plot
   if (FLAGS_LIST$PRIOR) {
@@ -134,7 +134,7 @@ PLOT_SSNB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,seed_count = 
        main =  bquote(bold(R[0]) ~ ' +True +Prior: ' ~ .(m2_prior)),
        xlim = m2_lim,
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = mcmc_specs$mod_start_points$m2, col = 'red', lwd = 2)
+  abline(v = simulated$m2, col = 'red', lwd = 2)
   
   #PRIOR PLOT 
   if (FLAGS_LIST$PRIOR) {
@@ -157,13 +157,15 @@ PLOT_SSNB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,seed_count = 
   
   #m1 mean
   titleX = paste(mcmc_specs$mod_par_names[1], "MCMC mean, Start:", mcmc_specs$mod_start_points$m1)
-  PLOT_CUM_MEAN(m1_mcmc, titleX = titleX, ylabX =  mcmc_specs$mod_par_names[1])
-  abline(h = mcmc_specs$mod_start_points$m1, col = 'blue', lwd = 2)
+  PLOT_CUM_MEAN_MCMC(m1_mcmc, titleX = titleX, ylabX =  mcmc_specs$mod_par_names[1],
+                     ylim = c(m1_min, m1_max))
+  abline(h = simulated$m1, col = 'blue', lwd = 2)
   
   #m2 mean
   titleX = bquote(R[0] ~ "MCMC mean, Start:" ~ .(mcmc_specs$mod_start_points$m2))
-  PLOT_CUM_MEAN(m2_mcmc, title = titleX, ylabX =  mcmc_specs$mod_par_names[2])
-  abline(h = mcmc_specs$mod_start_points$m2, col = 'red', lwd = 2)
+  PLOT_CUM_MEAN_MCMC(m2_mcmc, title = titleX, ylabX =  mcmc_specs$mod_par_names[2],
+                     ylim = c(m2_min, m2_max))
+  abline(h = simulated$m2, col = 'red', lwd = 2)
   
   #SCALING VEC
   plot.ts(mcmc_output$scaling_vec,  ylab = paste0('adaptive scaling vec'), 
@@ -196,22 +198,20 @@ PLOT_SSNB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,seed_count = 
     n_mcmc = n_mcmc,
     n_thin_samps = n_samples,
     k_sim = simulated$m1[[1]], 
-    k_start =  mcmc_specs$mod_start_points$m1[[1]],
     k_mean_mcmc = round(mean(m1_mcmc), 2),
-    k_lo_95_cred_int = get_lower_ci(m1_mcmc),
-    k_up_95_cred_int = get_upper_ci(m1_mcmc),
+    k_lo_95_cred_int = round(get_lower_ci(m1_mcmc), 2),
+    k_up_95_cred_int = round(get_upper_ci(m1_mcmc), 2), 
     r0_sim = simulated$m2[[1]],
-    r0_start = mcmc_specs$mod_start_points$m2[[1]],
     r0_mean_mcmc = round(mean(m2_mcmc), 2), 
-    r0_lo_95_cred_int = get_lower_ci(m2_mcmc),
-    r0_up_95_cred_int = get_upper_ci(m2_mcmc),
-    #log_like_sim = round(log_like_sim, 2),
+    r0_lo_95_cred_int = round(get_lower_ci(m2_mcmc), 2), 
+    r0_up_95_cred_int = round(get_upper_ci(m2_mcmc), 2),  
+    log_like_sim = round(log_like_sim, 2),
     accept_rate = round(mcmc_output$accept_rate, 2),
     k_es = round(effectiveSize(as.mcmc(m1_mcmc))[[1]], 2),
     r0_es = round(effectiveSize(as.mcmc(m2_mcmc))[[1]], 2),
     time_elap = mcmc_output$time_elap) #format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
   
-  print(df_results)
+  #print(df_results)
   
   return(df_results)
   
