@@ -49,10 +49,14 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
-  sampling_prob = rbinom(n_samples, 1, prob)
-  samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
-  print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
-  prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
+  # sampling_prob = rbinom(n_samples, 1, prob)
+  # samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  # print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  # prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
+  
+  #SAMPLING SIZE #2
+  samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
+  prob_prop = prob; prob_prior = 1-prob_prop
   
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
@@ -68,6 +72,8 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
   
   #log_q_s = LOG_SUM_EXP(log_q) #LOG SUM EXP OF TWO COMPONENTS
+  
+  #print(paste0('LOG_Q: ', log_q))
   
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -128,6 +134,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   
   #PRIORS 
   if (FLAGS_MODELS$SSEB | FLAGS_MODELS$SSIB) {
+    print(paste0('FLAGS_MODELS$SSEB' = FLAGS_MODELS$SSEB))
     log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
       dexp((theta_samples[,3] - 1), log = TRUE)
     lambda_vec = get_lambda(epidemic_data); 
@@ -150,6 +157,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
         vector_log_sum_exp[i] = log_priors[i] - log_q
       } else {
         vector_log_sum_exp[i] = loglike + log_priors[i] - log_q
+        #print(paste0('vector_log_sum_exp[i]', vector_log_sum_exp[i]))
       }
       
     } #else if(FLAGS_MODELS$SSIB) {
@@ -171,6 +179,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
     # }
   }
   
+  #print(paste0('LOG_SUM_EXP(vector_log_sum_exp)',  LOG_SUM_EXP(vector_log_sum_exp)))
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
   return(log_p_hat)
@@ -219,6 +228,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data) 
+      
       estimates_vec[i] = phat_estimate
       print(estimates_vec)
       

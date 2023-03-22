@@ -1,7 +1,6 @@
 #******************
 #MULTIPLE RJMCMC
 #****************
-
 RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 10){
   
   #INITIALISE

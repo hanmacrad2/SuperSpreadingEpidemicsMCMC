@@ -16,7 +16,10 @@ run_number = 1
 #**********************
 RUN_MULTIPLE_MCMC_SSNB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
+#**********************
 #Inspect MCMC results
+#**********************
+
 model_type = 'SSNB'; i = 100
 RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
 
