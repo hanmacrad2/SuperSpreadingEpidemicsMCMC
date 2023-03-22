@@ -13,7 +13,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 # 1. RUN BASE MCMC
 #**********************
 list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                                                SSNB = FALSE, SSIC = FALSE)) 
+                                                                               SSNB = FALSE, SSIC = FALSE)) 
 #Plot RESULTS
 PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
 mean(list_log_ev_base)
@@ -33,7 +33,7 @@ PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
 # 3. RUN SSNB MCMC
 #**********************
 list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                                                SSNB = TRUE, SSIC = FALSE))
+                                                                               SSNB = TRUE, SSIC = FALSE))
 mean(list_log_ev_ssnb)
 sd(list_log_ev_ssnb)
 
@@ -49,16 +49,10 @@ log_bf_hm = list_log_ev_base - list_log_ev_sseb
 PLOT_BAYES_FACTORS(log_bf_hm)
 mean(log_bf_hm)
 
+
 #***********************
 # 5. POSTERIOR MODEL PROBABILITIES
 #**********************
-
-#GET_AGGREGATE_POSTERIOR_MODEL_PROB
-GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = mod1,
-                                                            mod2 = mod2, mod3 = mod3))
-  
-vec_post_probs_hm = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
-                                                                     mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
 
 #***********************
 #* METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS
@@ -88,3 +82,21 @@ PLOT_MODEL_EV_RESULTS(lme_sseb_is)
 #PLOT TOTAL RESULTS
 BOX_PLOT_MODEL_EV_RESULTS(list_log_ev_base, lme_base_is, list_log_ev_sseb, lme_sseb_is)
 
+
+
+
+
+
+
+
+#INSPECT SINGLE SET OF RESULTS
+#Inspect MCMC results
+model_type = 'SSEB'; run_number = 1
+RESULTS_FOLDER = paste0(CURRENT_OUTPUT_FOLDER, model_type, '/run_', run_number, '/')
+
+#MCMC RESULTS
+i = 1
+mcmc_sseb_1 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_sseb_', i))
+
+lme1 = LOG_MODEL_EVIDENCE(mcmc_sseb_1$log_like_vec)
+lme1
