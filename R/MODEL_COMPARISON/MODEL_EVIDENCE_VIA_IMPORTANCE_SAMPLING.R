@@ -7,11 +7,11 @@ library(mvtnorm)
 
 #***************************************
 #*
-#1. GET IMPORTANCE SAMPLING PROPOSAL
+#1. GET IMPORTANCE SAMPLING PROPOSAL (LOG)
 #*
 #***************************************
 GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
-                                 n_samples, dof = 3, prob = 0.95) {   
+                                       n_samples, dof = 3, prob = 0.95) {   
   
   'Get proposal q for univariate dist'
   
@@ -32,7 +32,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   #DEFENSE MIXTURE
   log_proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = TRUE) - log(sd_mcmc)
   log_prior = dexp(theta_samples[,1], log = TRUE)
-
+  
   #LOG SUM EXP TRICK TO GET LOG_Q
   max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
   log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
@@ -44,7 +44,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
 
 #MUTLI DIM PROPOSAL
 GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROPOSAL_MULTI_DIM
-                                   n_samples, dof = 3, prob = 0.95) {               
+                                         n_samples, dof = 3, prob = 0.95) {               
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
@@ -76,7 +76,7 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
 
 #*********************************************************
 #*
-#* 2. GET LOG P_HATS 
+#* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #************************************************************
 GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
@@ -91,7 +91,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
   
   #PRIORS 
   priors = dexp(theta_samples) 
-
+  
   #LOG SUM EXP (LOOP)
   vector_log_sum_exp = c()
   for(i in 1:n_samples){         
@@ -114,9 +114,9 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 
 #MULTI PARAMETER MODELS 
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
-                                     FLAGS_MODELS = list(SSEB = TRUE,
-                                                       SSIB = FALSE, SSIC = FALSE),
-                                     n_samples = 10000) {
+                          FLAGS_MODELS = list(SSEB = TRUE,
+                                              SSIB = FALSE, SSIC = FALSE),
+                          n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -153,107 +153,37 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
       }
       
     } #else if(FLAGS_MODELS$SSIB) {
-      
-      # loglike = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-      #                        theta_samples[i, 3])
-      # if (is.na(loglike)){
-      #   vector_log_sum_exp[i] = log(priors[i]) - log_q
-      # } else {
-      #   vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
-      # }
-      # 
-      # vector_log_sum_exp[i] =  + log(priors[i]) - log_q
-      
-    # } else if (FLAGS_MODELS$SSIC) {
+    
+    # loglike = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+    #                        theta_samples[i, 3])
+    # if (is.na(loglike)){
+    #   vector_log_sum_exp[i] = log(priors[i]) - log_q
+    # } else {
+    #   vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
+    # }
+    # 
+    # vector_log_sum_exp[i] =  + log(priors[i]) - log_q
+    
+    # } else if (FLAGS_MODELS$SSNB) {
     #   
     #   vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
     #                           #theta_samples[i, 3]) + log(priors[i]) - log_q
     # }
   }
-
+  
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
   return(log_p_hat)
 }
 
-#SSEB
-#phat_sseb = GET_LOG_P_HAT(mcmc_samples, data_baseI)
-#Base
-#phat_base = GET_LOG_P_HAT_BASELINE(mcmc_samples, data_baseI)
-#SSIB
-#phat_ssib = GET_LOG_P_HAT(mcmc_samples, data_baseI, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE,SSIC = FALSE))
-
-#*********************************************************
-#*
-#* 3. GET POSTERIOR MODEL PROBABILITIES
-#* 
-#***********************************************************
-GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, 
-                                     probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25), #mech = mechanism; baseline (0.5) or sse (0.25)
-                                     log_phats = list(mod1 = mod1,
-                                                      mod2 = mod2, mod3 = mod3)){ 
-  
-  #PARAMS
-  vec_model_diffs = c()
-  
-  for(i in 1:num_models-1){
-    vec_model_diffs[i] = exp(log(probs_models[[i+1]]) + log_phats[[i+1]] -
-                                 log(probs_models[[1]]) - log_phats[[1]])
-  }
-  
-  print(paste0('sum(vec_model_diffs) = ', sum(vec_model_diffs)))
-  
-  posterior_prob =  1/(1 + sum(vec_model_diffs))
-  
-  print(paste0('posterior_prob= ', posterior_prob))
-  
-  return(posterior_prob)
-}
-
-#GET_AGGREGATE_POSTERIOR_MODEL_PROB
-GET_AGG_POSTERIOR_PROB <- function(num_models = 3, 
-                                   probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25),
-                                               list_log_phats = list(mod1 = mod1,
-                                                                     mod2 = mod2, mod3 = mod3)){ 
-  'Get posterior probabilites for mulitple P_hat reps'
-  
-  #FOR EACH REP
-  num_reps = length(list_log_phats$mod1)
-  vec_post_probs = c()
-  
-  for (i in 1:num_reps){
-    print(paste0('rep = ', i))
-    vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(num_models = 3, 
-                                       probs_models = probs_models,
-                                       log_phats = list(mod1 = list_log_phats$mod1[i],
-                                                        mod2 = list_log_phats$mod2[i],
-                                                        mod3 = list_log_phats$mod3[i]))
-    
-  }
-
-  return(vec_post_probs)
-  
-}
-
-#*********************
-#* 4. GET BAYES FACTORS
-#*********************
-GET_LOG_BAYES_FACTORS <- function (list_log_phat_mod1, list_log_phat_mod2){
-  
-  log_bf = list_log_phat_mod1 - list_log_phat_mod2
-  
-  return(log_bf)
-  
-}
-
 #******************************************************************************
 #*
-# 5. LOAD MCMC + GET POSTERIOR MODEL PROBABILITIES
+# 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
 LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                  SSIB = FALSE, SSIC = FALSE)){
+                                                    SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Run mcmc 2. Get estimate'
@@ -319,85 +249,3 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
   
   return(estimates_vec) 
 }
-
-#******************
-#**NEED TO EDIT
-RUN_MCMC_MODEL_EV_IMP_SAMP <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
-                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                         SSIB = TRUE, SSIC = FALSE)){
-  'For a given epidemic dataset and model. 
-  Get importance sampling estimate of model evidence. 
-  1. Run mcmc 2. Get estimate'
-  
-  #FOLDER
-  CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run)
-  create_folder(CURRENT_OUTPUT_FOLDER)
-  
-  #Parameters
-  estimates_vec = c()
-  
-  if (FLAGS_MODELS$BASE){
-    for (i in 1:n_repeats){
-      
-      print(paste0('i = ', i))
-      #MCMC SAMPLES
-      mcmc_samples = MCMC_INFER_BASELINE(epidemic_data)
-      #SAVE MCMC
-      saveRDS(mcmc_samples, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base_', i ))
-      #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_IMP_SAMP_MODEL_EV_BASE(mcmc_samples$r0_vec, epidemic_data) 
-      estimates_vec[i] = phat_estimate
-      print(estimates_vec)
-    }
-  } else {
-    
-    for (i in 1:n_repeats){
-      
-      print(paste0('i = ', i))
-      
-      #MCMC SAMPLES
-      if(FLAGS_MODELS$SSEB){
-        mcmc_output = MCMC_INFER_SSEB(epidemic_data)
-        saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
-        mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-          
-      } else if (FLAGS_MODELS$SSIB){
-        mcmc_output = MCMC_INFER_SSIB(epidemic_data)
-        saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
-        mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
-        
-      } else if (FLAGS_MODELS$SSIC){
-        mcmc_output = MCMC_INFER_SSIC(epidemic_data)
-        saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssic_', i )) 
-        #SSIC_PARAMS + ETA
-        #mcmc_samples = mcmc_output$
-          
-      } else if (FLAGS_MODELS$SSEC) {
-        mcmc_output = SSI_MCMC_ADAPTIVE(epidemic_data)
-        saveRDS(mcmc_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssec_', i )) 
-      }
-      
-      #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_IMP_SAMP_MODEL_EV_SSB(mcmc_samples, epidemic_data) 
-      estimates_vec[i] = phat_estimate
-      print(estimates_vec)
-    }
-    
-  }
- return(estimates_vec) 
-}
-
-
-#*******************
-#* APPLICATION OF FUNCTIONS
-#APPLY
-# post_prob1 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_base,
-#                                                        mod2 = phat_sseb, mod3 = phat_ssib))
-# 
-# post_prob2 = GET_POSTERIOR_MODEL_PROB(log_phats = list(mod1 = phat_sseb,
-#                                                        mod2 = phat_base, mod3 = phat_ssib))
-# 
-# #APPLY AGGREGATE
-# vec_post_probs = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
-#                                                                     mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
-# 
