@@ -21,10 +21,10 @@ model_type = 'SSNB'; i = 100
 RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
 
 #MCMC RESULTS
-i = 1
-mcmc1 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
+i = 90
+mcmc90 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 #PLOT
-PLOT_SSNB_MCMC_GRID(data_baseI, mcmc1, n_mcmc = 100000)
+PLOT_SSNB_MCMC_GRID(data_baseI, mcmc90, n_mcmc = 100000)
 
 ssnb1 = mcmc1$ssec_params_matrix
 plot.ts(ssec1)

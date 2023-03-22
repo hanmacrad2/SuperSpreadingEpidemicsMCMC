@@ -1,9 +1,6 @@
-#MODEL COMPARISON
-
-#*********************
-#* MODEL COMPARISON BY RATIO OF MODEL EVIDENCES
-#***********
-
+#***************************************************
+#* #MODEL EVIDENCE ESTIMATE VIA HARMONIC MEAN
+#********************************************************
 LOG_MODEL_EVIDENCE <- function(loglike_vec){
   
   'Model evidence via log-sum-exp trick'
@@ -15,20 +12,8 @@ LOG_MODEL_EVIDENCE <- function(loglike_vec){
   return(-log_model_ev)
 }
 
-#GET BAYES FACTORS
-GET_BAYES_FACTORS <- function(loglike_vec1, loglike_vec2){
-  
-  'Get Bayes factor via ratio of the model evidence'
-  
-  #bayes_factor = MODEL_EVIDENCE(loglike_vec1)/MODEL_EVIDENCE(loglike_vec2) 
-  log_bf = LOG_MODEL_EVIDENCE(loglike_vec1)  - LOG_MODEL_EVIDENCE(loglike_vec2)
-  bayes_factor = exp(log_bf)
-  
-  return(bayes_factor)
-}
-
 #RUN MODEL EVIDENCE
-RUN_MODEL_EV_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
+RUN_MODEL_EV_HM_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
   
   #List of model evidences
   list_log_ev = c()
@@ -58,7 +43,7 @@ RUN_MODEL_EV_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30)
 }
 
 #MODEL EVIDENCE - SSEB
-RUN_MODEL_EV_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
+RUN_MODEL_EV_HM_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
   
   #INITIALISE
   n_mcmc = 30000
@@ -86,45 +71,13 @@ RUN_MODEL_EV_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30)
   return(list_log_ev)
 }
 
-#LOAD MCMC + GET MODEL EVIDENCE
 
-#MULTIPLE RJMCMC
-RUN_RJMCMC_MULT <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 10){
-  
-  #INITIALISE
-  n_mcmc = 30000
-  list_bfs = c(); list_bc0 = c()
-  
-  for(i in 1:n_reps){
-    
-    print(paste0('i =', i))
-    #RUN MCMC
-    start_time = Sys.time()
-    print(paste0('start_time:', start_time))
-    rj_output = RJMCMC_BASE_SSEB(epidemic_data, n_mcmc)
-    end_time = Sys.time()
-    time_elap = get_time(start_time, end_time)
-    rj_output$time_elap = time_elap
-    saveRDS(rj_output, file = paste0(CURRENT_OUTPUT_FOLDER, '/rjmcmc_', i, '.rds' ))
-    
-    #MODEL EVIDENCE
-    list_bfs = c(list_bfs, rj_output$bayes_factor)
-    print(list_bfs)
-    
-    list_bc0 = c(list_bc0, rj_output$beta_pc0)
-    print(list_bc0)
-    
-  }
-  
-  rjmcmc_out = list(list_bfs = list_bfs, list_bc0 = list_bc0)
-  
-  return(rjmcmc_out)
-}
-
-#LOAD MCMC & GET MODEL EVIDENCE
+#********************************************************
+#* LOAD MCMC & GET MODEL EVIDENCE
+#********************************************************
 LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
-                                FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                    SSIB = FALSE, SSIC = FALSE)){
+                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
+                                                          SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   1. Load MCMC. 2. Get log model evidence'
   
@@ -156,12 +109,3 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   
   return(list_log_model_ev) 
 }
-
-
-
-#NOTES
-#MODEL COMPARISON VIA POSTERIOR MODEL PROBABILITIES
-#Add Do all calculations on log scale and take exp as final step 
-#(Not one 8th)
-#0.5*base_model/(0.5*base_model + (1/8)*S + (1/8)*m2 + (1/8)*m3 + (1/8)*m4)  #An 1/8 for each of 4 other models
-
