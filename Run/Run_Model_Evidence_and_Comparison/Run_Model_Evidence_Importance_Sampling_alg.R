@@ -28,7 +28,7 @@ ests_phat_sseb = readRDS(file = paste0(OUTPUT_FOLDER, 'run_', runX, '/phat_ests_
 
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
-                                     FLAGS_LIST = list(BASE = TRUE, SSEB = FALSE,
+                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                        SSIB = FALSE, SSIC = FALSE))
 
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'SSIB/')

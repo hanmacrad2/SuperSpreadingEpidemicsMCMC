@@ -13,7 +13,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 # 1. RUN BASE MCMC
 #**********************
 list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                                                SSIB = FALSE, SSIC = FALSE)) 
+                                                                                SSNB = FALSE, SSIC = FALSE)) 
 #Plot RESULTS
 PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
 mean(list_log_ev_base)
@@ -32,21 +32,27 @@ PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER) 
+list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                                                SSNB = TRUE, SSIC = FALSE))
 mean(list_log_ev_ssnb)
 sd(list_log_ev_ssnb)
 
 #Plot
-PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
+PLOT_MODEL_EV_RESULTS(list_log_ev_ssnb)
 
 #***********************
-# 3. BAYES FACTORS
+# 4. BAYES FACTORS
 #**********************
 log_bf_hm = list_log_ev_base - list_log_ev_sseb
 
 #PLOT
 PLOT_BAYES_FACTORS(log_bf_hm)
 mean(log_bf_hm)
+
+
+#***********************
+# 5. POSTERIOR MODEL PROBABILITIES
+#**********************
 
 #***********************
 #* METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS

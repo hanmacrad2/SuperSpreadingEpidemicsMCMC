@@ -35,18 +35,21 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
     FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSNB)  {
     model_type = 'ssnb'
+    print(model_type)
     FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    print(FOLDERX)
   }
   
   #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
   for (i in 1:n_repeats){
     print(paste0('i = ', i))
-    mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', model_type, '_', i ))
+    #print(paste0(FOLDERX, 'mcmc_', model_type, '_', i ))
     
     #TYPO IN FOLDER STRUCTRUE FOR SSNB
     if (FLAGS_MODELS$SSNB)  {
-      model_type = 'ssnb'
-      mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', i ))
+      mcmc_output = readRDS(file = paste0(FOLDERX, 'mcmc_', i ,'.rds'))
+    } else {
+      mcmc_output = readRDS(file = paste0(FOLDERX, 'mcmc_', model_type, '_', i ))
     }
     
     #LOG MODEL EVIDENCE
@@ -55,7 +58,7 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   }
   
   #SAVE LOG MODEL EVIDENCE ESTIMATES
-  saveRDS(list_log_model_ev, file = paste0(FOLDERX, '/list_log_model_ev_', model_type, '_', run, '.rds' ))
+  saveRDS(list_log_model_ev, file = paste0(FOLDERX, 'list_log_model_ev_', model_type, '_', run, '.rds' ))
   
   return(list_log_model_ev) 
 }

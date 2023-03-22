@@ -30,7 +30,7 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt(theta_samples - mean_mcmc, df = num_dims, log = TRUE) - log(sd_mcmc)
+  log_proposal = dt(theta_samples - mean_mcmc, df = dof, log = TRUE) - log(sd_mcmc)
   log_prior = dexp(theta_samples[,1], log = TRUE)
   
   #LOG SUM EXP TRICK TO GET LOG_Q
