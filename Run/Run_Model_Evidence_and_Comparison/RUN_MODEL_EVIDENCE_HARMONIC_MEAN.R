@@ -1,4 +1,4 @@
-#Apply model evidence - model comparion basic
+#Apply model evidence - model comparison basic
 
 #RUN MULTIPLE MCMC ITERATIONS
 
@@ -12,7 +12,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 #***********************
 # 1. RUN BASE MCMC
 #**********************
-list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER,FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
+list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                                                 SSIB = FALSE, SSIC = FALSE)) 
 #Plot RESULTS
 PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
@@ -25,6 +25,16 @@ sd(list_log_ev_base)
 list_log_ev_sseb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER) 
 mean(list_log_ev_sseb)
 sd(list_log_ev_sseb)
+
+#Plot
+PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
+
+#***********************
+# 3. RUN SSNB MCMC
+#**********************
+list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER) 
+mean(list_log_ev_ssnb)
+sd(list_log_ev_ssnb)
 
 #Plot
 PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)

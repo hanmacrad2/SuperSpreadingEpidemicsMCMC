@@ -1,18 +1,68 @@
 #***************************************************
-#* #MODEL EVIDENCE ESTIMATE VIA HARMONIC MEAN
+#* #MODEL EVIDENCE ESTIMATE VIA HARMONIC MEAN (Kaas, Raftery, 1995)
 #********************************************************
-LOG_MODEL_EVIDENCE <- function(loglike_vec){
+LOG_HM_MODEL_EVIDENCE <- function(loglike_vec){
   
-  'Model evidence via log-sum-exp trick'
+  'Model evidence via Harmonic mean (Kaas, Raftery, 1995)'
   
-  loglike_vec = - loglike_vec
-  m = max(loglike_vec, na.rm = TRUE)
-  log_model_ev = m + log(mean(exp(loglike_vec - m)))
+  loglike_vec = - loglike_vec #Harmonic mean applied to inverse likelihood
+  loglike_lse = LOG_SUM_EXP(loglike_vec)
+  N = length(loglike_vec)
+  log_model_evidence = log(N) - loglike_lse
   
-  return(-log_model_ev)
+  return(log_model_evidence)
 }
 
-#RUN MODEL EVIDENCE
+#********************************************************
+#* 2. LOAD MCMC & GET MODEL EVIDENCE
+#********************************************************
+LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
+                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
+                                                          SSNB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  1. Load MCMC. 2. Get log model evidence'
+  
+  #FOLDER
+  #FOLDERX = paste0(OUTER_FOLDER, 'run_', run)
+  list_log_model_ev = c()
+  
+  #MODEL TYPE
+  if (FLAGS_MODELS$BASE) {
+    model_type = 'base'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  } else if (FLAGS_MODELS$SSEB)  {
+    model_type = 'sseb'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  } else if (FLAGS_MODELS$SSNB)  {
+    model_type = 'ssnb'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  }
+  
+  #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
+  for (i in 1:n_repeats){
+    print(paste0('i = ', i))
+    mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', model_type, '_', i ))
+    
+    #TYPO IN FOLDER STRUCTRUE FOR SSNB
+    if (FLAGS_MODELS$SSNB)  {
+      model_type = 'ssnb'
+      mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', i ))
+    }
+    
+    #LOG MODEL EVIDENCE
+    list_log_model_ev[i] = LOG_HM_MODEL_EVIDENCE(mcmc_output$log_like_vec)
+    print(list_log_model_ev)
+  }
+  
+  #SAVE LOG MODEL EVIDENCE ESTIMATES
+  saveRDS(list_log_model_ev, file = paste0(FOLDERX, '/list_log_model_ev_', model_type, '_', run, '.rds' ))
+  
+  return(list_log_model_ev) 
+}
+
+#********************************************************
+#* OLDER FUNCTIONS
+#********************************************************
 RUN_MODEL_EV_HM_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 30){
   
   #List of model evidences
@@ -32,7 +82,7 @@ RUN_MODEL_EV_HM_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 
     saveRDS(mcmc_base, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base', i, '.rds' ))
     
     #MODEL EVIDENCE
-    log_mod_ev = LOG_MODEL_EVIDENCE(mcmc_base$log_like_vec)
+    log_mod_ev = LOG_HM_MODEL_EVIDENCE(mcmc_base$log_like_vec)
     list_log_ev = c(list_log_ev, log_mod_ev)
     print(log_mod_ev)
     
@@ -62,50 +112,11 @@ RUN_MODEL_EV_HM_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 
     saveRDS(mcmc_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb', i, '.rds' ))
     
     #MODEL EVIDENCE
-    log_mod_ev = LOG_MODEL_EVIDENCE(mcmc_sseb$log_like_vec)
+    log_mod_ev = LOG_HM_MODEL_EVIDENCE(mcmc_sseb$log_like_vec)
     list_log_ev = c(list_log_ev, log_mod_ev)
     print(log_mod_ev)
     
   }
   
   return(list_log_ev)
-}
-
-
-#********************************************************
-#* LOAD MCMC & GET MODEL EVIDENCE
-#********************************************************
-LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
-                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                          SSIB = FALSE, SSIC = FALSE)){
-  'For a given epidemic dataset and model. 
-  1. Load MCMC. 2. Get log model evidence'
-  
-  #FOLDER
-  #FOLDERX = paste0(OUTER_FOLDER, 'run_', run)
-  list_log_model_ev = c()
-  
-  #MODEL TYPE
-  if (FLAGS_MODELS$BASE) {
-    model_type = 'base'
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
-  } else if (FLAGS_MODELS$SSEB)  {
-    model_type = 'sseb'
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
-  }
-  
-  #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
-  for (i in 1:n_repeats){
-    
-    print(paste0('i = ', i))
-    mcmc_output = readRDS(file = paste0(FOLDERX, '/mcmc_', model_type, '_', i ))
-    #LOG MODEL EVIDENCE
-    list_log_model_ev[i] = LOG_MODEL_EVIDENCE(mcmc_output$log_like_vec)
-    print(list_log_model_ev)
-  }
-  
-  #SAVE LOG MODEL EVIDENCE ESTIMATES
-  saveRDS(list_log_model_ev, file = paste0(FOLDERX, '/list_log_model_ev_', model_type, '_', run, '.rds' ))
-  
-  return(list_log_model_ev) 
 }
