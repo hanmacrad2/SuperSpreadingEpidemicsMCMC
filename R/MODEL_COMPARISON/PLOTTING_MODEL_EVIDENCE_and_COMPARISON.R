@@ -18,7 +18,7 @@ PLOT_BAYES_FACTORS <- function(bayes_factors, result_type = 'Bayes Factors via H
   titleX = paste0(axis_label, data_type, ' data. ', n_reps, ' reps.')
   labelX =  'Bayes Factor'
   #PLOT
-  par(mfrow = c(2,1))
+  #par(mfrow = c(2,1))
   boxplot(bayes_factors,
           ylab =labelX,
           main = axis_label)

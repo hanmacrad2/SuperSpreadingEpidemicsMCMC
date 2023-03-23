@@ -27,7 +27,7 @@ mean(list_log_ev_sseb)
 sd(list_log_ev_sseb)
 
 #Plot
-PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
+PLOT_MODEL_EV_RESULTS(list_log_ev_sseb) 
 
 #***********************
 # 3. RUN SSNB MCMC
@@ -52,16 +52,38 @@ mean(log_bf_hm)
 #***********************
 # 5. POSTERIOR MODEL PROBABILITIES
 #**********************
-
+par(mfrow = c(1,1))
 #GET_AGGREGATE_POSTERIOR_MODEL_PROB
-GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = mod1,
-                                                            mod2 = mod2, mod3 = mod3))
-  
-vec_post_probs_hm = GET_AGG_POSTERIOR_MODEL_PROB(list_log_phats = list(mod1 = c(-101, -102, -103, 102, 101),
-                                                                     mod2 = c(-113, -114, 112, 111, -115), mod3 = c(-15, -15.5, -16, -16.1, -15.9) ))
+#MODEL 1: BASE
+vec_post_probs_hm = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_base,
+                                                            mod2 = list_log_ev_sseb, mod3 = list_log_ev_ssnb))
+
+mean(vec_post_probs_hm); sd(vec_post_probs_hm)
+PLOT_BAYES_FACTORS(vec_post_probs_hm)
+#MODEL 2: SSEB
+vec_post_probs_hm2 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_sseb,
+                                                                    mod2 = list_log_ev_base, mod3 = list_log_ev_ssnb))
+mean(vec_post_probs_hm2); sd(vec_post_probs_hm2)
+PLOT_BAYES_FACTORS(vec_post_probs_hm2)
+#MODEL 3: SSNB
+vec_post_probs_hm3 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_ssnb,
+                                                                     mod2 = list_log_ev_base, mod3 = list_log_ev_sseb))
+mean(vec_post_probs_hm3); sd(vec_post_probs_hm3)
+PLOT_BAYES_FACTORS(vec_post_probs_hm3)
+
+#DATAFRAME OF POSTERIOR RESULTS
+list_pp_results = list(Baseline_model = vec_post_probs_hm, SSEB_model = vec_post_probs_hm2, SSNB_model = vec_post_probs_hm3)
+df_pp <- as.data.frame(do.call(cbind, list_pp_results))
+df_pp
+boxplot(df_pp, main = 'Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model',
+        col = c('red', 'green', 'blue'),
+        cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
+
+#HISTOGRAM OF RESULTS
+hist(df_pp, main = 'Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model')
 
 #***********************
-#* METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS
+#* COMPARE WITH METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS
 #**********************
 
 #1. BASE
@@ -88,3 +110,7 @@ PLOT_MODEL_EV_RESULTS(lme_sseb_is)
 #PLOT TOTAL RESULTS
 BOX_PLOT_MODEL_EV_RESULTS(list_log_ev_base, lme_base_is, list_log_ev_sseb, lme_sseb_is)
 
+num_models = 3
+for(i in 1:(num_models-1)){
+  print(i)
+}
