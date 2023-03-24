@@ -18,7 +18,7 @@ LOG_HM_MODEL_EVIDENCE <- function(loglike_vec){
 #********************************************************
 LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                          SSNB = FALSE, SSIC = FALSE)){
+                                                          SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   1. Load MCMC. 2. Get log model evidence'
   
@@ -32,6 +32,9 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
     FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSEB)  {
     model_type = 'sseb'
+    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  } else if  (FLAGS_MODELS$SSIB)  {
+    model_type = 'ssib'
     FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSNB)  {
     model_type = 'ssnb'

@@ -31,7 +31,8 @@ PLOT_BAYES_FACTORS <- function(bayes_factors, result_type = 'Bayes Factors via H
 
 
 #MODEL EVIDENCE RESULTS
-PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB', data_type = 'Baseline', 
+PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB',
+                                  data_type = 'Baseline', 
                                   n_reps = 100, FLAG_RESULT_TYPE = list(phat = FALSE, post_prob = FALSE,
                                                                         log_model_ev = TRUE, log = FALSE)){
   

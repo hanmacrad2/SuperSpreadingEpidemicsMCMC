@@ -13,7 +13,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 # 1. RUN BASE MCMC
 #**********************
 list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                                                SSNB = FALSE, SSIC = FALSE)) 
+                                                                               SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
 #Plot RESULTS
 PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
 mean(list_log_ev_base)
@@ -33,12 +33,27 @@ PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
 # 3. RUN SSNB MCMC
 #**********************
 list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                                                SSNB = TRUE, SSIC = FALSE))
+                                                                               SSNB = TRUE, SSIB = FALSE, SSIC = FALSE))
 mean(list_log_ev_ssnb)
 sd(list_log_ev_ssnb)
 
 #Plot
 PLOT_MODEL_EV_RESULTS(list_log_ev_ssnb)
+
+#***********************
+# 4. RUN SSIB MCMC (Not correct)
+#**********************
+list_log_ev_ssib = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                                               SSNB = FALSE, SSIB = TRUE, SSIC = FALSE))
+mean(list_log_ev_ssib)
+sd(list_log_ev_ssib)
+
+#***********************
+# 5. RUN SSIB MCMC
+#**********************
+
+#Plot
+PLOT_MODEL_EV_RESULTS(list_log_ev_ssib)
 
 #***********************
 # 4. BAYES FACTORS
@@ -54,22 +69,28 @@ mean(log_bf_hm)
 #**********************
 par(mfrow = c(1,1))
 #GET_AGGREGATE_POSTERIOR_MODEL_PROB
+
 #MODEL 1: BASE
 vec_post_probs_hm = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_base,
                                                             mod2 = list_log_ev_sseb, mod3 = list_log_ev_ssnb))
 
 mean(vec_post_probs_hm); sd(vec_post_probs_hm)
 PLOT_BAYES_FACTORS(vec_post_probs_hm)
+
 #MODEL 2: SSEB
 vec_post_probs_hm2 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_sseb,
                                                                     mod2 = list_log_ev_base, mod3 = list_log_ev_ssnb))
 mean(vec_post_probs_hm2); sd(vec_post_probs_hm2)
 PLOT_BAYES_FACTORS(vec_post_probs_hm2)
+
 #MODEL 3: SSNB
 vec_post_probs_hm3 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_log_ev_ssnb,
                                                                      mod2 = list_log_ev_base, mod3 = list_log_ev_sseb))
 mean(vec_post_probs_hm3); sd(vec_post_probs_hm3)
 PLOT_BAYES_FACTORS(vec_post_probs_hm3)
+
+#MODEL 4: SSIB
+
 
 #DATAFRAME OF POSTERIOR RESULTS
 list_pp_results = list(Baseline_model = vec_post_probs_hm, SSEB_model = vec_post_probs_hm2, SSNB_model = vec_post_probs_hm3)
@@ -79,8 +100,9 @@ boxplot(df_pp, main = 'Posterior Model Probabilities (Model evidence via Harmoni
         col = c('red', 'green', 'blue'),
         cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
 
-#HISTOGRAM OF RESULTS
+#HISTOGRAM (OVERLAPPING?) OF RESULTS
 hist(df_pp, main = 'Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model')
+
 
 #***********************
 #* COMPARE WITH METHOD 2: IMPORTANCE SAMPLING -- MODEL EVIDENCE RESULTS
