@@ -17,10 +17,15 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
-  sampling_prob = rbinom(n_samples, 1, prob)
-  samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
-  print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
-  prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
+  # sampling_prob = rbinom(n_samples, 1, prob)
+  # samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  # print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  # prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
+  #prob_prop = 0.95; prob_prior = 1 - prob_prop
+  
+  #SAMPLING SIZE #2
+  samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
+  prob_prop = prob; prob_prior = 1-prob_prop
   
   #*******
   #THETA SAMPLES: PROPOSAL + PRIOR
@@ -30,12 +35,14 @@ GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data,
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt(theta_samples - mean_mcmc, df = dof, log = TRUE) - log(sd_mcmc)
+  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) 
   log_prior = dexp(theta_samples[,1], log = TRUE)
   
   #LOG SUM EXP TRICK TO GET LOG_Q
-  max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
-  log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
+  #max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
+  #log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
+  
+  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior))
   
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -85,7 +92,7 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
 #* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #************************************************************
-GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
+GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
