@@ -100,9 +100,8 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(data,
-                              mcmc_inputs = list(n_mcmc = 30000,
-                                                 mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
+MCMC_INFER_SSIB <- function(data, n_mcmc = 100000,
+                              mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
@@ -124,7 +123,7 @@ MCMC_INFER_SSIB <- function(data,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  time = length(data[[1]]); n_mcmc = mcmc_inputs$n_mcmc;
+  time = length(data[[1]]); #n_mcmc = mcmc_inputs$n_mcmc;
   print(paste0('num mcmc iters = ', n_mcmc))
 
   #THINNING FACTOR

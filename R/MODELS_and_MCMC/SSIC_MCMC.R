@@ -1,12 +1,12 @@
 #********************************************************
-#1. INDIVIDUAL R0 MCMC ADAPTIVE SHAPING                           
+#1. INDIVIDUAL R0 MCMC WITH ADAPTIVE SHAPING                           
 #********************************************************
 library(MASS)
 
 #*********************************************
 #* SIMULATE SSIC Model - Individual reproduction number
 #**********************************************
-SIMULATE_EPI_SSIC = function(num_days = 110, alphaX = 1.2, k = 0.16,
+SIMULATE_EPI_SSIC = function(num_days = 110, R0X = 1.2, k = 0.16,
                         shape_gamma = 6, scale_gamma = 1) {
   
   'Simulate from the Negative Binomial model'
@@ -22,7 +22,7 @@ SIMULATE_EPI_SSIC = function(num_days = 110, alphaX = 1.2, k = 0.16,
   for (t in 2:num_days) {
     
     #ETA (t-1)
-    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = alphaX/k) #Draw eta from previous time step
+    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = R0X/k) #Draw eta from previous time step
     #INFECTIVITY
     infectivity = rev(prob_infect[1:t]) 
     #POISSON; OFFSPRINT DISTRIBUTION
@@ -40,7 +40,7 @@ LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
   
   #Params
   num_days = length(x)
-  alpha = ssic_params[1]; k = ssic_params[2]
+  R0 = ssic_params[1]; k = ssic_params[2]
   loglike = 0; count_inf = 0
   
   for (t in 2:num_days) {
@@ -55,7 +55,7 @@ LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
         else eta_prob = -Inf #Make whole likelihood zero 
    #2. IF INFECTIONS 
         } else { 
-      eta_prob = dgamma(eta[t-1], shape = x[t-1]*k, scale = alpha/k, log = TRUE)
+      eta_prob = dgamma(eta[t-1], shape = x[t-1]*k, scale = R0/k, log = TRUE)
     }
     
     loglike = loglike + eta_prob 
@@ -71,12 +71,11 @@ LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
 #********************************************************
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
-MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER = 'Results/SSIC/', seed_count = 1,
-                              mcmc_inputs = list(n_mcmc = 20000, #00,
-                                                 mod_start_points = c(1.2, 0.16),
-                                                 dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
+MCMC_INFER_SSIC <- function(epidemic_data, n_mcmc = 100000,
+                              mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
+                                                 dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(R0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10),
-                              priors_list = list( alpha_prior = c(1,0), k_prior = c(1, 0)),
+                              priors_list = list(R0_prior = c(1,0), k_prior = c(1, 0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR_K1 = TRUE,
                                                 PRIOR_K2 = FALSE)) {    
   
@@ -87,7 +86,7 @@ MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER = 'Results/SSIC/', seed_
   #**********************************************
   
   #MCMC PARAMS + VECTORS
-  num_days = length(epidemic_data); n_mcmc = mcmc_inputs$n_mcmc;
+  num_days = length(epidemic_data); 
   vec_min = rep(0, mcmc_inputs$dim);
   count_accept = 0; count_accept_da = 0
   
@@ -104,6 +103,7 @@ MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER = 'Results/SSIC/', seed_
   eta = epidemic_data; eta_matrix = matrix(NA, mcmc_vec_size, num_days); 
   ssic_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
   ssic_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssic_params = ssic_params_matrix[1,] #2x1 #as.matrix
+  
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSIC(epidemic_data, infectivity_vec, ssic_params, eta);  log_like = log_like_vec[1]
@@ -141,10 +141,9 @@ MCMC_INFER_SSIC <- function(epidemic_data, OUTER_FOLDER = 'Results/SSIC/', seed_
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
-      
       #PRIORS
       log_accept_ratio = log_accept_ratio - 
-        priors_list$alpha_prior[1]*ssic_params_dash[1] + priors_list$alpha_prior[1]*ssic_params[1] - 
+        priors_list$R0_prior[1]*ssic_params_dash[1] + priors_list$R0_prior[1]*ssic_params[1] - 
         priors_list$k_prior[1]*ssic_params_dash[2] + priors_list$k_prior[1]*ssic_params[2] 
       
       #METROPOLIS ACCEPTANCE STEP
