@@ -1,9 +1,9 @@
 #***************************************************
 #* #MODEL EVIDENCE ESTIMATE VIA HARMONIC MEAN (Kaas, Raftery, 1995)
 #********************************************************
-LOG_HM_MODEL_EVIDENCE <- function(loglike_vec){
+LOG_MODEL_EVIDENCE_HM <- function(loglike_vec){
   
-  'Model evidence via Harmonic mean (Kaas, Raftery, 1995)'
+  'Model evidence via Harmonic mean (log) (Kaas, Raftery, 1995)'
   
   loglike_vec = - loglike_vec #Harmonic mean applied to inverse likelihood
   loglike_lse = LOG_SUM_EXP(loglike_vec)
@@ -11,6 +11,17 @@ LOG_HM_MODEL_EVIDENCE <- function(loglike_vec){
   log_model_evidence = log(N) - loglike_lse
   
   return(log_model_evidence)
+}
+
+MODEL_EVIDENCE_HM <- function(loglike_vec){
+  
+  'Model evidence via Harmonic mean (Kaas, Raftery, 1995)'
+  
+  likelihood_vec = exp(loglike_vec);  N = length(loglike_vec)
+  inner_sum = sum(1/likelihood_vec)
+  harmonic_mean = 1/(inner_sum/N)
+  
+  return(harmonic_mean)
 }
 
 #********************************************************
@@ -24,6 +35,7 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   
   #FOLDER
   #FOLDERX = paste0(OUTER_FOLDER, 'run_', run)
+  #list_model_ev = c()
   list_log_model_ev = c()
   
   #MODEL TYPE
@@ -56,12 +68,13 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
     }
     
     #LOG MODEL EVIDENCE
-    list_log_model_ev[i] = LOG_HM_MODEL_EVIDENCE(mcmc_output$log_like_vec)
+    list_log_model_ev[i] = LOG_MODEL_EVIDENCE_HM(mcmc_output$log_like_vec)
+    #list_model_ev[i] = MODEL_EVIDENCE_HM(mcmc_output$log_like_vec)
     print(list_log_model_ev)
   }
   
   #SAVE LOG MODEL EVIDENCE ESTIMATES
-  saveRDS(list_log_model_ev, file = paste0(FOLDERX, 'list_log_model_ev_', model_type, '_', run, '.rds' ))
+  saveRDS(list_log_model_ev, file = paste0(FOLDERX, 'list_log_model_ev', model_type, '_', run, '.rds' ))
   
   return(list_log_model_ev) 
 }
@@ -88,7 +101,7 @@ RUN_MODEL_EV_HM_BASE <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 
     saveRDS(mcmc_base, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base', i, '.rds' ))
     
     #MODEL EVIDENCE
-    log_mod_ev = LOG_HM_MODEL_EVIDENCE(mcmc_base$log_like_vec)
+    log_mod_ev = LOG_MODEL_EVIDENCE_HM(mcmc_base$log_like_vec)
     list_log_ev = c(list_log_ev, log_mod_ev)
     print(log_mod_ev)
     
@@ -118,7 +131,7 @@ RUN_MODEL_EV_HM_SSEB <- function(epidemic_data, CURRENT_OUTPUT_FOLDER, n_reps = 
     saveRDS(mcmc_sseb, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb', i, '.rds' ))
     
     #MODEL EVIDENCE
-    log_mod_ev = LOG_HM_MODEL_EVIDENCE(mcmc_sseb$log_like_vec)
+    log_mod_ev = LOG_MODEL_EVIDENCE_HM(mcmc_sseb$log_like_vec)
     list_log_ev = c(list_log_ev, log_mod_ev)
     print(log_mod_ev)
     
