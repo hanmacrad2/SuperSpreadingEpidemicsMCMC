@@ -132,9 +132,9 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000)
   return(log_p_hat)
 }
 
-#*********************
+#******************************************************************
 #* 2b. Estimate of model evidence (P_hat) for SSEB model 
-#**********************
+#*******************************************************************
 GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
