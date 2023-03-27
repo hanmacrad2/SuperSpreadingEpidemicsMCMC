@@ -61,6 +61,19 @@ PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB',
   
 }
 
+#DATAFRAME OF POSTERIOR RESULTS
+BOX_PLOT_MULT_RESULTS <- function(list_vec_results = list(results1 = results1,
+                                                          results2 = results2), #results3 = results3
+                                  plot_title = 'Baseline model evidence. HM vs IS') { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
+  
+  df_results <- as.data.frame(do.call(cbind, list_vec_results))
+  boxplot(df_results, main = plot_title,
+          col = c('red', 'green', 'blue'),
+          cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
+  
+  
+}
+
 #MODEL EVIDENCE RESULTS
 BOX_PLOT_MODEL_EV_RESULTS <- function(list_mod_ev1, list_mod_ev2, list_mod_ev3, list_mod_ev4,
                                       model_type = 'SSEB', data_type = 'Baseline', 
