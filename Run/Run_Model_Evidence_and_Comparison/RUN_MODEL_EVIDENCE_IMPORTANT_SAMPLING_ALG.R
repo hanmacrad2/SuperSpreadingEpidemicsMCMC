@@ -13,13 +13,16 @@ runX = 1
 #***************************
 # 2. LOAD MCMC & GET MULTIPLE PHAT (log)
 #***************************
+#SSEB
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'SSEB/')
+
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSNB = FALSE))
 
 PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
 
+#BASELINE
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,

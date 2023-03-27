@@ -1,39 +1,27 @@
-#'Estimate of Model Evidence via Importance sampling as in:
-#'Touloupou, Panayiota, et al.
-#"Efficient model comparison techniques for models requiring large scale data augmentation." (2018): 437-459.'
+#'Model evidence estimator via importance sampling'
 
 #LIBRARIES
 library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
 #library(compositions)
 
-#*************************************
-#* LOG SUM EXP
-#* ***********************************
-LOG_SUM_EXP <- function(vectorX){
-  
-  #REMOVE NA VALUES
-  vectorX = na.omit(vectorX)
-  
-  max_val = max(vectorX)
-  
-  out = max_val + log(sum(exp(vectorX - max_val)))
-  
-  return(out)
-}
-
 #***************************************
 #*
 #1. GET IMPORTANCE SAMPLING PROPOSAL (LOG)
 #*
 #***************************************
-GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, 
+GET_LOG_Q_PROPOSAL_UNI_VAR <- function(mcmc_samples, epidemic_data, 
                                        n_samples, dof = 3, prob = 0.95) {   
   
   'Get proposal q for univariate dist'
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
+  # sampling_prob = rbinom(n_samples, 1, prob)
+  # samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  # print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  # prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
+  #prob_prop = 0.95; prob_prior = 1 - prob_prop
   
   #SAMPLING SIZE #2
   samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
@@ -61,17 +49,19 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   return(imp_samp_comps)
 }
 
-#*************************************
-#1b. MUTLI DIM PROPOSAL Q
-#*************************************
-GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,  
+#MUTLI DIM PROPOSAL
+GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROPOSAL_MULTI_DIM
                                          n_samples, dof = 3, prob = 0.95) {               
   
-  #PARAMETERS REQUIRED
+  #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
+  # sampling_prob = rbinom(n_samples, 1, prob)
+  # samp_size_proposal = length(which(sampling_prob == 1)); samp_size_prior =  n_samples - samp_size_proposal
+  # print(paste0('samp_size_proposal = ', samp_size_proposal)); print(paste0('samp_size_prior = ', samp_size_prior))
+  # prob_prop = samp_size_proposal/n_samples; prob_prior = 1 - prob_prop
   
-  #SAMPLING SIZE 
+  #SAMPLING SIZE #2
   samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1-prob_prop
   
@@ -106,7 +96,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000)
   
   #PARAMS
   sum_estimate = 0
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples 
   log_q = imp_samp_comps$log_q
   
@@ -132,41 +122,6 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000)
   return(log_p_hat)
 }
 
-#*********************
-#* 2b. Estimate of model evidence (P_hat) for SSEB model 
-#**********************
-GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
-  
-  'Estimate of model evidence for SSEB model using Importance Sampling'
-  
-  #PARAMS
-  sum_estimate = 0; lambda_vec = get_lambda(epidemic_data); 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
-  theta_samples = imp_samp_comps$theta_samples ; log_q = imp_samp_comps$log_q
-  
-  #PRIORS 
-  log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-    dexp((theta_samples[,3] - 1), log = TRUE)
-  
-  #LOG SUM EXP (LOOP)
-  vector_terms = c()
-  for(i in 1:n_samples){
-    if(i%%100 == 0) print(i)
-    
-    loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                            theta_samples[i, 3])
-    if (is.na(loglike)){
-      vector_terms[i] = log_priors[i] - log_q
-    } else {
-      vector_terms[i] = loglike + log_priors[i] - log_q
-    }
-  }
-  
-  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
-  
-  return(log_p_hat)
-}
-
 
 #MULTI PARAMETER MODELS 
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
@@ -178,7 +133,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   
   #PARAMS
   sum_estimate = 0
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples 
   log_q = imp_samp_comps$log_q
   
@@ -189,7 +144,10 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
       dexp((theta_samples[,3] - 1), log = TRUE)
     lambda_vec = get_lambda(epidemic_data); 
     
-  } 
+  } else {
+    log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) 
+    #infectivity = get_infectious_curve(epidemic_data)
+  }
   
   #LOG SUM EXP (LOOP)
   vector_log_sum_exp = c()
@@ -230,6 +188,49 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
   return(log_p_hat)
+}
+
+#V2 REMOVE LOG SUM EXP
+#MULTI PARAMETER MODELS 
+GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, 
+                          FLAGS_MODELS = list(SSEB = TRUE,
+                                              SSIB = FALSE, SSIC = FALSE),
+                          n_samples = 1000) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  sum_estimate = 0
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples ; log_q = imp_samp_comps$log_q
+  
+  #PRIORS 
+  log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
+    dexp((theta_samples[,3] - 1), log = TRUE)
+  lambda_vec = get_lambda(epidemic_data); 
+  
+  #LOG SUM EXP (LOOP)
+  vector_terms = c()
+  for(i in 1:n_samples){
+    
+    if(i%%100 == 0) print(i)
+      loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3])
+      #print(paste0('loglike = ', loglike))
+      if (is.na(loglike)){
+        vector_terms[i] = exp(log_priors[i] - log_q)
+        #print(paste0('vector_terms[i] = ', vector_terms[i]))
+      } else {
+        vector_terms[i] = exp(loglike + log_priors[i] - log_q)
+        #print(paste0('vector_terms[i] = ', vector_terms[i]))
+      }
+  }
+
+  #log_p_hat = log((sum(vector_terms))/n_samples)
+  
+  p_hat = (sum(vector_terms))/n_samples
+  
+  return(p_hat)
 }
 
 
