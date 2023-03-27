@@ -1,7 +1,7 @@
 #'Model evidence estimator via importance sampling'
 
 #LIBRARIES
-#library(SuperSpreadingEpidemicsMCMC)
+library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
 #library(compositions)
 
@@ -74,13 +74,11 @@ GET_LOG_Q_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data,  #GET_PROP
   #DEFENSE MIXTURE
   log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
   log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE)
+  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior))
   
-  max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
-  log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
-  
+  #max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
+  #log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
   #log_q_s = LOG_SUM_EXP(log_q) #LOG SUM EXP OF TWO COMPONENTS
-  
-  #print(paste0('LOG_Q: ', log_q))
   
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
