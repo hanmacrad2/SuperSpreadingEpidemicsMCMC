@@ -18,6 +18,7 @@ ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                                                   SSIB = FALSE, SSNB = FALSE))
 
+PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
 
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
 ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,

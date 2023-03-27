@@ -127,7 +127,7 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000)
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
                           FLAGS_MODELS = list(SSEB = TRUE,
                                               SSIB = FALSE, SSIC = FALSE),
-                          n_samples = 10000) {
+                          n_samples = 1000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -146,7 +146,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
     
   } else {
     log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) 
-    infectivity = get_infectious_curve(epidemic_data)
+    #infectivity = get_infectious_curve(epidemic_data)
   }
   
   #LOG SUM EXP (LOOP)
@@ -189,6 +189,45 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   
   return(log_p_hat)
 }
+
+#V2 REMOVE LOG SUM EXP
+#MULTI PARAMETER MODELS 
+GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, 
+                          FLAGS_MODELS = list(SSEB = TRUE,
+                                              SSIB = FALSE, SSIC = FALSE),
+                          n_samples = 1000) {
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  sum_estimate = 0
+  imp_samp_comps = GET_LOG_Q_PROPOSAL_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+  theta_samples = imp_samp_comps$theta_samples ; log_q = imp_samp_comps$log_q
+  
+  #PRIORS 
+  log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
+    dexp((theta_samples[,3] - 1), log = TRUE)
+  lambda_vec = get_lambda(epidemic_data); 
+  
+  #LOG SUM EXP (LOOP)
+  vector_terms = c()
+  for(i in 1:n_samples){
+    
+    if(i%%100 == 0) print(i)
+      loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+                              theta_samples[i, 3])
+      if (is.na(loglike)){
+        vector_terms[i] = exp(log_priors[i] - log_q)
+      } else {
+        vector_terms[i] = exp(loglike + log_priors[i] - log_q)
+      }
+  }
+
+  log_p_hat = log((sum(vector_terms))/n_samples)
+  
+  return(log_p_hat)
+}
+
 
 #******************************************************************************
 #*
