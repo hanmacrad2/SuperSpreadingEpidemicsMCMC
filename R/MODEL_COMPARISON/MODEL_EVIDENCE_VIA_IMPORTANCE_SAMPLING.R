@@ -47,7 +47,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) 
+  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) - log(sd_mcmc) #ADDED
   log_prior = dexp(theta_samples[,1], log = TRUE)
   
   #LOG SUM EXP TRICK TO GET LOG_Q
@@ -161,68 +161,68 @@ GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
 
 
 #MULTI PARAMETER MODELS 
-GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
-                          FLAGS_MODELS = list(SSEB = TRUE,
-                                              SSIB = FALSE, SSIC = FALSE),
-                          n_samples = 1000) {
-  
-  'Estimate of model evidence for SSEB model using Importance Sampling'
-  
-  #PARAMS
-  sum_estimate = 0
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
-  theta_samples = imp_samp_comps$theta_samples 
-  log_q = imp_samp_comps$log_q
-  
-  #PRIORS 
-  if (FLAGS_MODELS$SSEB | FLAGS_MODELS$SSIB) {
-    print(paste0('FLAGS_MODELS$SSEB' = FLAGS_MODELS$SSEB))
-    log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-      dexp((theta_samples[,3] - 1), log = TRUE)
-    lambda_vec = get_lambda(epidemic_data); 
-    
-  } 
-  
-  #LOG SUM EXP (LOOP)
-  vector_log_sum_exp = rep(NA, n_samples) 
-  for(i in 1:n_samples){
-    
-    if(i%%100 == 0) print(i)
-    
-    if(FLAGS_MODELS$SSEB) {
-      loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                              theta_samples[i, 3])
-      if (is.na(loglike)){
-        vector_log_sum_exp[i] = log_priors[i] - log_q[i]
-      } else {
-        vector_log_sum_exp[i] = loglike + log_priors[i] - log_q[i]
-        #print(paste0('vector_log_sum_exp[i]', vector_log_sum_exp[i]))
-      }
-      
-    } #else if(FLAGS_MODELS$SSIB) {
-    
-    # loglike = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-    #                        theta_samples[i, 3])
-    # if (is.na(loglike)){
-    #   vector_log_sum_exp[i] = log(priors[i]) - log_q
-    # } else {
-    #   vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
-    # }
-    # 
-    # vector_log_sum_exp[i] =  + log(priors[i]) - log_q
-    
-    # } else if (FLAGS_MODELS$SSNB) {
-    #   
-    #   vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
-    #                           #theta_samples[i, 3]) + log(priors[i]) - log_q
-    # }
-  }
-  
-  #print(paste0('LOG_SUM_EXP(vector_log_sum_exp)',  LOG_SUM_EXP(vector_log_sum_exp)))
-  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
-  
-  return(log_p_hat)
-}
+# GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, 
+#                           FLAGS_MODELS = list(SSEB = TRUE,
+#                                               SSIB = FALSE, SSIC = FALSE),
+#                           n_samples = 1000) {
+#   
+#   'Estimate of model evidence for SSEB model using Importance Sampling'
+#   
+#   #PARAMS
+#   sum_estimate = 0
+#   imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
+#   theta_samples = imp_samp_comps$theta_samples 
+#   log_q = imp_samp_comps$log_q
+#   
+#   #PRIORS 
+#   if (FLAGS_MODELS$SSEB | FLAGS_MODELS$SSIB) {
+#     print(paste0('FLAGS_MODELS$SSEB' = FLAGS_MODELS$SSEB))
+#     log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
+#       dexp((theta_samples[,3] - 1), log = TRUE)
+#     lambda_vec = get_lambda(epidemic_data); 
+#     
+#   } 
+#   
+#   #LOG SUM EXP (LOOP)
+#   vector_log_sum_exp = rep(NA, n_samples) 
+#   for(i in 1:n_samples){
+#     
+#     if(i%%100 == 0) print(i)
+#     
+#     if(FLAGS_MODELS$SSEB) {
+#       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
+#                               theta_samples[i, 3])
+#       if (is.na(loglike)){
+#         vector_log_sum_exp[i] = log_priors[i] - log_q[i]
+#       } else {
+#         vector_log_sum_exp[i] = loglike + log_priors[i] - log_q[i]
+#         #print(paste0('vector_log_sum_exp[i]', vector_log_sum_exp[i]))
+#       }
+#       
+#     } #else if(FLAGS_MODELS$SSIB) {
+#     
+#     loglike = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+#                            theta_samples[i, 3])
+#     if (is.na(loglike)){
+#       vector_log_sum_exp[i] = log(priors[i]) - log_q
+#     } else {
+#       vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
+#     }
+# 
+#     vector_log_sum_exp[i] =  + log(priors[i]) - log_q
+# 
+#     } else if (FLAGS_MODELS$SSNB) {
+# 
+#       vector_log_sum_exp[i] = LOG_LIKE_SSI(epidemic_data, theta_samples[i, 1],  theta_samples[i, 2],
+#                               #theta_samples[i, 3]) + log(priors[i]) - log_q
+#     }
+#   }
+#   
+#   #print(paste0('LOG_SUM_EXP(vector_log_sum_exp)',  LOG_SUM_EXP(vector_log_sum_exp)))
+#   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
+#   
+#   return(log_p_hat)
+# }
 
 
 #******************************************************************************
