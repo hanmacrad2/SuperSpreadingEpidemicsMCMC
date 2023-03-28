@@ -45,3 +45,8 @@ ests_phat_base1 = ests_phat_base
 #ests_phat_ssib = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
 #                                     FLAGS_LIST = list(BASE = FALSE, SSEB = FALSE,
 #                                                       SSIB = TRUE, SSNB = FALSE))
+
+#LOAD MCMC
+i = 10
+mcmc_samples = readRDS(file = paste0(OUTPUT_FOLDER, 'run_',
+                                     runX, '/mcmc_sseb_', i ))

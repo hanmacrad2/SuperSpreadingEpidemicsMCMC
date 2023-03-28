@@ -73,7 +73,7 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
   
   #SAMPLING SIZE 
   samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
-  prob_prop = prob; prob_prior = 1-prob_prop
+  prob_prop = prob; prob_prior = 1 - prob_prop
   
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
@@ -152,12 +152,6 @@ GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
     loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                             theta_samples[i, 3])
     vector_terms[i] = loglike + log_priors[i] - log_q[i]
-    
-    # if (is.na(loglike)){
-    #   vector_terms[i] = log_priors[i] - log_q[i]
-    # } else {
-    #   vector_terms[i] = loglike + log_priors[i] - log_q[i]
-    # }
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
