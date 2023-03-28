@@ -82,7 +82,9 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
+  #log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
+  log_proposal = dmvt(theta_samples - rep(means, each = n_samples),
+                      sigma = cov(mcmc_samples), df = dof, log = TRUE)
   log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE)
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior))
   
@@ -100,7 +102,7 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
 #* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #************************************************************
-GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000) {
+GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -111,20 +113,14 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 1000)
   log_q = imp_samp_comps$log_q
   
   #PRIORS 
-  priors = dexp(theta_samples) 
+  log_priors = dexp(theta_samples, log = TRUE) 
   
   #LOG SUM EXP (LOOP)
-  vector_log_sum_exp = c()
+  vector_log_sum_exp = rep(NA, n_samples)
   for(i in 1:n_samples){         
     
     loglike = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])
-    
-    #NEGATIVE THETA SAMPLES -> NEGATIVE LOGLIKELIHOOD
-    if (is.na(loglike)){
-      vector_log_sum_exp[i] = log(priors[i]) - log_q
-    } else {
-      vector_log_sum_exp[i] = loglike + log(priors[i]) - log_q
-    }
+    vector_log_sum_exp[i] = loglike + log_priors[i] - log_q[i]
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
@@ -149,17 +145,19 @@ GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
     dexp((theta_samples[,3] - 1), log = TRUE)
   
   #LOG SUM EXP (LOOP)
-  vector_terms = c()
+  vector_terms = rep(NA, n_samples) 
   for(i in 1:n_samples){
     if(i%%100 == 0) print(i)
     
     loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                             theta_samples[i, 3])
-    if (is.na(loglike)){
-      vector_terms[i] = log_priors[i] - log_q
-    } else {
-      vector_terms[i] = loglike + log_priors[i] - log_q
-    }
+    vector_terms[i] = loglike + log_priors[i] - log_q[i]
+    
+    # if (is.na(loglike)){
+    #   vector_terms[i] = log_priors[i] - log_q[i]
+    # } else {
+    #   vector_terms[i] = loglike + log_priors[i] - log_q[i]
+    # }
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
@@ -192,7 +190,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   } 
   
   #LOG SUM EXP (LOOP)
-  vector_log_sum_exp = c()
+  vector_log_sum_exp = rep(NA, n_samples) 
   for(i in 1:n_samples){
     
     if(i%%100 == 0) print(i)
@@ -201,9 +199,9 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
                               theta_samples[i, 3])
       if (is.na(loglike)){
-        vector_log_sum_exp[i] = log_priors[i] - log_q
+        vector_log_sum_exp[i] = log_priors[i] - log_q[i]
       } else {
-        vector_log_sum_exp[i] = loglike + log_priors[i] - log_q
+        vector_log_sum_exp[i] = loglike + log_priors[i] - log_q[i]
         #print(paste0('vector_log_sum_exp[i]', vector_log_sum_exp[i]))
       }
       
@@ -250,7 +248,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
   create_folder(CURRENT_OUTPUT_FOLDER)
   
   #Parameters
-  estimates_vec = c()
+  estimates_vec = rep(NA, n_repeats) 
   
   if (FLAGS_MODELS$BASE){
     for (i in 1:n_repeats){

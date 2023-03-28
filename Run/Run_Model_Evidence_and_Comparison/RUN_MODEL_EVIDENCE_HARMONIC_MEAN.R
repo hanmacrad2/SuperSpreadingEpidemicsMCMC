@@ -15,10 +15,14 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                                                SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
 #Plot RESULTS
-PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
+PLOT_MODEL_EV_RESULTS(log_ev_base_hm_100, model_type = 'Baseline')
 mean(list_log_ev_base)
 sd(list_log_ev_base)
 
+#SAVE
+saveRDS(list_log_ev_base, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/log_ev_base_hm_100.rds'))
+
+list_log_ev_base1 = list_log_ev_base
 #***********************
 # 2. RUN SSEB MCMC
 #**********************
