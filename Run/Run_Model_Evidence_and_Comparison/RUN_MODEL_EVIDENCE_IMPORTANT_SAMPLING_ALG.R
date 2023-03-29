@@ -21,12 +21,13 @@ ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                                                                   SSIB = FALSE, SSNB = FALSE))
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
+
 #SAVE
 #saveRDS(ests_phat_sseb, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
 
 #BASELINE
 OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
-ests_phat_base2 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
+ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
                                      FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                        SSIB = FALSE, SSNB = FALSE))
 mean(ests_phat_base)

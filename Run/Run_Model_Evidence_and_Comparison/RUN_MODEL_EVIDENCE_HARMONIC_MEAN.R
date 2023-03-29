@@ -23,6 +23,7 @@ sd(list_log_ev_base)
 saveRDS(list_log_ev_base, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/log_ev_base_hm_100.rds'))
 
 list_log_ev_base1 = list_log_ev_base
+
 #***********************
 # 2. RUN SSEB MCMC
 #**********************
