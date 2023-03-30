@@ -35,9 +35,10 @@ ests_phat_base1 = ests_phat_base
 
 #LOAD MCMC
 i = 10
-mcmc_samples = readRDS(file = paste0(OUTPUT_FOLDER, 'run_',
+mcmc_samples_base = readRDS(file = paste0(OUTPUT_FOLDER, 'run_',
                                      runX, '/mcmc_base_', i ))
 
+mcmc_samples = mcmc_samples_base$r0_vec
 #*************************
 #2c. SSEB
 #*************************

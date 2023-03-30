@@ -35,7 +35,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   #PARAMS
   lambda_vec = get_lambda(epidemic_data); sum_estimate = 0
   
-  #SAMPLING SIZE #2
+  #SAMPLING SIZE
   samp_size_proposal = prob*n_samples; samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1-prob_prop
   
@@ -48,21 +48,24 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   theta_samples = c(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) - log(sd_mcmc) #ADDED
-  #print(paste0('1. mean log_proposal = ', mean(log_proposal)))
+  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = 1, log = TRUE) - log(sd_mcmc) #ADDED
+  
+  print(paste0('1. mean log_proposal = ', mean(log_proposal)))
   
   #dmvt: not matching ***
-  #log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc), sigma = diag(sd_mcmc, length(theta_samples)), log = TRUE)
-  # log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc,
-  #                             rep(1, length(theta_samples)), rep(1, length(theta_samples))), 
-  #                      sigma = diag(sd_mcmc, length(theta_samples)), log=TRUE)
-  #print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
+  log_proposal2 = dmvt(matrix(theta_samples),
+                       sigma = diag(sd_mcmc^2, 1), df = 1, log = TRUE)
+  
+  log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc,
+                               rep(1, length(theta_samples)), rep(1, length(theta_samples))), 
+                       sigma = diag(sd_mcmc, length(theta_samples)), log=TRUE)
+  print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
   #print('')
   
+  dmvt(matrix(1,1,1), sigma=matrix(4,1,1), log=TRUE)
+  dt((1-0)/2, df=1, log=TRUE)-log(2)
+  
   log_prior = dexp(theta_samples, log = TRUE) #CHECK [,1]
-  #print(paste0('I log_prior = ', log_prior))
-  #print(paste0('I mean log_prior = ', mean(log_prior)))
-  #print('')
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
   print(paste0('mean log_q = ', mean(log_q)))
   
