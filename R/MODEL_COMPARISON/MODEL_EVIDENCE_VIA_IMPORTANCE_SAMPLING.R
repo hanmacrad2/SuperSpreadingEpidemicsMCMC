@@ -62,8 +62,8 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
   #print('')
   
-  dmvt(matrix(1,1,1), sigma=matrix(4,1,1), log=TRUE)
-  dt((1-0)/2, df=1, log=TRUE)-log(2)
+  #dmvt(matrix(1,1,1), sigma=matrix(4,1,1), log=TRUE)
+  #dt((1-0)/2, df=1, log=TRUE)-log(2)
   
   log_prior = dexp(theta_samples, log = TRUE) #CHECK [,1]
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
