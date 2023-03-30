@@ -44,18 +44,33 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   mean_mcmc = mean(mcmc_samples); sd_mcmc = sd(mcmc_samples)
   theta_samples_proposal = sd_mcmc*rt(samp_size_proposal, df = dof) + mean_mcmc 
   theta_samples_prior = c(rexp(samp_size_prior))
-  theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
+  #theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
+  theta_samples = c(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) #- log(sd_mcmc) #ADDED
-  log_prior = dexp(theta_samples[,1], log = TRUE)
+  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) - log(sd_mcmc) #ADDED
+  #print(paste0('1. mean log_proposal = ', mean(log_proposal)))
   
-  #LOG SUM EXP TRICK TO GET LOG_Q
-  #max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
-  #log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
+  #dmvt: not matching ***
+  #log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc), sigma = diag(sd_mcmc, length(theta_samples)), log = TRUE)
+  # log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc,
+  #                             rep(1, length(theta_samples)), rep(1, length(theta_samples))), 
+  #                      sigma = diag(sd_mcmc, length(theta_samples)), log=TRUE)
+  #print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
+  #print('')
   
-  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior))
+  log_prior = dexp(theta_samples, log = TRUE) #CHECK [,1]
+  #print(paste0('I log_prior = ', log_prior))
+  #print(paste0('I mean log_prior = ', mean(log_prior)))
+  #print('')
+  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
+  print(paste0('mean log_q = ', mean(log_q)))
   
+  #LOG SUM EXP TRICK TO GET LOG_Q (MATCH) 
+  max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
+  log_q2 = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
+  print(paste0('4 mean log_q2 lse = ', mean(log_q2)))
+  #print('')
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
   return(imp_samp_comps)
@@ -77,20 +92,34 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
   
   #THETA SAMPLES: PROPOSAL + PRIOR
   means = colMeans(mcmc_samples)
-  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) + means 
+  #theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) + means 
+  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
+    rep(means, each = samp_size_proposal) 
+  
   theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = 3) 
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
+  print(paste0('mean_mcmc = ', means))
+  #print(paste0('mean proposal = ', colMeans(theta_samples_proposal)))
+  #print(paste0('mean prior = ', colMeans(theta_samples_prior)))
+  
   #DEFENSE MIXTURE
   #log_proposal = dmvt(theta_samples - means, sigma = cov(mcmc_samples), df = dof, log = TRUE)
-  log_proposal = dmvt(theta_samples - rep(means, each = n_samples),
-                      sigma = cov(mcmc_samples), df = dof, log = TRUE)
+  log_proposal = dmvt(theta_samples - matrix( rep(means, each = n_samples), ncol = 3),
+                      sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  = 2, f(x,y) = 0.2) for exmaples
   log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE)
-  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior))
   
-  #max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
-  #log_q = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
-  #log_q_s = LOG_SUM_EXP(log_q) #LOG SUM EXP OF TWO COMPONENTS
+  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #1 x n_samples
+  
+  # print(paste0('mean_mcmc = ', means))
+  # print(paste0('mean log_proposal = ', mean(log_proposal)))
+  # print(paste0('mean prior = ', mean(log_prior, na.rm = TRUE)))
+  # print(paste0('1 log_q = ', log_q))
+  # 
+  # max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
+  # log_q2 = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
+  # log_q_s = LOG_SUM_EXP(log_q2) #LOG SUM EXP OF TWO COMPONENTS - See if the same
+  # print(paste0('2 log_q_s = ', log_q_s))
   
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -155,6 +184,10 @@ GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
+  print(paste0('log_p_hat = ', log_p_hat))
+  
+  log_p_hat2 = -log(n_samples) + log(sum(exp(vector_terms)))
+  print(paste0('log_p_hat2 = ', log_p_hat2))
   
   return(log_p_hat)
 }
