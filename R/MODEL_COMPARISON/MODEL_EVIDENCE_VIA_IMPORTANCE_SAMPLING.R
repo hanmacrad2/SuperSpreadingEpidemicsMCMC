@@ -49,16 +49,10 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   
   #DEFENSE MIXTURE
   log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = 1, log = TRUE) - log(sd_mcmc) #ADDED
-  
   print(paste0('1. mean log_proposal = ', mean(log_proposal)))
   
-  #dmvt: not matching ***
-  log_proposal2 = dmvt(matrix(theta_samples),
-                       sigma = diag(sd_mcmc^2, 1), df = 1, log = TRUE)
+  log_proposal2 = dmvt(matrix(theta_samples)- mean_mcmc, sigma = matrix(sd_mcmc^2), df=1, log=TRUE)
   
-  log_proposal2 = dmvt(matrix((theta_samples - mean_mcmc)/sd_mcmc,
-                               rep(1, length(theta_samples)), rep(1, length(theta_samples))), 
-                       sigma = diag(sd_mcmc, length(theta_samples)), log=TRUE)
   print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
   #print('')
   

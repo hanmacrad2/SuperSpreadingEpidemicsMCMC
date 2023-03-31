@@ -120,8 +120,8 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #'
-MCMC_INFER_BASELINE <- function(epidemic_data,
-                                   mcmc_inputs = list(n_mcmc = 50000, r0_start = 1.2, r0_prior_exp = c(1, 0),
+MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
+                                   mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE)) {
   
@@ -135,9 +135,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  n_mcmc = mcmc_inputs$n_mcmc
   print(paste0('num mcmc iters = ', n_mcmc))
-  count_accept = 0
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -153,6 +151,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data,
   log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
   #Running parameters
   r0 = r0_vec[1]; log_likelihood = log_like_vec[1]
+  count_accept = 0
   
   #SIGMA - INITIALISE
   sigmaX =  0.5*mcmc_inputs$r0_start
