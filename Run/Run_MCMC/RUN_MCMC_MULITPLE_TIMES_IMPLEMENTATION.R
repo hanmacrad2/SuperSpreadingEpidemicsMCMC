@@ -19,12 +19,20 @@ RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER) # run_number = 2, n_repeats = 
 #***********************
 # 2. RUN SSEB MCMC
 #**********************
-RUN_MULTIPLE_MCMC_SSEB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
+RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER, run_number = 2, n_repeats = 500, n_mcmc = 500000,
+                                    FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
+                                                        SSIB = FALSE, SSIC = FALSE))
+
+#RUN_MULTIPLE_MCMC_SSEB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-RUN_MULTIPLE_MCMC_SSNB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
+RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER, run_number = 2, n_repeats = 500, n_mcmc = 500000,
+                        FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
+                                            SSIB = FALSE, SSIC = FALSE))
+
+#RUN_MULTIPLE_MCMC_SSNB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
 #***********************
 # 4. RUN SSIC MCMC
