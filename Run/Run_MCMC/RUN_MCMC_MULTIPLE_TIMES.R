@@ -1,4 +1,85 @@
 #RUN MULTIPLE MCMC
+RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTPUT_FOLDER, run_number = 2, n_repeats = 500, n_mcmc = 500000,
+                                FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                    SSIB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  Get importance sampling estimate of model evidence. 
+  1. Run mcmc 2. Get estimate'
+  
+  #FOLDER
+  CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run_number)
+  create_folder(CURRENT_OUTPUT_FOLDER)
+  
+  if (FLAGS_MODELS$BASELINE){
+    
+    #CREATE FOLDER
+    model_type = 'BASELINE'; print(model_type)
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
+    create_folder(RESULTS_FOLDER)
+    
+    for (i in 1:n_repeats){
+      
+      #RUN MCMC
+      print(paste0('i = ', i))
+      start_time = Sys.time()
+      print(paste0('start_time:', start_time))
+      mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc = n_mcmc)
+      end_time = Sys.time()
+      time_elap = get_time(start_time, end_time)
+      mcmc_output$time_elap = time_elap
+      
+      #SAVE
+      saveRDS(mcmc_output, file = paste0(RESULTS_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+    }
+    
+  } else if(FLAGS_MODELS$SSEB){
+    
+    #CREATE FOLDER
+    model_type = 'SSEB'; print(model_type)
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
+    create_folder(RESULTS_FOLDER)
+    
+    for (i in 1:n_repeats){
+      
+      #RUN MCMC
+      print(paste0('i = ', i))
+      start_time = Sys.time()
+      print(paste0('start_time:', start_time))
+      mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc = n_mcmc)   
+      time_elap = get_time(start_time, end_time)
+      mcmc_output$time_elap = time_elap
+      
+      #SAVE
+      saveRDS(mcmc_output, file = paste0(RESULTS_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+    }
+
+  } else if (FLAGS_MODELS$SSNB){
+    
+    #CREATE FOLDER
+    model_type = 'SSEB'; print(model_type)
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
+    create_folder(RESULTS_FOLDER)
+    
+    for (i in 1:n_repeats){
+      
+      #RUN MCMC
+      print(paste0('i = ', i))
+      start_time = Sys.time()
+      print(paste0('start_time:', start_time))
+      mcmc_output = MCMC_INFER_SSNB(epidemic_data, n_mcmc = n_mcmc)
+      time_elap = get_time(start_time, end_time)
+      mcmc_output$time_elap = time_elap
+      
+      #SAVE
+      saveRDS(mcmc_output, file = paste0(RESULTS_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+    }
+  }
+}
+
+
+#***************************
+#* OLDER INDIVIDUAL FUNCTIONS
+#* **************************
 
 #RUN SSNB MULTIPLE TIMES 
 RUN_MULTIPLE_MCMC_SSNB <- function(epidemic_data, OUTER_FOLDER, model_type = 'SSNB',

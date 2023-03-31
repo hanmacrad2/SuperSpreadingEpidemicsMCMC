@@ -7,22 +7,27 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
 #***********************
 # EPIDEMIC DATA (RUN AUTOMATICALLY)
 #**********************
-data_baseI = readRDS(file = paste0(LOC_BASE_DATA, 'epi_data_base_1.rds'))
+data_baseI = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
 run_number = 1
 
 #***********************
-# 1. RUN SSEB MCMC
+# 1. RUN BASELINE MCMC
+#**********************
+RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER) # run_number = 2, n_repeats = 500, n_mcmc = 500000)
+
+#***********************
+# 2. RUN SSEB MCMC
 #**********************
 RUN_MULTIPLE_MCMC_SSEB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
 #***********************
-# 2. RUN SSNB MCMC
+# 3. RUN SSNB MCMC
 #**********************
 RUN_MULTIPLE_MCMC_SSNB(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
 #***********************
-# 3. RUN SSIC MCMC
+# 4. RUN SSIC MCMC
 #**********************
 RUN_MULTIPLE_MCMC_SSIC(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000) 
 
