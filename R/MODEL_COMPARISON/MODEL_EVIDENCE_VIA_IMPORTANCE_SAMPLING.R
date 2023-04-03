@@ -4,8 +4,8 @@
 
 #LIBRARIES
 #library(SuperSpreadingEpidemicsMCMC)
-#library(mvtnorm)
-#library(compositions)
+library(mvtnorm)
+library(compositions)
 
 #*************************************
 #* LOG SUM EXP
