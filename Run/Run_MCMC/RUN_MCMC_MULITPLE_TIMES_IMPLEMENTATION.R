@@ -69,3 +69,12 @@ plot.ts(ssec5)
 mcmc100 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 ssec100 = mcmc100$ssec_params_matrix
 plot.ts(ssec100)
+
+#TOTAL TIME
+for (i in 1:5){
+  
+  #RUN MCMC
+  print(paste0('i = ', i))
+  model_type = i
+}
+print(model_type)
