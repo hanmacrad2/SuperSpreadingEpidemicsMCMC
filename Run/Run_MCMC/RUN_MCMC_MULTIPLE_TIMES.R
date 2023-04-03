@@ -7,14 +7,14 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTPUT_FOLDER, run_number = 2
   1. Run mcmc 2. Get estimate'
   
   #FOLDER
-  CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run_number)
-  create_folder(CURRENT_OUTPUT_FOLDER)
+  #CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run_number)
+  #create_folder(CURRENT_OUTPUT_FOLDER)
   
   if (FLAGS_MODELS$BASELINE){
     
     #CREATE FOLDER
     model_type = 'BASELINE'; print(model_type)
-    RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run_number, '/')
     create_folder(RESULTS_FOLDER)
     
     for (i in 1:n_repeats){
@@ -79,7 +79,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTPUT_FOLDER, run_number = 2
 
 #***************************
 #* OLDER INDIVIDUAL FUNCTIONS
-#* **************************
+#***************************
 
 #RUN SSNB MULTIPLE TIMES 
 RUN_MULTIPLE_MCMC_SSNB <- function(epidemic_data, OUTER_FOLDER, model_type = 'SSNB',

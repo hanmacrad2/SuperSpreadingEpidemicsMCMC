@@ -3,8 +3,8 @@
 #"Efficient model comparison techniques for models requiring large scale data augmentation." (2018): 437-459.'
 
 #LIBRARIES
-library(SuperSpreadingEpidemicsMCMC)
-library(mvtnorm)
+#library(SuperSpreadingEpidemicsMCMC)
+#library(mvtnorm)
 #library(compositions)
 
 #*************************************
@@ -49,11 +49,11 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   
   #DEFENSE MIXTURE
   log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = 1, log = TRUE) - log(sd_mcmc) #ADDED
-  print(paste0('1. mean log_proposal = ', mean(log_proposal)))
+  #print(paste0('1. mean log_proposal = ', mean(log_proposal)))
   
-  log_proposal2 = dmvt(matrix(theta_samples)- mean_mcmc, sigma = matrix(sd_mcmc^2), df=1, log=TRUE)
+  #log_proposal2 = dmvt(matrix(theta_samples)- mean_mcmc, sigma = matrix(sd_mcmc^2), df=1, log=TRUE)
   
-  print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
+  #print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
   #print('')
   
   #dmvt(matrix(1,1,1), sigma=matrix(4,1,1), log=TRUE)
@@ -61,12 +61,12 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   
   log_prior = dexp(theta_samples, log = TRUE) #CHECK [,1]
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
-  print(paste0('mean log_q = ', mean(log_q)))
+  #print(paste0('mean log_q = ', mean(log_q)))
   
   #LOG SUM EXP TRICK TO GET LOG_Q (MATCH) 
   max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
   log_q2 = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_prior - max_el))
-  print(paste0('4 mean log_q2 lse = ', mean(log_q2)))
+  #print(paste0('4 mean log_q2 lse = ', mean(log_q2)))
   #print('')
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q)
   
@@ -260,7 +260,7 @@ GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
 # 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
-LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats = 100,
+LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = 1, n_repeats = 100,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -268,32 +268,41 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
   1. Run mcmc 2. Get estimate'
   
   #FOLDER
-  CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run)
-  create_folder(CURRENT_OUTPUT_FOLDER)
+  #CURRENT_FOLDER = paste0(OUTER_FOLDER, '/run_', run)
+  #create_folder(CURRENT_FOLDER)
   
   #Parameters
   estimates_vec = rep(NA, n_repeats) 
   
   if (FLAGS_MODELS$BASE){
+    
+    model_type = 'baseline'
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
       #READ SAMPLES
-      mcmc_samples = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_base_', i ))
+      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      log_phat = GET_LOG_P_HAT_BASELINE(mcmc_samples$r0_vec, epidemic_data) 
+      log_phat = GET_LOG_P_HAT_BASELINE(mcmc_output$r0_vec, epidemic_data) 
       estimates_vec[i] = log_phat
       print(estimates_vec)
     }
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_base_', run, '.rds' ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_base_', run, '.rds' ))
     
   } else if(FLAGS_MODELS$SSEB){
-    print('sseb')
+   
+    model_type = 'sseb'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', i ))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_sseb_', i ))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
@@ -306,14 +315,14 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     }
     
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
     
   } else if (FLAGS_MODELS$SSIB){
     
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      mcmc_output = readRDS(file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_ssib_', i ))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_ssib_', i ))
       mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
@@ -324,7 +333,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTPUT_FOLDER, run = 1, n_repeats
     }
     
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_OUTPUT_FOLDER, '/phat_ests_ssib_', run, '.rds' ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_ssib_', run, '.rds' ))
     
   }
   

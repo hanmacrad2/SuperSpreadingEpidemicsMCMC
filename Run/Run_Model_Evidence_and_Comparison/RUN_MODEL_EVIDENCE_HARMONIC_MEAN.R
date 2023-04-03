@@ -10,12 +10,13 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 #**********************
 
 #***********************
-# 1. RUN BASE MCMC
+# 1. RUN BASELINE MCMC
 #**********************
-list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
+list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 2,  n_repeats = 500,
+                                             FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                                                SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
 #Plot RESULTS
-PLOT_MODEL_EV_RESULTS(log_ev_base_hm_100, model_type = 'Baseline')
+PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
 mean(list_log_ev_base)
 sd(list_log_ev_base)
 

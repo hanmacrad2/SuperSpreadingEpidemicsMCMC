@@ -34,38 +34,39 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   1. Load MCMC. 2. Get log model evidence'
   
   #FOLDER
-  #FOLDERX = paste0(OUTER_FOLDER, 'run_', run)
+  #CURRENT_FOLDER = paste0(OUTER_FOLDER, 'run_', run)
   #list_model_ev = c()
   list_log_model_ev = c()
   
   #MODEL TYPE
   if (FLAGS_MODELS$BASE) {
-    model_type = 'base'
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    model_type = 'baseline'
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSEB)  {
     model_type = 'sseb'
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if  (FLAGS_MODELS$SSIB)  {
     model_type = 'ssib'
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSNB)  {
     model_type = 'ssnb'
     print(model_type)
-    FOLDERX = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
-    print(FOLDERX)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    print(CURRENT_FOLDER)
   }
   
   #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
   for (i in 1:n_repeats){
     print(paste0('i = ', i))
-    #print(paste0(FOLDERX, 'mcmc_', model_type, '_', i ))
+    #print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ))
     
     #TYPO IN FOLDER STRUCTRUE FOR SSNB
     if (FLAGS_MODELS$SSNB)  {
-      mcmc_output = readRDS(file = paste0(FOLDERX, 'mcmc_', i ,'.rds'))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
     } else {
-      mcmc_output = readRDS(file = paste0(FOLDERX, 'mcmc_', model_type, '_', i ))
-    }
+      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+    } 
     
     #LOG MODEL EVIDENCE
     list_log_model_ev[i] = LOG_MODEL_EVIDENCE_HM(mcmc_output$log_like_vec)
@@ -74,7 +75,7 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   }
   
   #SAVE LOG MODEL EVIDENCE ESTIMATES
-  saveRDS(list_log_model_ev, file = paste0(FOLDERX, 'list_log_model_ev', model_type, '_', run, '.rds' ))
+  saveRDS(list_log_model_ev, file = paste0(CURRENT_FOLDER, 'list_log_model_ev', model_type, '_', run, '.rds' ))
   
   return(list_log_model_ev) 
 }

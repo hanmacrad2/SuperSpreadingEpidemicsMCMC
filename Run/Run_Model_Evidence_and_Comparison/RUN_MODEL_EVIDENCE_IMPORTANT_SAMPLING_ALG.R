@@ -1,12 +1,13 @@
 #IMPLEMENT MODEL EVIDENCE VIA IMPORTANCE SAMPLING 
 library(SuperSpreadingEpidemicsMCMC)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
 
 #***********************
 # 1. BASE DATA (RUN AUTOMATICALLY)
 #**********************
-LOC_BASE_DATA = paste0(OUTER_FOLDER, 'BASE_DATA/')
-data_baseI = readRDS(file = paste0(LOC_BASE_DATA, 'epi_data_base_1.rds'))
+#LOC_BASE_DATA = paste0(OUTER_FOLDER, 'BASE_DATA/')
+data_baseI = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
 runX = 1
 
@@ -17,8 +18,8 @@ runX = 1
 #*************************
 #2b. BASELINE
 #*************************
-OUTPUT_FOLDER = paste0(LOC_BASE_DATA, 'BASE/')
-ests_phat_base2 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTPUT_FOLDER,
+#CURRENT_FOLDER = paste0(OUTER_FOLDER, 'BASELINE/')
+ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER, run = 2, n_repeats = 500,
                                      FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                          SSIB = FALSE, SSNB = FALSE))
 mean(ests_phat_base)
