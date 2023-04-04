@@ -92,7 +92,7 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
                                          alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
@@ -150,7 +150,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   
   #SIGMA
   sigma_alpha = sigma_starts$sigma_alpha; sigma_beta = sigma_starts$sigma_beta; 
-  sigma_gamma = sigma_starts$sigma_gamma = 3; sigma_bg = sigma_starts$sigma_bg; sigma_ag = sigma_starts$sigma_ag
+  sigma_gamma = sigma_starts$sigma_gamma; sigma_bg = sigma_starts$sigma_bg; sigma_ag = sigma_starts$sigma_ag
   
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
