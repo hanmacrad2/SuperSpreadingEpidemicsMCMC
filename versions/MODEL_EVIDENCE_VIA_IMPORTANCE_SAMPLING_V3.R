@@ -44,13 +44,24 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data,
   mean_mcmc = mean(mcmc_samples); sd_mcmc = sd(mcmc_samples)
   theta_samples_proposal = sd_mcmc*rt(samp_size_proposal, df = dof) + mean_mcmc 
   theta_samples_prior = c(rexp(samp_size_prior))
+  #theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   theta_samples = c(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
   log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = 1, log = TRUE) - log(sd_mcmc) #ADDED
+  #print(paste0('1. mean log_proposal = ', mean(log_proposal)))
+  
+  #log_proposal2 = dmvt(matrix(theta_samples)- mean_mcmc, sigma = matrix(sd_mcmc^2), df=1, log=TRUE)
+  
+  #print(paste0('2. mean log_proposal2 = ', mean(log_proposal2)))
+  #print('')
+  
+  #dmvt(matrix(1,1,1), sigma=matrix(4,1,1), log=TRUE)
+  #dt((1-0)/2, df=1, log=TRUE)-log(2)
   
   log_prior = dexp(theta_samples, log = TRUE) #CHECK [,1]
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
+  #print(paste0('mean log_q = ', mean(log_q)))
   
   #LOG SUM EXP TRICK TO GET LOG_Q (MATCH) 
   max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_prior)
@@ -291,7 +302,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = 1, n_repeats 
     saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_base_', run, '.rds' ))
     
   } else if(FLAGS_MODELS$SSEB){
-   
+    
     model_type = 'sseb'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     

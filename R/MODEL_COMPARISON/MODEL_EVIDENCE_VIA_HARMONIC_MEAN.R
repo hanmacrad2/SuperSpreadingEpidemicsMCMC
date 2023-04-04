@@ -35,7 +35,6 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100, bu
 
   #Results
   list_log_model_ev =  rep(NA, n_repeats)
-  list_mean_log_like =  rep(NA, n_repeats)
 
   #MODEL TYPE:
   if (FLAGS_MODELS$BASE) {
