@@ -122,8 +122,8 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #'
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
                                    mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
-                                                      target_accept_rate = 0.4, thinning_factor = 10), 
-                                   FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE)) {
+                                                      target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
+                                   FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -145,10 +145,17 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
     thinning_factor = 1; mcmc_vec_size = n_mcmc
   }
   
+  #BURN-IN
+  if(FLAGS_LIST$BURN_IN){
+    burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
+    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('mcmc vec size post burn-in = ', mcmc_vec_size))
+  }
+  
   #MCMC VECTORS - INITIALISE
   r0_vec <- vector('numeric', mcmc_vec_size); log_like_vec <- vector('numeric', mcmc_vec_size)
   r0_vec[1] <- mcmc_inputs$r0_start
   log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
+  
   #Running parameters
   r0 = r0_vec[1]; log_likelihood = log_like_vec[1]
   count_accept = 0
