@@ -27,18 +27,17 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
 #********************************************************
 #* 2. LOAD MCMC & GET MODEL EVIDENCE
 #********************************************************
-LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
+LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                           SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   1. Load MCMC. 2. Get log model evidence'
-  
-  #FOLDER
-  #CURRENT_FOLDER = paste0(OUTER_FOLDER, 'run_', run)
-  #list_model_ev = c()
-  list_log_model_ev = c()
-  
-  #MODEL TYPE
+
+  #Results
+  list_log_model_ev =  rep(NA, n_repeats)
+  list_mean_log_like =  rep(NA, n_repeats)
+
+  #MODEL TYPE:
   if (FLAGS_MODELS$BASE) {
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
@@ -50,7 +49,6 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   } else if (FLAGS_MODELS$SSNB)  {
     model_type = 'ssnb'
-    print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     print(CURRENT_FOLDER)
   }
@@ -58,24 +56,30 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100,
   #LOG MODEL EVIDENCE FOR ALL MCMC RUNS
   for (i in 1:n_repeats){
     print(paste0('i = ', i))
-    #print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ))
     
-    #TYPO IN FOLDER STRUCTRUE FOR SSNB
-    if (FLAGS_MODELS$SSNB)  {
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
-    } else {
-      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ))
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-    } 
+    #MCMC OUTPUT
+    mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+    log_like_vec = mcmc_output$log_like_vec
+    
+    #LOG LIKE (BURN-IN):
+    if(BURN_IN){
+      print(length(log_like_vec))
+      log_like_vec = log_like_vec[(burn_in_pc*length(log_like_vec)):length(log_like_vec)]
+      print(length(log_like_vec))
+    }
     
     #LOG MODEL EVIDENCE
-    list_log_model_ev[i] = LOG_MODEL_EVIDENCE_HM(mcmc_output$log_like_vec)
-    #list_model_ev[i] = MODEL_EVIDENCE_HM(mcmc_output$log_like_vec)
-    print(list_log_model_ev)
+    list_log_model_ev[i] = LOG_MODEL_EVIDENCE_HM(log_like_vec)
+    #list_mean_log_like[i] = mean(log_like_vec)
+    print(paste0('loglike : ',  print(summary(log_like_vec)), ' log harmonic mean',   list_log_model_ev[i]))
+    #print(list_log_model_ev)
   }
   
   #SAVE LOG MODEL EVIDENCE ESTIMATES
   saveRDS(list_log_model_ev, file = paste0(CURRENT_FOLDER, 'list_log_model_ev', model_type, '_', run, '.rds' ))
+  
+  #print('*********'); print('**********')
+  #print(list_mean_log_like)
   
   return(list_log_model_ev) 
 }

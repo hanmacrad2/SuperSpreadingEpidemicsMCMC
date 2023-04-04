@@ -95,7 +95,7 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
-                                         alpha_star = 0.4, thinning_factor = 10), 
+                                         alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_a = 0.3, sigma_b = 0.03,
                                                 sigma_g = 3, sigma_bg = 5, sigma_ag = 5),
                                   priors_list = list(alpha_prior_exp = c(1, 0), beta_prior_ga = c(10, 2/100),
@@ -103,7 +103,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
                                   FLAGS_LIST = list(ADAPTIVE = TRUE, ABG_TRANSFORM = TRUE,
                                                     PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
-                                                    THIN = TRUE)) {
+                                                    THIN = TRUE, BURN_IN = TRUE)) {
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rates.
@@ -121,13 +121,18 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   #**********************************************
   print(paste0('num mcmc iters = ', n_mcmc))
   lambda_vec = get_lambda(epidemic_data); 
-  
+
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
   } else {
     thinning_factor = 1; mcmc_vec_size = n_mcmc
+  }
+  
+  #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
+  if(FLAGS_LIST$BURN_IN){
+    burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
   }
   
   #INITIALISE MCMC VECTORS
@@ -381,7 +386,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0) {
+    if (i%%thinning_factor == 0 & i >= burn_in_start) {
       #print(paste0('i = ', i))
       i_thin = i/thinning_factor
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
@@ -405,6 +410,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                            accept_rate_bg = accept_rate_bg, accept_rate_ag = accept_rate_ag)
   print(list_accept_rates)
   
+  #BURN
   #OUTPUT
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma_list = sigma_list,
@@ -413,3 +419,4 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   
   return(mcmc_output)
 }
+
