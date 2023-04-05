@@ -259,8 +259,11 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
       print(paste0('i = ', i))
       
       #READ SAMPLES
-      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      #print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      print(paste0(CURRENT_FOLDER, 'mcmc_base_', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_base_', i))
+     
       
       #LOG LIKE (BURN-IN):
       if(BURN_IN){
@@ -320,7 +323,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS)
-                                    
+      estimates_vec[i] = phat_estimate                        
       print(estimates_vec)
       
     }

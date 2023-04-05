@@ -9,18 +9,23 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
 #LOC_BASE_DATA = paste0(OUTER_FOLDER, 'BASE_DATA/')
 data_baseI = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
-runX = 1
+run = 1
 
 #***************************
-# 2. LOAD MCMC & GET MULTIPLE PHAT (log)
+# 2. LOAD 
 #***************************
 
 #*************************
 #2a. BASELINE
 #*************************
-ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER, run = 2, n_repeats = 500,
-                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                         SSIB = FALSE, SSNB = FALSE))
+model_type = 'BASELINE'
+#CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') 
+#ests_phat_base_100 = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
+
+ests_phat_base_100 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
+                                         FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                             SSIB = FALSE, SSIC = FALSE),
+                                         run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE)
 mean(ests_phat_base)
 sd(ests_phat_base)
 
@@ -31,6 +36,7 @@ PLOT_MODEL_EV_RESULTS(ests_phat_base)
 run = 2
 model_type = 'BASELINE'
 CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') #phat_ests_base_', run, '.rds' ) 
+
 ests_phat_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
 
 #*************************
@@ -41,16 +47,17 @@ CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/')
 
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                                                  SSIB = FALSE, SSNB = FALSE))
+                                                         SSIB = FALSE, SSNB = FALSE))
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
 
 #*************************
 #2c. SSNB
 #*************************
-ests_phat_ssnb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
-                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
-                                                          SSIB = FALSE, SSIC = FALSE))
+ests_phat_ssnb_100 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
+                                         FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                             SSIB = FALSE, SSIC = FALSE),
+                                         run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE)
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_ssnb)
 

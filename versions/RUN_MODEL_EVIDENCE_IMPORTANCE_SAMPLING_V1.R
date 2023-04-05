@@ -33,27 +33,64 @@ model_type = 'BASELINE'
 CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') #phat_ests_base_', run, '.rds' ) 
 ests_phat_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
 
+#SAVE
+saveRDS(ests_phat_base, file = paste0(CURRENT_FOLDER, '/run_',
+                                      runX, '/ests_phat_base_100_r.rds'))
+
+ests_phat_base1 = ests_phat_base
+
+#LOAD MCMC
+i = 10
+mcmc_samples_base = readRDS(file = paste0(OUTPUT_FOLDER, 'run_',
+                                          runX, '/mcmc_base_', i ))
+
+mcmc_samples = mcmc_samples_base$r0_vec
+
 #*************************
 #2b. SSEB
 #*************************
+
 model_type = 'SSEB'
 CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/')
 
 ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                                                  SSIB = FALSE, SSNB = FALSE))
+                                                         SSIB = FALSE, SSNB = FALSE))
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
+
+#SAVE
+#saveRDS(ests_phat_sseb, file = paste0(OUTER_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
+
 
 #*************************
 #2c. SSNB
 #*************************
+#model_type = 'SSNB'
+#CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/')
+
 ests_phat_ssnb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
-                                                          SSIB = FALSE, SSIC = FALSE))
+                                                         SSIB = FALSE, SSIC = FALSE))
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_ssnb)
 
 #Results
 mean(ests_phat_ssnb)
 sd(ests_phat_ssnb)
+
+#SAVE
+saveRDS(ests_phat_sseb, file = paste0(CURRENT_FOLDER, '/run_', runX, '/ests_phat_sseb.rds'))
+
+
+#************************888
+#LOAD MCMC
+i = 10
+mcmc_output = readRDS(file = paste0(OUTPUT_FOLDER, 'run_',
+                                    runX, '/mcmc_sseb_', i ))
+
+#CHECKS
+#SSNB
+ssnb1 = matrix(rep(1:20)^2, 10, 2); 
+ssnb1
+ssnbX = ssnb1[1,] 
