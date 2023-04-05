@@ -5,7 +5,7 @@ library(coda)
 
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
-SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.1, gammaX = 10,
+SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX = 10,
                               shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
   alpha - rate of non super-spreading events/days
@@ -133,7 +133,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
   if(FLAGS_LIST$BURN_IN){
     burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
-    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('mcmc vec size post burn-in = ', mcmc_vec_size))
+    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   }
   
   #INITIALISE MCMC VECTORS
