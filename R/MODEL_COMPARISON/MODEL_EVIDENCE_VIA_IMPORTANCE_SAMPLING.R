@@ -113,8 +113,8 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   print(paste0('mean_mcmc = ', means))
-  #print(paste0('mean proposal = ', colMeans(theta_samples_proposal)))
-  #print(paste0('mean prior = ', colMeans(theta_samples_prior)))
+  print(paste0('mean proposal = ', colMeans(theta_samples_proposal)))
+  print(paste0('mean prior = ', colMeans(theta_samples_prior)))
   
   #DEFENSE MIXTURE
   log_proposal = dmvt(theta_samples - matrix(rep(means, each = n_samples), ncol = n_dim),
@@ -124,7 +124,8 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data,
   if(FLAGS_MODELS$SSEB  & FLAG_PRIORS$EXP_PRIOR){
     log_prior = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + dexp((theta_samples[,3] - 1), log = TRUE) 
   } else if (FLAGS_MODELS$SSNB){
-    log_prior = dexp(theta_samples[,1], log = TRUE) 
+    log_prior = dgamma(theta_samples[,1], shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte, log = TRUE) +
+      dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE)
   }
  
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #1 x n_samples
@@ -185,44 +186,49 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, n_samples = 1000,
   sum_estimate = 0; lambda_vec = get_lambda(epidemic_data); 
   imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples ; log_q = imp_samp_comps$log_q
-
-  #PRIORS
-  if(FLAGS_MODELS$SSEB & FLAG_PRIORS$SSEB_EXP_PRIOR){
-    n_dim = 3 #PUT IN DICTIONARY
-    log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-      dexp((theta_samples[,3] - 1), log = TRUE)
+  vector_estimate_terms = rep(NA, n_samples) 
+  
+    #SSEB MODEL 
+  if (FLAGS_MODELS$SSEB & FLAG_PRIORS$SSEB_EXP_PRIOR) {
     
-  } else if (FLAGS_MODELS$SSNB){
-    n_dim = 2
-    log_priors = dgamma(theta_samples[,1], shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte, log = TRUE) +
-                          dunif(theta_samples[,2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE)
-  }
-  
-  #LOG SUM EXP (LOOP)
-  vector_terms = rep(NA, n_samples) 
-  
-  if (FLAGS_MODELS$SSEB) {
+    #MODEL PRIORS
+    n_dim = 3 #PUT IN DICTIONARY
+    log_priors = dexp(theta_samples[, 1], log = TRUE) + dexp(theta_samples[, 2], log = TRUE) +
+      dexp((theta_samples[, 3] - 1), log = TRUE)
+    
+    #GET ESTIMATE
     for (i in 1:n_samples) {
-      if (i %% 100 == 0) print(i)
+      if (i %% 100 == 0)
+        print(i)
       
       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3])
-      vector_terms[i] = loglike + log_priors[i] - log_q[i]
+      vector_estimate_terms[i] = loglike + log_priors[i] - log_q[i]
     }
-  } else if (FLAGS_MODELS$SSNB){
+    
+    #SSNB MODEL
+  } else if (FLAGS_MODELS$SSNB) {
+    
+    #MODEL PRIORS
+    n_dim = 2
+    log_priors = dgamma(theta_samples[, 1], shape = priors_ssnb$pk_ga_shape,
+                        rate = priors_ssnb$pk_ga_rte, log = TRUE) +
+      dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE)
     
     for (i in 1:n_samples) {
-      if (i %% 100 == 0) print(i)
+      if (i %% 100 == 0)
+        print(i)
       
       loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i, 1]) #THETA SAMPLES FOR SSNB ARE A MATRIX!?
-      vector_terms[i] = loglike + log_priors[i] - log_q[i]
+      
+      vector_estimate_terms[i] = loglike + log_priors[i] - log_q[i]
     }
   }
   
-  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
   
-  log_p_hat2 = -log(n_samples) + log(sum(exp(vector_terms)))
+  log_p_hat2 = -log(n_samples) + log(sum(exp(vector_estimate_terms)))
   print(paste0('log_p_hat2 = ', log_p_hat2))
   
   return(log_p_hat)
@@ -283,7 +289,6 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = 1, n_repeats 
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_sseb_', i ))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
       
@@ -296,19 +301,22 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = 1, n_repeats 
     }
     
     #SAVE ESTIMATES
-    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_', model_type, '_' run, '.rds' ))
     
   } else if (FLAGS_MODELS$SSNB){
+    
+    model_type = 'ssnb'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_ssib_', i ))
       
-      mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      
+      mcmc_samples =  mcmc_output$ssnb_params_matrix #matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data) 
       estimates_vec[i] = phat_estimate
       print(estimates_vec)
