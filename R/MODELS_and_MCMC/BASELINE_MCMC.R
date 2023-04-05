@@ -148,7 +148,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
   #BURN-IN
   if(FLAGS_LIST$BURN_IN){
     burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
-    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('mcmc vec size post burn-in = ', mcmc_vec_size))
+    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('Post burn-in mcmc vec size  = ', mcmc_vec_size))
   }
   
   #MCMC VECTORS - INITIALISE
@@ -199,12 +199,12 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
       r0 <- r0_dash
       count_accept = count_accept + 1
       log_likelihood = loglike_new
-    }
-    
-    #Sigma (Adaptive)
-    if (FLAGS_LIST$ADAPTIVE){
-      accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
-      sigmaX =  sigmaX*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
+      
+      #Sigma (Adaptive)
+      if (FLAGS_LIST$ADAPTIVE){
+        accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
+        sigmaX =  sigmaX*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
+      }
     }
     
     #POPULATE MCMC VECTOR (ONLY STORE THINNED SAMPLE)
