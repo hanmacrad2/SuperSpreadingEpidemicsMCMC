@@ -1,14 +1,10 @@
 #RUN MULTIPLE MCMC
-RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 2, n_repeats = 500, n_mcmc = 500000,
-                                FLAGS_MODELS) { #= list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                   # SSIB = FALSE, SSIC = FALSE)){
+RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1, n_repeats = 500, n_mcmc = 500000,
+                                FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                   SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Run mcmc 2. Get estimate'
-  
-  #FOLDER
-  #CURRENT_OUTPUT_FOLDER = paste0(OUTPUT_FOLDER, '/run_', run_number)
-  #create_folder(CURRENT_OUTPUT_FOLDER)
   
   #TOTAL TIME
   start_time = Sys.time()
