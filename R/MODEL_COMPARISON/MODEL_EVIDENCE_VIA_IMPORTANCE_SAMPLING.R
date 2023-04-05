@@ -172,9 +172,8 @@ GET_LOG_P_HAT_BASELINE <-function(mcmc_samples, epidemic_data, n_samples = 10000
 #******************************************************************
 #* 2b. Estimate of model evidence (P_hat) for SSEB model 
 #*******************************************************************
-
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, n_samples = 1000,
-                          FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
+                          FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
                                               SSIB = FALSE, SSIC = FALSE),
                           priors_ssnb = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
                                              p_prob_unif = c(0,1)),
@@ -230,35 +229,97 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data, n_samples = 1000,
 }
 
 
-
-GET_LOG_P_HAT_SSEB <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
+#******************************************************************************
+#*
+# 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
+#*
+#******************************************************************************
+LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE,
+                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                    SSIB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  Get importance sampling estimate of model evidence. 
+  1. Run mcmc 2. Get estimate'
   
-  'Estimate of model evidence for SSEB model using Importance Sampling'
+  #FOLDER
+  #CURRENT_FOLDER = paste0(OUTER_FOLDER, '/run_', run)
+  #create_folder(CURRENT_FOLDER)
   
-  #PARAMS
-  sum_estimate = 0; lambda_vec = get_lambda(epidemic_data); 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_MULTI_DIM(mcmc_samples, epidemic_data, n_samples)
-  theta_samples = imp_samp_comps$theta_samples ; log_q = imp_samp_comps$log_q
+  #Parameters
+  estimates_vec = rep(NA, n_repeats) 
   
-  #PRIORS 
-  log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-    dexp((theta_samples[,3] - 1), log = TRUE)
-  
-  #LOG SUM EXP (LOOP)
-  vector_terms = rep(NA, n_samples) 
-  for(i in 1:n_samples){
-    if(i%%100 == 0) print(i)
+  if (FLAGS_MODELS$BASE){
     
-    loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],  theta_samples[i, 2],
-                            theta_samples[i, 3])
-    vector_terms[i] = loglike + log_priors[i] - log_q[i]
+    model_type = 'baseline'
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      
+      #READ SAMPLES
+      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      
+      #LOG LIKE (BURN-IN):
+      if(BURN_IN){
+        mcmc_output$r0_vec = mcmc_output$r0_vec[(burn_in_pc*length(mcmc_output$r0_vec)):length(mcmc_output$r0_vec)]
+        print(length(mcmc_output$r0_vec))
+      }
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      log_phat = GET_LOG_P_HAT_BASELINE(mcmc_output$r0_vec, epidemic_data) 
+      estimates_vec[i] = log_phat
+      print(estimates_vec)
+    }
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_base_', run, '.rds' ))
+    
+  } else if(FLAGS_MODELS$SSEB){
+    
+    model_type = 'sseb'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_sseb_', i ))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_LOG_P_HAT_SSEB(mcmc_samples, epidemic_data) 
+      
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_sseb_', run, '.rds' ))
+    
+  } else if (FLAGS_MODELS$SSNB){
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, '/mcmc_ssib_', i ))
+      
+      mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      
+      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data) 
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_ssib_', run, '.rds' ))
+    
   }
   
-  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_terms)
-  print(paste0('log_p_hat = ', log_p_hat))
-  
-  log_p_hat2 = -log(n_samples) + log(sum(exp(vector_terms)))
-  print(paste0('log_p_hat2 = ', log_p_hat2))
-  
-  return(log_p_hat)
+  return(estimates_vec) 
 }
+
