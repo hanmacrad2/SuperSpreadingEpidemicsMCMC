@@ -26,8 +26,8 @@ ests_phat_base_100 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                              SSIB = FALSE, SSIC = FALSE),
                                          run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE)
-mean(ests_phat_base)
-sd(ests_phat_base)
+mean(ests_phat_base_100)
+sd(ests_phat_base_100)
 
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_base)
@@ -55,12 +55,12 @@ PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
 #2c. SSNB
 #*************************
 ests_phat_ssnb_100 = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
-                                         FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                              SSIB = FALSE, SSIC = FALSE),
                                          run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE)
 #PLOT
 PLOT_MODEL_EV_RESULTS(ests_phat_ssnb)
 
 #Results
-mean(ests_phat_ssnb)
-sd(ests_phat_ssnb)
+mean(ests_phat_ssnb_100)
+sd(ests_phat_ssnb_100)

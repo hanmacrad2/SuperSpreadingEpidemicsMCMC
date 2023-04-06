@@ -12,7 +12,8 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
-list_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 2,  n_repeats = 500,
+list_log_ev_base_no_burn = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 1, n_repeats = 100, burn_in_pc = 0.2, 
+                                                     BURN_IN = FALSE, #REMOVE IN FUTURE
                                              FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                                  SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
 #Plot RESULTS
@@ -38,11 +39,12 @@ PLOT_MODEL_EV_RESULTS(list_log_ev_sseb)
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-list_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 2,  n_repeats = 500,
-                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                                 SSNB = TRUE, SSIB = FALSE, SSIC = FALSE))
-mean(list_log_ev_ssnb)
-sd(list_log_ev_ssnb)
+list_log_ev_ssnb_no_burn = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 1, n_repeats = 100, burn_in_pc = 0.2,
+                                                     BURN_IN = FALSE, #REMOVE IN FUTURE
+                                              FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                                  SSNB = TRUE, SSIB = FALSE, SSIC = FALSE))
+mean(list_log_ev_ssnb_no_burn)
+sd(list_log_ev_ssnb_no_burn)
 
 #Plot
 PLOT_MODEL_EV_RESULTS(list_log_ev_ssnb)

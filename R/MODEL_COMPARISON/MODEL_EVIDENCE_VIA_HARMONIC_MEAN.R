@@ -27,7 +27,7 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
 #********************************************************
 #* 2. LOAD MCMC & GET MODEL EVIDENCE
 #********************************************************
-LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
+LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                           SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -40,6 +40,8 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100, bu
   if (FLAGS_MODELS$BASE) {
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    print(CURRENT_FOLDER)
+    #model_type = 'base'
   } else if (FLAGS_MODELS$SSEB)  {
     model_type = 'sseb'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
@@ -58,6 +60,8 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 1, n_repeats = 100, bu
     
     #MCMC OUTPUT
     mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+    #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
+    #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
     log_like_vec = mcmc_output$log_like_vec
     
     #LOG LIKE (BURN-IN):

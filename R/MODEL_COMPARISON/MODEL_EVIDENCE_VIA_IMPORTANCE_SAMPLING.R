@@ -310,7 +310,9 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
       
       print(paste0('i = ', i))
       
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
       
       #mcmc_samples =  mcmc_output$ssnb_params_matrix 
       
