@@ -1,5 +1,5 @@
 #RUN MULTIPLE MCMC
-RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1, n_repeats = 500, n_mcmc = 500000,
+RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1, n_repeats = 100, n_mcmc = 50000,
                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                    SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 

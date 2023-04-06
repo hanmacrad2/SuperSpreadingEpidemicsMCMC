@@ -215,12 +215,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
       alpha <- alpha_dash
       list_accept_counts$count_accept_alpha = list_accept_counts$count_accept_alpha + 1
       log_like = logl_new
-    }
-    
-    #Sigma (Adaptive)
-    if (FLAGS_LIST$ADAPTIVE){
-      accept_prob = min(1, exp(log_accept_ratio))
-      sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      
+      #Sigma (Adaptive)
+      if (FLAGS_LIST$ADAPTIVE){
+        accept_prob = min(1, exp(log_accept_ratio))
+        sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      }
     }
     
     #************************************************************************ Only if (b > 0)
@@ -248,12 +248,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
       beta <- beta_dash
       log_like = logl_new
       list_accept_counts$count_accept_beta = list_accept_counts$count_accept_beta + 1
-    }
-    
-    #Sigma (Adpative)
-    if (FLAGS_LIST$ADAPTIVE){
-      accept_prob = min(1, exp(log_accept_ratio))
-      sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      
+      #Sigma (Adpative)
+      if (FLAGS_LIST$ADAPTIVE){
+        accept_prob = min(1, exp(log_accept_ratio))
+        sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      }
     }
     
     #************************************************************************
@@ -280,12 +280,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
       gamma <- gamma_dash
       log_like <- logl_new
       list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
-    }
-    
-    #Sigma (Adpative)
-    if (FLAGS_LIST$ADAPTIVE){
-      accept_prob = min(1, exp(log_accept_ratio))
-      sigma_gamma =  sigma_gamma*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      
+      #Sigma (Adpative)
+      if (FLAGS_LIST$ADAPTIVE){
+        accept_prob = min(1, exp(log_accept_ratio))
+        sigma_gamma =  sigma_gamma*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+      }
     }
     
     #*****************************************************
@@ -331,13 +331,14 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
           gamma <- gamma_dash
           log_like <- logl_new
           list_accept_counts$count_accept_bg = list_accept_counts$count_accept_bg + 1
+          
+          #Sigma (Adpative)
+          if (FLAGS_LIST$ADAPTIVE){
+            accept_prob = min(1, exp(log_accept_ratio))
+            sigma_bg = sigma_bg*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+          }
         }
         
-        #Sigma (Adpative)
-        if (FLAGS_LIST$ADAPTIVE){
-          accept_prob = min(1, exp(log_accept_ratio))
-          sigma_bg = sigma_bg*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-        }
       }
     }
     
@@ -376,13 +377,14 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
           gamma <- gamma_dash
           log_like <- logl_new
           list_accept_counts$count_accept_ag = list_accept_counts$count_accept_ag + 1
+          
+          #Sigma (Adpative)
+          if (FLAGS_LIST$ADAPTIVE){
+            accept_prob = min(1, exp(log_accept_ratio))
+            sigma_ag = sigma_ag*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
+          }
         }
-        
-        #Sigma (Adpative)
-        if (FLAGS_LIST$ADAPTIVE){
-          accept_prob = min(1, exp(log_accept_ratio))
-          sigma_ag = sigma_ag*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-        }
+
       }
     }
     

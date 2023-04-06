@@ -4,17 +4,26 @@ library(SuperSpreadingEpidemicsMCMC)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
 
+#OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
+
 #***********************
 # EPIDEMIC DATA (RUN AUTOMATICALLY)
 #**********************
+
+# BASE DATA
 data_baseI = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_base_1.rds'))
 plot.ts(data_baseI)
 run_number = 1
 
+#2. SSEB DATA 
+model_type = 'sseb'; run = 1
+data_sseb = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_', model_type, '_', run, '.rds'))
+plot.ts(data_sseb)
+
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER) # run_number = 2, n_repeats = 500, n_mcmc = 500000)
+RUN_MCMC_MULTIPLE_TIMES(data_baseI, OUTER_FOLDER) 
 
 #***********************
 # 2. RUN SSEB MCMC
