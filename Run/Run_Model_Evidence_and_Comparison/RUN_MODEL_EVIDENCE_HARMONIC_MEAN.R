@@ -20,6 +20,12 @@ PLOT_MODEL_EV_RESULTS(list_log_ev_base, model_type = 'Baseline')
 mean(list_log_ev_base)
 sd(list_log_ev_base)
 
+#100 Reps
+list_log_ev_base_100 = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = 1,  n_repeats = 100,
+                                             FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
+                                                                 SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
+#
+
 #SAVE
 saveRDS(list_log_ev_base, file = paste0(OUTPUT_FOLDER, '/run_', runX, '/log_ev_base_hm_100.rds'))
 

@@ -41,7 +41,7 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, bu
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     print(CURRENT_FOLDER)
-    #model_type = 'base'
+    model_type = 'base'
   } else if (FLAGS_MODELS$SSEB)  {
     model_type = 'sseb'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
@@ -59,8 +59,8 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, bu
     print(paste0('i = ', i))
     
     #MCMC OUTPUT
-    mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-    #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
+    #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+    mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
     #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
     log_like_vec = mcmc_output$log_like_vec
     
