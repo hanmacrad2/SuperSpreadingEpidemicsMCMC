@@ -4,8 +4,7 @@
 #library(SuperSpreadingEpidemicsMCMC)
 
 #FOLDER - MCMC RESULTS
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
 
 #PARAMS
 run = 1; n_repeats = 100
@@ -13,12 +12,12 @@ run = 1; n_repeats = 100
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
-list_hm_log_ev_base = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run,  n_repeats = n_repeats,
-                                             FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                                               SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
+list_hm_log_ev_base_nz = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run,  n_repeats = n_repeats,
+                                                FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
+                                                                    SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))
 #STATS
-mean(list_hm_log_ev_base)
-sd(list_hm_log_ev_base)
+mean(list_hm_log_ev_base_nz)
+sd(list_hm_log_ev_base_nz)
 
 #PLOT RESULTS
 PLOT_MODEL_EV_RESULTS(list_hm_log_ev_base, model_type = 'Baseline')
@@ -42,14 +41,19 @@ PLOT_MODEL_EV_RESULTS(list_hm_log_ev_sseb)
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-list_hm_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                                               SSNB = TRUE, SSIB = FALSE, SSIC = FALSE))
-mean(list_hm_log_ev_ssnb)
-sd(list_hm_log_ev_ssnb)
+list_hm_log_ev_ssnb_nz = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                                    SSNB = TRUE, SSIB = FALSE, SSIC = FALSE))
+mean(list_hm_log_ev_ssnb_nz)
+sd(list_hm_log_ev_ssnb_nz)
 
 #Plot
-PLOT_MODEL_EV_RESULTS(list_hm_log_ev_ssnb)
+PLOT_MODEL_EV_RESULTS(list_hm_log_ev_ssnb_nz)
+
+#***********************
+# 4. RUN SSIB MCMC 
+#**********************
+
 
 #***********************
 # BAYES FACTORS

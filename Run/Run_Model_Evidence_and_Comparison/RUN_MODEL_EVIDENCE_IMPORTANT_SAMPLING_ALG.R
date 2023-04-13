@@ -1,16 +1,26 @@
-#IMPLEMENT MODEL EVIDENCE VIA IMPORTANCE SAMPLING 
+#**********************************************
+#GET MODEL EVIDENCE VIA IMPORTANCE SAMPLING (2018 Paper)
+#***********************
 #library(SuperSpreadingEpidemicsMCMC)
-#library(SuperSpreadingEpidemicsMCMC)
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+run = 1; n_repeats = 100
 
 #***********************
-# 1. BASE DATA (RUN AUTOMATICALLY)
+# 1. DATA 
 #**********************
-#LOC_BASE_DATA = paste0(OUTER_FOLDER, 'BASE_DATA/')
-data_baseI = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_base_1.rds'))
-plot.ts(data_baseI)
-runX = 1
+#BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
+
+#BASE DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
+file_name = 'epi_data_base_1.rds'
+data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_baseline)
+
+#SSEB DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+file_name = "epi_data_sseb_1.rds"
+data_sseb = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_sseb)
 
 #***************************
 # 2. LOAD MCMC & GET MULTIPLE PHAT (log)
@@ -19,20 +29,19 @@ runX = 1
 #*************************
 #2a. BASELINE
 #*************************
-ests_phat_base = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER, run = 2, n_repeats = 500,
+list_is_log_ev_base = LOAD_MCMC_GET_P_HAT(data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                      FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                          SSIB = FALSE, SSNB = FALSE))
-mean(ests_phat_base)
-sd(ests_phat_base)
+mean(list_is_log_ev_base)
+sd(list_is_log_ev_base)
 
 #PLOT
-PLOT_MODEL_EV_RESULTS(ests_phat_base)
+PLOT_MODEL_EV_RESULTS(list_is_log_ev_base)
 
 #LOAD estimates
-run = 2
 model_type = 'BASELINE'
-CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') #phat_ests_base_', run, '.rds' ) 
-ests_phat_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
+CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') 
+list_is_log_ev_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
 
 #*************************
 #2b. SSEB
@@ -49,13 +58,13 @@ PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
 #*************************
 #2c. SSNB
 #*************************
-ests_phat_ssnb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
+list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT(data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                           SSIB = FALSE, SSIC = FALSE))
 #PLOT
-PLOT_MODEL_EV_RESULTS(ests_phat_ssnb)
+PLOT_MODEL_EV_RESULTS(list_is_log_ev_ssnb)
 
 #Results
-mean(ests_phat_ssnb)
-sd(ests_phat_ssnb)
+mean(list_is_log_ev_ssnb)
+sd(list_is_log_ev_ssnb)
 

@@ -1,7 +1,7 @@
 #NEW MCMC SCRIPT MULTI TIMES SCRIPT_2
 
 #RUN MULTIPLE MCMC ITERATIONS
-library(SuperSpreadingEpidemicsMCMC)
+#library(SuperSpreadingEpidemicsMCMC)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 
 #MODEL TYPE

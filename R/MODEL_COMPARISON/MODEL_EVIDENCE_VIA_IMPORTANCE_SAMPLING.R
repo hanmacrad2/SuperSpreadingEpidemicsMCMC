@@ -236,15 +236,12 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 # 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
-LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
+LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats, burn_in_pc = 0.2, BURN_IN = TRUE,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                    SSIB = FALSE, SSIC = FALSE),
-                                 run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE){
+                                                    SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Load mcmc samples 2. Get estimate'
-  
-  print(paste0('FLAGS_MODELS$SSNB', FLAGS_MODELS$SSNB))
   
   #Parameters
   estimates_vec = rep(NA, n_repeats) 
@@ -259,10 +256,10 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
       print(paste0('i = ', i))
       
       #READ SAMPLES
-      #print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      print(paste0(CURRENT_FOLDER, 'mcmc_base_', i))
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_base_', i))
+      print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      #print(paste0(CURRENT_FOLDER, 'mcmc_base_', i))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_base_', i))
      
       
       #LOG LIKE (BURN-IN):
@@ -309,12 +306,10 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER,
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
       
-      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
-      
-      #mcmc_samples =  mcmc_output$ssnb_params_matrix 
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_samples =  mcmc_output$ssnb_params_matrix 
       
       #LOG LIKE (BURN-IN):
       if(BURN_IN){

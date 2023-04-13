@@ -1,20 +1,21 @@
+#***************************
 #COMPARE MODEL EVIDENCE; HARMONIC MEAN VS IMPORTANCE SAMPLING
+#***************************
 
 #PLOT
 par(mfrow = c(1,1))
 
-#PARAMETERS(RENAME)
-
-#1. COMPARE IS VS HARMONIC MEAN
+#1.COMPARE IS VS HARMONIC MEAN
 #BASELINE MODEL
-BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = ests_phat_base,
-                                              harmonic_mean = list_log_ev_base),
-                      plot_title = 'Baseline Model Evidence. IS alg (2018) vs HM. 500 runs, N mcmc = 500k')
+data_type = 'SSEB'; 
+BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_base,
+                                              harmonic_mean = list_hm_log_ev_base),
+                      plot_title = paste0('Baseline Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 #SSNB MODEL
-BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = ests_phat_ssnb,
-                                              harmonic_mean = list_log_ev_ssnb),
-                      plot_title = 'SSNB Model Evidence. IS alg (2018) vs HM. 500 runs, N mcmc = 500k')
+BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_ssnb,
+                                              harmonic_mean = list_hm_log_ev_ssnb),
+                      plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 #SSEB MODEL
 BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = ests_phat_sseb,
@@ -22,10 +23,9 @@ BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = ests_ph
                       plot_title = 'SSEB Model Evidence. Importance sampling alg (2018) vs Harmonic Mean')
 
 
-#2. COMPARE SAMPLES RUNS
-
 #***************************
 #1. IMPORTANCE SAMPLING COMPARISON
+#***************************
 BOX_PLOT_MULT_RESULTS(list_vec_results = list(model_ev_500k = ests_phat_base,
                                               model_ev_50k = ests_phat_base_100),
                       plot_title = 'Important Sampling (2018)
