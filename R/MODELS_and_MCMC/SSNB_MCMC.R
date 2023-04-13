@@ -87,6 +87,14 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     thinning_factor = 1; mcmc_vec_size = n_mcmc
   }
   
+  #BURN_IN: 
+  if(FLAGS_LIST$BURN_IN){
+    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; print(paste0('N burn-in = ', burn_in_start))
+    #Adjust mcmc vector store size
+    mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size; ; print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
+    #mcmc_vec_size = ceil(mcmc_vec_size)
+  }
+  
   #MODEL PARAMETERS
   lambda_vec = get_lambda(epidemic_data)
   ssnb_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
@@ -172,7 +180,10 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     scaling =  scaling*exp(delta/i*(accept_prob - mcmc_inputs$target_acceptance_rate))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0) {
+    if (i%%thinning_factor == 0 & i >= burn_in_start) {
+      print(paste0('i = ', i))
+      i_thin = i/thinning_factor; 
+      print(paste0('i thinned idx = ', i_thin))
       ssnb_params_matrix[i/thinning_factor,] = ssnb_params
       log_like_vec[i/thinning_factor] <- log_like
       scaling_vec[i/thinning_factor] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior

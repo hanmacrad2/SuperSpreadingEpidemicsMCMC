@@ -132,8 +132,9 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   
   #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
   if(FLAGS_LIST$BURN_IN){
-    burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
-    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
+    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; print(paste0('N burn-in = ', burn_in_start))
+    #Adjust mcmc vector store size
+    mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size; ; print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   }
   
   #INITIALISE MCMC VECTORS
@@ -390,8 +391,9 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 & i >= burn_in_start) {
-      #print(paste0('i = ', i))
-      i_thin = i/thinning_factor
+      print(paste0('i = ', i))
+      i_thin = i/thinning_factor; 
+      print(paste0('i thinned idx = ', i_thin))
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like

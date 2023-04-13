@@ -147,8 +147,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
   
   #BURN-IN
   if(FLAGS_LIST$BURN_IN){
-    burn_in_start = mcmc_inputs$burn_in_pc*mcmc_vec_size; print(paste0('N burn-in = ', burn_in_start))
-    mcmc_vec_size = mcmc_vec_size - burn_in_start; ; print(paste0('Post burn-in mcmc vec size  = ', mcmc_vec_size))
+    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; print(paste0('N burn-in = ', burn_in_start))
+    mcmc_vec_size =  mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size; ; print(paste0('Post burn-in mcmc vec size  = ', mcmc_vec_size))
   }
   
   #MCMC VECTORS - INITIALISE
