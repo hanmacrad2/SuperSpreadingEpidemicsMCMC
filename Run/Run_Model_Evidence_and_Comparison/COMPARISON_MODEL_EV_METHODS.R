@@ -18,9 +18,9 @@ BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is
                       plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 #SSEB MODEL
-BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = ests_phat_sseb,
-                                              harmonic_mean = list_log_ev_sseb),
-                      plot_title = 'SSEB Model Evidence. Importance sampling alg (2018) vs Harmonic Mean')
+BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_sseb,
+                                              harmonic_mean = list_hm_log_ev_sseb),
+                      plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 
 #***************************

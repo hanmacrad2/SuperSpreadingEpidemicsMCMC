@@ -1,19 +1,23 @@
 #Package install steps
 
 library(devtools)
+install.packages("Rtools")
+library(Rtools)
 
 #1. SET WD to Parent directory
 #Code: cd ~/Documents/GitHub
 
-#2. BUILD PACKAGE
-#Code: R CMD SuperSpreadingEpidemicsMCMC
+#2. BUILD PACKAGE 
+#Code: R CMD build SuperSpreadingEpidemicsMCMC
 
 #3. INSTALL PACKAGE
 #Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
 
-#library(SuperSpreadingEpidemicsMCMC)
+library(SuperSpreadingEpidemicsMCMC)
 
+#NB!!!
 #Note: Need to delete unused functions in man and delete Namespace and re-build
+
 
 #PART 1: TERMINAL INSTALL
 #1. Set wd to parent directory

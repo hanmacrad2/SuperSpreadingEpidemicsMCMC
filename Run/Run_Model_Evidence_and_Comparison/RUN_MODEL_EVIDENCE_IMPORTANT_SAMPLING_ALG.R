@@ -46,14 +46,13 @@ list_is_log_ev_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', r
 #*************************
 #2b. SSEB
 #*************************
-model_type = 'SSEB'
-CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/')
-
-ests_phat_sseb = LOAD_MCMC_GET_P_HAT(data_baseI, OUTER_FOLDER,
-                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
-                                                                                  SSIB = FALSE, SSNB = FALSE))
+list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                          FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
+                                                              SSIB = FALSE, SSIC = FALSE))
 #PLOT
-PLOT_MODEL_EV_RESULTS(ests_phat_sseb)
+PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
+mean(list_is_log_ev_sseb)
+sd(list_is_log_ev_sseb)
 
 #*************************
 #2c. SSNB

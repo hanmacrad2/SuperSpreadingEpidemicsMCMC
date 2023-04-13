@@ -288,7 +288,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_LOG_P_HAT_SSEB(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
+      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
       
       estimates_vec[i] = phat_estimate
       print(estimates_vec)
