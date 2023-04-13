@@ -120,7 +120,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #'
-MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
+MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 50000,
                                    mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
@@ -207,9 +207,11 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 100000,
       }
     }
     
-    #POPULATE MCMC VECTOR (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0) {
-      i_thin = i/thinning_factor
+    #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
+    if (i%%thinning_factor == 0 & i >= burn_in_start) {
+      print(paste0('i = ', i))
+      i_thin = i/thinning_factor; 
+      print(paste0('i thinned idx = ', i_thin))
       r0_vec[i_thin] <- r0
       log_like_vec[i_thin] <- log_likelihood
       
