@@ -1,7 +1,8 @@
 #IMPLEMENT MODEL EVIDENCE VIA IMPORTANCE SAMPLING 
-library(SuperSpreadingEpidemicsMCMC)
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
-OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
+#library(SuperSpreadingEpidemicsMCMC)
+#library(SuperSpreadingEpidemicsMCMC)
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
 
 #***********************
 # 1. BASE DATA (RUN AUTOMATICALLY)

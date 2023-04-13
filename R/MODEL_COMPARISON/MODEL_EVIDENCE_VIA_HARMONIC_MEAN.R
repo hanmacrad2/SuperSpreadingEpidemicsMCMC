@@ -28,7 +28,7 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
 #* 2. LOAD MCMC & GET MODEL EVIDENCE
 #********************************************************
 LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
-                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
+                                      FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
                                                           SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   1. Load MCMC. 2. Get log model evidence'
