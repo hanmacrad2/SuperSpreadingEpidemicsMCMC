@@ -181,9 +181,9 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 & i >= burn_in_start) {
-      print(paste0('i = ', i))
+      #print(paste0('i = ', i))
       i_thin = i/thinning_factor; 
-      print(paste0('i thinned idx = ', i_thin))
+      #print(paste0('i thinned idx = ', i_thin))
       ssnb_params_matrix[i/thinning_factor,] = ssnb_params
       log_like_vec[i/thinning_factor] <- log_like
       scaling_vec[i/thinning_factor] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior

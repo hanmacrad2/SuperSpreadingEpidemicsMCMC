@@ -391,9 +391,8 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 & i >= burn_in_start) {
-      print(paste0('i = ', i))
+      #print(paste0('i = ', i))
       i_thin = i/thinning_factor; 
-      print(paste0('i thinned idx = ', i_thin))
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
