@@ -54,5 +54,8 @@ library(SuperSpreadingEpidemicsMCMC)
 
 #List of named vectors
 #USE = sign, not ->
-
-
+i = 4000
+thinning_factor = 10; burn_in_start = 0.2*n_mcmc
+if (i%%thinning_factor == 0 & i >= burn_in_start) {
+  print('y')
+}
