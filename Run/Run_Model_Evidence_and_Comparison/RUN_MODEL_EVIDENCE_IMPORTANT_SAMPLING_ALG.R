@@ -3,7 +3,7 @@
 #***********************
 #library(SuperSpreadingEpidemicsMCMC)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
-run = 1; n_repeats = 100
+run = 2; n_repeats = 100
 
 #***********************
 # 1. DATA 

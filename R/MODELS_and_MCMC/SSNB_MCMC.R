@@ -46,9 +46,20 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
     
     #NEGATIVE BINOMIAL PARAMETERISATION
     if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
-      loglike = loglike + dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1  
+      
+      loglike_t = dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+      
+      if(!is.infinite(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
+        
+        loglike = loglike + loglike_t 
+      }
+      
     } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
-      loglike = loglike + dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
+      loglike_t = dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
+      
+      if(!is.infinite(loglike_t)) { 
+        loglike = loglike + loglike_t 
+      }
     }
   }
   
@@ -77,7 +88,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
   print(FLAG_NEGBIN_PARAMATERISATION)
   num_days = length(epidemic_data)
   vec_min = rep(0, mcmc_inputs$dim)
-  count_accept = 0
+  count_accept = 0; idx_thinned = 0
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -121,14 +132,15 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     if(i%%10000 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
-    ssnb_params_dash = c(ssnb_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim),
-                                               Sigma = scaling*c_star*sigma_i)) 
+    #print(paste0('scaling*c_star*sigma_i', scaling*c_star*sigma_i))
+    ssnb_params_dash = c(ssnb_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
     if (min(ssnb_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
       logl_new = LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params_dash, FLAG_NEGBIN_PARAMATERISATION)
+      
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
@@ -180,13 +192,15 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     scaling =  scaling*exp(delta/i*(accept_prob - mcmc_inputs$target_acceptance_rate))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 & i >= burn_in_start) {
+    if (i > burn_in_start & i%%thinning_factor == 0) {
       #print(paste0('i = ', i))
-      i_thin = i/thinning_factor; 
-      #print(paste0('i thinned idx = ', i_thin))
-      ssnb_params_matrix[i/thinning_factor,] = ssnb_params
-      log_like_vec[i/thinning_factor] <- log_like
-      scaling_vec[i/thinning_factor] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
+      #i_thin = i/thinning_factor; 
+      #print(paste0('i = ', i))
+      idx_thinned = idx_thinned + 1
+      #print(paste0('idx_thinned = ', idx_thinned))
+      ssnb_params_matrix[idx_thinned,] = ssnb_params
+      log_like_vec[idx_thinned] <- log_like
+      scaling_vec[idx_thinned] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
     }
     
   } #END FOR LOOP

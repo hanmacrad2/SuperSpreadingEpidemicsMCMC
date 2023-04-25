@@ -36,7 +36,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1,
     create_folder(CURRENT_FOLDER)
     print(paste0('CURRENT_FOLDER = ', CURRENT_FOLDER))
     
-    for (i in 1:9){
+    for (i in 10:100){
       
       #RUN MCMC
       print(paste0('i = ', i))
