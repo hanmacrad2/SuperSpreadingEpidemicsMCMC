@@ -73,16 +73,10 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, bu
     
     #LOG MODEL EVIDENCE
     list_log_model_ev[i] = LOG_MODEL_EVIDENCE_HM(log_like_vec)
-    #list_mean_log_like[i] = mean(log_like_vec)
-    print(paste0('loglike : ',  print(summary(log_like_vec)), ' log harmonic mean',   list_log_model_ev[i]))
-    #print(list_log_model_ev)
   }
   
   #SAVE LOG MODEL EVIDENCE ESTIMATES
   saveRDS(list_log_model_ev, file = paste0(CURRENT_FOLDER, 'list_log_model_ev', model_type, '_', run, '.rds' ))
-  
-  #print('*********'); print('**********')
-  #print(list_mean_log_like)
   
   return(list_log_model_ev) 
 }
