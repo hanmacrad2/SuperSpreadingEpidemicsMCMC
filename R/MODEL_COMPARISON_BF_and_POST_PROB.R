@@ -39,32 +39,31 @@ GET_POSTERIOR_MODEL_PROB <- function(num_models = 3, log_model_evidence = list(m
   vec_model_diffs = c()
   
   for(i in 1:(num_models-1)){
-    print(i); print(probs_models[[1]]); print(log_model_evidence[[1]])
+    #print(i); print(probs_models[[1]]); print(log_model_evidence[[1]])
     
     vec_model_diffs[i] = exp(log(probs_models[[i+1]]) + log_model_evidence[[i+1]] -
-                               log(probs_models[[1]]) - log_model_evidence[[1]])
+                               log(probs_models[[1]]) - log_model_evidence[[1]]) #Matches formula?
   }
   
-  print(paste0('sum(vec_model_diffs) = ', sum(vec_model_diffs)))
+  #print(paste0('sum(vec_model_diffs) = ', sum(vec_model_diffs)))
   
   posterior_prob =  1/(1 + sum(vec_model_diffs))
   
-  print(paste0('posterior_prob= ', posterior_prob))
+  #print(paste0('posterior_prob= ', posterior_prob))
   
   return(posterior_prob)
 }
 
 #GET_AGGREGATE_POSTERIOR_MODEL_PROB
-GET_AGG_POSTERIOR_PROB <- function(num_models = 3, 
-                                   probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25),
-                                   FLAG_EQUAL_PROB = TRUE,
-                                   list_log_mod_evid = list(mod1 = mod1,
-                                                         mod2 = mod2, mod3 = mod3)){ 
+GET_AGG_POSTERIOR_PROB <- function(num_models = 3, FLAG_EQUAL_PROB = TRUE,                                               #probs_models = list(prob_mech1 = 0.25, prob_mech2 = 0.5, prob_mech3 = 0.25)
+                                   list_log_mod_evid = list(mod1 = mod1, mod2 = mod2, mod3 = mod3)){ 
   'Get posterior probabilites for mulitple P_hat reps'
   
   #FOR EACH REP
   num_reps = length(list_log_mod_evid$mod1)
-  vec_post_probs = c()
+  vec_post_probs = c();
+  idx_sample = sample(1:num_reps, num_reps)
+  
   #PROBABILITY
   if(FLAG_EQUAL_PROB){
     probs_models = list(prob_mech1 = 1/num_models, prob_mech2 = 1/num_models, prob_mech3 = 1/num_models) 
@@ -73,11 +72,12 @@ GET_AGG_POSTERIOR_PROB <- function(num_models = 3,
   
   for (i in 1:num_reps){
     print(paste0('rep = ', i))
-    vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(num_models = 3, 
+    j = idx_sample[i]; print(j)
+    vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(num_models = num_models, 
                                                  probs_models = probs_models,
-                                                 log_model_evidence = list(mod1 = list_log_mod_evid$mod1[i],
-                                                                  mod2 = list_log_mod_evid$mod2[i],
-                                                                  mod3 = list_log_mod_evid$mod3[i]))
+                                                 log_model_evidence = list(mod1 = list_log_mod_evid$mod1[j],
+                                                                  mod2 = list_log_mod_evid$mod2[j],
+                                                                  mod3 = list_log_mod_evid$mod3[j]))
     
   }
   
