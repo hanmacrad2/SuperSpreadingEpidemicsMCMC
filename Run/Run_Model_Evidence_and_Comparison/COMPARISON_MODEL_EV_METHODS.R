@@ -3,7 +3,7 @@
 #***************************
 
 #PLOT
-par(mfrow = c(1,1))
+par(mfrow = c(2,1))
 
 #1.COMPARE IS VS HARMONIC MEAN
 #BASELINE MODEL
@@ -12,15 +12,17 @@ BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is
                                               harmonic_mean = list_hm_log_ev_base),
                       plot_title = paste0('Baseline Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
+#SSEB MODEL
+BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_sseb,
+                                              harmonic_mean = list_hm_log_ev_sseb),
+                      plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
+
+
 #SSNB MODEL
 BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_ssnb,
                                               harmonic_mean = list_hm_log_ev_ssnb),
                       plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
-#SSEB MODEL
-BOX_PLOT_MULT_RESULTS(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_sseb,
-                                              harmonic_mean = list_hm_log_ev_sseb),
-                      plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 
 #***************************
