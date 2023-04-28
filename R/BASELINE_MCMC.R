@@ -10,7 +10,7 @@
 #' @param num_days Number of days of the epidemic
 #' @param shape_gamma Shape of the gamma distribution representing the time-varying infectivity curve of each infected individual
 #' @param scale_gamma Scale of the gamma distribution representing the time-varying infectivity curve of each infected individual
-#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambda_t} 
+#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambdaX_t} 
 #' @return Total infections; Total daily infection counts of length \code{'num_days'}
 #' @export
 #'
@@ -58,6 +58,7 @@ SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_
 #' R0 = 1.2
 #' log_likelihood_baseline = LOG_LIKE_BASELINE(epidemic_data, R0)
 #'
+#' @export
 LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   
   #Params
@@ -70,8 +71,8 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   
   for (t in 2:num_days) {
     
-    lambda = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
-    log_likelihood = log_likelihood + epidemic_data[t]*log(lambda) - lambda - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
+    lambdaX = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
+    log_likelihood = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     
   }
   

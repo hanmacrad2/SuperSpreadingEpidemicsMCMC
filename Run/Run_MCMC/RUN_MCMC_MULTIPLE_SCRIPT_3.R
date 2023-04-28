@@ -25,6 +25,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, 
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIB = FALSE, SSIC = FALSE))
 
+
 #***********************
 # 3. RUN SSNB MCMC
 #**********************

@@ -236,7 +236,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 # 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
-LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats, burn_in_pc = 0.2, BURN_IN = TRUE,
+LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats, burn_in_pc = 0.2, BURN_IN = FALSE,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -258,6 +258,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
       #READ SAMPLES
       print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      print(mcmc_output$r0_vec)
       #print(paste0(CURRENT_FOLDER, 'mcmc_base_', i))
       #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_base_', i))
      
@@ -284,10 +285,10 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-      
+      print(mcmc_output$alpha_vec)
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
       
@@ -311,7 +312,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  mcmc_output$ssnb_params_matrix 
-      
+      print(mcmc_samples[1])
       #LOG LIKE (BURN-IN):
       if(BURN_IN){
         mcmc_length = dim(mcmc_output$ssnb_params_matrix)[1]

@@ -48,3 +48,10 @@ library(SuperSpreadingEpidemicsMCMC)
 #FINAL: LOAD LIBRARY
 # library(brocolors)
 # help(plotcolours)
+
+#DEV TOOLS WAY
+library(devtools)
+
+#INSTALL PACKAGE
+check()
+install()
