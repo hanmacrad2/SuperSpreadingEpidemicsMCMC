@@ -5,7 +5,9 @@
 
 #FOLDER - MCMC RESULTS
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/" 
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/NZ_DATA_WAIT_21/"
 
 #PARAMS
 run = 2; n_repeats = 100
@@ -29,7 +31,7 @@ saveRDS(list_hm_log_ev_base, file = paste0(OUTPUT_FOLDER, '/run_', run, '/list_h
 #***********************
 # 2. RUN SSEB MCMC
 #**********************
-n_repeats = 90
+n_repeats = 88
 list_hm_log_ev_sseb = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE,
                                                                     SSNB = FALSE, SSIB = FALSE, SSIC = FALSE))

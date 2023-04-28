@@ -23,7 +23,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1,
       #RUN MCMC
       print(paste0('i = ', i))
       mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc = n_mcmc)
-      
+      print(mean(mcmc_output$r0_vec))
       #SAVE
       saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
     }
@@ -36,12 +36,12 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1,
     create_folder(CURRENT_FOLDER)
     print(paste0('CURRENT_FOLDER = ', CURRENT_FOLDER))
     
-    for (i in 10:100){
+    for (i in 16:n_repeats){
       
       #RUN MCMC
       print(paste0('i = ', i))
       mcmc_output = MCMC_INFER_SSEB(epidemic_data, n_mcmc = n_mcmc)   
-      
+      print(mean(mcmc_output$alpha_vec))
       #SAVE
       saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
     }

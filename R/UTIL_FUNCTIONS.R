@@ -126,6 +126,8 @@ get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1
 #MCMC COLUMNS
 get_lower_ci <- function(mcmc_col){
   
+  #print(CredibleInterval(mcmc_col, level = 0.95)[[2]])
+  mcmc_col[is.na(mcmc_col)] <- 0
   lower_interval = CredibleInterval(mcmc_col, level = 0.95)[[2]]
   
   return(lower_interval)
@@ -133,6 +135,8 @@ get_lower_ci <- function(mcmc_col){
 
 get_upper_ci <- function(mcmc_col){
   
+  mcmc_col[is.na(mcmc_col)] <- 0
+  #print(CredibleInterval(mcmc_col, level = 0.95)[[3]])
   upper_interval = CredibleInterval(mcmc_col, level = 0.95)[[3]]
   
   return(upper_interval)
@@ -146,6 +150,8 @@ get_ci_matrix <- function(mcmc_matrix){
   vec_upper = vector("numeric", length = num_cols)
   
   for (i in seq(1, num_cols)){
+    
+    #print(mcmc_matrix[, i])
     
     vec_lower[i] = get_lower_ci(mcmc_matrix[, i])
     vec_upper[i] = get_upper_ci(mcmc_matrix[, i])

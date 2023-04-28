@@ -5,6 +5,7 @@ LOG_MODEL_EVIDENCE_HM <- function(loglike_vec){
   
   'Model evidence via Harmonic mean (log) (Kaas, Raftery, 1995)'
   
+  #print(loglike_vec)
   loglike_vec = - loglike_vec #Harmonic mean applied to inverse likelihood
   loglike_lse = LOG_SUM_EXP(loglike_vec)
   N = length(loglike_vec)
@@ -17,6 +18,7 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
   
   'Model evidence via Harmonic mean (Kaas, Raftery, 1995)'
   
+  #print(loglike_vec)
   likelihood_vec = exp(loglike_vec);  N = length(loglike_vec)
   inner_sum = sum(1/likelihood_vec)
   harmonic_mean = 1/(inner_sum/N)

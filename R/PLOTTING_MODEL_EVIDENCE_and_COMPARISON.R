@@ -62,12 +62,28 @@ PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB',
 }
 
 #DATAFRAME OF POSTERIOR RESULTS
-BOX_PLOT_MULT_RESULTS <- function(list_vec_results = list(sseb = results1,
+BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results = list(sseb = results1,
                                                           base = results2, ssnb = results3),
-                                  data_type = data_type) { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
+                                  data_type = data_type, model_ev_method = model_ev_method) { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
   
   #Set up
-  title = paste0('Posterior Probabilities of Models, ', data_type, ' data')
+  title = paste0('Posterior Probabilities of Models, ', data_type, ' data. ', model_ev_method, ' model evidence')
+  df_results <- as.data.frame(do.call(cbind, list_vec_results))
+  print(head(df_results))
+  boxplot(df_results, main = title,
+          col = c('red', 'green', 'blue'),
+          cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
+  
+  
+}
+
+#BOX PLOT RESULTS 
+BOX_PLOT_MODEL_EV <- function(list_vec_results = list(importance_sampling = results1,
+                                                      harmonic_mean = results2),
+                                  data_type = data_type, model = model) { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
+  
+  #Set up
+  title = paste0(model, ' Model Evidence. Importance sampling vs Harmonic Mean. ', data_type, ' data. ')
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   print(head(df_results))
   boxplot(df_results, main = title,
