@@ -53,20 +53,25 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   for (t in 2:num_days) {
     
-    #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    inner_sum_xt = 0
-    term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
-    
-    for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
+    #print(paste0('x[t] = ', x[t]))
+    if (x[t] > 0) {
       
-      #Log likelihood
-      st = x[t] - nt
-      inner_sum_xt = inner_sum_xt + 
-        term1*(term2)^nt*(1/factorial(nt))*
-        PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
-    } 
+      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
+      inner_sum_xt = 0
+      term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
+      
+      for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
+        
+        #Log likelihood
+        st = x[t] - nt
+        inner_sum_xt = inner_sum_xt + 
+          term1*(term2)^nt*(1/factorial(nt))*
+          PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
+      } 
+      
+      logl = logl + log(inner_sum_xt) 
+    }
     
-    logl = logl + log(inner_sum_xt) 
   }
   
   return(logl)

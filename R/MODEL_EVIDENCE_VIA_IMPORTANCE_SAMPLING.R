@@ -236,7 +236,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 # 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
-LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats, burn_in_pc = 0.2, BURN_IN = FALSE,
+LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,  BURN_IN = FALSE, burn_in_pc = 0.2,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -329,6 +329,92 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
     
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_', model_type, '_', run, '.rds' ))
+    
+  }
+  
+  return(estimates_vec) 
+}
+
+#*****************************
+# LOAD MCMC VERSION 2
+LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,  BURN_IN = FALSE, burn_in_pc = 0.2,
+                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                    SSIB = FALSE, SSIC = FALSE)){
+  'For a given epidemic dataset and model. 
+  Get importance sampling estimate of model evidence. 
+  1. Load mcmc samples 2. Get estimate'
+  
+  #Parameters
+  estimates_vec = rep(NA, n_repeats) 
+  
+  if (FLAGS_MODELS$BASE){
+    
+    model_type = 'baseline'
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/')
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      
+      #READ SAMPLES
+      epidemic_data = matrix_data[i, ]
+      print(epidemic_data)
+    
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      print(mean(mcmc_output$r0_vec))
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      log_phat = GET_LOG_P_HAT_BASELINE(mcmc_output$r0_vec, epidemic_data) 
+      estimates_vec[i] = log_phat
+      print(estimates_vec)
+    }
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds'))
+    
+  } else if(FLAGS_MODELS$SSEB){
+    
+    model_type = 'sseb'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/')
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      epidemic_data = matrix_data[i, ]
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
+      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
+      
+      estimates_vec[i] = phat_estimate
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, 'phat_ests_', model_type, '_', run, '.rds'))
+    
+  } else if (FLAGS_MODELS$SSNB){
+    
+    model_type = 'ssnb'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type),  '/')
+    
+    for (i in 1:n_repeats){
+      
+      print(paste0('i = ', i))
+      epidemic_data = matrix_data[i, ]
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      mcmc_samples =  mcmc_output$ssnb_params_matrix 
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS)
+      estimates_vec[i] = phat_estimate                        
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, 'phat_ests_', model_type, '_', run, '.rds' ))
     
   }
   

@@ -6,6 +6,7 @@ par(mfrow = c(1,1))
 
 #RESULTS
 data_type = 'SSEB'
+data_type = 'BASELINE'
 model_ev_method = 'IS'
 
 #*************************
@@ -39,12 +40,12 @@ mean(vec_post_probs_is_ssnb1); sd(vec_post_probs_is_ssnb1)
 
 #PLOT POSTERIOR PROBS
 model_ev_method = 'IS'
-BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_is_sseb, BASE = vec_post_probs_is_base,
-                                              SSNB = vec_post_probs_is_ssnb),
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = vec_post_probs_is_base1, SSEB = vec_post_probs_is_sseb1,
+                                              SSNB = vec_post_probs_is_ssnb1),
                                               data_type = data_type, model_ev_method = model_ev_method)
 
 #Data
-plot.ts(data_sseb, ylab = 'Infection count', main = paste0(data_type, ' Simulated data'))
+plot.ts(data_baseline, ylab = 'Infection count', main = paste0(data_type, ' Simulated data'))
 
 #*************************
 #2. HARMONIC MEAN DATA
