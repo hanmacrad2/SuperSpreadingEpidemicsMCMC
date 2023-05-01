@@ -18,6 +18,9 @@ data_wait_08_21 = data_file_wait_21$Cases
 plot.ts(data_wait_08_21, ylab = 'Infection count', main = 'Waitemata NZ, August 2021')
 saveRDS(data_wait_08_21, file = paste0(OUTER_FOLDER, 'data_wait_08_21.rds'))
 
+#REMOVE LEADING ZERO!!!!
+data_wait_08_21 = data_wait_08_21[2:length(data_wait_08_21)]
+
 #***********************
 # 2. RUN BASELINE MCMC
 #**********************
@@ -42,7 +45,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, 
 
 
 #INSPECT
-mcmc_output = MCMC_INFER_BASELINE(data_wait_08_21, n_mcmc = 1000)
+mcmc_output = MCMC_INFER_BASELINE(data_wait_08_21, n_mcmc = 10) #00)
 
 mcmc_output = MCMC_INFER_SSEB(data_wait_08_21, n_mcmc = 1000)   
 

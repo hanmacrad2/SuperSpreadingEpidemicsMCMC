@@ -96,6 +96,9 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODE
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   
+  neg_count <- apply(theta_samples_proposal, 2, function(x) sum(x < 0))
+  print(paste0('neg_count, ', neg_count))
+  
   #PRIORS
   #print(paste0('FLAGS_MODELS$SSNB', FLAGS_MODELS))
   if(FLAGS_MODELS$SSEB & FLAG_PRIORS$SSEB_EXP_PRIOR){
@@ -186,7 +189,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  vector_estimate_terms = rep(NA, n_samples)
+  vector_estimate_terms = rep(0, n_samples)
   lambda_vec = get_lambda(epidemic_data); 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
@@ -199,14 +202,24 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
     
     #GET ESTIMATE
     for (i in 1:n_samples) {
+      count_samps = 0
       if (i %% 100 == 0)
         print(i)
       
       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3])
       
-      vector_estimate_terms[i] = loglike + log_priors[i] - log_q[i]
+      vector_estimate_terms = loglike + log_priors[i] - log_q[i]
+      
+      if(!is.na(vector_estimate_terms) ||  !is.infinite(vector_estimate_terms)){
+        
+        vector_estimate_terms[i] =  vector_estimate_terms
+        #count_samps = count_samps + 1
+        #print(paste0('count_samps: ', count_samps))
+        
+      }
     }
+    #print(paste0('total count_samps: ', count_samps))
     
     #SSNB MODEL
   } else if (FLAGS_MODELS$SSNB) {
@@ -337,7 +350,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
 
 #*****************************
 # LOAD MCMC VERSION 2
-LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,  BURN_IN = FALSE, burn_in_pc = 0.2,
+LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 

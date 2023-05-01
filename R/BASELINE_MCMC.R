@@ -73,7 +73,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
     
     lambdaX = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
     log_likelihood = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
-    
+    #print(paste0('t: ', t, '. lambaX: ', lambdaX, 'log_likelihood: ', log_likelihood))
   }
   
   log_likelihood
@@ -121,7 +121,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #'
-MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc = 50000,
+MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
                                    mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                                    FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE, BURN_IN = TRUE)) {

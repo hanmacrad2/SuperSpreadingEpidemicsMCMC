@@ -64,9 +64,17 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
         
         #Log likelihood
         st = x[t] - nt
+        prob_st = PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
+        
+        if(is.na(prob_st) || is.infinite(prob_st)){
+          print(paste0('st = ', st, 'x[t] = ', x[t]))
+          print(paste0('prob: ', PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)))
+          break 
+        }
+        
         inner_sum_xt = inner_sum_xt + 
-          term1*(term2)^nt*(1/factorial(nt))*
-          PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
+          term1*(term2)^nt*(1/factorial(nt))*prob_st
+         
       } 
       
       logl = logl + log(inner_sum_xt) 
@@ -87,8 +95,11 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
   for (et in 0:max_et){
     
-    prob_st = prob_st + dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
+    prob_term = dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
     
+    if(!is.na(prob_term)){
+      prob_st = prob_st + prob_term
+    }
   }
   
   return(prob_st)

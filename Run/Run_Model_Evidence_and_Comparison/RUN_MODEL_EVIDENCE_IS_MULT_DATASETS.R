@@ -59,4 +59,19 @@ list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT_II(matrix_data_sseb, OUTER_FOLDER, run
 mean(list_is_log_ev_sseb)
 sd(list_is_log_ev_sseb)
 
+#INSPECT
+CURRENT_FOLDER = paste0(OUTER_FOLDER, '/SSEB/')
+for (i in 1:n_repeats){
+  
+  #print(paste0('i = ', i))
+  epidemic_data = matrix_data_sseb[i, ]
+  mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+  
+  mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+  print(colMeans(mcmc_samples))
+  
+}
 
+if(1 > 2 || 2 < 1){
+  print('y')
+}
