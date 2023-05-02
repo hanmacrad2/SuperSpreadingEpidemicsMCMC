@@ -2,7 +2,7 @@
 library(MASS)
 #SIMULATE
 #' @export
-SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.8, k = 0.16,
+SIMULATE_EPI_SSNB <- function(R0, num_days = 50, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
   

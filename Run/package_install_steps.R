@@ -14,6 +14,7 @@ library(Rtools)
 #Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
 
 library(SuperSpreadingEpidemicsMCMC)
+ls("package:SuperSpreadingEpidemicsMCMC")
 
 #NB!!!
 #Note: Need to delete unused functions in man and delete Namespace and re-build

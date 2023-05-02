@@ -4,10 +4,10 @@
 library(MASS)
 
 #*********************************************
-#* SIMULATE SSIC Model - Individual reproduction number
+#* SIMULATE SSIR Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSIC = function(num_days = 110, R0X = 1.2, k = 0.16,
+SIMULATE_EPI_SSIR = function(R0X, num_days = 50, k = 0.16,
                         shape_gamma = 6, scale_gamma = 1) {
   
   'Simulate from the Negative Binomial model'
@@ -38,7 +38,7 @@ SIMULATE_EPI_SSIC = function(num_days = 110, R0X = 1.2, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector of length x. eta[1] = infectivity of xt[1]
+LOG_LIKE_SSIR <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector of length x. eta[1] = infectivity of xt[1]
   
   #Params
   num_days = length(x)
@@ -74,7 +74,7 @@ LOG_LIKE_SSIC <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSIC <- function(epidemic_data, n_mcmc = 100000,
+MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 100000,
                               mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(R0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10),

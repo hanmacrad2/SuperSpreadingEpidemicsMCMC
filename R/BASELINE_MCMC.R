@@ -21,7 +21,7 @@
 #' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
 #'
 #' @export
-SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
+SIMULATE_EPI_BASELINE = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
   
   'Baseline simulation model'
   
