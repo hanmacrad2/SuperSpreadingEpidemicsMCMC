@@ -5,6 +5,7 @@ library(coda)
 
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
+#' @export
 SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX = 10,
                               shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
@@ -46,6 +47,7 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX =
 }
 
 #1. LOG LIKELIHOOD
+#' @export
 LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   #Params
@@ -86,6 +88,7 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
 }
 
 #2. PROBABILITY OF ZT
+#' @export
 PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
   'Probability of Zt'
@@ -108,6 +111,7 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
+#' @export
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),

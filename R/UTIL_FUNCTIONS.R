@@ -3,6 +3,7 @@
 library(RChronoModel)
 
 #TIME FUNCTIONS
+#' @export
 get_time <- function(start_time, end_time, show = TRUE){
   'Print difference between end & start time'
   
@@ -15,6 +16,7 @@ get_time <- function(start_time, end_time, show = TRUE){
 }
 
 #FOLDER CREATION
+#' @export
 create_folder <- function(folder_name){
   
   ifelse(!dir.exists(file.path(folder_name)),
@@ -38,17 +40,17 @@ create_folder <- function(folder_name){
 #'
 
 #LOG EXP SUM
-LOG_SUM_EXP <- function(vectorX){
-  
-  #REMOVE NA VALUES
-  vectorX = na.omit(vectorX)
-  
-  max_val = max(vectorX)
-  
-  out = max_val + log(sum(exp(vectorX - max_val)))
-  
-  return(out)
-}
+# LOG_SUM_EXP <- function(vectorX){
+#   
+#   #REMOVE NA VALUES
+#   vectorX = na.omit(vectorX)
+#   
+#   max_val = max(vectorX)
+#   
+#   out = max_val + log(sum(exp(vectorX - max_val)))
+#   
+#   return(out)
+# }
 
 #Example
 # ll = c(-1000, -1000, -1000)
@@ -58,6 +60,7 @@ LOG_SUM_EXP <- function(vectorX){
 
 #************
 #* PLOTTING FUNCTIONS
+#' @export
 PLOT_CUM_MEAN <- function(mcmc_chain, titleX = 'MCMC chain', ylabX = 'MCMC chain') {
   
   #MEAN
@@ -83,6 +86,7 @@ PLOT_CUM_MEAN_MCMC <- function(mcmc_chain, titleX = 'MCMC chain', ylabX = 'MCMC 
 }
 
 #EPIDEMIC FUNCTIONS
+#' @export
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
   '#Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between '
@@ -101,6 +105,7 @@ get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
 }
 
 #GET INFECTIVITY
+#' @export
 get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
   '#Infectiousness (Discrete gamma) i,e Prob less than x2 - prob less than x1; the area in between '
@@ -124,6 +129,7 @@ get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1
 #CREDIBLE INTERVALS
 
 #MCMC COLUMNS
+#' @export
 get_lower_ci <- function(mcmc_col){
   
   #print(CredibleInterval(mcmc_col, level = 0.95)[[2]])
@@ -133,6 +139,7 @@ get_lower_ci <- function(mcmc_col){
   return(lower_interval)
 }
 
+#' @export
 get_upper_ci <- function(mcmc_col){
   
   mcmc_col[is.na(mcmc_col)] <- 0
@@ -142,6 +149,7 @@ get_upper_ci <- function(mcmc_col){
   return(upper_interval)
 }
 
+#' @export
 get_ci_matrix <- function(mcmc_matrix){
   
   #Storage

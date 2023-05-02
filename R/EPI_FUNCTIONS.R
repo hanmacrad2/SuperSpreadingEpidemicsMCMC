@@ -1,6 +1,7 @@
 #EPIDEMIC FUNCTIONS
 
 #LAMBDA FUNCTION -SUM OF INFECTIVITY
+#' @export
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   
   #Parameters

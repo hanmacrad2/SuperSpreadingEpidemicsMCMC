@@ -2,6 +2,7 @@
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 
 #SAMPLE FROM BASELINE MODEL
+#' @export
 SAMPLE_BASELINE_MCMC <- function(mcmc_output, burn_in = burn_in){
   
   #SAMPLE
@@ -16,6 +17,7 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, burn_in = burn_in){
 }
 
 #SAMPLE FROM SSEB MODEL
+#' @export
 SAMPLE_SSEB_MCMC <- function(mcmc_output, burn_in = burn_in){
   
   #SAMPLE
@@ -32,6 +34,7 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, burn_in = burn_in){
 }
 
 #SAMPLE FROM SSEB MODEL
+#' @export
 SAMPLE_SSNB_MCMC <- function(mcmc_output, burn_in = burn_in){
   
   #SAMPLE
@@ -46,6 +49,7 @@ SAMPLE_SSNB_MCMC <- function(mcmc_output, burn_in = burn_in){
 }
 
 #PLOT POSTERIOR PREDICTIVE DATA
+#' @export
 PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6,
                                          run = 1, n_repeats = 100, n_sample_repeats = 5, burn_in = 2000,
                                 FLAGS_MODELS = list(BASE = TRUE, SSEB = TRUE,

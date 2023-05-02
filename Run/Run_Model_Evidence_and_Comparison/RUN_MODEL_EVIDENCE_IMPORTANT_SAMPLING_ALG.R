@@ -68,7 +68,6 @@ sd(list_is_log_ev_ssnb)
 #*************************
 #2b. SSEB
 #*************************
-run = 1
 list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                               SSIB = FALSE, SSIC = FALSE))

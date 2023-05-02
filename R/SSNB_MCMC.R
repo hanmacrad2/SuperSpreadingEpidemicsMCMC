@@ -1,6 +1,7 @@
 #SSNB model
 library(MASS)
 #SIMULATE
+#' @export
 SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.8, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
@@ -35,6 +36,7 @@ SIMULATE_EPI_SSNB <- function(num_days = 50, R0 = 1.8, k = 0.16,
 #************************
 #* LOG LIKELIHOOD SSNB
 #* ***********************
+#' @export
 LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params, 
                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
   
@@ -69,6 +71,7 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
 #********************************************************
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
+#' @export
 MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                             mcmc_inputs = list(mod_start_points = c(0.16, 1.8),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),

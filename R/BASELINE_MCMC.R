@@ -20,6 +20,7 @@
 #'
 #' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
 #'
+#' @export
 SIMULATE_BASELINE_EPIDEMIC = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
   
   'Baseline simulation model'
@@ -120,7 +121,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' #START MCMC
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
-#'
+#' @export
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
                                    mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
                                                       target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 

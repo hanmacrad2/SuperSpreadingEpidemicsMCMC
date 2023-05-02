@@ -10,6 +10,7 @@ library(compositions)
 #*************************************
 #* LOG SUM EXP
 #* ***********************************
+#' @export
 LOG_SUM_EXP <- function(vectorX){
   
   #REMOVE NA VALUES
@@ -27,6 +28,7 @@ LOG_SUM_EXP <- function(vectorX){
 #1. GET IMPORTANCE SAMPLING PROPOSAL (LOG)
 #*
 #***************************************
+#' @export
 GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples, 
                                dof = 3, prob = 0.95, FLAG_PRIORS = list(EXP_PRIOR = TRUE)) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
   
@@ -76,6 +78,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
 #*************************************
 #1b. MULTI PARAMETER MODEL - PROPOSAL Q
 #*************************************
+#' @export
 GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                                          n_samples, dof = 3, prob = 0.95, 
                                          priors_ssnb = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
@@ -111,14 +114,8 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODE
                                    runif(samp_size_prior,  min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2])), ncol = n_dim)
   }
   
-  #Proposal samples
-  #print(paste0('dim = theta_samples_proposal', dim(theta_samples_proposal)))
-  #print(paste0('dim = theta_samples_prior', dim(theta_samples_prior)))
+  #PROPOSAL SAMPLES
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
-  
-  #print(paste0('mean_mcmc = ', means))
-  #print(paste0('mean proposal = ', colMeans(theta_samples_proposal)))
-  #print(paste0('mean prior = ', colMeans(theta_samples_prior)))
   
   #DEFENSE MIXTURE
   log_proposal = dmvt(theta_samples - matrix(rep(means, each = n_samples), ncol = n_dim),
@@ -134,12 +131,10 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODE
   }
  
   log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_priors)) #1 x n_samples
-  #print(paste0('log_q ', log_q))
   
   #max_el = pmax(log(prob_prop) + log_proposal, log(prob_prior) + log_priors)
   #log_q2 = max_el + log(exp(log(prob_prop) + log_proposal - max_el) + exp(log(prob_prior) + log_priors - max_el))
   #log_q_s = LOG_SUM_EXP(log_q2) #LOG SUM EXP OF TWO COMPONENTS - See if the same
-  #print(paste0('log_q_s2 ', log_q_s))
   
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_priors = log_priors)
   
@@ -151,6 +146,7 @@ GET_LOG_PROPOSAL_Q_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODE
 #* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #************************************************************
+#' @export
 GET_LOG_P_HAT_BASELINE <- function(mcmc_samples, epidemic_data, n_samples = 10000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -179,7 +175,8 @@ GET_LOG_P_HAT_BASELINE <- function(mcmc_samples, epidemic_data, n_samples = 1000
 
 #******************************************************************
 #* 2b. Estimate of model evidence (P_hat) for SSEB model 
-#*******************************************************************
+#******************************************************************
+#' @export
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
                           FLAGS_MODELS, n_samples = 1000,
                           priors_ssnb = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
@@ -249,6 +246,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 # 3. LOAD MCMC + GET P_HAT ESTIMATES MODEL EVIDENCE ESTIMATES
 #*
 #******************************************************************************
+#' @export
 LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,  BURN_IN = FALSE, burn_in_pc = 0.2,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){
@@ -298,10 +296,11 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
+      print(paste0('CURRENT_FOLDER = ', CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-      print(mcmc_output$alpha_vec)
+     
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
       
@@ -350,6 +349,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
 
 #*****************************
 # LOAD MCMC VERSION 2
+#' @export
 LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){

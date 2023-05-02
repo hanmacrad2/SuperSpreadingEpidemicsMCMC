@@ -15,6 +15,7 @@
 #'
 #' log_like = LOG_LIKE_SSI(epidemic_data, 0.8, 0.02, 20)
 #'
+#' @export
 LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 
   #Datawdf
@@ -96,7 +97,7 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #' #START MCMC
 #'mcmc_ssi_output = SSI_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
-
+#' @export
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************

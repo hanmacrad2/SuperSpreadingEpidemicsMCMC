@@ -1,6 +1,7 @@
 #***************************************************
 #* #MODEL EVIDENCE ESTIMATE VIA HARMONIC MEAN (Kaas, Raftery, 1995)
 #********************************************************
+#' @export
 LOG_MODEL_EVIDENCE_HM <- function(loglike_vec){
   
   'Model evidence via Harmonic mean (log) (Kaas, Raftery, 1995)'
@@ -14,6 +15,7 @@ LOG_MODEL_EVIDENCE_HM <- function(loglike_vec){
   return(log_model_evidence)
 }
 
+#' @export
 MODEL_EVIDENCE_HM <- function(loglike_vec){
   
   'Model evidence via Harmonic mean (Kaas, Raftery, 1995)'
@@ -29,6 +31,7 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
 #********************************************************
 #* 2. LOAD MCMC & GET MODEL EVIDENCE
 #********************************************************
+#' @export
 LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
                                                           SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
@@ -86,6 +89,7 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, bu
 #********************************************************
 #* 2.INSPECT HARMONIC MEAN ESTIMATES
 #********************************************************
+#' @export
 INSPECT_HM_MEAN_EST <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
                                                           SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
