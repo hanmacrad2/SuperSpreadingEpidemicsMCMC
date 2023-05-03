@@ -1,6 +1,8 @@
 #GET POSTERIOR PREDICTIVE VALUES FROM MCMC
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 
+#MAKE TRANSPARENT WITH ALPHA!!
+
 #SAMPLE FROM BASELINE MODEL
 #' @export
 SAMPLE_BASELINE_MCMC <- function(mcmc_output, burn_in = burn_in){

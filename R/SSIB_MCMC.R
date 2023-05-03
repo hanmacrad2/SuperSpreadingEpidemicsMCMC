@@ -3,7 +3,8 @@
 #' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #'
 #' @export
-SIMULATE_EPI_SSIB = function(num_days, shape_gamma, scale_gamma, aX, bX, cX) {
+SIMULATE_EPI_SSIB = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
+                             shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
   #Set up
@@ -36,7 +37,8 @@ SIMULATE_EPI_SSIB = function(num_days, shape_gamma, scale_gamma, aX, bX, cX) {
 #' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #' Returns non super-spreaders super-spreaders separately
 #' @export
-SIMULATE_EPI_SSIB_II = function(num_days, shape_gamma, scale_gamma, aX, bX, cX) {
+SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
+                                shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
   #Set up
