@@ -76,7 +76,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, run_number = 1,
 #* RUN_MCMC_MULTIPLE_DATASETS
 #* **************************
 RUN_MCMC_MULTIPLE_DATASETS <- function(matrix_datasets, OUTER_FOLDER, run_number = 1, n_mcmc = 20000,
-                                    FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = TRUE,
+                                    FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                         SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
@@ -112,7 +112,7 @@ RUN_MCMC_MULTIPLE_DATASETS <- function(matrix_datasets, OUTER_FOLDER, run_number
   if(FLAGS_MODELS$SSEB){
     
     #CREATE FOLDER
-    model_type = 'SSEB'; print(model_type)
+    model_type = 'SSEBX'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/')
     create_folder(CURRENT_FOLDER)
     print(paste0('CURRENT_FOLDER = ', CURRENT_FOLDER))
@@ -123,7 +123,7 @@ RUN_MCMC_MULTIPLE_DATASETS <- function(matrix_datasets, OUTER_FOLDER, run_number
       print(paste0('i = ', i))
       epidemic_data = matrix_datasets[i,]
       mcmc_output = MCMC_INFER_SSEB(epidemic_data, n_mcmc = n_mcmc)   
-      print(mean(mcmc_output$alpha_vec))
+      #print(mean(mcmc_output$alpha_vec))
       #SAVE
       saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
     }
@@ -156,10 +156,5 @@ RUN_MCMC_MULTIPLE_DATASETS <- function(matrix_datasets, OUTER_FOLDER, run_number
   mcmc_output$tot_time_elap = tot_time_elap
   saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
 }
-
-
-
-
-
 
 

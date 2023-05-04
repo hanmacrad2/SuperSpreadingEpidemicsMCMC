@@ -178,7 +178,7 @@ GET_LOG_P_HAT_BASELINE <- function(mcmc_samples, epidemic_data, n_samples = 1000
 #******************************************************************
 #' @export
 GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
-                          FLAGS_MODELS, n_samples = 1000,
+                          FLAGS_MODELS, n_samples = 200,
                           priors_ssnb = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
                                              p_prob_unif = c(0,1)),
                           FLAG_PRIORS = list(SSEB_EXP_PRIOR = TRUE)) {    
@@ -300,7 +300,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-     
+      
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
       
@@ -347,7 +347,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
   return(estimates_vec) 
 }
 
-#*****************************
+#***************************** 
 # LOAD MCMC VERSION 2
 #' @export
 LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,
@@ -392,15 +392,23 @@ LOAD_MCMC_GET_P_HAT_II <- function(matrix_data, OUTER_FOLDER, run = run, n_repea
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
-      epidemic_data = matrix_data[i, ]
-      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-
-      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
-      #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
       
-      estimates_vec[i] = phat_estimate
-      print(estimates_vec)
+      #MCMC
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      if( sum(is.na(mcmc_output$log_like_vec)) == 0){
+        
+        print(paste0('working i = ', i))
+        mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+        #DATA
+        epidemic_data = matrix_data[i, ]
+        
+        #GET PHAT ESTIMATE OF MODEL EVIDENCE
+        phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
+        
+        estimates_vec[i] = phat_estimate
+        print(estimates_vec)
+      }
+
       
     }
     

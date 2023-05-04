@@ -14,7 +14,7 @@ plot_sim_model <- function(epi_data, model_type, R0X){
   plot(seq_along(epi_data), epi_data, type = 'l',
           ylab = 'Infection count', xlab = 'Day',
           mgp = c(3, 1, 0),
-          cex.lab = 1.7, cex.axis = 1.4, cex.main=1.5, #cex.sub= 1.5,
+          cex.lab = 1.4, cex.axis = 1.2, cex.main=1.4, #cex.sub= 1.5,
           main = paste0(model_type, ' simulated data. R0 = ', R0X))
   
 }
@@ -45,6 +45,14 @@ model_type = 'Baseline'
 matrix_data[1,] = data_base
 plot.ts(data_base, ylab = 'Infection count', xlab = 'Day',
         main = paste0(model_type, ' simulated data. R0 = ', R0X))
+
+
+#PLOT
+plot(seq_along(data_base), data_base, type = 'l',
+     ylab = 'Infection count', xlab = 'Day',
+     mgp = c(3, 1, 0),
+     cex.lab = 1.4, cex.axis = 1.2, cex.main=1.4, #cex.sub= 1.5,
+     main = paste0(model_type, ' simulated data. R0 = ', R0X))
 
 #2. SSNB
 model_type = 'SS-NB'

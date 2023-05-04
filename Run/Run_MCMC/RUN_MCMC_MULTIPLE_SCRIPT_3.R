@@ -43,6 +43,14 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, 
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                             SSIB = FALSE, SSIC = FALSE))
 
+#MCMC OUTPUT
+i = 10
+model_type = 'SSEB'; print(model_type)
+CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run_number, '/')
+mcmc_sseb =  readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+
+#PLOT
+PLOT_SSB_MCMC_REAL_DATA(data_wait_08_21, mcmc_sseb, 20000)
 
 #INSPECT
 mcmc_output = MCMC_INFER_BASELINE(data_wait_08_21, n_mcmc = 10) #00)

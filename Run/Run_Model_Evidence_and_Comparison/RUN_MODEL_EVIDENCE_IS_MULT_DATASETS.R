@@ -1,7 +1,7 @@
 #**********************************************
 #GET MODEL EVIDENCE VIA IMPORTANCE SAMPLING (2018 Paper)
 #***********************
-library(SuperSpreadingEpidemicsMCMC)
+library(SuperSpreadingEpidemicsMCMC); library(mvtnorm)
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/PART_2/SSEB_DATA/"
@@ -15,8 +15,8 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'run_', run, '/')
 #BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
 
 #DATASETS; MATRIX
-file_name = 'matrix_data_sseb.rds'
-matrix_data = readRDS(file = paste0(OUTER_FOLDER, file_name))
+file_name = 'matrix_datasets_sseb.rds'
+matrix_data_sseb = readRDS(file = paste0(OUTER_FOLDER, file_name))
 
 #***************************
 # 2. LOAD MCMC & GET MULTIPLE PHAT (log)
@@ -34,6 +34,13 @@ sd(list_is_log_ev_base)
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_base)
 
+#EXTRACT TRUE VALUES
+list_is_log_ev_base2 = list_is_log_ev_base[!(is.na(list_is_log_ev_sseb))]
+
+#Inspect results
+model_type = 'BASELINE'
+list_is_log_ev_base = readRDS(paste0(OUTER_FOLDER, model_type, '/phat_ests_', tolower(model_type), '_', run, '.rds'))
+
 #*************************
 #2c. SSNB
 #*************************
@@ -47,6 +54,13 @@ list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT_II(matrix_data_sseb, OUTER_FOLDER, run
 mean(list_is_log_ev_ssnb)
 sd(list_is_log_ev_ssnb)
 
+#EXTRACT TRUE VALUES
+list_is_log_ev_ssnb2 = list_is_log_ev_ssnb[!(is.na(list_is_log_ev_sseb))]
+
+#Inspect results
+model_type = 'SSNB'
+list_is_log_ev_ssnb = readRDS(paste0(OUTER_FOLDER, model_type, '/phat_ests_', tolower(model_type), '_', run, '.rds'))
+
 #*************************
 #2b. SSEB
 #*************************
@@ -54,12 +68,19 @@ run = 1
 list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT_II(matrix_data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                               SSIB = FALSE, SSIC = FALSE))
+
+#EXTRACT TRUE VALUES
+list_is_log_ev_sseb2 = list_is_log_ev_sseb[!(is.na(list_is_log_ev_sseb))]
+
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
 mean(list_is_log_ev_sseb)
 sd(list_is_log_ev_sseb)
 
+
+#***************
 #INSPECT
+#***************
 CURRENT_FOLDER = paste0(OUTER_FOLDER, '/SSEB/')
 for (i in 1:n_repeats){
   

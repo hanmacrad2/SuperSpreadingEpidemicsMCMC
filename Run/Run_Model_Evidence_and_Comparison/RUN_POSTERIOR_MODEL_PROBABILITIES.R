@@ -3,9 +3,10 @@ library(SuperSpreadingEpidemicsMCMC)
 # 5. POSTERIOR MODEL PROBABILITIES
 #**********************
 par(mfrow = c(2,1))
+par(mfrow = c(1,1))
 
 #RESULTS
-data_type = 'SSEB'
+data_type = 'SSEB x30 different simulated'
 data_type = 'BASELINE'
 data_type = 'Waitemata NZ, August 2021'
 model_ev_method = 'IS'
@@ -17,8 +18,8 @@ model_ev_method = 'IS'
 #***********************
 #MODEL 1: BASE
 #***********************
-vec_post_probs_is_base = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_base,
-                                                                    mod2 = list_is_log_ev_sseb, mod3 = list_is_log_ev_ssnb))
+vec_post_probs_is_base = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_base2,
+                                                                    mod2 = list_is_log_ev_sseb2, mod3 = list_is_log_ev_ssnb2))
 
 mean(vec_post_probs_is_base); sd(vec_post_probs_is_base)
 #PLOT_BAYES_FACTORS(vec_post_probs_hm)
@@ -26,8 +27,8 @@ mean(vec_post_probs_is_base); sd(vec_post_probs_is_base)
 #***********************
 #MODEL 2: SSEB
 #***********************
-vec_post_probs_is_sseb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_sseb,
-                                                                     mod2 = list_is_log_ev_base, mod3 = list_is_log_ev_ssnb),
+vec_post_probs_is_sseb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_sseb2,
+                                                                     mod2 = list_is_log_ev_base2, mod3 = list_is_log_ev_ssnb2),
                                                  probs_models = list(prob1 = 0.25, prob2 = 0.5, prob3 = 0.25))
 
 mean(vec_post_probs_is_sseb); sd(vec_post_probs_is_sseb)
@@ -36,16 +37,16 @@ mean(vec_post_probs_is_sseb); sd(vec_post_probs_is_sseb)
 #***********************
 #MODEL 3: SSNB
 #***********************
-vec_post_probs_is_ssnb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssnb,
-                                                                     mod2 = list_is_log_ev_base, mod3 = list_is_log_ev_sseb),
+vec_post_probs_is_ssnb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssnb2,
+                                                                     mod2 = list_is_log_ev_base2, mod3 = list_is_log_ev_sseb2),
                                                 probs_models = list(prob1 = 0.25, prob2 = 0.5, prob3 = 0.25))
 mean(vec_post_probs_is_ssnb); sd(vec_post_probs_is_ssnb)
 #PLOT_BAYES_FACTORS(vec_post_probs_hm3)
 
 #PLOT POSTERIOR PROBS
 model_ev_method = 'IS'
-BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = vec_post_probs_is_base, SSEB = vec_post_probs_is_sseb,
-                                              SSNB = vec_post_probs_is_ssnb),
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = vec_post_probs_is_base, SSE_B = vec_post_probs_is_sseb,
+                                              SSE_NB = vec_post_probs_is_ssnb),
                                               data_type = data_type, model_ev_method = 'IS Model Evidence.')
 
 #Data
@@ -54,10 +55,6 @@ plot.ts(data_wait_08_21, ylab = 'Infection count', main = paste0(data_type, ', r
 #********************
 #COMPARISON: TWO MODELS
 #********************
-bf = GET_BAYES_FACTORS(list_is_log_ev_ssnb, list_is_log_ev_base)
-bf
-boxplot(bf)
-
 post_probs_base_2 = GET_AGG_POSTERIOR_PROB_II(list_log_mod_evid = list(mod1 = list_is_log_ev_base,
                                                                        mod2 = list_is_log_ev_ssnb))
 
@@ -70,6 +67,10 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = post_probs_base_2,
 
 #Data
 plot.ts(data_wait_08_21, ylab = 'Infection count', main = paste0(data_type, ', real data'))
+
+#BF
+#bf = GET_BAYES_FACTORS(list_is_log_ev_ssnb, list_is_log_ev_base)
+#boxplot(bf)
 
 #*************************
 #2. HARMONIC MEAN DATA

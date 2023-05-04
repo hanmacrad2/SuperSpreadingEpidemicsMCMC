@@ -45,13 +45,13 @@
 #'
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output)
 
-PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim,
-                              mcmc_specs = list(data_type = 'Baseline', model_type = 'SSEB', mod_par_names = c('alpha', 'beta', 'gamma'),
-                                                seed_count = 1,  burn_in_pc = 0.05, thinning_factor = 10),
+PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
+                              mcmc_specs = list(data_type = 'NZ Waitemata', model_type = 'SSEB', mod_par_names = c('alpha', 'beta', 'gamma'),
+                                                seed_count = 1,  burn_in_pc = 0.2, thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                              FLAGS_LIST = list(SSIB = FALSE, BURN_IN = FALSE, THIN = TRUE,
-                                                REAL_DATA = FALSE, RJMCMC = TRUE,
+                              FLAGS_LIST = list(SSIB = FALSE, BURN_IN = TRUE, THIN = TRUE,
+                                                REAL_DATA = TRUE, RJMCMC = FALSE,
                                                 DATA_AUG = FALSE, ADAPTIVE = TRUE, MULTI_ALG = FALSE,
                                                 PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE)){
   
@@ -442,18 +442,16 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc, r0_sim,
     m1_mean_mc = round(mean(m1_mcmc), 2),
     m2_mean_mc = round(mean(m2_mcmc), 2),
     m3_mean_mc = round(mean(m3_mcmc), 2),
-    R0 = r0_sim,
     R0_mc = round(mean(r0_mcmc), 2), 
     accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate_a, 2),
     a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate_b, 2),
     a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate_g, 2),
-    a_rte_m2_m3 = round(mcmc_output$list_accept_rates$accept_ratebg, 2),
-    a_rte_m1_m3 = round(mcmc_output$list_accept_rates$accept_rate5, 2),
+    a_rte_m2_m3 = round(mcmc_output$list_accept_rates$accept_rate_bg, 2),
+    a_rte_m1_m3 = round(mcmc_output$list_accept_rates$accept_rate_ag, 2),
     a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
     b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
     c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
-    d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]],
-    time_elap = format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
+    d_es = effectiveSize(as.mcmc(r0_mcmc))[[1]])
   
   } else if (FLAGS_LIST$RJMCMC){
     

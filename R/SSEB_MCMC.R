@@ -112,7 +112,7 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #1. SSEB MCMC
 #************************************************************************
 #' @export
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 20000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
                                          alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
@@ -416,6 +416,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
+      print(paste0('log_like = ', log_like))
       sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_beta_vec[i_thin] = sigma_beta
       sigma_list$sigma_gamma_vec[i_thin] = sigma_gamma
       sigma_list$sigma_bg_vec[i_thin] = sigma_bg; sigma_list$sigma_ag_vec[i_thin] = sigma_ag

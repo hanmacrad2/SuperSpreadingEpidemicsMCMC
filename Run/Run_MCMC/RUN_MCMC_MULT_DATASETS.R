@@ -57,3 +57,7 @@ RUN_MCMC_MULTIPLE_DATASETS(matrix_data_sseb, OUTER_FOLDER)
 
 #matrix_data_sseb[29,]
 
+
+#Inspect results
+model_type = 'SSEB'
+list_is_log_ev_sseb = readRDS(paste0(OUTER_FOLDER, model_type, '/phat_ests_sseb_', run, '.rds'))
