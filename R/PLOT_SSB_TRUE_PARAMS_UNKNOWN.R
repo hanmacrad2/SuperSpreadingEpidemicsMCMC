@@ -1,5 +1,5 @@
 #' Grid Plot of MCMC Super-Spreading Results
-#'
+library(coda)
 #'Grid Plot of MCMC Results for Super-Spreading Epidemic Models
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts
@@ -48,7 +48,7 @@
 PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
                               mcmc_specs = list(data_type = 'NZ Waitemata', model_type = 'SSEB', mod_par_names = c('alpha', 'beta', 'gamma'),
                                                 seed_count = 1,  burn_in_pc = 0.2, thinning_factor = 10),
-                              priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
+                              priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(1,0), #10, 1/100
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(SSIB = FALSE, BURN_IN = TRUE, THIN = TRUE,
                                                 REAL_DATA = TRUE, RJMCMC = FALSE,
@@ -143,7 +143,8 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
   #************************
   
   #i. TOTAL INFECTIONS
-  inf_tite = paste0(mcmc_specs$seed_count, ' ', mcmc_specs$data_type, " Data")
+  #inf_tite = paste0(mcmc_specs$seed_count, ' ', mcmc_specs$data_type, " Data")
+  inf_tite = paste0(mcmc_specs$data_type, " Data")
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
           main = inf_tite,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
@@ -263,7 +264,7 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
   
   #***********
   #HIST m1
-  hist(m1_mcmc, freq = FALSE, breaks = 100,
+  hist(m1_mcmc, freq = FALSE, breaks = 200,
        xlab = mcmc_specs$mod_par_names[1], #ylab = 'Density',
        main = paste(mcmc_specs$mod_par_names[1],
                     " prior:", m1_prior),
@@ -284,9 +285,10 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
   hist(m2_mcmc, freq = FALSE, breaks = 200,
        xlab = mcmc_specs$mod_par_names[2], #ylab = 'Density',
        main = paste(mcmc_specs$mod_par_names[2],
-                    " prior:", m2_prior), #xlim=c(0, m2_lim)
+                    " prior:", m2_prior), 
+       xlim=c(0, m2_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
+  #axis(side=1, at=seq(0,0.4, 0.05), labels= seq(0,0.4, 0.05))
   
   #PRIOR PLOT
   if (FLAGS_LIST$B_PRIOR_GAMMA) {
@@ -294,7 +296,7 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
     lines(xseq, dgamma(xseq, shape =  priors_list$b_prior_ga[1], scale =  priors_list$b_prior_ga[2]),
           type = 'l', lwd = 2, col = 'blue')
   } else {
-    xseq = seq(0, 10, length.out = 5000)
+    xseq = seq(0, 1.5, length.out = 500)
     lines(xseq, dexp(xseq, priors_list$b_prior_exp[1]),
           type = 'l', lwd = 2, col = 'blue')
   }

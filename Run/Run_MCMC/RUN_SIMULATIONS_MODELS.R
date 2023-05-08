@@ -84,3 +84,8 @@ matrix_data[5,] = data_ssir4$epidemic_data
 
 #SAVE THE DATA
 saveRDS(matrix_data, file = paste0(DATA_FOLDER, 'matrix_simulated_datasets.rds'))
+
+matrix_data2 = readRDS(file = paste0(DATA_FOLDER, 'matrix_simulated_datasets.rds'))
+
+#Plot Waitemmata
+

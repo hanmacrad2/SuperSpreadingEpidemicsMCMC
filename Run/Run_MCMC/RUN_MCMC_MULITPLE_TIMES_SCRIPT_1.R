@@ -4,8 +4,6 @@ library(SuperSpreadingEpidemicsMCMC)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
 
-#OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
-
 #***********************
 # EPIDEMIC DATA (RUN AUTOMATICALLY)
 #**********************
@@ -16,6 +14,7 @@ plot.ts(data_baseI)
 run_number = 1
 
 #2. SSEB DATA 
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
 model_type = 'sseb'; run = 1
 data_sseb = readRDS(file = paste0(OUTER_FOLDER, 'epi_data_', model_type, '_', run, '.rds'))
 plot.ts(data_sseb)
@@ -51,12 +50,15 @@ RUN_MULTIPLE_MCMC_SSIC(data_baseI, OUTER_FOLDER, n_reps = 100, n_mcmc = 100000)
 #**********************
 #Inspect MCMC results
 #**********************
-model_type = 'SSNB'; i = 100
-RESULTS_FOLDER = paste0(OUTER_FOLDER, '/', model_type, '/run_', run_number, '/')
+model_type = 'SSEB'; i = 100; run_number = 2
+RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run_number, '/')
 
 #MCMC RESULTS
-i = 90
-mcmc90 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
+mcmc50 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', model_type , '_', i, '.rds'))
+PLOT_SSB_MCMC_REAL_DATA(data_sseb, mcmc50, 50000)
+
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc50, 50000)
+
 #PLOT
 PLOT_SSNB_MCMC_GRID(data_baseI, mcmc90, n_mcmc = 100000)
 
@@ -79,11 +81,3 @@ mcmc100 = readRDS(file = paste0(RESULTS_FOLDER, 'mcmc_', i, '.rds'))
 ssec100 = mcmc100$ssec_params_matrix
 plot.ts(ssec100)
 
-#TOTAL TIME
-for (i in 1:5){
-  
-  #RUN MCMC
-  print(paste0('i = ', i))
-  model_type = i
-}
-print(model_type)
