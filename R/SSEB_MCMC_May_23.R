@@ -5,6 +5,7 @@ library(coda)
 
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
+#' @export
 SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX = 10,
                               shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading events
@@ -46,6 +47,7 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX =
 }
 
 #1. LOG LIKELIHOOD
+#' @export
 LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   #Params
@@ -53,26 +55,39 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   
   for (t in 2:num_days) {
     
-    #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    inner_sum_xt = 0
-    term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
-    
-    for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
+    #print(paste0('x[t] = ', x[t]))
+    if (x[t] > 0) {
       
-      #Log likelihood
-      st = x[t] - nt
-      inner_sum_xt = inner_sum_xt + 
-        term1*(term2)^nt*(1/factorial(nt))*
-        PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
-    } 
+      #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
+      inner_sum_xt = 0
+      term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
+      
+      for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
+        
+        #Log likelihood
+        st = x[t] - nt
+        prob_st = PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
+        
+        if(is.na(prob_st) || is.infinite(prob_st)){
+          print(paste0('st = ', st, 'x[t] = ', x[t]))
+          print(paste0('prob: ', PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)))
+        } else {
+          
+          inner_sum_xt = inner_sum_xt + 
+            term1*(term2)^nt*(1/factorial(nt))*prob_st
+        }
+      } 
+      
+      logl = logl + log(inner_sum_xt) 
+    }
     
-    logl = logl + log(inner_sum_xt) 
   }
   
   return(logl)
 }
 
 #2. PROBABILITY OF ZT
+#' @export
 PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
   'Probability of Zt'
@@ -82,8 +97,11 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
   for (et in 0:max_et){
     
-    prob_st = prob_st + dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
+    prob_term = dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
     
+    if(!is.na(prob_term)){
+      prob_st = prob_st + prob_term
+    }
   }
   
   return(prob_st)
@@ -92,7 +110,8 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
+#' @export
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 20000,
                                   mcmc_inputs = 
                                     list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
                                          alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
@@ -396,6 +415,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
+      print(paste0('log_like = ', log_like))
       sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_beta_vec[i_thin] = sigma_beta
       sigma_list$sigma_gamma_vec[i_thin] = sigma_gamma
       sigma_list$sigma_bg_vec[i_thin] = sigma_bg; sigma_list$sigma_ag_vec[i_thin] = sigma_ag

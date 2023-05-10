@@ -2,10 +2,12 @@
 #GET MODEL EVIDENCE VIA IMPORTANCE SAMPLING (2018 Paper)
 #***********************
 library(SuperSpreadingEpidemicsMCMC)
-#OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/PART_2/SSEB_DATA/"
-run = 2; n_repeats = 50
+#OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/PART_2/SSEB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21_SUBSET_I/"
+run = 1; 
+n_repeats = 100
 
 #***********************
 # 1. DATA 
@@ -24,7 +26,7 @@ file_name = "epi_data_sseb_1.rds"
 data_sseb = readRDS(file = paste0(OUTER_FOLDER, file_name))
 plot.ts(data_sseb)
 
-#SSEB DATA
+#NZ DATA
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 data_file_wait_21 = read.csv(paste0(DATA_FOLDER, 'data_waitemata_aug_21.csv'))
@@ -38,7 +40,7 @@ plot.ts(data_wait_08_21)
 #*************************
 #2a. BASELINE
 #*************************
-list_is_log_ev_base = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_base = LOAD_MCMC_GET_P_HAT(data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                      FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
                                                          SSIB = FALSE, SSNB = FALSE))
 mean(list_is_log_ev_base)
@@ -55,7 +57,7 @@ sd(list_is_log_ev_base)
 #*************************
 #2c. SSNB
 #*************************
-list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                            FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                SSIB = FALSE, SSIC = FALSE))
 #PLOT
@@ -68,7 +70,7 @@ sd(list_is_log_ev_ssnb)
 #*************************
 #2b. SSEB
 #*************************
-list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_sseb, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                               SSIB = FALSE, SSIC = FALSE))
 #PLOT

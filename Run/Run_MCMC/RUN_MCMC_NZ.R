@@ -2,12 +2,14 @@
 
 #RUN MULTIPLE MCMC ITERATIONS
 library(SuperSpreadingEpidemicsMCMC)
+library(MASS)
+ls("package:SuperSpreadingEpidemicsMCMC")
 
 #FOLDER RESULTS
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
-OUTER_FOLDER = paste0(OUTER_FOLDER, 'NZ_DATA_WAIT_21/')
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'NZ_DATA_WAIT_21_SUBSET_I/')
 create_folder(OUTER_FOLDER)
-run_number = 2
+run_number = 1
 
 #***********************
 # EPIDEMIC DATA -- NEW ZEALAND
@@ -15,16 +17,21 @@ run_number = 2
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 data_file_wait_21 = read.csv(paste0(DATA_FOLDER, 'data_waitemata_aug_21.csv'))
 data_wait_08_21 = data_file_wait_21$Cases
-plot.ts(data_wait_08_21, ylab = 'Infection count', main = 'Waitemata NZ, August 2021')
+plot.ts(data_wait_08_21_sub1, ylab = 'Infection count', main = 'Waitemata NZ, August 2021')
 saveRDS(data_wait_08_21, file = paste0(OUTER_FOLDER, 'data_wait_08_21.rds'))
 
-#REMOVE LEADING ZERO!!!!
+#SUBSET
+data_wait_08_21_sub1 = data_wait_08_21[2:11]
+
+#REMOVE LEADING ZEROES FOR MCMC
+#data_wait_08_21 = c(0, 0, data_wait_08_21)
+data_wait_08_21 = data_wait_08_21[1:length(data_wait_08_21)]
 data_wait_08_21 = data_wait_08_21[2:length(data_wait_08_21)]
 
 #***********************
 # 2. RUN BASELINE MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 20000,
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIB = FALSE, SSIC = FALSE))
 
@@ -32,14 +39,14 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, 
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 20000,
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                             SSIB = FALSE, SSIC = FALSE))
 
 #***********************
 # 2. RUN SSEB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 20000,
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                             SSIB = FALSE, SSIC = FALSE))
 
