@@ -85,6 +85,9 @@ PLOT_SSB_MCMC_REAL_DATA <- function(epidemic_data, mcmc_output, n_mcmc,
     r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
   }
   
+  log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
+  #r0_sim = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
+  
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_specs$thinning_factor

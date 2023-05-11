@@ -67,7 +67,7 @@ BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results = list(sseb = results1,
                                   data_type = data_type, model_ev_method = model_ev_method, titleX = '') { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
   
   #Set up
-  title = paste0(titleX, 'Posterior Model Probabilities. ', data_type, ' data. ', model_ev_method) #' model evidence'
+  title = paste0(titleX, 'Posterior Model Probabilities. ', data_type, model_ev_method) #' data. ', #' model evidence'
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   print(head(df_results))
   boxplot(df_results, main = title,

@@ -77,7 +77,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10, burn_in_pc = 0.2),
                             priors = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
-                                               p_prob_unif = c(0,1)),
+                                               p_prob_unif = c(0,1), pk_exp = c(1,0)),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE, BURN_IN = TRUE),
                             FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
   
@@ -155,8 +155,8 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
       if(FLAG_NEGBIN_PARAMATERISATION$param_mu & FLAGS_LIST$PRIOR) {
 
         log_accept_ratio = log_accept_ratio +
-          dgamma(k_dash, shape = priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -
-          dgamma(k, shape = priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) +
+          dexp(k_dash, rate = priors$pk_exp[1], log = TRUE) -
+          dexp(k, rate = priors$pk_exp[1], log = TRUE)
         dunif(R0_dash, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE) - #Uniform prior
         dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
         #priors_list$pr0_unif[1]*ssnb_params_dash[2] + priors_list$pr0_unif[1]*ssnb_params[2]

@@ -237,7 +237,7 @@ GET_LOG_P_HAT <- function(mcmc_samples, epidemic_data,
 #*
 #******************************************************************************
 LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                burn_in_pc = 0.2, BURN_IN = TRUE,
+                                start = 1, burn_in_pc = 0.2, BURN_IN = TRUE,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIC = FALSE)){
   'For a given epidemic dataset and model. 
@@ -246,13 +246,14 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
   
   #Parameters
   estimates_vec = rep(NA, n_repeats) 
+  #estimates_vec = rep(NA, n_repeats - start) 
   
   if (FLAGS_MODELS$BASE){
     
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     
-    for (i in 1:n_repeats){
+    for (i in start:n_repeats){
       
       print(paste0('i = ', i))
       
@@ -282,7 +283,7 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
     model_type = 'sseb'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     
-    for (i in 1:n_repeats){
+    for (i in start:n_repeats){
       
       print(paste0('i = ', i))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
@@ -304,13 +305,44 @@ LOAD_MCMC_GET_P_HAT <- function(epidemic_data, OUTER_FOLDER, run = run, n_repeat
     model_type = 'ssnb'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     
-    for (i in 1:n_repeats){
+    for (i in start:n_repeats){
       
       print(paste0('i = ', i))
       #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  mcmc_output$ssnb_params_matrix 
+      
+      #LOG LIKE (BURN-IN):
+      if(BURN_IN){
+        mcmc_length = dim(mcmc_output$ssnb_params_matrix)[1]
+        mcmc_samples = mcmc_output$ssnb_params_matrix[(burn_in_pc*mcmc_length + 1):mcmc_length,]
+        print(dim(mcmc_samples))
+      }
+      
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_LOG_P_HAT(mcmc_samples, epidemic_data, FLAGS_MODELS)
+      estimates_vec[i] = phat_estimate                        
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/phat_ests_', model_type, '_', run, '.rds' ))
+    
+  } else if (FLAGS_MODELS$SSIR) {
+    
+    model_type = 'ssir'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    
+    for (i in start:n_repeats){
+      
+      print(paste0('i = ', i))
+      #mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', i ,'.rds'))
+      
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      
+      mcmc_samples =  cbind(mcmc_ssir$ssic_params_matrix, mcmc_ssir$eta_matrix)
       
       #LOG LIKE (BURN-IN):
       if(BURN_IN){

@@ -100,6 +100,11 @@ model_ev_ssnb3 =  readRDS(file = paste0(CURRENT_FOLDER, file_name))
 #COUNTEIS MANAUKA
 
 #****************
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'CM_08_21_SUB_1/')
+print(OUTER_FOLDER)
+
+n_repeats = 34; run =1
 
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 filename =  'data_cm_tot_aug_21.csv'
@@ -109,4 +114,51 @@ data_file_cm_21 = data_file_cm_21$Cases
 plot.ts(data_file_cm_21, ylab = 'Infection count', main = 'CM NZ, August 2021')
 
 #SUBSET
+data_file_cm_21_sub1 = data_file_cm_21[5:21]
+plot.ts(data_file_cm_21_sub1)
 
+#*************************
+#2a. BASELINE
+#*************************
+list_is_log_ev_baseCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                            start = 16,
+                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
+                                                              SSIB = FALSE, SSNB = FALSE))
+mean(list_is_log_ev_baseCM, na.rm = TRUE)
+sd(list_is_log_ev_baseCM, na.rm = TRUE)
+
+#PLOT
+#PLOT_MODEL_EV_RESULTS(list_is_log_ev_base)
+
+#LOAD estimates
+#model_type = 'BASELINE'
+#CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/') 
+#list_is_log_ev_base = readRDS(file = paste0(CURRENT_FOLDER, 'phat_ests_base_', run, '.rds' ))
+
+#*************************
+#2c. SSNB
+#*************************
+run = 1; 
+list_is_log_ev_ssnbCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                            start = 16,
+                                          FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
+                                                              SSIB = FALSE, SSIC = FALSE))
+#PLOT
+#PLOT_MODEL_EV_RESULTS(list_is_log_ev_ssnb)
+
+#Results
+mean(list_is_log_ev_ssnbCM)
+sd(list_is_log_ev_ssnbCM)
+
+#*************************
+#2b. SSEB
+#*************************
+run = 1
+list_is_log_ev_ssebCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                            start = 16,
+                                          FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
+                                                              SSIB = FALSE, SSIC = FALSE))
+#PLOT
+#PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
+mean(list_is_log_ev_ssebCM)
+sd(list_is_log_ev_ssebCM)

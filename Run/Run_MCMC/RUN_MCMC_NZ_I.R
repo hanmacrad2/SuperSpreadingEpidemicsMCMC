@@ -6,12 +6,10 @@ library(MASS)
 ls("package:SuperSpreadingEpidemicsMCMC")
 
 #FOLDER RESULTS
-data_nz = 'NZ_DATA_WAIT_21_SUBSET_I/'
-data_nz = 'NZ_DATA_WAIT_21/'
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
-OUTER_FOLDER = paste0(OUTER_FOLDER, data_nz)
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'NZ_DATA_WAIT_21_SUBSET_I/')
 create_folder(OUTER_FOLDER)
-run_number = 1
+run_number = 2
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'CM_08_21_SUB_1/')
@@ -38,9 +36,7 @@ data_wait_08_21_sub1 = data_wait_08_21[2:11]
 data_wait_08_21 = data_wait_08_21[1:length(data_wait_08_21)]
 data_wait_08_21 = data_wait_08_21[2:length(data_wait_08_21)]
 
-#********************
-#DATA: COUNTIES MANUKAAU
-#*********************
+#COUNTIES MANUKAAU
 filename =  'data_cm_tot_aug_21.csv'
 
 data_file_cm_08_21 = read.csv(paste0(DATA_FOLDER, filename))
@@ -64,7 +60,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = run_
 #***********************
 # 3. RUN SSNB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = 2, n_repeats = 50, n_mcmc = 30000,
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = 2, n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                             SSIB = FALSE, SSIC = FALSE))
 
@@ -74,13 +70,6 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = 2, n
 RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                             SSIB = FALSE, SSIC = FALSE))
-
-#***********************
-# 2. RUN SSIR MCMC
-#**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 10, n_mcmc = 30000,
-                        FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                            SSIB = FALSE, SSIR = TRUE))
 
 
 #***********
@@ -112,14 +101,12 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub2, OUTER_FOLDER, run_number = run_
 
 
 
-#**************
-#INSPECT MCMC OUTPUT
-#**************
 
-i = 1
-model_type = 'SSIR'; print(model_type)
+#MCMC OUTPUT
+i = 10
+model_type = 'SSEB'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run_number, '/')
-mcmc_ssir =  readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+mcmc_sseb =  readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
 
 #PLOT
 PLOT_SSB_MCMC_REAL_DATA(data_wait_08_21_sub1, mcmc_sseb, 30000)
@@ -141,3 +128,31 @@ for (t in 2:num_days) {
   x[t] = rpois(1, total_rate)
   
 }
+
+#************
+#COMPARE SSNB
+#**************
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'NZ_DATA_WAIT_21/')
+create_folder(OUTER_FOLDER)
+run_number = 3
+
+#***********************
+# 3. RUN SSNB MCMC
+#**********************
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
+                        FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
+                                            SSIB = FALSE, SSIC = FALSE))
+
+#COMPARE SSNB
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'NZ_DATA_WAIT_21_SUBSET_I/')
+create_folder(OUTER_FOLDER)
+run_number = 3
+
+#***********************
+# 3. RUN SSNB MCMC
+#**********************
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 50, n_mcmc = 30000,
+                        FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
+                                            SSIB = FALSE, SSIC = FALSE))
