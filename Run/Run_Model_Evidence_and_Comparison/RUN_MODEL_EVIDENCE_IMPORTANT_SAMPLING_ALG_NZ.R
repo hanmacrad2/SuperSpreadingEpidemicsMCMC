@@ -154,11 +154,25 @@ sd(list_is_log_ev_ssnbCM)
 #2b. SSEB
 #*************************
 run = 1
-list_is_log_ev_ssebCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                            start = 16,
+list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER, run = 1, n_repeats = n_repeats,
+                                            start = 1,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                               SSIB = FALSE, SSIC = FALSE))
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
 mean(list_is_log_ev_ssebCM)
 sd(list_is_log_ev_ssebCM)
+
+#*************************
+#2b. SSIR
+#*************************
+run = 2; n_repeats = 50
+list_is_log_ev_ssir = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER,
+                                            run = run, n_repeats = n_repeats,
+                                            FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                SSIB = FALSE, SSIR = TRUE))
+#PLOT
+#PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
+mean(list_is_log_ev_ssir)
+sd(list_is_log_ev_ssir)
+

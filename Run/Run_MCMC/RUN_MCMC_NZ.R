@@ -10,6 +10,7 @@ data_nz = 'NZ_DATA_WAIT_21_SUBSET_I/'
 data_nz = 'NZ_DATA_WAIT_21/'
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 OUTER_FOLDER = paste0(OUTER_FOLDER, data_nz)
+print(OUTER_FOLDER)
 create_folder(OUTER_FOLDER)
 run_number = 1
 
@@ -32,6 +33,7 @@ saveRDS(data_wait_08_21, file = paste0(OUTER_FOLDER, 'data_wait_08_21.rds'))
 
 #SUBSET
 data_wait_08_21_sub1 = data_wait_08_21[2:11]
+plot.ts(data_wait_08_21_sub1, ylab = 'Infection count', main = 'Waitemata NZ, August 2021')
 
 #REMOVE LEADING ZEROES FOR MCMC
 #data_wait_08_21 = c(0, 0, data_wait_08_21)
@@ -78,7 +80,8 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = run_
 #***********************
 # 2. RUN SSIR MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run_number, n_repeats = 10, n_mcmc = 30000,
+run = 2
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run, n_repeats = 50, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIB = FALSE, SSIR = TRUE))
 
@@ -118,8 +121,13 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub2, OUTER_FOLDER, run_number = run_
 
 i = 1
 model_type = 'SSIR'; print(model_type)
-CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run_number, '/')
+CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/')
 mcmc_ssir =  readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
+
+i = 1
+model_type = 'SSEB'; print(model_type)
+CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/')
+mcmc_sseb =  readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
 
 #PLOT
 PLOT_SSB_MCMC_REAL_DATA(data_wait_08_21_sub1, mcmc_sseb, 30000)

@@ -116,7 +116,7 @@ get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
   #Lambda -> days of the infection
-  for (t in seq(1, num_days)){
+  for (t in 1:num_days){
     infect_vec[t] = rev(prob_infect[1:(t-1)])
   }
   
