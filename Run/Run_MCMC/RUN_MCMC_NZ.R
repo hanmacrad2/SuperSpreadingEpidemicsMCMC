@@ -80,11 +80,10 @@ RUN_MCMC_MULTIPLE_TIMES(data_file_cm_08_21_sub1, OUTER_FOLDER, run_number = run_
 #***********************
 # 2. RUN SSIR MCMC
 #**********************
-run = 2
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run, n_repeats = 50, n_mcmc = 50000,
+run = 4
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub1, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIB = FALSE, SSIR = TRUE))
-
 
 #***********
 #DATA 2

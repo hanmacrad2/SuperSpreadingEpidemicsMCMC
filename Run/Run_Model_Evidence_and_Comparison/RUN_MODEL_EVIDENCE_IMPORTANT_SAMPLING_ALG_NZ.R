@@ -36,7 +36,6 @@ data_wait_08_21 = data_file_wait_21$Cases
 plot.ts(data_wait_08_21)
 
 #***************************
-# 2. LOAD MCMC & GET MULTIPLE PHAT (log)
 #***************************
 
 #*************************
@@ -166,8 +165,8 @@ sd(list_is_log_ev_ssebCM)
 #*************************
 #2b. SSIR
 #*************************
-run = 2; n_repeats = 50
-list_is_log_ev_ssir = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER,
+run = 4; n_repeats = 10
+list_is_log_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER,
                                             run = run, n_repeats = n_repeats,
                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                 SSIB = FALSE, SSIR = TRUE))
@@ -175,4 +174,12 @@ list_is_log_ev_ssir = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER,
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
 mean(list_is_log_ev_ssir)
 sd(list_is_log_ev_ssir)
+
+#*************
+#LOAD MODEL EVIDENCE ESTIMATES
+#**************
+run = 1
+model_type = 'baseline'; print(model_type)
+CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+list_is_log_ev_base = readRDS(file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
 

@@ -43,31 +43,26 @@ SIMULATE_EPI_SSIR = function(R0X, num_days = 50, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIR <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector of length x. eta[1] = infectivity of xt[1]
+LOG_LIKE_SSIR <- function(x, infectivity_vec, ssir_params, eta){ #eta - a vector of length x. eta[1] = infectivity of xt[1]
   
   #Params
   num_days = length(x)
-  R0 = ssic_params[1]; k = ssic_params[2]
+  R0 = ssir_params[1]; k = ssir_params[2]
   loglike = 0; count_inf = 0
-  
-  #print('eta')
-  #print('length(eta)',length(eta))
-  #print(eta)
   
   for (t in 2:num_days) {
     
     total_rate = sum(eta[1:(t-1)]*infectivity_vec) 
-    #print(paste0('total_rate', total_rate))
     eta_prob = dgamma(eta[t-1], shape = x[t-1]*k, scale = R0/k, log = TRUE)
     #print(paste0('eta_prob', eta_prob))
     
-    if (!is.na(eta_prob) && !is.infinite(eta_prob)){
+    if (!is.na(eta_prob)){ # && !is.infinite(eta_prob)
       loglike = loglike + eta_prob 
     } 
     
     poi_prob = x[t]*log(total_rate) - total_rate - lfactorial(x[t]) 
     
-    if (!is.na(poi_prob) && !is.infinite(poi_prob)){
+    if (!is.na(poi_prob)){ #!is.infinite(poi_prob)
       loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
     }
   }
@@ -76,15 +71,15 @@ LOG_LIKE_SSIR <- function(x, infectivity_vec, ssic_params, eta){ #eta - a vector
 }
 
 #********************************************************
-#1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
+#1. MCMC INFERENCE FOR ssir MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
 MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
                               mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(R0_prior = c(1, 0), k_prior = c()),
-                                                 thinning_factor = 10),
+                                                 thinning_factor = 10, burn_in_pc = 0.2),
                               priors_list = list(R0_prior = c(1,0), k_prior = c(1, 0)),
-                              FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR_K1 = TRUE,
+                              FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE, PRIOR_K1 = TRUE,
                                                 PRIOR_K2 = FALSE)) {    
   
   #NOTE:
@@ -97,6 +92,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   num_days = length(epidemic_data); 
   vec_min = rep(0, mcmc_inputs$dim);
   count_accept = 0; count_accept_da = 0
+  i_thin = 1
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -106,65 +102,77 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     thinning_factor = 1; mcmc_vec_size = n_mcmc
   }
   
+  #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
+  if(FLAGS_LIST$BURN_IN){
+    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; print(paste0('N burn-in = ', burn_in_start))
+    #Adjust mcmc vector store size
+    mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size; ; print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
+    mcmc_vec_size = mcmc_vec_size + 1
+    }
+  
+  print(paste0('mcmc_vec_size', mcmc_vec_size))
+  
   #MODEL PARAMETERS
   infectivity_vec = get_infectious_curve(epidemic_data)
-  eta = epidemic_data; eta_matrix = matrix(NA, mcmc_vec_size, num_days); 
-  ssic_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
-  ssic_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssic_params = ssic_params_matrix[1,] #2x1 #as.matrix
+  eta_dim = length(epidemic_data)-1 #epidemic_data[1:(length(epidemic_data)-1)]
+  eta = epidemic_data[1:eta_dim]; #print(paste0('eta = ', eta))
+  eta_matrix = matrix(NA, mcmc_vec_size, eta_dim); 
+  ssir_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
+  ssir_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssir_params = ssir_params_matrix[1,] #2x1 #as.matrix
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssic_params, eta);  log_like = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params, eta);  log_like = log_like_vec[1]
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
   c_star = (2.38^2)/mcmc_inputs$dim; termX = mcmc_inputs$v0 + mcmc_inputs$dim
   delta = 1/(mcmc_inputs$target_acceptance_rate*(1 - mcmc_inputs$target_acceptance_rate))
-  x_bar = 0.5*(ssic_params + ssic_params_matrix[1,])
+  x_bar = 0.5*(ssir_params + ssir_params_matrix[1,])
   sigma_i = diag(mcmc_inputs$dim); scaling = 1
-  sigma_i = (1/(termX + 3))*(tcrossprod(ssic_params_matrix[1,]) + tcrossprod(ssic_params) -
+  sigma_i = (1/(termX + 3))*(tcrossprod(ssir_params_matrix[1,]) + tcrossprod(ssir_params) -
                                2*tcrossprod(x_bar) + (termX + 1)*sigma_i) #CHANGE TO USE FUNCTIONS
   
   #SIGMA ETA (ONE DIMENSION - ROBINS MUNROE) 
-  sigma_eta =  0.5*rep(1, num_days)
-  sigma_eta_matrix = matrix(0, mcmc_vec_size, num_days); sigma_eta_matrix[1,] =  sigma_eta;
+  sigma_eta =  0.5*rep(1, eta_dim)
+  sigma_eta_matrix = matrix(0, mcmc_vec_size, eta_dim); sigma_eta_matrix[1,] =  sigma_eta;
   
   #DIRECTORY - SAVING
   ifelse(!dir.exists(file.path(OUTER_FOLDER)), dir.create(file.path(OUTER_FOLDER), recursive = TRUE), FALSE)
   
-  #MCMC (#RENAME ssic_params AS PARAMS)
+  #MCMC (#RENAME ssir_params AS PARAMS)
   for(i in 2:n_mcmc) {
     
     #print(paste0('i = ', i))
-    if(i%%100 == 0) print(paste0('i = ', i))
+    #if(i%%100 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
-    ssic_params_dash = c(ssic_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
+    ssir_params_dash = c(ssir_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
-    if (min(ssic_params_dash - vec_min) >= 0){ 
+    if (min(ssir_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssic_params_dash, eta)
+      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params_dash, eta)
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
       log_accept_ratio = log_accept_ratio - 
-        priors_list$R0_prior[1]*ssic_params_dash[1] + priors_list$R0_prior[1]*ssic_params[1] - 
-        priors_list$k_prior[1]*ssic_params_dash[2] + priors_list$k_prior[1]*ssic_params[2] 
+        priors_list$R0_prior[1]*ssir_params_dash[1] + priors_list$R0_prior[1]*ssir_params[1] - 
+        priors_list$k_prior[1]*ssir_params_dash[2] + priors_list$k_prior[1]*ssir_params[2] 
       
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-        ssic_params <- ssic_params_dash
+        ssir_params <- ssir_params_dash
         count_accept = count_accept + 1
         log_like = logl_new
       }
       
       #SIGMA - ADAPTIVE SHAPING
       xbar_prev = x_bar
-      x_bar = (i-1)/i*xbar_prev + (1/i)*ssic_params
-      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(ssic_params)
+      x_bar = (i-1)/i*xbar_prev + (1/i)*ssir_params
+      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(ssir_params)
                                       + (i-1)*tcrossprod(xbar_prev)
                                       -i*tcrossprod(x_bar))
       
@@ -182,15 +190,16 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     #************************************
     #DATA AUGMENTATION
     #************************************
-    for(t in which(epidemic_data[1:(num_days)] > 0)){ #Only update eta's where x[t] > 0 epidemic_data[1:(num_days-1)]
+    for(t in which(epidemic_data[1:(num_days-1)] > 0)){ #Only update eta's where x[t] > 0 epidemic_data[1:(num_days-1)]
       
-      v = rep(0, length(eta)); v[t] = 1
+      v = rep(0, length(eta))
+      v[t] = 1
       
       #METROPOLIS STEP 
       eta_dash = abs(eta + rnorm(1,0, sigma_eta[t])*v) #normalise the t_th element of eta #or variance = x[t]
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssic_params, eta_dash)
+      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params, eta_dash)
       log_accept_ratio = logl_new - log_like
       
       #METROPOLIS ACCEPTANCE STEP
@@ -207,19 +216,21 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0) {
-      ssic_params_matrix[i/thinning_factor,] = ssic_params
-      log_like_vec[i/thinning_factor] <- log_like
-      scaling_vec[i/thinning_factor] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
-      eta_matrix[i/thinning_factor, ] <- eta 
-      sigma_eta_matrix[i/thinning_factor, ] = sigma_eta
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
+      
+      ssir_params_matrix[i_thin,] = ssir_params
+      log_like_vec[i_thin] <- log_like
+      scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
+      eta_matrix[i_thin, ] <- eta 
+      sigma_eta_matrix[i_thin, ] = sigma_eta
+      i_thin = i_thin + 1
     }
     
   } #END FOR LOOP
   
   #SAVE 
   #saveRDS(epidemic_data, file = paste0(OUTER_FOLDER, 'epidemic_data', seed_count, '.rds' ))
-  #saveRDS(ssic_params_matrix, file = paste0(OUTER_FOLDER, 'ssic_params_matrix_', seed_count, '.rds' ))
+  #saveRDS(ssir_params_matrix, file = paste0(OUTER_FOLDER, 'ssir_params_matrix_', seed_count, '.rds' ))
   #saveRDS(eta_matrix, file = paste0(OUTER_FOLDER, 'eta_matrix_', seed_count, '.rds' ))
   #saveRDS(log_like_vec, file = paste0(OUTER_FOLDER, 'log_like_vec_', seed_count, '.rds' ))
   
@@ -228,7 +239,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   accept_rate_da = 100*count_accept_da/((n_mcmc-1)*num_days)
   
   #Return a, acceptance rate
-  return(list(ssic_params_matrix = ssic_params_matrix, eta_matrix = eta_matrix,
+  return(list(ssir_params_matrix = ssir_params_matrix, eta_matrix = eta_matrix,
               sigma_eta_matrix = sigma_eta_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate, accept_rate_da = accept_rate_da))
