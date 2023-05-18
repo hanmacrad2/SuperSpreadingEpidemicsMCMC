@@ -58,7 +58,7 @@ sd(list_is_log_ev_base)
 #*************************
 #2c. SSNB
 #*************************
-run = 3; n_repeats = 50
+run = 5; n_repeats = 50
 list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                            FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                SSIB = FALSE, SSIC = FALSE))
@@ -81,7 +81,9 @@ list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = r
 mean(list_is_log_ev_sseb)
 sd(list_is_log_ev_sseb)
 
-#OUTPUT
+#*************
+# LOAD MCMC
+#*************
 model_type = 'SSEB'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run, '/')
 file_name = 'phat_ests_sseb_2.rds'

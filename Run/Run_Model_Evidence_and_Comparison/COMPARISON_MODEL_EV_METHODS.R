@@ -8,6 +8,7 @@ par(mfrow = c(3,1))
 #1.COMPARE IS VS HARMONIC MEAN
 #BASELINE MODEL
 data_type = 'SSEB'; 
+data_type = 'NZ Waitemata Subset'
 BOX_PLOT_MODEL_EV(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_base,
                                               harmonic_mean = list_hm_log_ev_base),
                   data_type = data_type, model = 'BASE')
@@ -26,6 +27,11 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(importance_sampling_2018 = list_is_log
                   data_type = data_type, model = 'SSNB')
                       #plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
+#SSIR MODEL
+BOX_PLOT_MODEL_EV(list_vec_results = list(importance_sampling_2018 = list_is_log_ev_ssir,
+                                          harmonic_mean = list_hm_log_ev_ssir),
+                  data_type = data_type, model = 'SSIR')
+#plot_title = paste0('SSNB Model Evidence. ', data_type, ' data. IS alg (2018) vs HM. ', n_repeats, ' runs, N mcmc = 50k'))
 
 
 #***************************

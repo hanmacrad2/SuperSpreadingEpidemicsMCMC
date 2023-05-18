@@ -65,6 +65,10 @@ GET_POSTERIOR_MODEL_PROB <- function(log_model_evidence, probs_models){
   return(posterior_prob)
 }
 
+#*********************
+#* x3 MODELS
+#*********************
+
 #GET_AGGREGATE_POSTERIOR_MODEL_PROB
 #' @export
 GET_AGG_POSTERIOR_PROB <- function(num_models = 3, FLAG_EQUAL_PROB = FALSE, probs_models =
@@ -95,6 +99,45 @@ GET_AGG_POSTERIOR_PROB <- function(num_models = 3, FLAG_EQUAL_PROB = FALSE, prob
   return(vec_post_probs)
   
 }
+
+#*********************
+#* x4 MODELS
+#*********************
+#' @export
+GET_AGG_POSTERIOR_PROB <- function(num_models = 4, FLAG_BASELINE = FALSE, list_log_mod_evid){ 
+  'Get posterior probabilites for mulitple P_hat reps'
+  
+  #FOR EACH REP
+  num_reps = length(list_log_mod_evid$mod1); num_ss_models = num_models - 1
+  vec_post_probs = c();
+  idx_sample = sample(1:num_reps, num_reps)
+  
+  #PROBABILITY
+  if(FLAG_BASELINE){
+    probs_models = list(prob_mech1 = 0.5, prob_mech2 = 0.5/num_ss_models, prob_mech3 =  0.5/num_ss_models,  
+                        prob_mech4 =  0.5/num_ss_models) 
+  } else {
+    probs_models = list(prob_mech1 = 0.5/num_ss_models, prob_mech2 = 0.5, prob_mech3 =  0.5/num_ss_models,  
+                        prob_mech4 =  0.5/num_ss_models) 
+  }
+  
+  print(probs_models)
+  
+  for (i in 1:num_reps){
+    print(paste0('rep = ', i))
+    j = idx_sample[i]; print(j)
+    vec_post_probs[i] = GET_POSTERIOR_MODEL_PROB(log_model_evidence = list(mod1 = list_log_mod_evid$mod1[j],
+                                                                           mod2 = list_log_mod_evid$mod2[j],
+                                                                           mod3 = list_log_mod_evid$mod3[j],
+                                                                           mod4 =  list_log_mod_evid$mod4[j]), 
+                                                 probs_models)
+    
+  }
+  
+  return(vec_post_probs)
+  
+}
+
 
 #MODELS
 #' @export

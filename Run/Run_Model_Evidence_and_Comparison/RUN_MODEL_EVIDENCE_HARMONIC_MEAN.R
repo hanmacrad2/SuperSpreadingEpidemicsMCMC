@@ -54,6 +54,18 @@ sd(list_hm_log_ev_ssnb)
 PLOT_MODEL_EV_RESULTS(list_hm_log_ev_ssnb)
 
 #***********************
+# 3. RUN SSIR MCMC
+#**********************
+list_hm_log_ev_ssir = LOAD_MCMC_GET_MODEL_EV_HM(OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
+                                                                    SSNB = FALSE, SSIB = FALSE, SSIR = TRUE))
+mean(list_hm_log_ev_ssir)
+sd(list_hm_log_ev_ssir)
+
+#Plot
+PLOT_MODEL_EV_RESULTS(list_hm_log_ev_ssir)
+
+#***********************
 # BAYES FACTORS
 #**********************
 log_bf_hm = list_log_ev_base - list_log_ev_sseb

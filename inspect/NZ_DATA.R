@@ -13,6 +13,30 @@ plot.ts(data_nz_08_21, ylab = 'Infection count', main = ' NZ, August 2021')
 data_nz_08_21_sub1 = data_nz_08_21[1:22]
 plot.ts(data_nz_08_21_sub1, ylab = 'Infection count', main = ' NZ, August 2021')
 
+#****************
+#WAITMETA
+#****************
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+file_name =  'data_waitemata_aug_21.csv'
+
+data_file_waitemata = read.csv(paste0(DATA_FOLDER, file_name))
+data_wait_08_21 = data_file_waitemata$Cases
+plot.ts(data_wait_08_21, ylab = 'Infection count', main = 'Waitemata, August 2021')
+
+#SUBSET ONE
+t1 = 2; t2 = 11
+data_wait_08_21_sub1 = data_wait_08_21[t1:t2]
+plot.ts(data_wait_08_21_sub1, ylab = 'Infection count',
+        main = paste0('Waitemata, August 2021. Days', t1, ' to ', t2))
+
+
+#SUBSET TWO
+t1 = 10; t2 = 20
+data_wait_08_21_sub2 = data_wait_08_21[t1:t2]
+plot.ts(data_wait_08_21_sub2, ylab = 'Infection count',
+        main = paste0('Waitemata, August 2021. Days ', t1, ' to ', t2))
+
+
 #COUNTIES MANAUKA
 file_name = 'data_cm_tot_aug_21.csv'
 

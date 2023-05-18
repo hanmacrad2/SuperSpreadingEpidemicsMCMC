@@ -32,9 +32,9 @@ MODEL_EVIDENCE_HM <- function(loglike_vec){
 #* 2. LOAD MCMC & GET MODEL EVIDENCE
 #********************************************************
 #' @export
-LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = TRUE, #REMOVE IN FUTURE
+LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, burn_in_pc = 0.2, BURN_IN = FALSE,
                                       FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE,
-                                                          SSNB = FALSE, SSIB = FALSE, SSIC = FALSE)){
+                                                          SSNB = FALSE, SSIB = FALSE, SSIR = FALSE)){
   'For a given epidemic dataset and model. 
   1. Load MCMC. 2. Get log model evidence'
 
@@ -57,6 +57,10 @@ LOAD_MCMC_GET_MODEL_EV_HM <- function(OUTER_FOLDER, run = 2, n_repeats = 500, bu
     model_type = 'ssnb'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     print(CURRENT_FOLDER)
+  } else if (FLAGS_MODELS$SSIR) {
+    model_type = 'ssir'
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    print(CURRENT_FOLDER) 
   }
   
   #LOG MODEL EVIDENCE FOR ALL MCMC RUNS

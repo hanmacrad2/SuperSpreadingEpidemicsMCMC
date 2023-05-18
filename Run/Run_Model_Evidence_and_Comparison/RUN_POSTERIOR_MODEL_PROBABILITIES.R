@@ -110,3 +110,35 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_hm_sseb, 
                       data_type = data_type, model_ev_method = model_ev_method)
 #Data
 plot.ts(data_sseb, ylab = 'Infection count', main = paste0(data_type, ' Simulated data'))
+
+
+#************
+# FOUR MODELS
+#************
+#BASE
+vec_post_probs_is_base = GET_AGG_POSTERIOR_PROB(FLAG_BASELINE = TRUE, list_log_mod_evid = list(mod1 = list_is_log_ev_base,
+                                                                                               mod2 = list_is_log_ev_sseb, mod3 = list_is_log_ev_ssnb,
+                                                                                               mod4 = list_is_log_ev_ssir))
+
+#SSEB
+vec_post_probs_is_sseb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_sseb,
+                                                                         mod2 = list_is_log_ev_base, mod3 = list_is_log_ev_ssnb,
+                                                                         mod4 = list_is_log_ev_ssir))
+
+#SSNB
+vec_post_probs_is_ssnb = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssnb,
+                                                                         mod2 = list_is_log_ev_base, mod3 = list_is_log_ev_sseb,
+                                                                         mod4 = list_is_log_ev_ssir))
+
+#SSIR
+vec_post_probs_is_ssir = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssir,
+                                                                         mod2 = list_is_log_ev_base, mod3 = list_is_log_ev_sseb,
+                                                                         mod4 = list_is_log_ev_ssnb))
+                                               
+
+#PLOT
+model_ev_method = 'IS'
+par(mfrow = c(2,1))
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = vec_post_probs_is_base, SSE_B = vec_post_probs_is_sseb,
+                                                 SSE_NB = vec_post_probs_is_ssnb),
+                         data_type = data_type, model_ev_method = '') #IS Model Evidence.')
