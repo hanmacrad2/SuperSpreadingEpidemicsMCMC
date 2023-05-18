@@ -1,6 +1,6 @@
 #INSPECT MCMC OUTPUT
 
-run = 4
+run = 5
 model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
