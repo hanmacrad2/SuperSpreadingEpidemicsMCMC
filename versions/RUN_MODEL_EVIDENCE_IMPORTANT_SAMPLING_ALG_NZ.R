@@ -58,7 +58,7 @@ sd(list_is_log_ev_base)
 #*************************
 #2c. SSNB
 #*************************
-run = 5; n_repeats = 50
+run = 1; n_repeats = 50
 list_is_log_ev_ssnb = LOAD_MCMC_GET_P_HAT(data_wait_08_21, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                            FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                SSIB = FALSE, SSIC = FALSE))
@@ -118,15 +118,16 @@ plot.ts(data_file_cm_21, ylab = 'Infection count', main = 'CM NZ, August 2021')
 data_file_cm_21_sub1 = data_file_cm_21[5:21]
 plot.ts(data_file_cm_21_sub1)
 
+
+
 #*************************
 #2a. BASELINE
 #*************************
-list_is_log_ev_baseCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                            start = 16,
-                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE,
-                                                              SSIB = FALSE, SSNB = FALSE))
-mean(list_is_log_ev_baseCM, na.rm = TRUE)
-sd(list_is_log_ev_baseCM, na.rm = TRUE)
+list_is_log_ev_base2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                              SSIB = FALSE, SSIR = FALSE))
+mean(list_is_log_ev_base2, na.rm = TRUE)
+sd(list_is_log_ev_base2, na.rm = TRUE)
 
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_base)
@@ -140,43 +141,40 @@ sd(list_is_log_ev_baseCM, na.rm = TRUE)
 #2c. SSNB
 #*************************
 run = 1; 
-list_is_log_ev_ssnbCM = LOAD_MCMC_GET_P_HAT(data_file_cm_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                            start = 16,
+list_is_log_ev_ssnb2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
-                                                              SSIB = FALSE, SSIC = FALSE))
+                                                              SSIB = FALSE, SSIR = FALSE))
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_ssnb)
 
 #Results
-mean(list_is_log_ev_ssnbCM)
-sd(list_is_log_ev_ssnbCM)
+mean(list_is_log_ev_ssnb2)
+sd(list_is_log_ev_ssnb2)
 
 #*************************
 #2b. SSEB
 #*************************
 run = 1
-list_is_log_ev_sseb = LOAD_MCMC_GET_P_HAT(data_wait_08_21_sub1, OUTER_FOLDER, run = 1, n_repeats = n_repeats,
-                                            start = 1,
+list_is_log_ev_sseb2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER, run = 1, n_repeats = n_repeats,
                                           FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
-                                                              SSIB = FALSE, SSIC = FALSE))
+                                                              SSIB = FALSE, SSIR = FALSE))
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
-mean(list_is_log_ev_ssebCM)
-sd(list_is_log_ev_ssebCM)
+mean(list_is_log_ev_sseb2)
+sd(list_is_log_ev_sseb2)
 
 #*************************
 #2b. SSIR
 #*************************
-run = 5; n_repeats = 50
-list_is_log_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER,
+list_is_log_ev_ssir2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER,
                                             run = run, n_repeats = n_repeats,
                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                 SSIB = FALSE, SSIR = TRUE))
 
 #PLOT
 #PLOT_MODEL_EV_RESULTS(list_is_log_ev_sseb)
-mean(list_is_log_ev_ssir)
-sd(list_is_log_ev_ssir)
+mean(list_is_log_ev_ssir2)
+sd(list_is_log_ev_ssir2)
 
 #*************
 #LOAD MODEL EVIDENCE ESTIMATES

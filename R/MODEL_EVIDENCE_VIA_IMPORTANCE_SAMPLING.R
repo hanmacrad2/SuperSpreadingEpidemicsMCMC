@@ -123,18 +123,19 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   return(imp_samp_comps)
 }
 
-#************************
+#**************************
 #MULTI_DIMENSIONAL PROPOSAL
-#************************
+#**************************
 GET_LOG_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                                          n_samples, dof = 3, prob = 0.95, 
                                          priors_sseb = list(exp_prior = c(1,0)),
                                          priors_ssnb = list(pk_prior_nb = c(1,0), pk_ga_shape = 0.001, pk_ga_rte = 0.001,
                                                             pr0_unif = c(1.0,4),
                                                             p_prob_unif = c(0,1)),
-                                      priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0))){               
+                                      priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)),
+                                      PRIORS_USED = list(SSNB_K_EXP = FALSE, SSNB_K_GAMMA = TRUE)){               
   
-  #PARAMETERS REQUIRED
+  #PARAMETERS REQUIRED 
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
   
@@ -155,13 +156,18 @@ GET_LOG_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS
     theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
   } else if (FLAGS_MODELS$SSNB){
-    n_dim =  dim(mcmc_samples)[2] #2 
-    theta_samples_prior = matrix(c(rexp(samp_size_prior),
-                                   runif(samp_size_prior,  min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2])),
-                                 ncol = n_dim)
-    #theta_samples_prior = matrix(c(rgamma(samp_size_prior, shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte),
-                                   #runif(samp_size_prior,  min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2])),
-                                 #ncol = n_dim)
+    n_dim =  dim(mcmc_samples)[2]
+    
+    if (PRIORS_USED$SSNB_K_EXP){
+      theta_samples_prior = matrix(c(rexp(samp_size_prior),
+                                     runif(samp_size_prior,  min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2])),
+                                   ncol = n_dim)
+    } else if (PRIORS_USED$SSNB_K_GAMMA){ 
+      theta_samples_prior = matrix(c(rgamma(samp_size_prior, shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte),
+      runif(samp_size_prior,  min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2])),
+      ncol = n_dim)
+    }
+
   } else if (FLAGS_MODELS$SSIR) {
     n_dim = dim(mcmc_samples)[2]
     param_priors = cbind(rexp(samp_size_prior, rate = priors_ssir$pk_exp[1]),
@@ -187,8 +193,16 @@ GET_LOG_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS
     log_priors = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
       dexp((theta_samples[,3] - 1), log = TRUE) 
   } else if (FLAGS_MODELS$SSNB){
-    log_priors = dexp(theta_samples[,1], log = TRUE) + #dgamma(theta_samples[,1], shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte, log = TRUE) +
+    
+    #SSNB PRIORS
+    if (PRIORS_USED$SSNB_K_EXP){
+    log_priors = dexp(theta_samples[,1], log = TRUE) 
       dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE)
+    } else if (PRIORS_USED$SSNB_K_GAMMA) {
+      log_priors = dgamma(theta_samples[,1], shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte, log = TRUE) +
+        dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE) 
+    }
+    
   } else if (FLAGS_MODELS$SSIR){
 
     log_density_eta_priors = GET_DENSITY_ETA_PRIORS(theta_samples, epidemic_data)
@@ -213,7 +227,7 @@ GET_LOG_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS
 #* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #*****************************************************************************************
-GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, n_samples = 10000) {
+GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, n_samples = 1000) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   

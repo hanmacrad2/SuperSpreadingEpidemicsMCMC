@@ -63,7 +63,8 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub2, OUTER_FOLDER, run_number = run, n_
 #***********************
 # 2. RUN SSNB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub2, OUTER_FOLDER, run_number = run, n_repeats = 50, n_mcmc = 30000,
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub2, OUTER_FOLDER, run_number = run,
+                        n_repeats = 50, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                             SSIB = FALSE, SSIR = FALSE))
 
@@ -82,6 +83,14 @@ RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub2, OUTER_FOLDER, run_number = run, n_
                                             SSIB = FALSE, SSIR = TRUE))
 
 
+#***********************
+# 2. RUN SSNB MCMC
+#**********************
+run = 'gamma_prior_k'
+RUN_MCMC_MULTIPLE_TIMES(data_wait_08_21_sub2, OUTER_FOLDER, run_number = run,
+                        n_repeats = 50, n_mcmc = 30000,
+                        FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
+                                            SSIB = FALSE, SSIR = FALSE))
 
 #***********
 #DATA 2

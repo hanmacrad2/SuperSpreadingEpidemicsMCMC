@@ -95,16 +95,17 @@ BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results = list(sseb = results1,
 
 
 #BOX PLOT RESULTS 
-BOX_PLOT_MODEL_EV <- function(list_vec_results = list(importance_sampling = results1,
-                                                      harmonic_mean = results2),
+BOX_PLOT_MODEL_EV <- function(list_vec_results = list(v1 = results1,
+                                                      v2 = results2),
+                              title = 'Model Evidence. Importance sampling vs Harmonic Mean. ',
                                   data_type = data_type, model = model) { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model
   
   #Set up
-  title = paste0(model, ' Model Evidence. Importance sampling vs Harmonic Mean. ', data_type, ' data. ')
+  title = paste0(model, title, data_type)
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   print(head(df_results))
   boxplot(df_results, main = title,
-          col = c('red', 'green', 'blue'),
+          col = c('red', 'green'),
           cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
   
   

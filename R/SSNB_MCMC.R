@@ -76,8 +76,9 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                             mcmc_inputs = list(mod_start_points = c(0.16, 1.8),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10, burn_in_pc = 0.2),
-                            priors = list(pk_ga_shape = 0.001, pk_ga_rte = 0.001, pr0_unif = c(1.0,4),
-                                               p_prob_unif = c(0,1), pk_exp = c(1,0)),
+                            priors = list(pk_exp = c(1,0), pk_ga_shape = 0.001, pk_ga_rte = 0.001, 
+                                          pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
+                            PRIORS_USED = list(EXP_K = FALSE, GAMMA_K = TRUE),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE, BURN_IN = TRUE),
                             FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
   
@@ -119,6 +120,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
   log_like = log_like_vec[1]
   #pk_ga_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
   #pk_ga_shape = negbin_scale*priors$negbin_k_prior_ga_mean
+  print(paste0('PRIOR ON K', PRIORS_USED))
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -152,7 +154,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
       k =  ssnb_params[1]; k_dash = ssnb_params_dash[1]
       R0 = ssnb_params[2]; R0_dash = ssnb_params_dash[2]
     
-      if(FLAG_NEGBIN_PARAMATERISATION$param_mu & FLAGS_LIST$PRIOR) {
+      if(FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$EXP_K) {
 
         log_accept_ratio = log_accept_ratio +
           dexp(k_dash, rate = priors$pk_exp[1], log = TRUE) -
@@ -161,7 +163,15 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
         dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
         #priors_list$pr0_unif[1]*ssnb_params_dash[2] + priors_list$pr0_unif[1]*ssnb_params[2]
 
-      } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob & FLAGS_LIST$PRIOR){
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$GAMMA_K) {
+        
+        log_accept_ratio = log_accept_ratio +
+          dgamma(k_dash, shape =  priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -
+          dgamma(k, shape =  priors$pk_ga_shape,  rate = priors$pk_ga_rte, log = TRUE) +
+        dunif(R0_dash, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE) - #Uniform prior
+          dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
+        
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob && PRIORS_USED$GAMMA_K){
 
         log_accept_ratio = log_accept_ratio +
           dgamma(k_dash, shape =  priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -

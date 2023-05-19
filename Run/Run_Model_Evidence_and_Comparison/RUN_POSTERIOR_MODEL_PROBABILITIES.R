@@ -112,9 +112,9 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_hm_sseb, 
 plot.ts(data_sseb, ylab = 'Infection count', main = paste0(data_type, ' Simulated data'))
 
 
-#************
+#************************
 # FOUR MODELS
-#************
+#************************
 #BASE
 vec_post_probs_is_base = GET_AGG_POSTERIOR_PROB(FLAG_BASELINE = TRUE, list_log_mod_evid = list(mod1 = list_is_log_ev_base,
                                                                                                mod2 = list_is_log_ev_sseb, mod3 = list_is_log_ev_ssnb,
@@ -138,7 +138,43 @@ vec_post_probs_is_ssir = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = 
 
 #PLOT
 model_ev_method = 'IS'
+data_type = 'NZ Waitemata 08/21 Subset I'
 par(mfrow = c(2,1))
-BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = vec_post_probs_is_base, SSE_B = vec_post_probs_is_sseb,
-                                                 SSE_NB = vec_post_probs_is_ssnb),
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_is_sseb, BASE = vec_post_probs_is_base,
+                                                 SSNB = vec_post_probs_is_ssnb, SSI = vec_post_probs_is_ssir),
                          data_type = data_type, model_ev_method = '') #IS Model Evidence.')
+
+#************************
+# FOUR MODELS #2
+#************************
+#BASE
+vec_post_probs_is_base2 = GET_AGG_POSTERIOR_PROB(FLAG_BASELINE = TRUE, list_log_mod_evid = list(mod1 = list_is_log_ev_base2,
+                                                                                               mod2 = list_is_log_ev_sseb2, mod3 = list_is_log_ev_ssnb2,
+                                                                                               mod4 = list_is_log_ev_ssir2))
+
+#SSEB
+vec_post_probs_is_sseb2 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_sseb2,
+                                                                         mod2 = list_is_log_ev_base2, mod3 = list_is_log_ev_ssnb2,
+                                                                         mod4 = list_is_log_ev_ssir2))
+
+#SSNB
+vec_post_probs_is_ssnb2 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssnb2,
+                                                                         mod2 = list_is_log_ev_base2, mod3 = list_is_log_ev_sseb2,
+                                                                         mod4 = list_is_log_ev_ssir2))
+
+#SSIR
+vec_post_probs_is_ssir2 = GET_AGG_POSTERIOR_PROB(list_log_mod_evid = list(mod1 = list_is_log_ev_ssir2,
+                                                                         mod2 = list_is_log_ev_base2, mod3 = list_is_log_ev_sseb2,
+                                                                         mod4 = list_is_log_ev_ssnb2))
+
+#PLOT
+model_ev_method = 'IS'
+data_type = 'NZ Waitemata 08/21 II'
+par(mfrow = c(2,1))
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_is_sseb2, BASE = vec_post_probs_is_base2,
+                                                 SSNB = vec_post_probs_is_ssnb2, SSI = vec_post_probs_is_ssir2),
+                         data_type = data_type, model_ev_method = '') #IS Model Evidence.')
+
+#DATA
+plot.ts(data_wait_08_21_sub2, ylab = 'Infection count',
+        main = paste0('Waitemata, August 2021. Days ', t1, ' to ', t2))
