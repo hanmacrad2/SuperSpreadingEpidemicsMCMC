@@ -2,32 +2,38 @@
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 
 #POSTERIOR PREDICTIVE PLOTS
-POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data){
+POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data){
+  
+  #SETUP
+  par(mfrow = c(1, 2))
+  num_days = length(true_data)
   
   #TEST STATS
-  upper_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.975) |> unlist()
-  
   mean_est <- apply(matrix_sim_data, 2, mean) |> unlist()
-  
+  upper_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.975) |> unlist()
   lower_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.025) |> unlist()
-  
-  zig_zag = #MATRIX OR LIST OF LISTS?
+  posterior_zig_zag = apply(m, 1, zigzag)
   
   #PLOTS 
-  par(mfrow = c(1, 2))
-  hist(post_pred_samp_zz, xlim = c(0, max(max(post_pred_samp_zz), zigzag(true_data) * 2)))
-  abline(v = quantile(post_pred_samp_zz, probs = c(0.025, 0.975)), col = 'red')
+  #HISTOGRAM OF ZIG-ZAG
+  hist(posterior_zig_zag, xlim = c(0, max(max(posterior_zig_zag), posterior_zig_zag(true_data) * 2)),
+       title = 'Zig-zag of data: sum(abs(diff(data)))')
+  abline(v = quantile(true_data, probs = c(0.025, 0.975)), col = 'red')
   abline(v = zigzag(true_data))
   
+  #PLOTS
   plot(1:num_days, upper_bounds, type = 'l', ylim = c(-5, 5))
+  
   lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l')
+  
   lines(1:num_days, mean_est, type = 'l')
+  
   lines(1:num_days, rep(qnorm(p=0.975, sd = 2), num_days), type = 'l')
+  
   lines(1:num_days, lower_bounds, type = 'l')
   points(1:num_days, true_data, type = 'l', col = 'red')
 }
 
-#MAKE TRANSPARENT WITH ALPHA!!
 
 
 #SAMPLE FROM BASELINE MODEL

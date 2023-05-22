@@ -23,6 +23,8 @@ true_data <- rdata()
 post_samps <- lapply(1:num_reps, \(n) rtraj()) #n represents the current iteration value
 
 #Zig-zag
+apply(m, 1, zigzag)
+
 post_pred_samp_zz <- post_samps |> map(zigzag) |> unlist()
 
 
