@@ -1,7 +1,7 @@
 #MODEL CRITICISM: POSTERIOR PREDICTIVE CHECKS
+library(purrr)
 
-num_days <- 20
-
+#FUNCTIONS
 rdata <- function() {
   rnorm(num_days, 0, sd = 1)
 }
@@ -14,11 +14,17 @@ zigzag <- function(xs) {
   sum(abs(diff(xs)))
 }
 
-true_data <- rdata()
-
+#PARAMS
+num_days <- 20
 num_reps <- 100
-post_samps <- lapply(1:num_reps, \(n) rtraj())
+
+#DATA
+true_data <- rdata()
+post_samps <- lapply(1:num_reps, \(n) rtraj()) #n represents the current iteration value
+
+#Zig-zag
 post_pred_samp_zz <- post_samps |> map(zigzag) |> unlist()
+
 
 m <- matrix(0, nrow = num_reps, ncol = num_days)
 for (i in 1:num_reps) {
@@ -26,9 +32,12 @@ for (i in 1:num_reps) {
 }
 
 upper_bounds <- apply(m, 2, quantile, probs = 0.975) |> unlist()
+
 mean_est <- apply(m, 2, mean) |> unlist()
+
 lower_bounds <- apply(m, 2, quantile, probs = 0.025) |> unlist()
 
+#PLOTS 
 par(mfrow = c(1, 2))
 hist(post_pred_samp_zz, xlim = c(0, max(max(post_pred_samp_zz), zigzag(true_data) * 2)))
 abline(v = quantile(post_pred_samp_zz, probs = c(0.025, 0.975)), col = 'red')
