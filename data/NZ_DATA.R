@@ -21,6 +21,7 @@ file_name =  'data_waitemata_aug_21.csv'
 
 data_file_waitemata = read.csv(paste0(DATA_FOLDER, file_name))
 data_wait_08_21 = data_file_waitemata$Cases
+data_wait_08_21 = data_wait_08_21[2:length(data_wait_08_21)]
 plot.ts(data_wait_08_21, ylab = 'Infection count', main = 'Waitemata, August 2021')
 
 #SUBSET ONE

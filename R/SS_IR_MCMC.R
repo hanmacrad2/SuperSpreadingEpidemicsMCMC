@@ -158,9 +158,11 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
-      log_accept_ratio = log_accept_ratio - 
-        priors_list$R0_prior[1]*ssir_params_dash[1] + priors_list$R0_prior[1]*ssir_params[1] - 
-        priors_list$k_prior[1]*ssir_params_dash[2] + priors_list$k_prior[1]*ssir_params[2] 
+      log_accept_ratio = log_accept_ratio +
+        dexp(ssir_params_dash[1], rate = priors_list$R0_prior[1], log = TRUE) -
+        dexp(ssir_params[1], rate = priors_list$R0_prior[1], log = TRUE) +
+        dexp(ssir_params_dash[2], rate = priors_list$k_prior[1], log = TRUE) -
+        dexp(ssir_params[2], rate = priors_list$k_prior[1], log = TRUE) 
       
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {

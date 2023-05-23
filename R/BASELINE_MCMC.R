@@ -156,10 +156,10 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   #MCMC VECTORS - INITIALISE
   r0_vec <- vector('numeric', mcmc_vec_size); log_like_vec <- vector('numeric', mcmc_vec_size)
   r0_vec[1] <- mcmc_inputs$r0_start
-  log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
+  r0 = r0_vec[1]; 
   
-  #Running parameters
-  r0 = r0_vec[1]; log_likelihood = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
+  log_likelihood = log_like_vec[1]
   count_accept = 0
   
   #SIGMA - INITIALISE
@@ -196,6 +196,9 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
       log_accept_ratio = log_accept_ratio - r0_dash + r0 #Acceptance RATIO. Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
     }
     
+    #print(paste0(' log_accept_ratio ',  log_accept_ratio))
+    #print(paste0(' log(runif(1)) ',  log(runif(1)) ))
+    
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
@@ -212,6 +215,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 & i >= burn_in_start) {
       #print(paste0('i = ', i))
+      #print(paste0('r0 = ', r0))
       i_thin = i/thinning_factor; 
       r0_vec[i_thin] <- r0
       log_like_vec[i_thin] <- log_likelihood

@@ -144,6 +144,12 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = vec_post_probs_is_sseb, 
                                                  SSNB = vec_post_probs_is_ssnb, SSI = vec_post_probs_is_ssir),
                          data_type = data_type, model_ev_method = '') #IS Model Evidence.')
 
+#DATA
+t1 = 2; t2 = 11
+#data_wait_08_21_sub1 = data_wait_08_21[t1:t2]
+plot.ts(data_wait_08_21_sub1, ylab = 'Infection count',
+        main = paste0('Waitemata, August 2021. Days', t1, ' to ', t2))
+
 #************************
 # FOUR MODELS #2
 #************************

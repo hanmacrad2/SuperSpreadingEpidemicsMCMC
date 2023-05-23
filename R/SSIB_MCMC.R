@@ -171,7 +171,7 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(data, n_mcmc = 100000,
+MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
                               mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
                                                  thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),

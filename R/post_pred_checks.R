@@ -46,8 +46,11 @@ abline(v = quantile(post_pred_samp_zz, probs = c(0.025, 0.975)), col = 'red')
 abline(v = zigzag(true_data))
 
 plot(1:num_days, upper_bounds, type = 'l', ylim = c(-5, 5))
-lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l')
+
+lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l') #sd = 1 
+
 lines(1:num_days, mean_est, type = 'l')
-lines(1:num_days, rep(qnorm(p=0.975, sd = 2), num_days), type = 'l')
+
+lines(1:num_days, rep(qnorm(p=0.975, sd = 2), num_days), type = 'l') #sd = 2
 lines(1:num_days, lower_bounds, type = 'l')
 points(1:num_days, true_data, type = 'l', col = 'red')

@@ -78,7 +78,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
                                                thinning_factor = 10, burn_in_pc = 0.2),
                             priors = list(pk_exp = c(1,0), pk_ga_shape = 0.001, pk_ga_rte = 0.001, 
                                           pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
-                            PRIORS_USED = list(EXP_K = FALSE, GAMMA_K = TRUE),
+                            PRIORS_USED = list(EXP_K = TRUE, GAMMA_K = FALSE),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE, BURN_IN = TRUE),
                             FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {    
   
