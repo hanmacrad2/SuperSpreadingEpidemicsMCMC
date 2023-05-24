@@ -6,7 +6,9 @@ library(coda)
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
 SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX = 10,
-                              shape_gamma = 6, scale_gamma = 1) {
+                              shape_gamma = 6, scale_gamma = 1,
+                              epi_data = c(0,0,0), SIM_DATA = TRUE) {
+                                
   'Simulate an epidemic with Superspreading events
   alpha - rate of non super-spreading events/days
   Beta = Proportion of superspreading events/days
@@ -19,13 +21,21 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, alphaX = 0.8, betaX = 0.2, gammaX =
   total_infecteds = vector('numeric', num_days)
   nsse_infecteds = vector('numeric', num_days)
   sse_infecteds = vector('numeric', num_days)
-  total_infecteds[1] = 2
-  nsse_infecteds[1] = 2
-  sse_infecteds[1] = 0
   
+  if (SIM_DATA){
+    total_infecteds[1] = 2
+    nsse_infecteds[1] = 2
+    sse_infecteds[1] = 0 
+  } else {
+    total_infecteds[1] = epi_data[1]
+    nsse_infecteds[1] = epi_data[1]
+    sse_infecteds[1] = 0 
+  }
+
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
   #Days of Infection Spreading
   for (t in 2:num_days) {

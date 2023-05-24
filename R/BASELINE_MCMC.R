@@ -21,13 +21,21 @@
 #' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
 #'
 #' @export
-SIMULATE_EPI_BASELINE = function(R0, num_days = 50, shape_gamma = 6, scale_gamma = 1) {
+SIMULATE_EPI_BASELINE = function(R0, num_days = 50, 
+                                 shape_gamma = 6, scale_gamma = 1,
+                                 epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
   'Baseline simulation model'
   
   #Initialisation 
   tot_daily_infections = vector('numeric', num_days)
-  tot_daily_infections[1] = 2
+  
+  if(SIM_DATA){
+    tot_daily_infections[1] = 2
+  } else {
+    tot_daily_infections[1] = epi_data[1] 
+  }
+ 
   
   #Infectiousness Pressure - Sum of all infected individuals infectivety curves 
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
