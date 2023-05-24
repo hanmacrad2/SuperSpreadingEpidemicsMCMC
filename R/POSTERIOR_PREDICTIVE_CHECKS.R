@@ -20,22 +20,22 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type){
   posterior_zig_zag = apply(matrix_sim_data, 1, zigzag)
   zigzag_true = zigzag(true_data)
   
-  #PLOTS 
-  #HISTOGRAM OF ZIG-ZAG 
-  max_x_lim = max(max(zigzag_true), max(posterior_zig_zag)); min_x_lim =  min(min(zigzag_true), min(posterior_zig_zag))
-  hist(posterior_zig_zag, breaks = 50, xlim = c(min_x_lim, max_x_lim), #xlim = c(0, max(max(posterior_zig_zag), zigzag(true_data) * 2)),
-       main = 'Zig-zag of data: sum(abs(diff(data)))')
-  abline(v = quantile(posterior_zig_zag, probs = c(0.025, 0.975)), col = 'red', lwd = 2)
-  abline(v = zigzag(true_data), col = 'green', lwd = 2)
-  
   #PLOTS
-  print(upper_bounds)
+  print('upper_bounds'); print(upper_bounds)
+  print('lower_bounds'); print(lower_bounds)
   titleX = paste0('Plot of True data (blk), 95% quantile of sim data. ',  str_to_sentence(model_type), ' model')
   ylim = c(0, max(true_data, upper_bounds))
   plot(1:num_days, true_data, type = 'l', ylim = ylim,
        main = titleX, xlab = 'time', ylab = 'Infection count')
   lines(1:num_days, upper_bounds, col = 'red', lwd = 2) #, type = 'l') #, ylim = c(-5, 5))
   lines(1:num_days, lower_bounds, col = 'red', lwd = 2) #, type = 'l')
+  
+  #HISTOGRAM OF ZIG-ZAG 
+  max_x_lim = max(max(zigzag_true), max(posterior_zig_zag)); min_x_lim =  min(min(zigzag_true), min(posterior_zig_zag))
+  hist(posterior_zig_zag, breaks = 50, xlim = c(min_x_lim, max_x_lim), #xlim = c(0, max(max(posterior_zig_zag), zigzag(true_data) * 2)),
+       main = 'Zig-zag of data: sum(abs(diff(data)))')
+  abline(v = quantile(posterior_zig_zag, probs = c(0.025, 0.975)), col = 'red', lwd = 2)
+  abline(v = zigzag(true_data), col = 'green', lwd = 2)
   
   #lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l') #quantile of parameter as we know its distribution
   #lines(1:num_days, mean_est, type = 'l')
@@ -46,7 +46,9 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type){
 
 #SAMPLE FROM BASELINE MODEL
 #' @export 
-SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days, n_sample_repeats, PLOT = FALSE){
+SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
+                                 epi_data = c(0,0,0),
+                                 SIM_DATA = TRUE, PLOT = FALSE){
   
   #SAMPLE
   r0_vec = mcmc_output$r0_vec; n_mcmc = length(r0_vec)
@@ -57,18 +59,19 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days, n_sample_repeats, PLOT =
   for (i in 1:n_sample_repeats){
     sample_index = sample_indices[i]
     r0 = r0_vec[sample_index]
-    posterior_pred_data = SIMULATE_EPI_BASELINE(r0, num_days)
+    posterior_pred_data = SIMULATE_EPI_BASELINE(r0, num_days, epi_data = epi_data, SIM_DATA = SIM_DATA)
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
     if(PLOT)lines(posterior_pred_data, col = 'red')
   }
-  print(paste0('R0 = ', r0))
-  print(posterior_pred_data)
+
   return(matrix_sim_temp)
 }
 
 #2. SSEB
-SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats, PLOT = FALSE){
+SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats, 
+                             epi_data = c(0,0,0),
+                             SIM_DATA = TRUE, PLOT = FALSE){
   
   #SAMPLE
   alpha_vec = mcmc_output$alpha_vec
@@ -83,7 +86,10 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats, PLOT = FAL
     alpha = alpha_vec[sample_index]; beta = mcmc_output$beta_vec[sample_index]
     gamma = mcmc_output$beta_vec[sample_index]
 
-    posterior_pred_data = SIMULATE_EPI_SSEB(num_days = num_days, alphaX = alpha, betaX = beta, gammaX = gamma)
+    posterior_pred_data = SIMULATE_EPI_SSEB(num_days = num_days,
+                                            alphaX = alpha, betaX = beta, gammaX = gamma,
+                                            epi_data = epi_data, SIM_DATA = SIM_DATA)
+    
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
     if(PLOT)lines(posterior_pred_data, col = 'green')
@@ -218,7 +224,8 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
 
 #POSTERIOR PREDICTIVE CHECKING
 RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
-                                         run = 1, num_reps = 50, n_sample_repeats = 100, 
+                                         run = 1, num_reps = 50, n_sample_repeats = 100,
+                                         SIM_DATA = TRUE, 
                                          MODELS = list(BASELINE = 'BASELINE', SSEB = 'SSEB',
                                                        SSNB = 'SSNB', SSIB = 'SSIB', SSIR = 'SSIR'),
                                          FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
@@ -236,7 +243,8 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
       #READ MCMC SAMPLES
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_',
                                           tolower(model_type), '_', i, '.rds'))
-      matrix_sim_temp = SAMPLE_BASELINE_MCMC(mcmc_output, num_days, n_sample_repeats)
+      matrix_sim_temp = SAMPLE_BASELINE_MCMC(mcmc_output, num_days, n_sample_repeats, 
+                                            epi_data = true_epidemic_data,  SIM_DATA = SIM_DATA)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
       #print(matrix_sim_data)
     }
@@ -253,7 +261,8 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
     for (i in 1:num_reps){
       #READ MCMC SAMPLES
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
-      matrix_sim_temp = SAMPLE_SSEB_MCMC(mcmc_output, num_days, n_sample_repeats)
+      matrix_sim_temp = SAMPLE_SSEB_MCMC(mcmc_output, num_days, n_sample_repeats,
+                                         epi_data = true_epidemic_data,  SIM_DATA = SIM_DATA)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
     }
     #POSTERIOR PREDICTIVE PLOTS

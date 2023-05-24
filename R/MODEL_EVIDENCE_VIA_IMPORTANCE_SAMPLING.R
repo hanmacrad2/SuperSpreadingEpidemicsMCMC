@@ -150,6 +150,14 @@ GET_LOG_PROPOSAL_MULTI_DIM <- function(mcmc_samples, epidemic_data, FLAGS_MODELS
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   
+  #SSIB MODEL
+  #Simulate from a multi-variate multi-dirichelt dist for each timepoint (each column)
+  #Columns are timepoints, rows are importance samples 
+  #One importance sample
+  #Outer loop is over the importance samples 
+  #One loop over timepoints. Each entry is an interger == number of super-spreaders
+  #Proposal -> multi-nomial 
+  
   #PRIORS
   if(FLAGS_MODELS$SSEB){
     n_dim = dim(mcmc_samples)[2] #3 #PUT IN DICTIONARY

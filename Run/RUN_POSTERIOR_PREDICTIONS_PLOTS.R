@@ -12,6 +12,7 @@ OUTER_FOLDER = paste0(PROJECT_FOLDER, DATA)
 
 #1. BASELINE
 matrix_sim = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
+                                            SIM_DATA = FALSE,
                                FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE,
                                                    SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
 
@@ -21,10 +22,17 @@ matrix_sim_base = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_baseline, OUTER_FOLDER,
 
 #1. SSEB
 matrix_sim_sseb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
+                                                 SIM_DATA = TRUE,
                                             FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
                                                                 SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
 
-matrix_sim_sseb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_sseb, OUTER_FOLDER,
+matrix_sim_sseb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
+                                                 SIM_DATA = FALSE,
+                                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
+                                                                     SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
+
+matrix_sim_sseb1 = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21_sub1, OUTER_FOLDER,
+                                                  SIM_DATA = FALSE,
                                                  FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
                                                                      SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
 
