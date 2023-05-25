@@ -2,7 +2,7 @@
 # DATA
 #****************************************************************
 
-#SIMULATED DATA
+#SIMULATED DATA: LOAD
 
 # BASELINE DATA
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
@@ -15,6 +15,11 @@ DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 file_name =  'epi_data_sseb_1.rds'
 data_sseb = readRDS(file = paste0(DATA_FOLDER, file_name))
 plot.ts(data_sseb)
+
+#SIMULATE DATA: RUN
+data_ssnb = SIMULATE_EPI_SSNB(num_days = 20)
+plot.ts(data_ssnb)
+saveRDS(data_ssnb, DATA_FOLDER)
 
 #****************************************************************
 # CANDADIAN DATA

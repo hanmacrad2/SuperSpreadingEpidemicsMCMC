@@ -6,6 +6,9 @@ PROJECT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compari
 #DATA SPECFIC 
 DATA = 'NZ_DATA_WAIT_21_SUBSET_I/'
 DATA = 'NZ_DATA_WAIT_21/'
+DATA = 'BASELINE/'
+DATA = 'SSEB/'
+DATA = 'SSNB/'
 OUTER_FOLDER = paste0(PROJECT_FOLDER, DATA)
 
 #DATA
@@ -35,4 +38,8 @@ matrix_sim_sseb1 = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21_sub1, OUTER_FO
                                                   SIM_DATA = FALSE,
                                                  FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
                                                                      SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
-
+#3. SSNB
+matrix_sim_ssnb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_ssnb, OUTER_FOLDER,
+                                                 SIM_DATA = TRUE,
+                                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
+                                                                     SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
