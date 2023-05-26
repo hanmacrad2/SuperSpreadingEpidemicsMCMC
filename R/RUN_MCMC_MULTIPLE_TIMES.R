@@ -11,6 +11,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER,
   #TOTAL TIME
   start_time = Sys.time()
   print(paste0('start_time:', start_time))
+  print(FLAGS_MODELS)
   
   if (FLAGS_MODELS$BASELINE){
     
