@@ -106,7 +106,8 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
     lambda_t = sum((n[1:(t-1)] + cX*s[1:(t-1)])*rev(prob_infect[1:(t-1)]))
 
     #LOG-LIKELIHOOD
-    logl = logl - lambda_t*(aX + bX) + n[t]*(log(aX) + log(lambda_t)) + s[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(n[t]) - lfactorial(s[t])
+    logl = logl - lambda_t*(aX + bX) + n[t]*(log(aX) + log(lambda_t)) +
+      s[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(n[t]) - lfactorial(s[t])
   }
 
   logl
@@ -172,11 +173,14 @@ LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
 MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
-                              mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22), alpha_star = 0.4,
-                                                 thinning_factor = 10),
-                              priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0),
+                              mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
+                                                 alpha_star = 0.4, 
+                                                 burn_in_pc = 0.2, thinning_factor = 10),
+                              priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100),
+                                                 b_prior_exp = c(0.1,0),
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
-                              FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BCA_TRANSFORM = TRUE,
+                              FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BURN_IN = TRUE,
+                                                BCA_TRANSFORM = TRUE,
                                                 PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 
@@ -194,16 +198,26 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  time = length(data[[1]]); #n_mcmc = mcmc_inputs$n_mcmc;
+  time = length(data) #length(data[[1]])
   print(paste0('num mcmc iters = ', n_mcmc))
 
   #THINNING FACTOR
+  i_thin = 1
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
   } else {
     thinning_factor = 1
     mcmc_vec_size = n_mcmc
+  }
+  
+  #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
+  if(FLAGS_LIST$BURN_IN){
+    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; 
+    print(paste0('N burn-in = ', burn_in_start))
+    
+    mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size
+    print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   }
 
   #INITIALISE MCMC VECTORS
@@ -353,7 +367,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
     }
 
-    #Sigma (Adpative)
+    #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
       sigma3 =  sigma3*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
@@ -393,7 +407,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
           tot_c_prior = - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
         }
 
-        #LOG ACCEPT PROB
+        #LOG ACCEPT PROB 
         log_accept_ratio = log_accept_ratio + tot_b_prior + tot_c_prior
 
         #Metropolis Step
@@ -488,12 +502,13 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
           data_dash[[1]][t] = 0
         }
         #CRITERIA FOR S_T & N_T
-        if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-          #Store
-          non_ss[i/thinning_factor, t] = data[[1]][t]
-          ss[i/thinning_factor, t] = data[[2]][t]
-          next
-        }
+        ?
+        # if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
+        #   #Store
+        #   non_ss[i/thinning_factor, t] = data[[1]][t]
+        #   ss[i/thinning_factor, t] = data[[2]][t]
+        #   next
+        # }
 
         logl_new = LOG_LIKE_SSI(data_dash, a, b, c)
         log_accept_ratio = logl_new - log_like
@@ -509,8 +524,10 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
         }
 
         #Store
-        non_ss[i/thinning_factor, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
-        ss[i/thinning_factor, t] = data[[2]][t]
+        if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
+        non_ss[i_thin, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
+        ss[i_thin, t] = data[[2]][t]
+        }
       }
     }
 
@@ -519,14 +536,14 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
     #else (log_like!=LOG_LIKE_SSI(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSI(data, a, b, c)))
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0) {
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
       #print(paste0('i = ', i))
-      i_thin = i/thinning_factor
       a_vec[i_thin] <- a; b_vec[i_thin] <- b
       c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
-      log_like_vec[i_thin] <- log_like #PLOT!!
+      log_like_vec[i_thin] <- log_like 
       sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
       sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
+      i_thin = i_thin + 1
       }
   }
 
