@@ -86,9 +86,9 @@ SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
 #' log_like = LOG_LIKE_SSIB(epidemic_data, 0.8, 0.02, 20)
 #'
 #' @export
-LOG_LIKE_SSIBB <- function(sim_data, aX, bX, cX){
+LOG_LIKE_SSIB <- function(sim_data, aX, bX, cX){
 
-  #Datawdf
+  #Data
   n = sim_data[[1]]; s = sim_data[[2]]
 
   #Params
@@ -96,11 +96,11 @@ LOG_LIKE_SSIBB <- function(sim_data, aX, bX, cX){
   shape_gamma = 6; scale_gamma = 1
   logl = 0
 
-  #INFECTIOUSNESS  - Difference of 2 GAMMA distributions. Discretized
+  #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
 
-  for (t in 1:num_days) { #*1 or 2
+  for (t in 1:num_days) { 
 
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
     lambda_t = sum((n[1:(t-1)] + cX*s[1:(t-1)])*rev(prob_infect[1:(t-1)]))
