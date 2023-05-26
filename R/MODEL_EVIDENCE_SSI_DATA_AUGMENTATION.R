@@ -1,7 +1,22 @@
 #Model Evidence for SSI model with data augmentation
+library(MultiRNG)
+
+#SETUP
+non_ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)
+
+#Generation
+#MULTI-NOMIAL DIRICHELT
+alpha = round(colSums(non_ss)*0.01)
+N = sum(alpha)
+beta = 1
+no.row =  dim(non_ss)[1]
+d =  dim(non_ss)[2]
+draw.dirichlet.multinomial(no.row, d, alpha, beta, N) #no.row; (1st element)
+
+r_dir = draw.dirichlet.multinomial(no.row, d, alpha, beta, N) # :D
+
 
 #Density function (mass function) for the multi-nomial dirichlet model
-
 MULTI_DIRICHLET <- function(data_vector, shrink_factor = 0.1){
   
   data_vector = shrink_factor*data_vector
