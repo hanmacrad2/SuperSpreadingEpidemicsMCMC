@@ -51,11 +51,12 @@ plot.ts(mcmc_output$a_vec)
 plot.ts(mcmc_output$b_vec)
 plot.ts(mcmc_output$c_vec)
 plot.ts(mcmc_output$r0_vec)
+plot.ts(mcmc_output$log_like_vec)
+plot.ts(mcmc_output$sigma$sigma5)
+plot(mcmc_output$non_ss)
 
 
 plot.ts(mcmc_output$eta_matrix)
-
-
 
 
 #COMPARE

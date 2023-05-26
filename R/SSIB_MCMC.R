@@ -83,10 +83,10 @@ SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
 #'
 #' @examples
 #'
-#' log_like = LOG_LIKE_SSI(epidemic_data, 0.8, 0.02, 20)
+#' log_like = LOG_LIKE_SSIB(epidemic_data, 0.8, 0.02, 20)
 #'
 #' @export
-LOG_LIKE_SSI <- function(sim_data, aX, bX, cX){
+LOG_LIKE_SSIBB <- function(sim_data, aX, bX, cX){
 
   #Datawdf
   n = sim_data[[1]]; s = sim_data[[2]]
@@ -228,7 +228,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
   #INITIALISE MCMC[1]
   a_vec[1] <- mcmc_inputs$mod_start_points$m1; b_vec[1] <- mcmc_inputs$mod_start_points$m2
   c_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- a_vec[1] + b_vec[1]*c_vec[1]
-  log_like_vec[1] <- LOG_LIKE_SSI(data, a_vec[1], b_vec[1], c_vec[1])
+  log_like_vec[1] <- LOG_LIKE_SSIB(data, a_vec[1], b_vec[1], c_vec[1])
 
   #INITIALISE RUNNING PARAMS
   a = a_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
@@ -288,7 +288,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
     }
 
     #log a
-    logl_new = LOG_LIKE_SSI(data, a_dash, b, c)
+    logl_new = LOG_LIKE_SSIB(data, a_dash, b, c)
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     #Priors
     if (FLAGS_LIST$PRIOR){
@@ -316,7 +316,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
     }
 
     #loglikelihood
-    logl_new = LOG_LIKE_SSI(data, a, b_dash, c)
+    logl_new = LOG_LIKE_SSIB(data, a, b_dash, c)
     log_accept_ratio = logl_new - log_like
 
     #Priors
@@ -348,7 +348,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
       c_dash = 2 - c_dash #Prior on c: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSI(data, a, b, c_dash)
+    logl_new = LOG_LIKE_SSIB(data, a, b, c_dash)
     log_accept_ratio = logl_new - log_like
 
     #Priors
@@ -387,7 +387,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
 
       if(b_transform >= 0){ #Only accept values of b > 0
 
-        logl_new = LOG_LIKE_SSI(data, a, b_transform, c_dash)
+        logl_new = LOG_LIKE_SSIB(data, a, b_transform, c_dash)
         log_accept_ratio = logl_new - log_like
 
         #PRIORS
@@ -440,7 +440,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
 
       if(a_transform >= 0){ #Only accept values of b > 0
 
-        logl_new = LOG_LIKE_SSI(data, a_transform, b, c_dash)
+        logl_new = LOG_LIKE_SSIB(data, a_transform, b, c_dash)
         log_accept_ratio = logl_new - log_like
 
         #PRIORS
@@ -510,7 +510,7 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
         #   next
         # }
 
-        logl_new = LOG_LIKE_SSI(data_dash, a, b, c)
+        logl_new = LOG_LIKE_SSIB(data_dash, a, b, c)
         log_accept_ratio = logl_new - log_like
 
         #METROPOLIS ACCEPTANCE STEP
@@ -532,8 +532,8 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
     }
 
     #Loglikelihood Check (Passing - no error)
-    #if (!(log_like && LOG_LIKE_SSI(data, a, b, c))) print('loglike doesnt exist')
-    #else (log_like!=LOG_LIKE_SSI(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSI(data, a, b, c)))
+    #if (!(log_like && LOG_LIKE_SSIB(data, a, b, c))) print('loglike doesnt exist')
+    #else (log_like!=LOG_LIKE_SSIB(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSIB(data, a, b, c)))
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
