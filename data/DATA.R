@@ -1,8 +1,11 @@
 #****************************************************************
 # DATA
 #****************************************************************
+library(SuperSpreadingEpidemicsMCMC)
 
+#*************************
 #SIMULATED DATA: LOAD
+#*************************
 
 # BASELINE DATA
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
@@ -16,10 +19,33 @@ file_name =  'epi_data_sseb_1.rds'
 data_sseb = readRDS(file = paste0(DATA_FOLDER, file_name))
 plot.ts(data_sseb)
 
-#SIMULATE DATA: RUN
-data_ssnb = SIMULATE_EPI_SSNB(num_days = 20)
+#************************
+#SIMULATE DATA
+#************************
+
+#SSNB
+file_name = 'data_ssnb.rds'
+data_ssnb = SIMULATE_EPI_SSNB(num_days = 50)
 plot.ts(data_ssnb)
-saveRDS(data_ssnb, DATA_FOLDER)
+saveRDS(data_ssnb, paste0(DATA_FOLDER, file_name))
+
+data_ssnb = readRDS(paste0(DATA_FOLDER, file_name))
+
+#SSIR
+file_name = 'data_ssir.rds'
+data_ssir2 = SIMULATE_EPI_SSIR()
+plot.ts(data_ssir$epidemic_data)
+saveRDS(data_ssir, paste0(DATA_FOLDER, file_name))
+
+data_ssir = readRDS(paste0(DATA_FOLDER, file_name))
+
+#SSIB
+file_name = 'data_ssib.rds'
+data_ssib = SIMULATE_EPI_SSIB()
+plot.ts(data_ssib)
+saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
+
+data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
 
 #****************************************************************
 # CANDADIAN DATA
