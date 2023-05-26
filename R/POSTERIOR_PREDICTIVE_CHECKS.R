@@ -98,29 +98,38 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
   return(matrix_sim_temp)
 }
 
-#SAMPLE FROM SSEB MODEL
-#' @export
-SAMPLE_SSEB_MCMC0 <- function(mcmc_output, PLOT = FALSE){
+SAMPLE_SSNB_MCMC <- function(mcmc_output, num_days, n_sample_repeats, 
+                             epi_data = c(0,0,0),
+                             SIM_DATA = TRUE, PLOT = FALSE){
   
   #SAMPLE
-  alpha_vec = mcmc_output$alpha_vec
-  n_mcmc = length(alpha_vec)
-  sample_index = sample(1:n_mcmc, 1)
+  num_days = length(epi_data); print(paste0('num_days', num_days))
+  n_mcmc = length(mcmc_output$ssnb_params_matrix[,1])
+  #sample_index = sample(1:n_mcmc, 1)
+  sample_indices = sample(1:n_mcmc, n_sample_repeats)
+  matrix_sim_temp = matrix(nrow = n_sample_repeats, ncol = num_days)
+  print(dim(matrix_sim_temp))
   #SAMPLE PARAMETERS
-  alpha = alpha_vec[sample_index]; beta = mcmc_output$beta_vec[sample_index]
-  gamma = mcmc_output$beta_vec[sample_index]
-  #POSTERIOR PRED DATA
-  posterior_pred_data = SIMULATE_EPI_SSEB(num_days = 50, alphaX = alpha, betaX = beta, gammaX = gamma)
+  for (i in 1:n_sample_repeats){
+    sample_index = sample_indices[i]
+    
+    #SAMPLE PARAMETERS
+    kX = mcmc_output$ssnb_params_matrix[sample_index, 1]; R0X = mcmc_output$ssnb_params_matrix[sample_index, 2]
+    #POSTERIOR PRED DATA
+    posterior_pred_data = SIMULATE_EPI_SSNB(R0 = R0X, k = kX)
+    print(length(posterior_pred_data))
+    matrix_sim_temp[i, ] = posterior_pred_data
+    #PLOT
+    if(PLOT)lines(posterior_pred_data, col = 'orange')
+  }
   
-  #PLOT
-  if(PLOT)lines(posterior_pred_data, col = 'green')
-  
-  return(posterior_pred_data)
+  return(matrix_sim_temp)
 }
+
 
 #SAMPLE FROM SSEB MODEL
 #' @export
-SAMPLE_SSNB_MCMC <- function(mcmc_output, PLOT = FALSE){
+V0_SAMPLE_SSNB_MCMC <- function(mcmc_output, PLOT = FALSE){
   
   #SAMPLE
   n_mcmc = length(mcmc_output$ssnb_params_matrix[,1])
@@ -263,6 +272,24 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
       matrix_sim_temp = SAMPLE_SSEB_MCMC(mcmc_output, num_days, n_sample_repeats,
                                          epi_data = true_epidemic_data,  SIM_DATA = SIM_DATA)
+      matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
+    }
+    #POSTERIOR PREDICTIVE PLOTS
+    POSTERIOR_PREDICTIVE_PLOTS(matrix_sim_data, true_epidemic_data, model_type)
+    
+  }
+  
+  if (FLAGS_MODELS$SSNB){
+    
+    #FOLDER
+    model_type = MODELS$SSNB
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run) 
+    
+    for (i in 1:num_reps){
+      #READ MCMC SAMPLES
+      mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
+      matrix_sim_temp = SAMPLE_SSNB_MCMC(mcmc_output, num_days, n_sample_repeats,
+                                         epi_data = true_epidemic_data)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
     }
     #POSTERIOR PREDICTIVE PLOTS
