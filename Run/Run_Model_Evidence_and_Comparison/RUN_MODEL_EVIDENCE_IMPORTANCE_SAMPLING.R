@@ -112,8 +112,18 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(ssnb_k_exp_prior = list_is_log_ev_ssnb
 #LOAD MODEL EVIDENCE ESTIMATES
 #*
 #*****************************
+LOAD_MODEL_EVIDENCE <- function(model_type, run, OUTER_FOLDER){
+  
 
-run = 1
-model_type = 'baseline'; print(model_type)
-CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
-list_is_log_ev_base = readRDS(file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
+  print(model_type)
+  CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+  list_model_ev = readRDS(file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
+  print(list_model_ev)
+  return(list_model_ev)
+}
+
+#LOAD 
+model_ev_base2 = LOAD_MODEL_EVIDENCE('baseline', 1, OUTER_FOLDER)
+model_ev_sseb2 = LOAD_MODEL_EVIDENCE('sseb', 1, OUTER_FOLDER)
+model_ev_ssnb2 = LOAD_MODEL_EVIDENCE('ssnb', 1, OUTER_FOLDER)
+model_ev_ssir2 = LOAD_MODEL_EVIDENCE('ssir', 1, OUTER_FOLDER)
