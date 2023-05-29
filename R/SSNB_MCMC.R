@@ -4,13 +4,20 @@ library(MASS)
 #' @export
 SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
+                              epi_data = c(0,0,0), SIM_DATA = TRUE,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
   
   'Simulate an epidemic with Superspreading events
   alpha - R0'
-
+  
   #INTIALISE VECTORS
-  x = vector('numeric', num_days); x[1] = 2
+  x = vector('numeric', num_days); 
+  
+  if(SIM_DATA){
+    x[1] = 2
+  } else {
+    x[1] = epi_data[1] 
+  }
   
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)

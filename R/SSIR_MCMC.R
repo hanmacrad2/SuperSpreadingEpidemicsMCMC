@@ -7,15 +7,21 @@ library(MASS)
 #* SIMULATE SSIR Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSIR = function(num_days = 30, R0X = 1.6, k = 0.16,
-                        shape_gamma = 6, scale_gamma = 1) {
+SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
+                        shape_gamma = 6, scale_gamma = 1,
+                        epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
   'Simulate from the Negative Binomial model'
   
   #INTIALISE VECTORS
   x = vector('numeric', num_days); 
-  x[1] = 2 #CHECK!!
   eta_vec = vector('numeric', num_days); 
+  
+  if(SIM_DATA){
+    x[1] = 2
+  } else {
+    x[1] = epi_data[1] 
+  }
   
   #INFECTIOUSNESS (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -

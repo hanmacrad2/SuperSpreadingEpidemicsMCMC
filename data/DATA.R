@@ -3,21 +3,7 @@
 #****************************************************************
 library(SuperSpreadingEpidemicsMCMC)
 
-#*************************
-#SIMULATED DATA: LOAD
-#*************************
-
-# BASELINE DATA
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
-OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
-file_name = 'epi_data_base_1.rds'
-data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
-
-#SSEB DATA
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
-file_name =  'epi_data_sseb_1.rds'
-data_sseb = readRDS(file = paste0(DATA_FOLDER, file_name))
-plot.ts(data_sseb)
 
 #************************
 #SIMULATE DATA
@@ -32,12 +18,13 @@ saveRDS(data_ssnb, paste0(DATA_FOLDER, file_name))
 data_ssnb = readRDS(paste0(DATA_FOLDER, file_name))
 
 #SSIR
-file_name = 'data_ssir.rds'
+file_name = 'data_ssir2.rds'
 data_ssir2 = SIMULATE_EPI_SSIR()
 plot.ts(data_ssir$epidemic_data)
 saveRDS(data_ssir, paste0(DATA_FOLDER, file_name))
 
-data_ssir = readRDS(paste0(DATA_FOLDER, file_name))
+data_ssir2 = readRDS(paste0(DATA_FOLDER, file_name))
+data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
 file_name = 'data_ssib.rds'
@@ -46,6 +33,7 @@ plot.ts(data_ssib)
 saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
 
 data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
+
 
 #****************************************************************
 # CANDADIAN DATA
@@ -74,3 +62,18 @@ sim_data_canadaX2 = list(canada_ns, canada_ss)
 plot.ts(canadaX,
         main = 'SARs (2003) Canadian Outbreak',
         ylab = 'infection count')
+
+#*************************
+#SIMULATED DATA: LOAD
+#*************************
+
+# BASELINE DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASE_DATA/')
+file_name = 'epi_data_base_1.rds'
+data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
+
+#SSEB DATA
+file_name =  'epi_data_sseb_1.rds'
+data_sseb = readRDS(file = paste0(DATA_FOLDER, file_name))
+plot.ts(data_sseb)

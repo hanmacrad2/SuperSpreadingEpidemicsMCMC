@@ -10,7 +10,7 @@
 #' @param num_days Number of days of the epidemic
 #' @param shape_gamma Shape of the gamma distribution representing the time-varying infectivity curve of each infected individual
 #' @param scale_gamma Scale of the gamma distribution representing the time-varying infectivity curve of each infected individual
-#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambdaX_t} 
+#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambda_t} 
 #' @return Total infections; Total daily infection counts of length \code{'num_days'}
 #' @export
 #'
@@ -21,7 +21,7 @@
 #' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
 #'
 #' @export
-SIMULATE_EPI_BASELINE = function(R0, num_days = 50, 
+SIMULATE_EPI_BASELINE = function(R0, num_days = 30, 
                                  shape_gamma = 6, scale_gamma = 1,
                                  epi_data = c(0,0,0), SIM_DATA = TRUE) {
   

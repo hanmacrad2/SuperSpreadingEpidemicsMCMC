@@ -49,7 +49,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_ssib, OUTER_FOLDER, run_number = run, n_repeats = 1
 #**************************
 # 4. RUN SSIR MCMC
 #**************************
-RUN_MCMC_MULTIPLE_TIMES(data_ssir2$epidemic_data, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
+RUN_MCMC_MULTIPLE_TIMES(data_ssir, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = TRUE, SSIB = FALSE))
 
