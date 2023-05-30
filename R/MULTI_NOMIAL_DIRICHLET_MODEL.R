@@ -138,16 +138,18 @@ ddirmultinom <- function(x, alphas) {
   return(d)
 }
 
-#EXAMPLE
+#TOY EXAMPLE
 alphas <- c(2, 3, 4)
 x <- rdirmultinom(alphas)
 print(x)
-
 dx = ddirmultinom(x, alphas)
 
 #SSI MODEL
 ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)
-
+alphas = ss[,1]
+x = rdirmultinom(alphas)
+dx = ddirmultinom(x, alphas)
+  
 #MODEL EVIDENCE ESTIMATE FOR OTHER MODELS
 theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
   rep(means, each = samp_size_proposal) 
