@@ -38,15 +38,11 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1 - prob_prop
   
-  #THETA SAMPLES: PROPOSAL + PRIOR
+  #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
-  
-  #PRIORS
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(samp_size_prior, n_dim, FLAGS_MODELS)
-  
-  #PROPOSAL SAMPLES 
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
