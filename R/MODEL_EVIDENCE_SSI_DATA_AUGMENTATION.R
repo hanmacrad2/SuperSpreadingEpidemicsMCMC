@@ -1,6 +1,21 @@
 #Model Evidence for SSI model with data augmentation
 library(MultiRNG)
 
+#BACKGROUND
+#- The Dirichlet distribution is used with the Multinomial when we consider a Bayesian approach to modeling the distribution. In simple words, the probabilities 
+# are the parameters of the counts 
+# and the priors 
+# are the parameters of the probabilities
+
+#SSIB
+#SSIB MODEL
+#Simulate from a multi-variate multi-dirichelt dist for each timepoint (each column)
+#Columns are timepoints, rows are importance samples 
+#One importance sample
+#Outer loop is over the importance samples 
+#One loop over timepoints. Each entry is an interger == number of super-spreaders
+#Proposal -> multi-nomial 
+
 #SETUP
 non_ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)
 

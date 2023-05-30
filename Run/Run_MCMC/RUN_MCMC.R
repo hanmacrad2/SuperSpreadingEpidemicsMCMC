@@ -1,5 +1,6 @@
 #RUN MCMC
 run = 1
+library(SuperSpreadingEpidemicsMCMC)
 library(MASS)
 #FOLDER STRUCTURE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
