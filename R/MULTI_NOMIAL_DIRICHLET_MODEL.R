@@ -116,12 +116,15 @@ dmultinomial <- function(x, p) {
 rdirmultinom <- function(alphas) {
   p <- rdirch(alphas)
   m <- rmultnomial(p)
+  m = m - 1
   return(m)
 }
 
 #DENSITY
 ddirmultinom <- function(x, alphas) {
+  
   k <- length(x)
+  k = length(alphas)
   n <- sum(x)
   sum_alphas <- sum(alphas)
   
@@ -142,7 +145,9 @@ ddirmultinom <- function(x, alphas) {
 alphas <- c(2, 3, 4)
 x <- rdirmultinom(alphas)
 print(x)
-dx = ddirmultinom(x, alphas)
+dx = ddirmultinom(2, alphas)
+dx
+
 
 #SSI MODEL
 ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)

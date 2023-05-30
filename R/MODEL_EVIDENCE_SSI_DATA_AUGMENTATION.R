@@ -40,9 +40,10 @@ r_dir = draw.dirichlet.multinomial(no.row, d, alpha, beta, N) # :D
 
 
 #Density function (mass function) for the multi-nomial dirichlet model
-MULTI_DIRICHLET <- function(data_vector, shrink_factor = 0.1){
+D_MULTINOMIAL_DIRICHLET <- function(data_vector, alphas, shrink_factor = 0.1){
   
-  data_vector = shrink_factor*data_vector
+  #data_vector = shrink_factor*data_vector
+  
   term1 = factorial(sum(data_vector)-1)
   term2 = prod(factorial(data_vector-1))
   term3 = prod(data_vector^(data_vector-1))
@@ -51,6 +52,11 @@ MULTI_DIRICHLET <- function(data_vector, shrink_factor = 0.1){
   
   return(prob)
 }
+
+#To do
+#1. File 1: Multi-nomial
+#2. File 2: IS
+
 
 #TOY EXAMPLE
 data_ssi = c(200, 600, 200)
