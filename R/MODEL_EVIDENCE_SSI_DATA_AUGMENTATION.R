@@ -16,8 +16,16 @@ library(MultiRNG)
 #One loop over timepoints. Each entry is an interger == number of super-spreaders
 #Proposal -> multi-nomial 
 
+
+#NEED
+theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
+  rep(means, each = samp_size_proposal) 
+
+log_proposal_density = dmvt(theta_samples - matrix_means,
+                            sigma = cov(mcmc_samples), df = dof) 
+
 #SETUP
-non_ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)
+ss = matrix(round(runif(1000, 1, 20)), nrow = 100, ncol = 10)
 
 #Generation
 #MULTI-NOMIAL DIRICHELT

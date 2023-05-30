@@ -70,7 +70,6 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
 #*
 #*****************************************************************************************
-
 GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
                           FLAGS_MODELS, n_samples = 1000) {   
   
@@ -117,6 +116,19 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     
     for (i in 1:n_samples) {
       loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],  theta_samples[i, 3:(2+num_etas)]) 
+      
+      vector_estimate_terms[i] = loglike + log_priors[i] - log_q[i]
+    }
+    
+  } else if (FLAGS_MODELS$SSIB){
+    
+    #GET ESTIMATE
+    for (i in 1:n_samples) {
+      if (i %% 100 == 0)
+        print(i)
+      
+      loglike = LOG_LIKE_SSIB(epidemic_data, theta_samples[i, 1],
+                              theta_samples[i, 2], theta_samples[i, 3])
       
       vector_estimate_terms[i] = loglike + log_priors[i] - log_q[i]
     }
@@ -222,6 +234,29 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
       print(paste0('dim of mcmc', dim(mcmc_samples)))
 
+      #GET PHAT ESTIMATE OF MODEL EVIDENCE
+      phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS)
+      estimates_vec[i] = phat_estimate                        
+      print(estimates_vec)
+      
+    }
+    
+    #SAVE ESTIMATES
+    saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
+    
+  } else if (FLAGS_MODELS$SSIB){
+    
+    model_type = 'ssib'; print(model_type)
+    CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+    print(CURRENT_FOLDER)
+    
+    for (i in start:n_repeats){ #start:n_repeats
+      
+      print(paste0('i = ', i))
+      mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+      
+      #mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
+     
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS)
       estimates_vec[i] = phat_estimate                        

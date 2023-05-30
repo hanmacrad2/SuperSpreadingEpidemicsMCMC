@@ -71,10 +71,11 @@ GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
     param_priors = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior),
                                    (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
-    data_aug_priors_matrix = GET_SAMPLES_DATA_AUG_PRIORS(param_priors, epidemic_data, samp_size_prior)
-    dim2 = dim(mcmc_samples)[2] #**??
-    theta_samples_prior = matrix(c(param_priors, eta_priors_matrix), ncol = n_dim + n_dim2)
+    theta_samples_prior = param_priors
     
+    #data_aug_priors_matrix = GET_SAMPLES_DATA_AUG_PRIORS(param_priors, epidemic_data, samp_size_prior)
+    #ncol = n_dim + dim_data_aug
+    #theta_samples_prior = matrix(c(param_priors, eta_priors_matrix), ncol = n_dim)
     
   }
   
@@ -119,6 +120,9 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, samp_size_prior, n_dim, FLAGS_M
     log_prior_density = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + log_density_eta_priors
     
   } else if (FLAGS_MODELS$SSIB){
+    
+    log_prior_density = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
+      dexp((theta_samples[,3] - 1), log = TRUE) 
     
   }
   
