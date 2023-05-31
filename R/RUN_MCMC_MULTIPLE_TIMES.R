@@ -61,7 +61,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER,
       
       #RUN MCMC 
       print(paste0('i = ', i))
-      mcmc_output = MCMC_INFER_SSNB(epidemic_data, n_mcmc = n_mcmc, PRIORS_USED = PRIORS_USED)
+      mcmc_output = MCMC_INFER_SSNB(epidemic_data, n_mcmc = n_mcmc) #, PRIORS_USED = PRIORS_USED)
       #SAVE
       saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))
     }
