@@ -4,14 +4,36 @@ library(MultiRNG)
 
 #FUNCTIONS
 ddirmnom(r_dir_samps, 3, alpha.vec, log = FALSE)
+
 rdirmnom(n, size, alpha)
 
+alpha <- c(0, 1, 2)
+
+ss_t1 = c(1,0,1,2,0,1,2,1)
+alpha1 = matrix(ss_t1, nrow = 1, ncol =  length(ss_t1))
+rdirmnom(3, 3, alpha1)
+
+print(x)
+dx = ddirmultinom(2, alphas)
+dx
+
+#OPTION 2
+alpha.vec = c(1,3,4,4) ; N=3
+draw.dirichlet.multinomial(no.row=1e5, d=4, alpha=alpha.vec, beta=2, N=10)
+
+#MULTI NOMIAL DRAWS
+r_dir_samps = draw.dirichlet.multinomial(no.row = n_is_samples, d = 3, 
+                                         alpha = alpha.vec, beta = 1, N = 3) #3
+
+#d = length(x_t) = length of vector alpha 
+#N = x_t?
+
+ddirmnom(r_dir_samps, 4, alpha.vec)
+
+ddirmultinom(r_dir_samps, alpha.vec)
 
 #R SAMP DIRICHLET  MULTINOMIAL
 R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta = 1){
-  
-  #Q
-  #Q over d
   
   #PARAMS
   N = dim(mcmc_output$ss_matrix)[1] #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e num of mcmc runs)
@@ -21,10 +43,10 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
     
     alpha_vec = as.vector(table(mcmc_output$ss_matrix[,t])) #table returns counts of each category 
     r_samp_t = draw.dirichlet.multinomial(no.row = num_is_samps, 
-                                          d = length(alpha_vec),
-                                          alpha = alpha_vec, 
-                                          beta = beta,
-                                          N = N)
+                 d = length(alpha_vec),
+                 alpha = alpha_vec, 
+                 beta = beta,
+                 N = N)
     
     print(dim(r_samp_t))
     
@@ -36,10 +58,31 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
 }
 
 
-DENSITY_PROSOSAL_SS_MULTINOM_DIR <- function(theta_samples_proposal_ss, mcmc_output, alphas){
+#APPLY
+R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
+
+
+R_MULTINOM_DIR_SS_PROPOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta = 1) {
   
-  #FUNCTION
-  ddirmnom(x, size, alpha, log = FALSE)
+  # PARAMS
+  N <- dim(mcmc_output$ss_matrix)[1] # Sum of the counts of each category, i.e num of 0s + num of 1s (i.e num of mcmc runs)
+  matrix_rmultdir_samps <- matrix(0, nrow = num_is_samps, ncol = length(x)) # ncol = time
+  
+  for (t in 1:length(x)) {
+    
+    alpha_vec <- as.vector(table(mcmc_output$ss_matrix[, t])) # table returns counts of each category
+    r_samp_t <- rmultdir(n = num_is_samps, size = x[t], alpha = alpha_vec, beta = beta, N = N)
+    
+    matrix_rmultdir_samps[, t] <- r_samp_t
+    
+  }
+  
+  return(matrix_rmultdir_samps)
+}
+
+
+                                       
+GET_SS_MULTINOM_DIR_PROSOSAL <- function(mcmc_output, alphas){
   
 }
 
@@ -60,15 +103,12 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
     rep(colMeans(mcmc_samples), each = samp_size_proposal) 
   
   theta_samples_proposal_ss = R_MULTINOM_DIR_SS_PROSOSAL(num_is_samps, epidemic_data, mcmc_output) #size num_is_samps x time
-  
-  theta_samples_proposal = cbind(theta_samples_proposal, theta_samples_proposal_ss)
-  
-  #PRIOR 
+    
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(samp_size_prior, n_dim, FLAGS_MODELS)
-  #PRIORS ON S?? 
+  
   
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
-  
+
   
   #DEFENSE MIXTURE
   matrix_means =  matrix(rep(colMeans(mcmc_samples), each = n_is_samples), ncol = n_dim)
@@ -77,7 +117,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   log_proposal_density = dmvt(theta_samples - matrix_means,
                               sigma = cov(mcmc_samples), df = dof) #log = TRUE log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
-  log_proposal_density_ss = DENSITY_PROSOSAL_SS_MULTINOM_DIR(theta_samples_proposal_ss)
+  log_proposal_density_ss = DENSITY_PROSOSAL_SS_MULTINOM_DIR()
   
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples,
@@ -92,6 +132,4 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 }
 
 #APPLY
-#APPLY
-R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
 data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)

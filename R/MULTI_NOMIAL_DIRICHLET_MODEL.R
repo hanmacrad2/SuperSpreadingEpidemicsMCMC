@@ -2,7 +2,29 @@
 
 #**********
 #FUNCTIONS
-#*********
+#********
+
+GENERATE_SS_DATA <-function(data_vector){
+  
+  T <- length(data_vector)  #Number of columns
+  n <- 1000  #Number of rows
+  
+  # Create an empty matrix
+  matrix_data <- matrix(nrow = n, ncol = T)
+  
+  # Generate random samples for each column
+  for (t in 1:T) {
+    max_val <- data_vector[t]
+    matrix_data[, t] <- sample(0:max_val, n, replace = TRUE)
+  }
+  
+  print(matrix_data)
+}
+
+#DATA
+data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
+ss_matrix = GENERATE_SS_DATA(data_ssir2)
+
 factorial <- function(x) {
   if (x <= 0) {
     return(1)
@@ -114,6 +136,7 @@ dmultinomial <- function(x, p) {
 
 #SAMPLES
 rdirmultinom <- function(alphas) {
+  
   p <- rdirch(alphas)
   m <- rmultnomial(p)
   m = m - 1
