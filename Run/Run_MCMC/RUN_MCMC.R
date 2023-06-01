@@ -16,8 +16,9 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/MISSING/')
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
-run = 1
-RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 30000,
+n_repeats = 5
+run = 2
+RUN_MCMC_MULTIPLE_TIMES(data_baseline2, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE))
 
@@ -25,15 +26,15 @@ RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run
 #***********************
 # 2. RUN SSNB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run,
-                        n_repeats = 10, n_mcmc = 30000,
+RUN_MCMC_MULTIPLE_TIMES(data_baseline2, OUTER_FOLDER, run_number = run,
+                        n_repeats = n_repeats, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                             SSIR = FALSE, SSIB = FALSE)) #data_ssnb
 
 #***********************
 # 3. RUN SSEB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 30000,
+RUN_MCMC_MULTIPLE_TIMES(data_baseline2, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = 30000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE)) #data_sseb
 

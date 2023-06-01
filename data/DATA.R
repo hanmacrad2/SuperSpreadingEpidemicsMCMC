@@ -10,10 +10,11 @@ DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 #************************
 
 #BASELINE
-file_name = 'data_baseline.rds'
-data_ssnb = SIMULATE_EPI_SSNB(num_days = 30)
-plot.ts(data_baseline)
-saveRDS(data_baseline, paste0(DATA_FOLDER, file_name))
+file_name = 'data_baseline2.rds'
+data_baseline2 = SIMULATE_EPI_BASELINE(1.6, num_days = 30)
+plot.ts(data_baseline2)
+
+saveRDS(data_baseline2, paste0(DATA_FOLDER, file_name))
 
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 
