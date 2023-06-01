@@ -25,19 +25,18 @@ GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
     #PRIORS
-    n_dim = dim(mcmc_samples)[2] 
     theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
     #2. SSNB
   } else if (FLAGS_MODELS$SSNB){
-    n_dim =  dim(mcmc_samples)[2]
+    n_dim = 2 #CHECK 
     pr0_unif = list_priors$priors_ssnb$pr0_unif 
     p_prob_unif =  list_priors$priors_ssnb$p_prob_unif 
     
     if (PRIORS_USED$SSNB_K_EXP){
     
       theta_samples_prior = matrix(c(rexp(samp_size_prior), runif(samp_size_prior,  min = pr0_unif[1],
-                                                                  max = pr0_unif[2]), ncol = n_dim))
+                                                                  max = pr0_unif[2])), ncol = n_dim)
       
     } else if (PRIORS_USED$SSNB_K_GAMMA){ 
       
@@ -55,7 +54,6 @@ GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
     #PRIORS
     pk_exp = list_priors$priors_ssnb$pk_exp
     pR0_exp = list_priors$priors_ssnb$pR0_exp
-    n_dim = dim(mcmc_samples)[2]
     
     param_priors = cbind(rexp(samp_size_prior, rate = pk_exp[1]),
                          rexp(samp_size_prior, rate = pR0_exp[1]))
@@ -67,7 +65,6 @@ GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
   } else if (FLAGS_MODELS$SSIB) {
     
     #PRIORS
-    n_dim = dim(mcmc_samples)[2] 
     param_priors = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior),
                                    (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
@@ -101,16 +98,15 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, samp_size_prior, n_dim, FLAGS_M
     
     #2. SSNB
   } else if (FLAGS_MODELS$SSNB){
-    n_dim =  dim(mcmc_samples)[2]
     pr0_unif = list_priors$priors_ssnb$pr0_unif 
     p_prob_unif =  list_priors$priors_ssnb$p_prob_unif 
     
     if (PRIORS_USED$SSNB_K_EXP){
       log_prior_density = dexp(theta_samples[,1], log = TRUE) 
-      dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE)
+      dunif(theta_samples[, 2], min = pr0_unif[1], max = pr0_unif[2], log = TRUE)
     } else if (PRIORS_USED$SSNB_K_GAMMA) {
-      log_prior_density = dgamma(theta_samples[,1], shape = priors_ssnb$pk_ga_shape, rate = priors_ssnb$pk_ga_rte, log = TRUE) +
-        dunif(theta_samples[, 2], min = priors_ssnb$pr0_unif[1], max = priors_ssnb$pr0_unif[2], log = TRUE) 
+      log_prior_density = dgamma(theta_samples[,1], shape = list_priors$priors_ssnb$pk_ga_shape, rate = list_priors$priors_ssnb$pk_ga_rte, log = TRUE) +
+        dunif(theta_samples[, 2], min =pr0_unif[1], max = pr0_unif[2], log = TRUE) 
     }
     
   } else if (FLAGS_MODELS$SSIR) {

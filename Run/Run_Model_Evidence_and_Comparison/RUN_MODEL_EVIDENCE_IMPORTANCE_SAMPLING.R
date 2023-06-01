@@ -9,8 +9,11 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21_SUBSET_I/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21_SUBSET_II/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE/"
+
 run = 1; 
-n_repeats = 50
+n_repeats = 10
 
 #***********************
 # 1. DATA 
@@ -40,13 +43,13 @@ plot.ts(data_wait_08_21)
 #*
 #* MODEL EVIDENCE ESTIMATES
 #* 
-#* ***************************************************************************
+#****************************************************************************
 
 #*************************
 #2a. BASELINE
 #*************************
 run = 1
-list_is_log_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 mean(list_is_log_ev_base, na.rm = TRUE)
@@ -55,8 +58,7 @@ sd(list_is_log_ev_base, na.rm = TRUE)
 #*************************
 #2c. SSNB
 #*************************
-run = 5; 
-list_is_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
@@ -68,7 +70,7 @@ sd(list_is_log_ev_ssnb)
 #2b. SSEB
 #*************************
 run = 1
-list_is_log_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+list_is_log_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 #PLOT
