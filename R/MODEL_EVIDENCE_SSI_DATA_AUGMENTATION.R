@@ -16,20 +16,22 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
   
   for (t in 1:length(x)){
     
+    print(paste0('mcmc_output$ss_matrix[,t]', length(mcmc_output$ss_matrix[,t])))
     alpha_vec = as.vector(table(mcmc_output$ss_matrix[,t])) #table returns counts of each category 
-    print(paste0('length alpha vec', length(alpha_vec)))
+    print(alpha_vec)
     r_samp_t = draw.dirichlet.multinomial(no.row = num_is_samps, 
                                           d = length(alpha_vec),
                                           alpha = alpha_vec, 
-                                          beta = beta,
-                                          N = N)
+                                          beta = beta, #scale 
+                                          N = N)#Sum of the counts of each category
     
-    print(dim(r_samp_t))
+    #print(r_samp_t)
     
     matrix_rmultdir_samps[, t] = r_samp_t
     
   }
   
+  #return(r_samp_t)
   return(matrix_rmultdir_samps)
 }
 
@@ -37,7 +39,8 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
 DENSITY_PROSOSAL_SS_MULTINOM_DIR <- function(theta_samples_proposal_ss, mcmc_output, alphas){
   
   #FUNCTION
-  ddirmnom(x, size, alpha, log = FALSE)
+  alpha = length of x_t + 1
+  ddirmnom(theta_samples_proposal_ss, size, alpha, log = FALSE)
   
 }
 
@@ -91,7 +94,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 
 #APPLY
 #APPLY
-R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
+r_samp_t = R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
 
 wherby 
 data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
