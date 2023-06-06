@@ -1,4 +1,5 @@
 #MODEL EVIDENCE FOR SSI MODEL
+library(SuperSpreadingEpidemicsMCMC)
 library(extraDistr)
 library(MultiRNG)
 
@@ -17,8 +18,9 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
   
   for (t in 1:length(x)){
     
-    print(paste0('mcmc_output$ss_matrix[,t]', length(mcmc_output$ss_matrix[,t])))
-    print(table(mcmc_output$ss_matrix[,t]))
+    print(paste0('t = ', t))
+    #print(paste0('mcmc_output$ss_matrix[,t]', length(mcmc_output$ss_matrix[,t])))
+    #print(table(mcmc_output$ss_matrix[,t]))
     
     categories = unique(mcmc_output$ss_matrix[,t])
     alpha_vec = as.vector(table(mcmc_output$ss_matrix[,t])) #table returns counts of each category 
@@ -31,7 +33,7 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
     
     r_samp_t = rep(categories, times = r_dir)
     r_samp_t = sample(r_samp_t) #shuffle output
-    print(r_samp_t)
+    #print(r_samp_t)
     matrix_rmultdir_samps[, t] = r_samp_t
     
   }
@@ -97,9 +99,16 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 }
 
 #APPLY
+
+#MOCK DATA
+data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
+n_data = length(data_ssir2)
+mcmc_output = list()
+ss_matrix = matrix(round(runif(1000, 0, 3)), nrow = 100, ncol = n_data)
+mcmc_output$ss_matrix = ss_matrix 
+
 #APPLY
 r_samp_t = R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
 r_samp_t
 
-wherby 
-data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
+help(runif)
