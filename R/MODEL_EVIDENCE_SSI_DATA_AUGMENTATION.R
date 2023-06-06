@@ -12,26 +12,30 @@ R_MULTINOM_DIR_SS_PROSOSAL <- function(x, mcmc_output, num_is_samps = 1000, beta
   
   #PARAMS
   N = dim(mcmc_output$ss_matrix)[1] #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e num of mcmc runs)
+  print(paste0('N', N))
   matrix_rmultdir_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
   
   for (t in 1:length(x)){
     
     print(paste0('mcmc_output$ss_matrix[,t]', length(mcmc_output$ss_matrix[,t])))
+    print(table(mcmc_output$ss_matrix[,t]))
+    
+    categories = unique(mcmc_output$ss_matrix[,t])
     alpha_vec = as.vector(table(mcmc_output$ss_matrix[,t])) #table returns counts of each category 
     print(alpha_vec)
-    r_samp_t = draw.dirichlet.multinomial(no.row = num_is_samps, 
-                                          d = length(alpha_vec),
+    r_dir = draw.dirichlet.multinomial(no.row = 1, #num_is_samps, 
+                                          d = length(categories), #length(alpha_vec),
                                           alpha = alpha_vec, 
                                           beta = beta, #scale 
                                           N = N)#Sum of the counts of each category
     
-    #print(r_samp_t)
-    
+    r_samp_t = rep(categories, times = r_dir)
+    r_samp_t = sample(r_samp_t) #shuffle output
+    print(r_samp_t)
     matrix_rmultdir_samps[, t] = r_samp_t
     
   }
   
-  #return(r_samp_t)
   return(matrix_rmultdir_samps)
 }
 
@@ -95,6 +99,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #APPLY
 #APPLY
 r_samp_t = R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
+r_samp_t
 
 wherby 
 data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
