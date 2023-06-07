@@ -1,5 +1,6 @@
 #MODEL EVIDENCE FOR SSI MODEL
 library(SuperSpreadingEpidemicsMCMC)
+library(mvtnorm)
 library(extraDistr)
 library(MultiRNG)
 
@@ -106,19 +107,20 @@ GET_LOG_PROPOSAL_Q_SS <- function(mcmc_samples, epidemic_data,
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
 #*
 #*****************************************************************************************
-GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, n_samples = 1000
+GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 1000,
                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = TRUE, SSIR = FALSE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  vector_estimate_terms = rep(NA, n_samples)
-  lambda_vec = get_lambda(epidemic_data); 
+  vector_estimate_terms = rep(NA, num_is_samps)
+  lambda_vec = get_lambda(epidemic_data) 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
   mcmc_param_samples = matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
-  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, n_samples)
+  print(paste0('dim of mcmc_samps', dim(mcmc_param_samples)))
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
@@ -129,7 +131,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, n_samples = 
   log_prior_so = log(1/(1 + epidemic_data[1]))
   
     #GET ESTIMATE
-    for (i in 1:n_samples) {
+    for (i in 1:num_is_samps) {
       if (i %% 100 == 0)
         print(i)
       
@@ -149,18 +151,20 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, n_samples = 
 }
 
 #APPLY
+GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, data_ssib)
+
 
 #MOCK DATA
 data_ssir2 = c(2, 0, 1, 0, 5, 3, 4, 2, 1, 4, 5, 4, 3, 3, 6, 4, 4, 8, 7, 12, 13, 15, 15, 12, 24, 26, 26, 41, 32, 38)
+
 n_data = length(data_ssir2)
 mcmc_output = list()
-ss_matrix = matrix(round(runif(1000, 0, 3)), nrow = 100, ncol = n_data)
+ss_matrix = matrix(round(runif(1000, 0, 3)), nrow = 80, ncol = n_data)
 mcmc_output$ss_matrix = ss_matrix 
 
 #APPLY
-r_samp_t = R_MULTINOM_DIR_SS_PROSOSAL(data_ssir2, mcmc_output)
-r_samp_t
+dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssir2, mcmc_output)
+dir_multi_nom_comps
 
-help(runif)
 
 a = rdirmnom(1000, 10, c(1:10))
