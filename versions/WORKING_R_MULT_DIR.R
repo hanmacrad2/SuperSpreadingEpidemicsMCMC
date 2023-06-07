@@ -112,6 +112,52 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   return(imp_samp_comps)  
 }
 
+GET_LOG_PROPOSAL_Q_SS <- function(mcmc_samples, epidemic_data,
+                                  num_is_samps, dof = 3, prob = 0.95) { #*NEED MCMC_OUTPUT
+  
+  #EXTRACT
+  dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps)
+  theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
+  density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
+  
+  #PARAMS
+  lambda_vec = get_lambda(epidemic_data)
+  sum_estimate = 0
+  
+  #SAMPLING SIZE 
+  samp_size_proposal = prob*num_is_samps; 
+  samp_size_prior = num_is_samps - samp_size_proposal
+  prob_prop = prob; prob_prior = 1 - prob_prop
+  
+  #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
+  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
+    rep(colMeans(mcmc_samples), each = samp_size_proposal)
+  
+  theta_samples_prior = GET_PRIOR_THETA_SAMPLES(samp_size_prior, n_dim) #FLAGS_MODELS)
+  
+  #theta_samples_proposal = cbind(theta_samples_proposal, theta_samples_proposal_ss)
+  #PRIOR 
+  #theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
+  
+  #DENSITY OF PROPOSAL
+  matrix_means =  matrix(rep(colMeans(mcmc_samples), each = n_is_samples), ncol = n_dim)
+  log_proposal_density = dmvt(theta_samples - matrix_means,
+                              sigma = cov(mcmc_samples), df = dof) #log = TRUE log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+  
+  #PRIOR DENSITIES 
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples,
+                                            samp_size_prior, n_dim, FLAGS_MODELS)
+  
+  #log_proposal_density_ss = DENSITY_PROSOSAL_SS_MULTINOM_DIR(theta_samples_proposal_ss)
+  
+  #DEFENSE MIXTURE 
+  log_q = log(prob_prop*exp(log_proposal_density) + prob_prior*exp(log_priors)) #1 x n_is_samples
+  
+  imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_priors = log_priors)
+  
+  return(imp_samp_comps)  
+}
+
 #APPLY
 
 #MOCK DATA

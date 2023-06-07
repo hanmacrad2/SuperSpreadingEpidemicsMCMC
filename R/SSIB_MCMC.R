@@ -120,7 +120,10 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
                                    shape_gamma = 6, scale_gamma = 1){
   
   #Data
-  non_ss = epidemic_data - ss 
+  non_ss = epidemic_data - ss
+  #non_ss = pmax(non_ss, 0)
+  print(paste0('aX: ', aX, ', bX: ', ' cX: ', cX))
+  print(paste0('non_ss', non_ss))
   
   #Params
   num_days = length(epidemic_data)
@@ -136,8 +139,13 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
     lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
     #LOG-LIKELIHOOD
-    loglike = loglike - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
+    loglike_t = - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
       ss[t]*(log(bX) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+    
+    if (!is.infinite(loglike_t)){
+      loglike = loglike + loglike_t
+    }
+    
   }
   
   return(loglike)
@@ -284,8 +292,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     sigma4_vec[1] =  sigma4; sigma5_vec[1] =  sigma5
 
     #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list(sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
-                 sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
+    sigma = list() #sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
+                 #sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
 
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
@@ -540,7 +548,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
         #CRITERIA FOR S_T & N_T
         if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
           #Store
-          print(paste0('i thin', i_thin))
+          #print(paste0('i thin', i_thin))
           non_ss[i_thin, t] = data[[1]][t]
           ss[i_thin, t] = data[[2]][t]
           next
@@ -573,7 +581,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
-      print(paste0('i = ', i))
+      #print(paste0('i = ', i))
       a_vec[i_thin] <- a; b_vec[i_thin] <- b
       c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
       log_like_vec[i_thin] <- log_like 

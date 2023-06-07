@@ -1,7 +1,7 @@
 #RUN MCMC
-run = 1
 library(SuperSpreadingEpidemicsMCMC)
 library(MASS)
+
 #FOLDER STRUCTURE
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/"
@@ -13,6 +13,8 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIR_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
 
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/MISSING/')
+
+run = 1
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
@@ -48,9 +50,10 @@ RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run
 #***********************
 # 5. RUN SSIB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
+RUN_MCMC_MULTIPLE_TIMES(data_ssib, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = TRUE))
+
 
 mcmc_ssib = MCMC_INFER_SSIB(data_ssib, n_mcmc = 1000)
 
