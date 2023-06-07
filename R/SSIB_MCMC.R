@@ -113,6 +113,36 @@ LOG_LIKE_SSIB <- function(sim_data, aX, bX, cX){
   logl
 }
 
+#' 
+#' @export
+#LOGLIKELIHOOD + DATA AUGMENTATION MODEL EVIDENCE
+LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
+                                   shape_gamma = 6, scale_gamma = 1){
+  
+  #Data
+  non_ss = epidemic_data - ss 
+  
+  #Params
+  num_days = length(epidemic_data)
+  loglike = 0
+  
+  #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  for (t in 1:num_days) { 
+    
+    #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
+    lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    
+    #LOG-LIKELIHOOD
+    loglike = loglike - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
+      ss[t]*(log(bX) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+  }
+  
+  return(loglike)
+}
+
 #' MCMC adaptive algorithm for Super-Spreading Individuals epidemic model
 #'
 #' MCMC algorithm with Adaptation for obtaining samples from the parameters of a
@@ -172,7 +202,7 @@ LOG_LIKE_SSIB <- function(sim_data, aX, bX, cX){
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
                               mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
                                                  alpha_star = 0.4, 
                                                  burn_in_pc = 0.2, thinning_factor = 10),
@@ -198,8 +228,9 @@ MCMC_INFER_SSIB <- function(data, n_mcmc = 50000,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  time = length(data) #length(data[[1]])
+  time = length(epidemic_data) #length(data[[1]])
   print(paste0('num mcmc iters = ', n_mcmc))
+  data = list(epidemic_data, rep(0, length(epidemic_data)))
 
   #THINNING FACTOR
   i_thin = 1

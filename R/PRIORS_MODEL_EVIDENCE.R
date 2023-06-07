@@ -5,7 +5,8 @@ SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0))
                                           priors_ssnb = list(pk_prior_nb = c(1,0),
                                                              pk_ga_shape = 0.001, pk_ga_rte = 0.001,
                                                              pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
-                                          priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0))),
+                                          priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)),
+                                          priors_ssib = list(exp_prior = c(1,0))),
                        PRIORS_USED = list(SSNB_K_EXP = TRUE, SSNB_K_GAMMA = FALSE)) {
   
   return(list(list_priors = list_priors, PRIORS_USED = PRIORS_USED))
@@ -178,15 +179,3 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
 }
 
 
-list_priors = list(priors_ssnb = list(pk_prior_nb = c(1,0), pk_ga_shape = 0.001, pk_ga_rte = 0.001,
-                             pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
-                            priors_sseb = list(exp_prior = c(1,0)),
-                            priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)))
-
-
-
-a <- function(bb = 5){
-  
-  c = bb^2
-  return(list(bb = bb, c = c))
-}

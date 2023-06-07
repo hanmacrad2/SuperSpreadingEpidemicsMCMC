@@ -52,6 +52,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_baseline_missing_08, OUTER_FOLDER, run_number = run
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = TRUE))
 
+mcmc_ssib = MCMC_INFER_SSIB(data_ssib, n_mcmc = 1000)
 
 
 #***********************
