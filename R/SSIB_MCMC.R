@@ -86,15 +86,15 @@ SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
 #' log_like = LOG_LIKE_SSIB(epidemic_data, 0.8, 0.02, 20)
 #'
 #' @export
-LOG_LIKE_SSIB <- function(sim_data, aX, bX, cX){
+LOG_LIKE_SSIB <- function(epidemic_data, aX, bX, cX, 
+                          shape_gamma = 6, scale_gamma = 1){
 
   #Data
-  n = sim_data[[1]]; s = sim_data[[2]]
+  non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
 
   #Params
-  num_days = length(n)
-  shape_gamma = 6; scale_gamma = 1
-  logl = 0
+  num_days = length(non_ss)
+  loglike = 0
 
   #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
@@ -103,14 +103,14 @@ LOG_LIKE_SSIB <- function(sim_data, aX, bX, cX){
   for (t in 1:num_days) { 
 
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
-    lambda_t = sum((n[1:(t-1)] + cX*s[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
 
     #LOG-LIKELIHOOD
-    logl = logl - lambda_t*(aX + bX) + n[t]*(log(aX) + log(lambda_t)) +
-      s[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(n[t]) - lfactorial(s[t])
+    loglike = loglike - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
+      ss[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
   }
 
-  logl
+  return(loglike)
 }
 
 #' 
@@ -230,7 +230,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
   #**********************************************
   time = length(epidemic_data) #length(data[[1]])
   print(paste0('num mcmc iters = ', n_mcmc))
-  data = list(epidemic_data, rep(0, length(epidemic_data)))
+  non_ss = pmax(data_ssib-1, 0); ss =  rep(1, length(epidemic_data))
+  data = list(non_ss, ss)
 
   #THINNING FACTOR
   i_thin = 1
@@ -263,6 +264,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
 
   #INITIALISE RUNNING PARAMS
   a = a_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
+  print(paste0('loglike 0', log_like))
 
   #SIGMA
   sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
@@ -319,13 +321,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     }
 
     #log a
+    #print(paste0('log_like', log_like))
     logl_new = LOG_LIKE_SSIB(data, a_dash, b, c)
+    #print(paste0('logl_new', logl_new))
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     #Priors
     if (FLAGS_LIST$PRIOR){
       log_accept_ratio = log_accept_ratio - a_dash + a #*Actually this is the Acceptance RATIO. ACCEPTANCE PROB = MIN(1, EXP(ACCPET_PROB))
     }
-
+    
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       a <- a_dash
@@ -349,7 +353,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     #loglikelihood
     logl_new = LOG_LIKE_SSIB(data, a, b_dash, c)
     log_accept_ratio = logl_new - log_like
-
+    
     #Priors
     if (FLAGS_LIST$B_PRIOR_GAMMA){
       log_accept_ratio = log_accept_ratio +
@@ -358,7 +362,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     } else {
       log_accept_ratio = log_accept_ratio - b_dash + b
     }
-
+    
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       b <- b_dash
@@ -397,7 +401,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
       log_like <- logl_new
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
     }
-
+    
     #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
       accept_prob = min(1, exp(log_accept_ratio))
@@ -440,7 +444,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
 
         #LOG ACCEPT PROB 
         log_accept_ratio = log_accept_ratio + tot_b_prior + tot_c_prior
-
+        
         #Metropolis Step
         if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
           b <- b_transform
@@ -485,7 +489,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
 
         #LOG ACCEPT PROB
         log_accept_ratio = log_accept_ratio + - a_transform + a + tot_c_prior
-
+        
         #Metropolis Step
         if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
           a <- a_transform
@@ -529,17 +533,18 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
         data_dash[[2]][t] = st_dash #s_t = st_dash
         data_dash[[1]][t] =  data[[1]][t] + data[[2]][t] - st_dash #n_t = x_t - s_t
 
-        if (data_dash[[1]][t] < 0){
-          data_dash[[1]][t] = 0
-        }
-        #CRITERIA FOR S_T & N_T
-        ?
-        # if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-        #   #Store
-        #   non_ss[i/thinning_factor, t] = data[[1]][t]
-        #   ss[i/thinning_factor, t] = data[[2]][t]
-        #   next
+        # if (data_dash[[1]][t] < 0){
+        #   data_dash[[1]][t] = 0
         # }
+        
+        #CRITERIA FOR S_T & N_T
+        if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
+          #Store
+          print(paste0('i thin', i_thin))
+          non_ss[i_thin, t] = data[[1]][t]
+          ss[i_thin, t] = data[[2]][t]
+          next
+        }
 
         logl_new = LOG_LIKE_SSIB(data_dash, a, b, c)
         log_accept_ratio = logl_new - log_like
@@ -567,8 +572,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     #else (log_like!=LOG_LIKE_SSIB(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSIB(data, a, b, c)))
 
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
-      #print(paste0('i = ', i))
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
+      print(paste0('i = ', i))
       a_vec[i_thin] <- a; b_vec[i_thin] <- b
       c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
       log_like_vec[i_thin] <- log_like 
