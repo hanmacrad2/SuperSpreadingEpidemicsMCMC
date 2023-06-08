@@ -1,4 +1,6 @@
 #MODEL EVIDENCE FOR SSI MODEL
+
+# - Dirichlet multinomial Importance sampling proposal for SSIB model with Data Augmentation - 
 library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
 library(extraDistr)
@@ -100,7 +102,6 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
       
       loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
-      #print(paste0('loglike ', loglike))
       
       vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
         log_q[i] - log_density_dirmult_samps[i]
