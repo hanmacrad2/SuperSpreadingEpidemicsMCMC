@@ -40,14 +40,13 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
     categories = unique(mcmc_output$ss[,t])
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
-    
-    r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,
-                                          d = length(categories), #length(alpha_vec),
-                                          alpha = alpha_vec,
-                                          beta = beta, #scale
-                                          N = N)#Sum of the counts of each category
-    
-    #r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
+    r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
+
+    # r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,
+    #                                       d = length(categories), #length(alpha_vec),
+    #                                       alpha = alpha_vec,
+    #                                       beta = beta, #scale
+    #                                       N = N)#Sum of the counts of each category
     
     r_samp_t = rep(categories, times = r_dir_multinom)
     r_samp_t = sample(r_samp_t) #shuffle output
