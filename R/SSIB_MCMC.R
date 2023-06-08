@@ -122,8 +122,8 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
   #Data
   non_ss = epidemic_data - ss
   #non_ss = pmax(non_ss, 0)
-  print(paste0('aX: ', aX, ', bX: ', ' cX: ', cX))
-  print(paste0('non_ss', non_ss))
+  #print(paste0('aX: ', aX, ', bX: ', ' cX: ', cX))
+  #print(paste0('non_ss', non_ss))
   
   #Params
   num_days = length(epidemic_data)

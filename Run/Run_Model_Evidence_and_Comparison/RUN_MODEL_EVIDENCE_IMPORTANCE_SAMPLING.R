@@ -12,9 +12,10 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 
-run = 2; 
-n_repeats = 5
+run = 1 
+n_repeats = 10
 
 #***********************
 # 1. DATA 
@@ -95,6 +96,20 @@ model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER,
 #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
 mean(model_ev_ssir)
 sd(model_ev_ssir)
+
+#*************************
+#5. SSIB
+#*************************
+model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                               FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                   SSIB = TRUE, SSIR = FALSE))
+#PLOT
+#PLOT_MODEL_EV_RESULTS(model_ev_sseb)
+mean(model_ev_ssib)
+sd(model_ev_ssib)
+
+PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
+                      data_type = 'SSIB')
 
 #*************************
 #2b. SSNB - GAMMA PRIOR ON K

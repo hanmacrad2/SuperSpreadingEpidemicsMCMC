@@ -259,11 +259,11 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       
       print(paste0('i = ', i))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      
-      #mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
-     
+      #mcmc_samples =  matrix(c(mcmc_output[["a_vec"]], mcmc_output[["b_vec"]], mcmc_output[["c_vec"]]), ncol = 3)
+      #mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
+
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS)
+      phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, epidemic_data, FLAGS_MODELS)
       estimates_vec[i] = phat_estimate                        
       print(estimates_vec)
       

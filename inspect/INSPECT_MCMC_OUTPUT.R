@@ -42,9 +42,10 @@ model_type = 'ssib'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
 #MCMC
-i = 1
+i = 10
 mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-#mcmc_samples =  cbind(mcmc_output$ssic_params_matrix, mcmc_output$eta_matrix)
+mcmc_samples =  cbind(mcmc_output$a_vec, mcmc_output$b_vec,  mcmc_output$c_vec)
+plot.ts(mcmc_samples)
 
 #PLOT
 plot.ts(mcmc_output$a_vec)
@@ -55,8 +56,8 @@ plot.ts(mcmc_output$log_like_vec)
 plot.ts(mcmc_output$sigma$sigma5)
 plot(mcmc_output$non_ss)
 
-
-plot.ts(mcmc_output$eta_matrix)
+#PLOT GRID
+PLOT_SSB_MCMC_GRID(data_ssib, mcmc_output, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
 
 #COMPARE

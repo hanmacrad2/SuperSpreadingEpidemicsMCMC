@@ -36,7 +36,7 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
   for (t in 1:length(x)){
     
-    print(paste0('t = ', t))
+    #print(paste0('t = ', t))
     
     categories = unique(mcmc_output$ss[,t])
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
@@ -47,14 +47,13 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
                                           beta = beta, #scale
                                           N = N)#Sum of the counts of each category
 
-    print('r_dir 1')
-    print(r_dir_multinom)
+    #print('r_dir 1')
+    #print(r_dir_multinom)
     
     #r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
     
     r_samp_t = rep(categories, times = r_dir_multinom)
     r_samp_t = sample(r_samp_t) #shuffle output
-    print(r_samp_t)
     
     matrix_rdirmult_samps[, t] = r_samp_t
     
@@ -103,12 +102,10 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   
     #GET ESTIMATE
     for (i in 1:num_is_samps) {
-      if (i %% 100 == 0)
-        print(i)
       
       loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
-      print(paste0('loglike ', loglike))
+      #print(paste0('loglike ', loglike))
       
       vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
         log_q[i] - log_density_dirmult_samps[i]
@@ -129,5 +126,5 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 
 
 #APPLY
-model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, data_ssib)
+model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, data_ssib)
 
