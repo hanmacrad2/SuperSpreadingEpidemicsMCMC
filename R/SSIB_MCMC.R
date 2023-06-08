@@ -122,8 +122,6 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
   #Data
   non_ss = epidemic_data - ss
   #non_ss = pmax(non_ss, 0)
-  #print(paste0('aX: ', aX, ', bX: ', ' cX: ', cX))
-  #print(paste0('non_ss', non_ss))
   
   #Params
   num_days = length(epidemic_data)
@@ -142,6 +140,7 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
     loglike_t = - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
       ss[t]*(log(bX) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
     
+    #-Inf if non_ss is negative
     if (!is.infinite(loglike_t)){
       loglike = loglike + loglike_t
     }
