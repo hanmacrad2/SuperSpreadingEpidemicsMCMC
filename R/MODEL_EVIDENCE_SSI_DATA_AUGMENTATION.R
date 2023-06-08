@@ -8,7 +8,7 @@ library(MultiRNG)
 
 #FUNCTIONS
 #ddirmnom(r_dir_samps, 3, alpha.vec, log = FALSE)
-#rdirmnom(n, size, alpha)
+rdirmnom(10, 1, c(2,3))
 
 #R SAMP DIRICHLET  MULTINOMIAL
 #' Title
@@ -31,30 +31,38 @@ library(MultiRNG)
 PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta = 1){
   
   #PARAMS
-  N = dim(mcmc_output$ss)[1] #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e num of mcmc runs)
-  #matrix_rdirmult_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
-  matrix_rdirmult_samps = matrix(0, nrow = N, ncol = length(x))
-  density_dirmult_samps = c()
+  N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
+  matrix_rdirmult_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
+  #matrix_rdirmult_samps = matrix(0, nrow = N, ncol = length(x))
+  density_dirmult_samps = rep(0, num_is_samps) #c()
     
   for (t in 1:length(x)){
     
-    categories = unique(mcmc_output$ss[,t])
+    categories = sort(unique(mcmc_output$ss[,t]))
+    
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
-    r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
-
-    # r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,
-    #                                       d = length(categories), #length(alpha_vec),
-    #                                       alpha = alpha_vec,
-    #                                       beta = beta, #scale
-    #                                       N = N)#Sum of the counts of each category
     
-    r_samp_t = rep(categories, times = r_dir_multinom)
-    r_samp_t = sample(r_samp_t) #shuffle output
+    if (length(alpha_vec)== 1){
+      
+      matrix_rdirmult_samps[, t] = rep(categories, num_is_samps)
+      #Contributes zero probability 
+    } else {
     
-    matrix_rdirmult_samps[, t] = r_samp_t
+      #r_dir_multinom = rdirmnom(n = 1, size = num_is_samps, alpha = alpha_vec) #n = num of experiments. size = num of samples in eac h exp
+      r_dir_multinom = rdirmnom(n = num_is_samps, size = 1, alpha = alpha_vec) #Binary matrix
+      #r_samp_t = rep(categories, times = r_dir_multinom)
+      
+      r_samp_t = r_dir_multinom%*%categories
+      
+      matrix_rdirmult_samps[, t] = r_samp_t
+      
+      #QUESTION 1: Should this be applied to r_samp_t or r_dir_multinom. r_dir_multinom matches with dim of alpha
+      #print(alpha_vec)
+      #alpha_vec = t(matrix(alpha_vec, nrow = length(alpha_vec), ncol = num_is_samps))
+      density_dirmult_samps = density_dirmult_samps + ddirmnom(x = r_dir_multinom, size = 1, alpha = alpha_vec, log = TRUE) 
+    }
     
-    #QUESTION 1: Should this be applied to r_samp_t or r_dir_multinom. r_dir_multinom matches with dim of alpha
-    density_dirmult_samps[t] = ddirmnom(r_dir_multinom, N, alpha_vec, log = TRUE) 
+    #density_dirmult_samps[t] = ddirmnom(r_dir_multinom, num_is_samps, alpha_vec, log = TRUE) 
     
   }
   
@@ -72,6 +80,12 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
   
   #Data
   non_ss = epidemic_data - ss
+  
+  if(min(non_ss)<0){
+    print('WARNING')
+    print(non_ss)
+    print(ss)
+  }
   #non_ss = pmax(non_ss, 0)
   
   #Params
@@ -116,14 +130,18 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   #PROPOSAL, PRIOR, THETA SAMPLES 
   mcmc_param_samples = matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
   print(paste0('dim of mcmc_samps', dim(mcmc_param_samples)))
+  
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
+  
   theta_samples = imp_samp_comps$theta_samples
+  
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
   #SS MULTINOM DIR
   dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps)
   theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
   log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
+  
   log_prior_so = log(1/(1 + epidemic_data[1]))
   
   #print(paste0('log_prior_density ', log_prior_density))
@@ -140,7 +158,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
         log_q[i] - log_density_dirmult_samps[i]
     }
   
-  print(vector_estimate_terms)
+  #print(vector_estimate_terms)
   log_model_ev_est = -log(num_is_samps) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_model_ev_est = ', log_model_ev_est))
   
@@ -150,10 +168,16 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-#dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
-#dir_multi_nom_comps
+dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
+dir_multi_nom_comps
 
 
 #APPLY
 model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, data_ssib)
 
+#r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
+# r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,
+#                                       d = length(categories), #length(alpha_vec),
+#                                       alpha = alpha_vec,
+#                                       beta = beta, #scale
+#                                       N = N)#Sum of the counts of each category
