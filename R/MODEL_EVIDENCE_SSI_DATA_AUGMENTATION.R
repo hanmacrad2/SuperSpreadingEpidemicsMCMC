@@ -36,8 +36,6 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
   for (t in 1:length(x)){
     
-    #print(paste0('t = ', t))
-    
     categories = unique(mcmc_output$ss[,t])
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
     
@@ -46,9 +44,6 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
                                           alpha = alpha_vec,
                                           beta = beta, #scale
                                           N = N)#Sum of the counts of each category
-
-    #print('r_dir 1')
-    #print(r_dir_multinom)
     
     #r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
     
