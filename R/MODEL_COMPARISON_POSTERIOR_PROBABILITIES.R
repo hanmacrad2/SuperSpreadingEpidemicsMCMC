@@ -1,8 +1,6 @@
-
-
 #*********************************************************
 #*
-#* 2. GET POSTERIOR MODEL PROBABILITIES
+#* GET POSTERIOR MODEL PROBABILITIES
 #* 
 #***********************************************************
 #' @export 
