@@ -116,39 +116,6 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, bX, cX,
 #' 
 #' @export
 #LOGLIKELIHOOD + DATA AUGMENTATION MODEL EVIDENCE
-LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
-                                   shape_gamma = 6, scale_gamma = 1){
-  
-  #Data
-  non_ss = epidemic_data - ss
-  #non_ss = pmax(non_ss, 0)
-  
-  #Params
-  num_days = length(epidemic_data)
-  loglike = 0
-  
-  #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
-    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  for (t in 1:num_days) { 
-    
-    #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
-    lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
-    
-    #LOG-LIKELIHOOD
-    loglike_t = - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
-      ss[t]*(log(bX) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
-    
-    #-Inf if non_ss is negative
-    if (!is.infinite(loglike_t)){
-      loglike = loglike + loglike_t
-    }
-    
-  }
-  
-  return(loglike)
-}
 
 #' MCMC adaptive algorithm for Super-Spreading Individuals epidemic model
 #'
