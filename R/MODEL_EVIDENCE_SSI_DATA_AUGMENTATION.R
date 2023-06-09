@@ -173,7 +173,7 @@ dir_multi_nom_comps
 
 
 #APPLY
-model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, data_ssib)
+model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, data_ssib) #mcmc_output
 
 #r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
 # r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,

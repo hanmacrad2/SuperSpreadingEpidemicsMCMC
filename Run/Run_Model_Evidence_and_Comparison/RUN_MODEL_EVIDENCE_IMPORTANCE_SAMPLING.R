@@ -100,7 +100,7 @@ sd(model_ev_ssir)
 #*************************
 #5. SSIB
 #*************************
-model_ev_ssib2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))
 mean(model_ev_ssib)
