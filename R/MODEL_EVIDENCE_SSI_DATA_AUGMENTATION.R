@@ -129,12 +129,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
   mcmc_param_samples = matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
-  print(paste0('dim of mcmc_samps', dim(mcmc_param_samples)))
-  
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
-  
   theta_samples = imp_samp_comps$theta_samples
-  
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
   #SS MULTINOM DIR
@@ -143,10 +139,6 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
   
   log_prior_so = log(1/(1 + epidemic_data[1]))
-  
-  #print(paste0('log_prior_density ', log_prior_density))
-  #print(paste0('theta_samples ', theta_samples))
-  #print(paste0('theta_samples_proposal_ss ', theta_samples_proposal_ss))
   
     #GET ESTIMATE
     for (i in 1:num_is_samps) {
