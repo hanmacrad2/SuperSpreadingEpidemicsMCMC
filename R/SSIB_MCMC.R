@@ -188,7 +188,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
                                                 PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 
-  'Returns MCMC samples of SSI model parameters (a, b, c, r0 = a + b*c)
+  'Returns MCMC samples of SSI-B model parameters (a, b, c, r0 = a + b*c)
   w/ acceptance rates.
   INCLUDES; ADAPTATION, DATA AUGMENTATION, B-C & A-C transform'
 
@@ -204,8 +204,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
   #**********************************************
   time = length(epidemic_data) #length(data[[1]])
   print(paste0('num mcmc iters = ', n_mcmc))
-  non_ss = pmax(data_ssib-1, 0); ss =  rep(1, length(epidemic_data))
+  
+  ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
+  print('ss:'); print(ss)
+  non_ss = epidemic_data - ss 
+  print('non_ss:'); print(non_ss)
   data = list(non_ss, ss)
+  
+  #non_ss = pmax(data_ssib-1, 0)
+  #ss =  rep(1, length(epidemic_data))
 
   #THINNING FACTOR
   i_thin = 1
