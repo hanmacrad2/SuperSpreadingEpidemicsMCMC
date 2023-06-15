@@ -37,12 +37,12 @@ data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
 file_name = 'data_ssib.rds'
-data_ssib = SIMULATE_EPI_SSIB()
+#data_ssib = SIMULATE_EPI_SSIB()
 plot.ts(data_ssib)
 saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
 
 data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
-
+plot.ts(data_ssib)
 
 #****************************************************************
 # CANDADIAN DATA

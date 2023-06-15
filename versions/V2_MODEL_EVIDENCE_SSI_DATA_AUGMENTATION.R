@@ -33,8 +33,9 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
   #PARAMS
   N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
   matrix_rdirmult_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
+  #matrix_rdirmult_samps = matrix(0, nrow = N, ncol = length(x))
   density_dirmult_samps = rep(0, num_is_samps) #c()
-    
+  
   for (t in 1:length(x)){
     
     categories = sort(unique(mcmc_output$ss[,t]))
@@ -43,17 +44,25 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
     if (length(alpha_vec)== 1){
       
-      matrix_rdirmult_samps[, t] = rep(categories, num_is_samps) #Contributes zero probability 
+      matrix_rdirmult_samps[, t] = rep(categories, num_is_samps)
+      #Contributes zero probability 
     } else {
-    
+      
+      #r_dir_multinom = rdirmnom(n = 1, size = num_is_samps, alpha = alpha_vec) #n = num of experiments. size = num of samples in eac h exp
       r_dir_multinom = rdirmnom(n = num_is_samps, size = 1, alpha = alpha_vec) #Binary matrix
+      #r_samp_t = rep(categories, times = r_dir_multinom)
       
       r_samp_t = r_dir_multinom%*%categories
       
       matrix_rdirmult_samps[, t] = r_samp_t
-
+      
+      #QUESTION 1: Should this be applied to r_samp_t or r_dir_multinom. r_dir_multinom matches with dim of alpha
+      #print(alpha_vec)
+      #alpha_vec = t(matrix(alpha_vec, nrow = length(alpha_vec), ncol = num_is_samps))
       density_dirmult_samps = density_dirmult_samps + ddirmnom(x = r_dir_multinom, size = 1, alpha = alpha_vec, log = TRUE) 
     }
+    
+    #density_dirmult_samps[t] = ddirmnom(r_dir_multinom, num_is_samps, alpha_vec, log = TRUE) 
     
   }
   
@@ -131,15 +140,15 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   
   log_prior_so = log(1/(1 + epidemic_data[1]))
   
-    #GET ESTIMATE
-    for (i in 1:num_is_samps) {
-      
-      loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
-                              theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
-      
-      vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
-        log_q[i] - log_density_dirmult_samps[i]
-    }
+  #GET ESTIMATE
+  for (i in 1:num_is_samps) {
+    
+    loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
+                                     theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
+    
+    vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
+      log_q[i] - log_density_dirmult_samps[i]
+  }
   
   #print(vector_estimate_terms)
   log_model_ev_est = -log(num_is_samps) + LOG_SUM_EXP(vector_estimate_terms)

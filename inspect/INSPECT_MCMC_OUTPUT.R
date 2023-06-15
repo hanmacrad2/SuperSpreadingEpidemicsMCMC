@@ -59,7 +59,6 @@ plot(mcmc_output$non_ss)
 #PLOT GRID
 PLOT_SSB_MCMC_GRID(data_ssib, mcmc_output, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
-
 #COMPARE
 library(EpiEstim)
 help(estimate_R)
