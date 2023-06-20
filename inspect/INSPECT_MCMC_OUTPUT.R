@@ -8,6 +8,10 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSNB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIR_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
+
+#PARAMS
+NMCMC = 30000
 
 #SSNB
 run = 5
@@ -23,18 +27,19 @@ mcmc_output_nb_2 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_
 plot.ts(mcmc_output_nb_2$ssnb_params_matrix)
 
 #SSIR
-run = 5
 model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
 #MCMC
 i = 1
-mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+mcmc_output_ssir = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 #mcmc_samples =  cbind(mcmc_output$ssic_params_matrix, mcmc_output$eta_matrix)
 
 #PLOT
 plot.ts(mcmc_output$ssir_params_matrix)
 plot.ts(mcmc_output$eta_matrix)
+PLOT_SSIR_MCMC_GRID(data_ssib, mcmc_output_ssir, 0, 1,
+                                0, NMCMC)
 
 #SSIB
 run = 1
@@ -57,7 +62,7 @@ plot.ts(mcmc_output$sigma$sigma5)
 plot(mcmc_output$non_ss)
 
 #PLOT GRID
-PLOT_SSB_MCMC_GRID(data_ssib, mcmc_output, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
+PLOT_SSB_MCMC_GRID(MOCK_DATA, mcmc_output, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
 #COMPARE
 library(EpiEstim)

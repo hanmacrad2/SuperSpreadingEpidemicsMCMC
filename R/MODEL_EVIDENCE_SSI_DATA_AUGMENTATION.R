@@ -1,14 +1,14 @@
 #MODEL EVIDENCE FOR SSI MODEL
 
 # - Dirichlet multinomial Importance sampling proposal for SSIB model with Data Augmentation - 
-library(SuperSpreadingEpidemicsMCMC)
-library(mvtnorm)
+#library(SuperSpreadingEpidemicsMCMC)
+#library(mvtnorm)
 library(extraDistr)
-library(MultiRNG)
+#library(MultiRNG)
 
 #FUNCTIONS
 #ddirmnom(r_dir_samps, 3, alpha.vec, log = FALSE)
-rdirmnom(10, 1, c(2,3))
+#rdirmnom(10, 1, c(2,3))
 
 #R SAMP DIRICHLET  MULTINOMIAL
 #' Title
@@ -151,12 +151,12 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
-dir_multi_nom_comps
+#dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
+#dir_multi_nom_comps
 
 
 #APPLY
-model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, data_ssib) #mcmc_output
+#model_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, data_ssib) #mcmc_output
 
 #r_dir_multinom = rdirmnom(n = 1, size = N, alpha = alpha_vec)
 # r_dir_multinom = draw.dirichlet.multinomial(no.row = 1, #num_is_samps,

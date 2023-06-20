@@ -4,7 +4,7 @@
 
 #LIBRARIES
 #library(SuperSpreadingEpidemicsMCMC)
-library(mvtnorm)
+#library(mvtnorm)
 
 #*************************************
 #* FUNCTIONS 
@@ -43,7 +43,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
-  theta_samples_prior = GET_PRIOR_THETA_SAMPLES(samp_size_prior, n_dim, FLAGS_MODELS)
+  theta_samples_prior = GET_PRIOR_THETA_SAMPLES(epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS)
   
   print(paste0('theta samps proposal dim: ', dim(theta_samples_proposal)))
   print(paste0('theta samps prior dim: ', dim(theta_samples_prior)))
@@ -58,7 +58,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                       sigma = cov(mcmc_samples), df = dof) #log = TRUE log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
-  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples,
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data,
                                             samp_size_prior, n_dim, FLAGS_MODELS)
   
   #PROPOSAL 

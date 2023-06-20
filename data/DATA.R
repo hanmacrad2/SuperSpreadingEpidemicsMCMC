@@ -2,7 +2,6 @@
 # DATA
 #****************************************************************
 library(SuperSpreadingEpidemicsMCMC)
-
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 
 #************************
@@ -23,7 +22,6 @@ file_name = 'data_ssnb.rds'
 data_ssnb = SIMULATE_EPI_SSNB(num_days = 50)
 plot.ts(data_ssnb)
 saveRDS(data_ssnb, paste0(DATA_FOLDER, file_name))
-
 data_ssnb = readRDS(paste0(DATA_FOLDER, file_name))
 
 #SSIR
@@ -36,13 +34,20 @@ data_ssir2 = readRDS(paste0(DATA_FOLDER, file_name))
 data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
-file_name = 'data_ssib.rds'
-#data_ssib = SIMULATE_EPI_SSIB()
-plot.ts(data_ssib)
-saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
+file_name = 'data_ssib2.rds'
+data_ssib2 = SIMULATE_EPI_SSIB()
+plot.ts(data_ssib2,  main = 'SSIB DATA, R0 = 1.6', ylab = 'Daily infection count')
+saveRDS(data_ssib2, paste0(DATA_FOLDER, file_name))
 
 data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_ssib)
+par(mfrow = c(1,1))
+
+#MOCK DATA
+file_name = 'mock_data_5_days.rds'
+MOCK_DATA = c(1,2,1,2,2)
+plot.ts(MOCK_DATA, main = 'MOCK DATA', ylab = 'Daily infection count', )
+saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
 
 #****************************************************************
 # CANDADIAN DATA

@@ -17,7 +17,7 @@ SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0))
 #* #1. SAMPLES FROM PRIORS
 #*
 #********************************
-GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
+GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS){
  
   #PRIORS
   list_priors = SET_PRIORS()$list_priors
@@ -85,7 +85,7 @@ GET_PRIOR_THETA_SAMPLES <- function(samp_size_prior, n_dim, FLAGS_MODELS){
 #* 2. GET DENSITY (LOG) OF PRIORS 
 #*
 #********************************
-GET_LOG_PRIOR_DENSITY <- function(theta_samples, samp_size_prior, n_dim, FLAGS_MODELS){
+GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS){
   
   #PRIORS
   list_priors = SET_PRIORS()$list_priors

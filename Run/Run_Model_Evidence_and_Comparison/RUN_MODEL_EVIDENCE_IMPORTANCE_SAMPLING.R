@@ -20,6 +20,9 @@ n_repeats = 10
 #***********************
 # 1. DATA 
 #**********************
+EPI_DATA = data_ssib2
+saveRDS(data_ssib2, paste0(OUTER_FOLDER, file_name)) 
+
 #BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 
@@ -51,44 +54,44 @@ plot.ts(data_wait_08_21)
 #* MODEL EVIDENCE ESTIMATES
 #* 
 #****************************************************************************
+run = 1
+n_repeats = 10
 
 #*************************
-#2a. BASELINE
+#1. BASELINE
 #*************************
-run = 2
-model_ev_base22 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-mean(model_ev_base22, na.rm = TRUE)
-sd(model_ev_base22, na.rm = TRUE)
+mean(model_ev_base)# , na.rm = TRUE)
+sd(model_ev_base) #, na.rm = TRUE)
 
 #*************************
-#2c. SSNB
+#2. SSNB
 #*************************
-model_ev_ssnb22 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
 #Results
-mean(model_ev_ssnb22)
-sd(model_ev_ssnb22)
+mean(model_ev_ssnb)
+sd(model_ev_ssnb)
 
 #*************************
-#2b. SSEB
+#3. SSEB
 #*************************
-model_ev_sseb22 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_baseline2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 #PLOT
 #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
-mean(model_ev_sseb22)
-sd(model_ev_sseb22)
+mean(model_ev_sseb)
+sd(model_ev_sseb)
 
 #*************************
-#2b. SSIR
+#4. SSIR
 #*************************
-run = 5
-model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub1, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = TRUE))
 
@@ -100,7 +103,7 @@ sd(model_ev_ssir)
 #*************************
 #5. SSIB
 #*************************
-model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))
 mean(model_ev_ssib)

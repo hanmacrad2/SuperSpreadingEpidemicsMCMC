@@ -96,7 +96,7 @@ ETA_CREDIBLE_INTERVALS <- function(eta_matrix, eta_true, pchX = 16,
 #'   \item \code{"PRIOR"}  - Plot prior distributions in grid if TRUE
 #'   \item \code{"B_PRIOR_GAMMA"}  - A Gamma prior on b if TRUE, otherwise exponential
 #'   \item \code{"C_PRIOR_GAMMA"}  - A Gamma prior on c if TRUE, otherwise exponential
-#' }
+,#' }
 #' @return Dataframe of results including mcmc sample starting points, mcmc sample final means, acceptance rates, mcmc effective sizes and the mcmc sampler run time
 #' @export
 #'
@@ -110,9 +110,9 @@ ETA_CREDIBLE_INTERVALS <- function(eta_matrix, eta_true, pchX = 16,
 #' df_mcmc_results = PLOT_SS_MCMC_GRID(epidemic_data, mcmc_output) 
 
 #PLOT MCMC GRID
-PLOT_ssir_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
+PLOT_SSIR_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
                                 log_like_sim, n_mcmc,
-                                simulated = list(m1 = 1.0, m2 = 0.16),
+                                simulated = list(m1 = 1.6, m2 = 0.16),
                                mcmc_specs = list(model_type = 'NZ',
                                                  mod_start_points = list(m1 = 1.2, m2 = 0.16), mod_par_names = c('R0', 'k', 'eta'),
                                                  burn_in_pc = 0.2, thinning_factor = 10,
@@ -122,6 +122,9 @@ PLOT_ssir_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
                                                  ADAPTIVE = FALSE, MULTI_ALG = TRUE)){
   #priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100), b_prior_exp = c(0.1,0), #10, 1/100
   #                   c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)){
+  
+  #FIX
+  eta_sim_val = 0
   
   #PLOT
   plot.new()
@@ -344,7 +347,9 @@ PLOT_ssir_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   abline(h = mcmc_specs$mod_start_points$m2, col = 'blue', lwd = 2)
   
   #ETA MEAN + CREDIBLE INTERVALS
-  ETA_CREDIBLE_INTERVALS(mcmc_output$eta_matrix, eta_sim, lwdX = 1)
+  #!!!!!!!!!!!!!
+  #INCLUDE BACK IN!!!!!!!!!!!!
+  #ETA_CREDIBLE_INTERVALS(mcmc_output$eta_matrix, eta_sim, lwdX = 1)
   
   #SIGMA ETA
   plot.ts(sigma_eta_X,  ylab = paste0('sigma ', mcmc_specs$mod_par_names[3]), 

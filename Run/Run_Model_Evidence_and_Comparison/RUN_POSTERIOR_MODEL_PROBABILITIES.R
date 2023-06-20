@@ -7,6 +7,41 @@
 #***************************************************
 
 #************************
+# PART 1: FIVE MODELS :D
+#************************
+post_probs_base = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, FLAG_BASELINE = TRUE, list_log_mod_evid = list(model_ev_base,
+                                                                                                                  model_ev_ssnb, model_ev_sseb,
+                                                                                                                model_ev_ssir, model_ev_ssib))
+
+post_probs_ssnb = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, list_log_mod_evid = list(model_ev_ssnb,
+                                                                                            model_ev_base, model_ev_sseb,
+                                                                                          model_ev_ssir, model_ev_ssib))
+
+
+
+post_probs_sseb = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, list_log_mod_evid = list(model_ev_sseb,
+                                                                                            model_ev_base, model_ev_ssnb,
+                                                                                          model_ev_ssir, model_ev_ssib))
+
+post_probs_ssir = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, list_log_mod_evid = list(model_ev_ssir,
+                                                                                          model_ev_base, model_ev_ssnb, 
+                                                                                          model_ev_sseb, model_ev_ssib))
+
+post_probs_ssib = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, list_log_mod_evid = list(model_ev_ssib,
+                                                                                          model_ev_base, model_ev_ssnb, 
+                                                                                          model_ev_sseb, model_ev_ssir))
+#PLOT
+#model_ev_method = 'IS'
+data_type = 'SSI-B Data'# (20% Missing)'
+#data_type = 'NZ Waitemata 08/21 Subset I (3 models)'
+par(mfrow = c(2,1))
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(BASE = post_probs_base, SSI = post_probs_ssir,
+                                                   SSNB = post_probs_ssnb,
+                                                 SSEB = post_probs_sseb, SSIB = post_probs_ssib),
+                         data_type = data_type, model_ev_method = '') #IS Model Evidence.')
+
+
+#************************
 # PART 1: TWO MODELS
 #************************
 post_probs_base2 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 2, FLAG_BASELINE = TRUE, list_log_mod_evid = list(model_ev_base,
@@ -25,31 +60,31 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSI = post_probs_ssir2, BASE = 
 #************************
 # PART 2: THREE MODELS
 #************************
-post_probs_base22 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, FLAG_BASELINE = TRUE, list_log_mod_evid = list(model_ev_base22,
-                                                                                                model_ev_ssnb22,
-                                                                                                model_ev_sseb22))
+post_probs_base3 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, FLAG_BASELINE = TRUE, list_log_mod_evid = list(model_ev_base,
+                                                                                                model_ev_ssnb,
+                                                                                                model_ev_sseb))
 
-post_probs_ssnb22 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, list_log_mod_evid = list(model_ev_ssnb22,
-                                                                          model_ev_base22,
-                                                                          model_ev_sseb22))
+post_probs_ssnb3 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, list_log_mod_evid = list(model_ev_ssnb,
+                                                                          model_ev_ssir,
+                                                                          model_ev_ssib))
 
 
 
-post_probs_sseb22 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, list_log_mod_evid = list(model_ev_sseb22,
-                                                                                           model_ev_base22,
-                                                                                           model_ev_ssnb22))
+post_probs_ssib3 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, list_log_mod_evid = list(model_ev_ssib,
+                                                                                           model_ev_ssnb,
+                                                                                           model_ev_ssir))
 
 post_probs_ssir3 = GET_AGG_POSTERIOR_PROBABILITES(num_models = 3, list_log_mod_evid = list(model_ev_ssir,
-                                                                          model_ev_base,
-                                                                          model_ev_sseb))
+                                                                          model_ev_ssnb,
+                                                                          model_ev_ssib))
 
 #PLOT
-model_ev_method = 'IS'
-data_type = 'Simulated Baseline'# (20% Missing)'
-data_type = 'NZ Waitemata 08/21 Subset I (3 models)'
+#model_ev_method = 'IS'
+#data_type = 'Simulated Baseline'# (20% Missing)'
+#data_type = 'NZ Waitemata 08/21 Subset I (3 models)'
 par(mfrow = c(2,1))
-BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSNB = post_probs_ssnb22,
-                                                SSEB = post_probs_sseb22, BASE = post_probs_base22),
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSIB = post_probs_ssib3,
+                                                SSI = post_probs_ssir3, SSNB = post_probs_ssnb3),
                          data_type = data_type, model_ev_method = '') #IS Model Evidence.')
 
 
