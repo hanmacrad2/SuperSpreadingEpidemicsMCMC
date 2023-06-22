@@ -28,7 +28,7 @@ library(extraDistr)
 #* 1. PROPOSALS FROM DIRICHLET MULTINOMIAL
 #*
 #*****************************************************************************************
-PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta = 1){
+PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta = 0.1){ #beta strictly less than 1 
   
   #PARAMS
   N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
@@ -40,6 +40,8 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     categories = sort(unique(mcmc_output$ss[,t]))
     
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
+    alpha_vec = alpha_vec*beta
+    #print(paste0('alpha_vec = ', alpha_vec))
     
     if (length(alpha_vec)== 1){
       
@@ -57,8 +59,13 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
   }
   
+  #print('***********')
+  #print(r_dir_multinom)
+  #print('***********')
+  #print(r_samp_t)
+  
   return(list(matrix_rdirmult_samps = matrix_rdirmult_samps, density_dirmult_samps = density_dirmult_samps))
-}
+} #beta = 1
 
 #**************************************************************************************
 #*
@@ -87,7 +94,7 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
-  for (t in 1:num_days) { 
+  for (t in 2:num_days) { 
     
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
     lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
@@ -96,10 +103,7 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
     loglike_t = - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
       ss[t]*(log(bX) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
     
-    #-Inf if non_ss is negative
-    if (!is.infinite(loglike_t)){
-      loglike = loglike + loglike_t
-    }
+    loglike = loglike + loglike_t
     
   }
   
@@ -122,6 +126,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   mcmc_param_samples = matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   theta_samples = imp_samp_comps$theta_samples
+  #print(paste0('theta_samps:', theta_samples))
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
   #SS MULTINOM DIR
@@ -134,11 +139,17 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
     #GET ESTIMATE
     for (i in 1:num_is_samps) {
       
+      if (log_prior_density[i] > -Inf){
+      
       loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
       
       vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
         log_q[i] - log_density_dirmult_samps[i]
+      
+      } else {
+        vector_estimate_terms[i] =  -Inf
+      }
     }
   
   #print(vector_estimate_terms)
@@ -151,8 +162,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-#dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
-#dir_multi_nom_comps
+dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
+dir_multi_nom_comps
 
 
 #APPLY

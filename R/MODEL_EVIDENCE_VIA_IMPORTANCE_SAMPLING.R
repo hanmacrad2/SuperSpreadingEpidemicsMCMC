@@ -94,8 +94,6 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     
     #GET ESTIMATE
     for (i in 1:n_samples) {
-      if (i %% 100 == 0)
-        print(i)
       
       loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3])
@@ -107,8 +105,6 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   } else if (FLAGS_MODELS$SSNB) {
     
     for (i in 1:n_samples) {
-      if (i %% 100 == 0)
-        print(i)
       
       loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
       
@@ -129,13 +125,16 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     
     #GET ESTIMATE
     for (i in 1:n_samples) {
-      if (i %% 100 == 0)
-        print(i)
       
-      loglike = LOG_LIKE_SSIB(epidemic_data, theta_samples[i, 1],
+      if (log_prior_density[i] > -Inf){
+
+        loglike = LOG_LIKE_SSIB(epidemic_data, theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3])
       
-      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+        vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+      } else {
+        vector_estimate_terms[i] = -Inf
+      }
     }
     
   }
@@ -189,7 +188,6 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     
     for (i in start:n_repeats){
       
-      print(paste0('i = ', i))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
       
@@ -211,7 +209,6 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     
     for (i in start:n_repeats){
       
-      print(paste0('i = ', i))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples =  mcmc_output$ssnb_params_matrix 
       
@@ -233,9 +230,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     
     for (i in start:n_repeats){ #start:n_repeats
       
-      print(paste0('i = ', i))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      
       mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
       print(paste0('dim of mcmc', dim(mcmc_samples)))
 
@@ -256,8 +251,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     print(CURRENT_FOLDER)
     
     for (i in start:n_repeats){ #start:n_repeats
-      
-      print(paste0('i = ', i))
+
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       #mcmc_samples =  matrix(c(mcmc_output[["a_vec"]], mcmc_output[["b_vec"]], mcmc_output[["c_vec"]]), ncol = 3)
       #mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
