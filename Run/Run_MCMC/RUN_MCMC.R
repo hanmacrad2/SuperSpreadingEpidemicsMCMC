@@ -12,18 +12,24 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSNB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIR_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
 
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_2/')
+
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/MISSING/')
 
 #PARAMS
-run = 3
+run = 1
 n_repeats = 10; NMCMC = 30000
-EPI_DATA = data_ssib3
+EPI_DATA = data_baseline
   
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
+                        FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                            SSIR = FALSE, SSIB = FALSE))
 
+run = '3_gp'
 RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE))

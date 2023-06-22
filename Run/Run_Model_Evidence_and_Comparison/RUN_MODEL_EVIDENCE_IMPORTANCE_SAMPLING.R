@@ -13,8 +13,11 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
+
 
 run = 1 
+run = 2
 n_repeats = 10
 
 #***********************
@@ -104,6 +107,7 @@ sd(model_ev_ssir)
 #*************************
 #5. SSIB
 #*************************
+run = 3
 model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))
@@ -114,12 +118,13 @@ sd(model_ev_ssib)
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
 
-#Mock data
-model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(MOCK_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+#MOCK DATA
+run = 1
+model_ev_ssib2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                              FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                  SSIB = TRUE, SSIR = FALSE))
-mean(model_ev_ssib)
-sd(model_ev_ssib)
+mean(model_ev_ssib2)
+sd(model_ev_ssib2)
 
 #*************************
 #2b. SSNB - GAMMA PRIOR ON K
@@ -155,7 +160,11 @@ LOAD_MODEL_EVIDENCE <- function(model_type, run, OUTER_FOLDER){
 }
 
 #LOAD 
-model_ev_base2 = LOAD_MODEL_EVIDENCE('baseline', 1, OUTER_FOLDER)
-model_ev_sseb2 = LOAD_MODEL_EVIDENCE('sseb', 1, OUTER_FOLDER)
-model_ev_ssnb2 = LOAD_MODEL_EVIDENCE('ssnb', 1, OUTER_FOLDER)
-model_ev_ssir2 = LOAD_MODEL_EVIDENCE('ssir', 1, OUTER_FOLDER)
+run = 2
+model_ev_base2 = LOAD_MODEL_EVIDENCE('baseline', run, OUTER_FOLDER)
+model_ev_sseb2 = LOAD_MODEL_EVIDENCE('sseb', run, OUTER_FOLDER)
+model_ev_ssnb2 = LOAD_MODEL_EVIDENCE('ssnb', run, OUTER_FOLDER)
+model_ev_ssir2 = LOAD_MODEL_EVIDENCE('ssir', run, OUTER_FOLDER)
+
+#SD OF RESULTS
+sd(model_ev_ssir2, na.rm = TRUE) 

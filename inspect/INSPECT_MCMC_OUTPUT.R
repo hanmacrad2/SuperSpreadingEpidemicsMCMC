@@ -13,6 +13,18 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 #PARAMS
 NMCMC = 30000
 
+#BASELINE
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_2/')
+run = '3_gp'
+
+run = '1'
+model_type = 'baseline'; print(model_type)
+CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+
+#MCMC
+i = 1
+mcmc_output_baseline1 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
 #SSNB
 run = 5
 model_type = 'ssnb'; print(model_type)
@@ -41,7 +53,7 @@ plot.ts(mcmc_output$eta_matrix)
 PLOT_SSIR_MCMC_GRID(data_ssib, mcmc_output_ssir, 0, 1,
                                 0, NMCMC)
 
-#SSIB
+#SSIB #GET DATA
 run = 1
 model_type = 'ssib'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')

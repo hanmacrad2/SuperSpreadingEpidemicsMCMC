@@ -34,6 +34,7 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
   N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
   matrix_rdirmult_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
   density_dirmult_samps = rep(0, num_is_samps) #c()
+  print(paste0('beta = ', beta))
     
   for (t in 1:length(x)){
     
@@ -112,6 +113,7 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
 
 #' @export
 GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 1000,
+                                        beta = 1,
                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = TRUE, SSIR = FALSE)) {   
   
@@ -130,7 +132,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
   #SS MULTINOM DIR
-  dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps)
+  dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps, beta = beta)
   theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
   log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
   

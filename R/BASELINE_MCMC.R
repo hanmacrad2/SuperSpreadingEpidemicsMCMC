@@ -130,10 +130,13 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #' @export
-MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
-                                   mcmc_inputs = list(r0_start = 1.2, r0_prior_exp = c(1, 0),
+MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
+                                   mcmc_inputs = list(r0_start = 1.2,
                                                       target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
-                                   FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
+                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0)),
+                                   FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR_EXP = FALSE,
+                                                     PRIOR_GAMMA = TRUE,
+                                                     THIN = TRUE, BURN_IN = TRUE)) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -146,6 +149,9 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   #INITIALISE PARAMS
   #**********************************************
   print(paste0('num mcmc iters = ', n_mcmc))
+  #PRIORS
+  gamma_shape = priors_list$gamma_shape
+  gamma_scale = priors_list$gamma_shape*r0_sim
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -200,8 +206,14 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     log_accept_ratio = loglike_new - log_likelihood 
     
     #Priors
-    if (FLAGS_LIST$PRIOR){
+    if (FLAGS_LIST$PRIOR_EXP){
       log_accept_ratio = log_accept_ratio - r0_dash + r0 #Acceptance RATIO. Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
+    
+      } else if (FLAGS_LIST$PRIOR_GAMMA) {
+      
+      log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale) - 
+        dgamma(r0, shape =gamma_shape, scale = gamma_scale, log = TRUE)
+
     }
     
     #print(paste0(' log_accept_ratio ',  log_accept_ratio))
