@@ -6,8 +6,8 @@
 #' @param epidemic_data data from the epidemic, namely daily infection counts
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
 #' 
-PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, true_r0,
-                                  true_loglike, data_type, ADAPTIVE = TRUE) { #sim_data, mcmc_output, true_r0, time_elap, seed_count, model_type){
+PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, true_r0 = 1.6,
+                                  true_loglike = 0, data_type = 'Baseline', ADAPTIVE = TRUE) { #sim_data, mcmc_output, true_r0, time_elap, seed_count, model_type){
   
   #PLOT
   plot.new(); par(mfrow=c(2,3))

@@ -134,8 +134,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
                                    mcmc_inputs = list(r0_start = 1.2,
                                                       target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                                 priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0)),
-                                   FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR_EXP = FALSE,
-                                                     PRIOR_GAMMA = TRUE,
+                                   FLAGS_LIST = list(ADAPTIVE = TRUE, 
+                                                     PRIOR_EXP = TRUE, PRIOR_GAMMA = FALSE,
                                                      THIN = TRUE, BURN_IN = TRUE)) {
   
   'Returns MCMC samples of the reproduction number of the data

@@ -16,14 +16,21 @@ NMCMC = 30000
 #BASELINE
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_2/')
 run = '3_gp'
+run = 1
 
-run = '1'
 model_type = 'baseline'; print(model_type)
-CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/'); print(CURRENT_FOLDER)
 
 #MCMC
-i = 1
-mcmc_output_baseline1 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+i = 10
+mcmc_output_baseline_exp1 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
+mcmc_output_baseline_gamma = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
+#PLOT
+PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_exp1) #exp(1) - MUCH TIGHTER!!
+
+PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_gamma)
 
 #SSNB
 run = 5

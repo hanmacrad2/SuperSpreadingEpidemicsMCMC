@@ -176,18 +176,19 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, bX, cX,
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
-                              mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
+                            mcmc_inputs = list(mod_start_points = list(m1 = 0.6, m2 = 0.0038, m3 = 22),
                                                  alpha_star = 0.4, 
                                                  burn_in_pc = 0.2, thinning_factor = 10),
                               priors_list = list(a_prior_exp = c(1, 0),
-                                                 a_prior_gamma = 
+                                                 a_prior_gamma_shape = 2,
                                                  b_prior_ga = c(10, 2/100),
                                                  b_prior_exp = c(0.1,0),
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BURN_IN = TRUE,
                                                 BCA_TRANSFORM = TRUE,
-                                                PRIOR = TRUE, A_PRIOR_GAMMA = TRUE,
+                                                PRIOR = TRUE, 
+                                                A_PRIOR_EXP = FALSE, A_PRIOR_GAMMA = TRUE,
                                                 B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 
@@ -207,6 +208,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
   #**********************************************
   time = length(epidemic_data) #length(data[[1]])
   print(paste0('num mcmc iters = ', n_mcmc))
+  
+  #PRIORS
+  a_gamma_shape = priors_list$a_prior_gamma_shape #priors_list$gamma_shape
+  a_gamma_scale = a_gamma_shape*mcmc_inputs$mod_start_points$m1
   
   ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
   print('ss:'); print(ss)
@@ -309,10 +314,17 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
     logl_new = LOG_LIKE_SSIB(data, a_dash, b, c)
     #print(paste0('logl_new', logl_new))
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
+    
     #Priors
-    if (FLAGS_LIST$PRIOR){
+    if (FLAGS_LIST$A_PRIOR_EXP){
       log_accept_ratio = log_accept_ratio - a_dash + a #*Actually this is the Acceptance RATIO. ACCEPTANCE PROB = MIN(1, EXP(ACCPET_PROB))
-    }
+    
+      } else if (FLAGS_LIST$A_PRIOR_GAMMA) {
+    
+    log_accept_ratio = log_accept_ratio + dgamma(a_dash, shape = a_gamma_shape, scale = a_gamma_scale) - 
+      dgamma(a, shape = a_gamma_shape, scale = a_gamma_scale, log = TRUE)
+    
+  }
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -376,7 +388,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
         dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
     } else {
       log_accept_ratio = log_accept_ratio - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
-      if (i == 3) print('exp prior on')
+      #if (i == 3) print('exp prior on')
     }
 
     #Metropolis Acceptance Step
