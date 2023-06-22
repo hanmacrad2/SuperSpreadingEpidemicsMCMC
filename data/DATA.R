@@ -34,10 +34,10 @@ data_ssir2 = readRDS(paste0(DATA_FOLDER, file_name))
 data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
-file_name = 'data_ssib2.rds'
-data_ssib2 = SIMULATE_EPI_SSIB()
-plot.ts(data_ssib2,  main = 'SSIB DATA, R0 = 1.6', ylab = 'Daily infection count')
-saveRDS(data_ssib2, paste0(DATA_FOLDER, file_name))
+file_name = 'data_ssib3.rds'
+data_ssib3 = SIMULATE_EPI_SSIB(aX = 0.8)
+plot.ts(data_ssib3,  main = 'SSIB DATA, R0 = 1.8', ylab = 'Daily infection count')
+saveRDS(data_ssib3, paste0(DATA_FOLDER, file_name))
 
 data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_ssib)

@@ -71,6 +71,7 @@ BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results, #= list(sseb = results1,b
   print(head(df_results))
   boxplot(df_results, main = title,
           col = c('red', 'green', 'blue', 'orange', 'black'),
+          ylim = c(0,1),
           cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
   
   
@@ -87,6 +88,7 @@ BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results = list(sseb = results1,
   print(head(df_results))
   boxplot(df_results, main = title,
           col = c('red', 'green', 'blue', 'orange'),
+          ylim = c(0,1),
           cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
   
   

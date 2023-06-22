@@ -20,8 +20,9 @@ n_repeats = 10
 #***********************
 # 1. DATA 
 #**********************
-EPI_DATA = data_ssib2
-saveRDS(data_ssib2, paste0(OUTER_FOLDER, file_name)) 
+EPI_DATA = data_ssib3 #data_ssib2
+file_name = 'data_ssib3.rds'
+saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
 
 #BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
@@ -112,6 +113,13 @@ sd(model_ev_ssib)
 #PLOT
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
+
+#Mock data
+model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(MOCK_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                 SSIB = TRUE, SSIR = FALSE))
+mean(model_ev_ssib)
+sd(model_ev_ssib)
 
 #*************************
 #2b. SSNB - GAMMA PRIOR ON K

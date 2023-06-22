@@ -15,14 +15,16 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/MISSING/')
 
-run = 1
-n_repeats = 10
-NMCMC = 30000
+#PARAMS
+run = 3
+n_repeats = 10; NMCMC = 30000
+EPI_DATA = data_ssib3
+  
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
 
-RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE))
 
@@ -30,7 +32,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run, n_repeats = 
 #***********************
 # 2. RUN SSNB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run,
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run,
                         n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                             SSIR = FALSE, SSIB = FALSE)) #data_ssnb
@@ -38,7 +40,7 @@ RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run,
 #***********************
 # 3. RUN SSEB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run,
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run,
                         n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE)) #data_sseb
@@ -46,14 +48,14 @@ RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run,
 #**************************
 # 4. RUN SSIR MCMC
 #**************************
-RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = TRUE, SSIB = FALSE)) #data_ssir
 
 #***********************
 # 5. RUN SSIB MCMC
 #**********************
-RUN_MCMC_MULTIPLE_TIMES(data_ssib2, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = TRUE))
 

@@ -62,7 +62,9 @@ plot.ts(mcmc_output$sigma$sigma5)
 plot(mcmc_output$non_ss)
 
 #PLOT GRID
-PLOT_SSB_MCMC_GRID(MOCK_DATA, mcmc_output, FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
+PLOT_SSB_MCMC_GRID(data_ssib, mcmc_output, 
+                   sim_vals = list(m1 = 0.8, m2 = 0.1, m3 = 10),
+                   FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
 #COMPARE
 library(EpiEstim)
