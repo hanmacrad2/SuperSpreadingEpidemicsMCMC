@@ -154,6 +154,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
   gamma_scale = priors_list$gamma_shape*r0_sim
   
   #THINNING FACTOR
+  i_thin = 1
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
@@ -233,12 +234,11 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 & i >= burn_in_start) {
-      #print(paste0('i = ', i))
-      #print(paste0('r0 = ', r0))
-      i_thin = i/thinning_factor; 
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
+
       r0_vec[i_thin] <- r0
       log_like_vec[i_thin] <- log_likelihood
+      i_thin = i_thin + 1
       
       if (FLAGS_LIST$ADAPTIVE){
         sigma_vec[i_thin] = sigmaX

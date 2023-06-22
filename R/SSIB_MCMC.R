@@ -180,12 +180,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000,
                               mcmc_inputs = list(mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
                                                  alpha_star = 0.4, 
                                                  burn_in_pc = 0.2, thinning_factor = 10),
-                              priors_list = list(a_prior_exp = c(1, 0), b_prior_ga = c(10, 2/100),
+                              priors_list = list(a_prior_exp = c(1, 0),
+                                                 a_prior_gamma = 
+                                                 b_prior_ga = c(10, 2/100),
                                                  b_prior_exp = c(0.1,0),
                                                  c_prior_ga = c(10, 1), c_prior_exp = c(0.1,0)),
                               FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BURN_IN = TRUE,
                                                 BCA_TRANSFORM = TRUE,
-                                                PRIOR = TRUE, B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
+                                                PRIOR = TRUE, A_PRIOR_GAMMA = TRUE,
+                                                B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 
   'Returns MCMC samples of SSI-B model parameters (a, b, c, r0 = a + b*c)
