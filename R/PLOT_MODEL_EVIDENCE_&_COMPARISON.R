@@ -52,11 +52,11 @@ PLOT_MODEL_EV_RESULTS <- function(posterior_results, model_type = 'SSEB',
   #PLOT
   par(mfrow = c(2,1))
   boxplot(posterior_results,
-          ylab = axis_label,
+          ylab = 'Log(Model Evidence)',  #axis_label,
           main = titleX)
   
   hist(posterior_results, breaks = 50, freq = FALSE,
-       xlab = axis_label,
+       xlab = 'Log(Model Evidence)', #axis_label,
        main = titleX)
   
 }

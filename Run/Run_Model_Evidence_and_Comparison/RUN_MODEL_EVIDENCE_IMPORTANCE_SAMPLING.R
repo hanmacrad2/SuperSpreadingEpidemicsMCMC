@@ -11,10 +11,10 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_compariso
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/DATA_BASELINE_2/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
-
 
 run = 1 
 run = 2
@@ -23,6 +23,7 @@ n_repeats = 10
 #***********************
 # 1. DATA 
 #**********************
+EPI_DATA = data_baseline2
 EPI_DATA = data_ssib3 #data_ssib2
 file_name = 'data_ssib3.rds'
 saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
@@ -69,6 +70,17 @@ model_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, 
                                                                         SSIB = FALSE, SSIR = FALSE))
 mean(model_ev_base)# , na.rm = TRUE)
 sd(model_ev_base) #, na.rm = TRUE)
+PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
+
+#PRIOR GAMMA 
+run = '3_gp'
+model_ev_base_gp = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                                PRIORS_LIST = list(EXP_PRIOR = FALSE, GAMMA_PRIOR = TRUE),
+                                             FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                                 SSIB = FALSE, SSIR = FALSE))
+mean(model_ev_base_gp)# , na.rm = TRUE)
+sd(model_ev_base_gp) #, na.rm = TRUE)
+PLOT_MODEL_EV_RESULTS(model_ev_base_gp, model_type = '. Baseline w/ gamma(2, mean = R0) prior on R0')
 
 #*************************
 #2. SSNB
