@@ -65,6 +65,12 @@ run = 1
 model_type = 'ssib'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
+#run gamma
+run = 'run_2_ga_prior'; 
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'DATA_SSIB_2/') #SSIB_DATA
+CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
+CURRENT_FOLDER
+
 #MCMC
 i = 10
 mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
@@ -81,8 +87,8 @@ plot.ts(mcmc_output$sigma$sigma5)
 plot(mcmc_output$non_ss)
 
 #PLOT GRID
-PLOT_SSB_MCMC_GRID(data_ssib, mcmc_output, 
-                   sim_vals = list(m1 = 0.8, m2 = 0.1, m3 = 10),
+PLOT_SSB_MCMC_GRID(data_ssib2, mcmc_output, 
+                   sim_vals = list(m1 = 0.6, m2 = 0.1, m3 = 10),
                    FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
 #COMPARE
