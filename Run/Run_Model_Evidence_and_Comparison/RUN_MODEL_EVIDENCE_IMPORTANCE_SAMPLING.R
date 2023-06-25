@@ -16,6 +16,8 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
 
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
+
 run = 1 
 run = 2
 n_repeats = 10
@@ -24,7 +26,7 @@ n_repeats = 10
 # 1. DATA 
 #**********************
 EPI_DATA = data_baseline2
-EPI_DATA = data_ssib3 #data_ssib2
+EPI_DATA = data_ssib2 #data_ssib3
 file_name = 'data_ssib3.rds'
 saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
 
@@ -130,13 +132,15 @@ sd(model_ev_ssib)
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
 
-#MOCK DATA
-run = 1
+#SSIB2 DATA + gamma prior
+run = '2_ga_prior'
 model_ev_ssib2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                              FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                  SSIB = TRUE, SSIR = FALSE))
 mean(model_ev_ssib2)
 sd(model_ev_ssib2)
+PLOT_MODEL_EV_RESULTS(model_ev_ssib2, model_type = 'SSIB; prior(a) ~ gamma(mean ~ a)',
+                      data_type = 'SSIB')
 
 #*************************
 #2b. SSNB - GAMMA PRIOR ON K

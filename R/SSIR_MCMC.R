@@ -62,13 +62,13 @@ LOG_LIKE_SSIR <- function(x, infectivity_vec, ssir_params, eta){ #eta - a vector
     eta_prob = dgamma(eta[t-1], shape = x[t-1]*k, scale = R0/k, log = TRUE)
     #print(paste0('eta_prob', eta_prob))
     
-    if (!is.na(eta_prob) && !is.infinite(eta_prob)){
+    if (!is.na(eta_prob) ) { #&& !is.infinite(eta_prob)){
       loglike = loglike + eta_prob 
     } 
     
     poi_prob = x[t]*log(total_rate) - total_rate - lfactorial(x[t]) 
     
-    if (!is.na(poi_prob) && !is.infinite(poi_prob)){
+    if (!is.na(poi_prob)) { #&& !is.infinite(poi_prob)){
       loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
     }
   }

@@ -164,8 +164,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
-dir_multi_nom_comps
+#dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
+#dir_multi_nom_comps
 
 
 #APPLY

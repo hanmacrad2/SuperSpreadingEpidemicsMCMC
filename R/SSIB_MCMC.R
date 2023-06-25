@@ -188,7 +188,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
                               FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BURN_IN = TRUE,
                                                 BCA_TRANSFORM = TRUE,
                                                 PRIOR = TRUE, 
-                                                A_PRIOR_EXP = FALSE, A_PRIOR_GAMMA = TRUE,
+                                                A_PRIOR_EXP = TRUE, A_PRIOR_GAMMA = FALSE,
                                                 B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
                                                 THIN = TRUE)) {
 

@@ -58,7 +58,7 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
       
       loglike_t = dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
       
-      if(!is.infinite(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
+      if(!is.na(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
         
         loglike = loglike + loglike_t 
       }
@@ -66,7 +66,7 @@ LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params,
     } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
       loglike_t = dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
       
-      if(!is.infinite(loglike_t)) { 
+      if(!is.na(loglike_t)) { 
         loglike = loglike + loglike_t 
       }
     }

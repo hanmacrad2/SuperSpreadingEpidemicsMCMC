@@ -4,7 +4,7 @@
 
 #LIBRARIES
 #library(SuperSpreadingEpidemicsMCMC)
-#library(mvtnorm)
+library(mvtnorm)
 
 #*************************************
 #* FUNCTIONS 
@@ -151,9 +151,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
 #*
 #******************************************************************************
 LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER, 
-                                         run = run, n_repeats = n_repeats, start = 1, 
-                                         beta_ssib = 1,
-                                         PRIORS_LIST = list(),
+                                         run = run, n_repeats = n_repeats, 
+                                         start = 1, beta_ssib = 1,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIR = FALSE)){
   'For a given epidemic dataset and model. 
@@ -161,6 +160,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
   1. Load mcmc samples 2. Get estimate'
   
   #Parameters
+  PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   estimates_vec = rep(NA, n_repeats) 
   #estimates_vec = rep(NA, n_repeats - start) 
   
@@ -175,7 +175,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      log_phat = GET_LOG_MODEL_EVIDENCE_BASELINE(mcmc_output$r0_vec, epidemic_data, PRIORS_LIST) 
+      log_phat = GET_LOG_MODEL_EVIDENCE_BASELINE(mcmc_output$r0_vec, epidemic_data) 
       estimates_vec[i] = log_phat
       print(estimates_vec)
     }

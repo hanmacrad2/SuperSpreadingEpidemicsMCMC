@@ -34,14 +34,19 @@ data_ssir2 = readRDS(paste0(DATA_FOLDER, file_name))
 data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
-file_name = 'data_ssib3.rds'
+file_name = 'data_ssib2.rds'
 data_ssib3 = SIMULATE_EPI_SSIB(aX = 0.8)
 plot.ts(data_ssib3,  main = 'SSIB DATA, R0 = 1.8', ylab = 'Daily infection count')
 saveRDS(data_ssib3, paste0(DATA_FOLDER, file_name))
 
-data_ssib = readRDS(paste0(DATA_FOLDER, file_name))
-plot.ts(data_ssib)
+data_ssib2 = readRDS(paste0(DATA_FOLDER, file_name))
+plot.ts(data_ssib2)
 par(mfrow = c(1,1))
+
+file_name = 'data_ssib4.rds'
+data_ssib4 = SIMULATE_EPI_SSIB(num_days = 100, aX = 0.8, bX = 0.05)
+plot.ts(data_ssib4)
+saveRDS(data_ssib4, paste0(DATA_FOLDER, file_name))
 
 #MOCK DATA
 file_name = 'mock_data_5_days.rds'

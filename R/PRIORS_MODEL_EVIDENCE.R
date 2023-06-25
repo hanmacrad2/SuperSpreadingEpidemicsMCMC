@@ -7,7 +7,8 @@ SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0))
                                                              pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
                                           priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)),
                                           priors_ssib = list(exp_prior = c(1,0), a_prior_gamma = c(2, 0.6))),
-                       PRIORS_USED = list(SSNB_K_EXP = TRUE, SSNB_K_GAMMA = FALSE,
+                       PRIORS_USED = list(BASELINE_EXP = TRUE, BASELINE_GAMMA = FALSE,
+                         SSNB_K_EXP = TRUE, SSNB_K_GAMMA = FALSE,
                                           SSIB_GAMMA_A = TRUE)) {
   
   return(list(list_priors = list_priors, PRIORS_USED = PRIORS_USED))
