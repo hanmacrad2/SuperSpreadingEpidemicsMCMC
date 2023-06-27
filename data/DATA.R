@@ -9,9 +9,9 @@ DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 #************************
 
 #BASELINE
-file_name = 'data_baseline2.rds'
-data_baseline2 = readRDS(paste0(DATA_FOLDER, file_name))
-plot.ts(data_baseline2)
+file_name = 'data_baseline.rds'
+data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
+plot.ts(data_baseline)
 
 data_baseline4 = SIMULATE_EPI_BASELINE(1.6, num_days = 30)
 plot.ts(data_baseline4)
@@ -47,6 +47,7 @@ file_name = 'data_ssib4.rds'
 data_ssib4 = SIMULATE_EPI_SSIB(num_days = 100, aX = 0.8, bX = 0.05)
 plot.ts(data_ssib4)
 saveRDS(data_ssib4, paste0(DATA_FOLDER, file_name))
+data_ssib4 = readRDS(paste0(DATA_FOLDER, file_name))
 
 #MOCK DATA
 file_name = 'mock_data_5_days.rds'

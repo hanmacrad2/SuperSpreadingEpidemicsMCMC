@@ -7,6 +7,8 @@ library(MASS)
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/"
 
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/')
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_1/')
+
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSNB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIR_DATA/')
@@ -29,14 +31,17 @@ EPI_DATA = data_ssib4
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
+run = '1_exp_1'
 RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE))
 
-#run = '3_gp'
-#RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
-#                        FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
-#                                            SSIR = FALSE, SSIB = FALSE))
+run = '1_ga'
+RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
+                        FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                            SSIR = FALSE, SSIB = FALSE))
+
+#FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR_EXP = FALSE, PRIOR_GAMMA = TRUE, THIN = TRUE, BURN_IN = TRUE))
 
 
 #***********************
@@ -50,10 +55,10 @@ RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run,
 #***********************
 # 5. RUN SSIB MCMC
 #**********************
-#run = 'run_2_ga_prior'
 RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = 10, n_mcmc = 50000,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = TRUE))
+#run = 'run_2_ga_prior'
 
 #***********************
 # 2. RUN SSNB MCMC

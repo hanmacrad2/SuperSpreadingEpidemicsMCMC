@@ -1,5 +1,6 @@
 #RUN MULTIPLE MCMC
 RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER, 
+                                    FLAGS_LIST,
                                     run_number = 1, n_repeats = 10, n_mcmc = 50000,
                                     PRIORS_USED = list(EXP_K = TRUE, GAMMA_K = FALSE),
                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
@@ -25,7 +26,7 @@ RUN_MCMC_MULTIPLE_TIMES <- function(epidemic_data, OUTER_FOLDER,
       
       #RUN MCMC
       print(paste0('i = ', i))
-      mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc = n_mcmc)
+      mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc = n_mcmc) #, FLAGS_LIST = FLAGS_LIST)
       print(mean(mcmc_output$r0_vec))
       #SAVE
       saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, 'mcmc_', tolower(model_type), '_', i,'.rds'))

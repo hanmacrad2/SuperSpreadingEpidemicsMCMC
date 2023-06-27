@@ -1,7 +1,7 @@
 #INSPECT PRIOR PLOTS
 
 shape <- 2
-mean <- 0.6 #1.6
+mean <- 1.6 #1.6
 scale <- shape * mean
 
 # Generate x-values for the plot

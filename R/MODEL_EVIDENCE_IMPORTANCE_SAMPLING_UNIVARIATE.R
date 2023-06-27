@@ -83,7 +83,7 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   #PRIORS 
   if (PRIORS_USED$BASELINE_GAMMA){
     gamma_shape = 2
-    log_priors = dgamma(theta_samples,  shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
+    log_priors = dgamma(theta_samples,shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
     
   } else {
     log_priors = dexp(theta_samples, log = TRUE)

@@ -130,13 +130,14 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
 #'
 #' @export
-MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
-                                   mcmc_inputs = list(r0_start = 1.2,
-                                                      target_accept_rate = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
-                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0)),
-                                   FLAGS_LIST = list(ADAPTIVE = TRUE, 
-                                                     PRIOR_EXP = TRUE, PRIOR_GAMMA = FALSE,
-                                                     THIN = TRUE, BURN_IN = TRUE)) {
+MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, 
+                                FLAGS_LIST = list(ADAPTIVE = TRUE, 
+                                                  PRIOR_EXP = FALSE, PRIOR_GAMMA = TRUE,
+                                                  THIN = TRUE, BURN_IN = TRUE),
+                                r0_sim = 1.6, mcmc_inputs = list(r0_start = 1.2,
+                                                      target_accept_rate = 0.4, thinning_factor = 10,
+                                                      burn_in_pc = 0.2), 
+                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0))) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -152,6 +153,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
   #PRIORS
   gamma_shape = priors_list$gamma_shape
   gamma_scale = priors_list$gamma_shape*r0_sim
+  print(paste0('Gamma prior? ', FLAGS_LIST$PRIOR_GAMMA))
   
   #THINNING FACTOR
   i_thin = 1
@@ -212,8 +214,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
     
       } else if (FLAGS_LIST$PRIOR_GAMMA) {
       
-      log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale) - 
-        dgamma(r0, shape =gamma_shape, scale = gamma_scale, log = TRUE)
+      log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
+        dgamma(r0, shape = gamma_shape, scale = gamma_scale, log = TRUE)
 
     }
     
@@ -234,7 +236,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, r0_sim = 1.6,
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
 
       r0_vec[i_thin] <- r0
       log_like_vec[i_thin] <- log_likelihood

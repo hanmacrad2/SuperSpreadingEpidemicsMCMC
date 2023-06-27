@@ -3,6 +3,9 @@
 #***********************
 library(SuperSpreadingEpidemicsMCMC)
 library(mvtnorm)
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/DATA_BASELINE_1/"
+
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 #OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/PART_2/SSEB_DATA/"
@@ -17,6 +20,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DAT
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_4/"
 
 run = 1 
 run = 2
@@ -25,8 +29,8 @@ n_repeats = 10
 #***********************
 # 1. DATA 
 #**********************
-EPI_DATA = data_baseline2
-EPI_DATA = data_ssib2 #data_ssib3
+EPI_DATA = data_baseline
+EPI_DATA = data_ssib4 #data_ssib3
 file_name = 'data_ssib3.rds'
 saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
 
@@ -75,11 +79,11 @@ sd(model_ev_base) #, na.rm = TRUE)
 PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
 
 #PRIOR GAMMA 
-run = '3_gp'
+run = '1_ga'
 model_ev_base_gp = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                                PRIORS_LIST = list(EXP_PRIOR = FALSE, GAMMA_PRIOR = TRUE),
                                              FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                  SSIB = FALSE, SSIR = FALSE))
+# PRIORS_LIST = list(EXP_PRIOR = FALSE, GAMMA_PRIOR = TRUE)
 mean(model_ev_base_gp)# , na.rm = TRUE)
 sd(model_ev_base_gp) #, na.rm = TRUE)
 PLOT_MODEL_EV_RESULTS(model_ev_base_gp, model_type = '. Baseline w/ gamma(2, mean = R0) prior on R0')
