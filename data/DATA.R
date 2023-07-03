@@ -1,7 +1,7 @@
 #****************************************************************
 # DATA
 #****************************************************************
-library(SuperSpreadingEpidemicsMCMC)
+#library(SuperSpreadingEpidemicsMCMC)
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 
 #************************
@@ -45,7 +45,7 @@ par(mfrow = c(1,1))
 
 file_name = 'data_ssib4.rds'
 data_ssib4 = SIMULATE_EPI_SSIB(num_days = 100, aX = 0.8, bX = 0.05)
-plot.ts(data_ssib4)
+plot.ts(data_ssib4, main = 'SSIB DATA, R0 = 1.3. a: 0.8, b: 0.05, c: 10', ylab = 'Daily infection count')
 saveRDS(data_ssib4, paste0(DATA_FOLDER, file_name))
 data_ssib4 = readRDS(paste0(DATA_FOLDER, file_name))
 

@@ -113,19 +113,18 @@ sd(model_ev_sseb)
 #*************************
 #4. SSIR
 #*************************
-model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                                        SSIB = FALSE, SSIR = TRUE))
-
-#PLOT
-#PLOT_MODEL_EV_RESULTS(model_ev_sseb)
-mean(model_ev_ssir)
-sd(model_ev_ssir)
+# model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+#                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+#                                                                         SSIB = FALSE, SSIR = TRUE))
+# 
+# #PLOT
+# #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
+# mean(model_ev_ssir)
+# sd(model_ev_ssir)
 
 #*************************
 #5. SSIB
 #*************************
-run = 3
 model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))

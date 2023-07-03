@@ -21,25 +21,25 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/MISSING/')
 
 #PARAMS
-run = 1
+run = 2
 n_repeats = 10; NMCMC = 50000
-EPI_DATA = data_baseline
 
+EPI_DATA = data_baseline
 EPI_DATA = data_ssib2
 EPI_DATA = data_ssib4
 
 #***********************
 # 1. RUN BASELINE MCMC
 #**********************
-run = '1_exp_1'
+#run = '1_exp_1'
 RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                             SSIR = FALSE, SSIB = FALSE))
 
-run = '1_ga'
-RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
-                        FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
-                                            SSIR = FALSE, SSIB = FALSE))
+# run = '1_ga'
+# RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
+#                         FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE, SSNB = FALSE,
+#                                             SSIR = FALSE, SSIB = FALSE))
 
 #FLAGS_LIST = list(ADAPTIVE = TRUE, PRIOR_EXP = FALSE, PRIOR_GAMMA = TRUE, THIN = TRUE, BURN_IN = TRUE))
 

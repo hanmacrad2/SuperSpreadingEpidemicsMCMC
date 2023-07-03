@@ -113,8 +113,7 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
 
 #' @export
 GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 1000,
-                                        beta = 1,
-                                        FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                        beta = 0.1, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = TRUE, SSIR = FALSE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
