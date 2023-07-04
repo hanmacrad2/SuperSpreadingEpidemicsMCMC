@@ -42,11 +42,11 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
     alpha_vec = alpha_vec*beta
-    #print(paste0('alpha_vec = ', alpha_vec))
     
     if (length(alpha_vec)== 1){
       
       matrix_rdirmult_samps[, t] = rep(categories, num_is_samps) #Contributes zero probability 
+      
     } else {
     
       r_dir_multinom = rdirmnom(n = num_is_samps, size = 1, alpha = alpha_vec) #Binary matrix
@@ -60,13 +60,8 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
   }
   
-  #print('***********')
-  #print(r_dir_multinom)
-  #print('***********')
-  #print(r_samp_t)
-  
   return(list(matrix_rdirmult_samps = matrix_rdirmult_samps, density_dirmult_samps = density_dirmult_samps))
-} #beta = 1
+} 
 
 #**************************************************************************************
 #*
@@ -127,8 +122,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   mcmc_param_samples = matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   theta_samples = imp_samp_comps$theta_samples
-  #print(paste0('theta_samps:', theta_samples))
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+  #print(paste0('theta_samps:', theta_samples))
   
   #SS MULTINOM DIR
   dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps, beta = beta)

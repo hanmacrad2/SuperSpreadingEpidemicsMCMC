@@ -87,8 +87,8 @@ plot.ts(mcmc_output$sigma$sigma5)
 plot(mcmc_output$non_ss)
 
 #PLOT GRID
-PLOT_SSB_MCMC_GRID(data_ssib2, mcmc_output, 
-                   sim_vals = list(m1 = 0.6, m2 = 0.1, m3 = 10),
+PLOT_SSB_MCMC_GRID(data_ssib4, mcmc_output, 
+                   sim_vals = list(m1 = 0.8, m2 = 0.05, m3 = 10),
                    FLAGS_MODELS = list(SSEB = FALSE, SSIB = TRUE))
 
 #COMPARE
