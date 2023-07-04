@@ -23,6 +23,132 @@ library(extraDistr)
 #'
 #' @examples
 
+
+#VECTORISED
+PROSOSAL_SS_DIR_MULTINOM_AC2 <- function(x, mcmc_output, num_is_samps = 1000,
+                                        beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
+  
+  #PARAMS
+  N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
+  
+  matrix_rdirmult_samps = matrix(NA, nrow = num_is_samps, ncol = length(x)) #ncol = time
+  
+  density_dirmult_samps = rep(0, num_is_samps) #c()
+  
+  print(paste0('beta = ', beta))
+  
+  for (t in 1:length(x)){
+    
+    if (t == 1){
+      last_categories = c(NA) 
+    } else {
+      #num of SS proposed at previous time point
+      last_categories = sort(unique(matrix_rdirmult_samps[,t-1])) #from all is at last timepoint. find categories #categories 
+    }
+    
+    for (j in 1:length(last_categories)) {
+      
+      if (t == 1) {
+        wh_mcmc = 1:N #Take all mcmc samples for first time point  
+        wh_is = 1:num_is_samps #importance samples we're going to sample. Variable depending on num of categories in prev. iteration
+      } else { #Matches previous time point
+        
+        wh_mcmc = which(mcmc_output$ss[,t-1] == last_categories[j]) #matrix_rdirmult_samps[last_categories, t-1]) #otherwise find mcmc iterations that match the importance sample at the previous time point
+        wh_is = which(matrix_rdirmult_samps[,t-1] == last_categories[j]) # last_categories[j] == the category
+      }
+      
+      categories = sort(unique(mcmc_output$ss[wh_mcmc,t])) #Take the subset where mcmc == import. samp
+      
+      #Match at previous time point and see where it goes. Conditional dist of st|st-1. Simulate from the part 
+      alpha_vec = as.vector(table(mcmc_output$ss[wh_mcmc,t])) #table returns counts of each category 
+      #Normalise
+      alpha_vec = rep(prior_dir/length(categories), length(categories)) + (alpha_vec*beta)/sum(alpha_vec) #sum(alpha) = effective sample size of the prior
+      #beta = effective sample size #Jim Burger: prior_dir = 0.8
+      
+      if (length(alpha_vec)== 1){ #in case matrix == one dimension 
+        
+        matrix_rdirmult_samps[wh_is, t] = categories #rep(categories, num_is_samps) #Contributes zero log probability. As only one category so prob = 1, log(prob) = 0.  
+        #density_dirmult_samps[wh_is] = density_dirmult_samps[wh_is] + 0: Does nothing. 
+        
+      } else {
+        
+        r_dir_multinom = rdirmnom(n=length(wh_is), size = 1, alpha = alpha_vec) #Binary matrix
+        
+        r_samp_t = r_dir_multinom%*%categories
+        
+        matrix_rdirmult_samps[wh_is, t] = r_samp_t
+        
+        density_dirmult_samps[wh_is] = density_dirmult_samps[wh_is] + ddirmnom(x = r_dir_multinom, size = 1, alpha = alpha_vec, log = TRUE) 
+      }
+      
+    }
+    #
+    
+  }
+  
+  return(list(matrix_rdirmult_samps = matrix_rdirmult_samps, density_dirmult_samps = density_dirmult_samps))
+} 
+
+# OPTION 2
+#
+
+PROSOSAL_SS_DIR_MULTINOM_AC <- function(x, mcmc_output, num_is_samps = 1000,
+                                        beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
+  
+  #PARAMS
+  N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
+  
+  matrix_rdirmult_samps = matrix(0, nrow = num_is_samps, ncol = length(x)) #ncol = time
+  
+  density_dirmult_samps = rep(0, num_is_samps) #c()
+  
+  print(paste0('beta = ', beta))
+  
+  for (t in 1:length(x)){
+    
+    for (i in 1:num_is_samps) {
+      
+      if (t == 1) {
+        wh_mcmc = 1:N #Take all mcmc samples for first time point  
+      } else { #Matches previous time point
+        wh_mcmc = which(mcmc_output$ss[,t-1] == matrix_rdirmult_samps[i, t-1]) #otherwise find mcmc iterations that match the importance sample at the previous time point 
+      }
+      
+      categories = sort(unique(mcmc_output$ss[wh_mcmc,t])) #Take the subset where mcmc == import. samp
+      
+      #Match at previous time point and see where it goes. Conditional dist of st|st-1. Simulate from the part 
+      alpha_vec = as.vector(table(mcmc_output$ss[wh_mcmc,t])) #table returns counts of each category 
+      #Normalise
+      alpha_vec = rep(prior_dir/length(categories), length(categories)) + (alpha_vec*beta)/sum(alpha_vec) #sum(alpha) = effective sample size of the prior
+                                                  #beta = effective sample size #Jim Burger: prior_dir = 0.8
+      
+      if (length(alpha_vec)== 1){ #in case matrix == one dimension 
+        
+        matrix_rdirmult_samps[i, t] = categories #rep(categories, num_is_samps) #Contributes zero log probability. As only one category so prob = 1, log(prob) = 0.  
+        #density_dirmult_samps[i] = density_dirmult_samps[i] + 0: Does nothing. 
+        
+      } else {
+        
+        r_dir_multinom = rdirmnom(n=1, size = 1, alpha = alpha_vec) #Binary matrix
+        
+        r_samp_t = r_dir_multinom%*%categories
+        
+        matrix_rdirmult_samps[i, t] = r_samp_t
+        
+        density_dirmult_samps[i] = density_dirmult_samps[i] + ddirmnom(x = r_dir_multinom, size = 1, alpha = alpha_vec, log = TRUE) 
+      }
+      
+    }
+    #
+    
+  }
+  
+  return(list(matrix_rdirmult_samps = matrix_rdirmult_samps, density_dirmult_samps = density_dirmult_samps))
+} 
+
+
+
+
 #**************************************************************************************
 #*
 #* 1. PROPOSALS FROM DIRICHLET MULTINOMIAL
@@ -38,10 +164,13 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
     
   for (t in 1:length(x)){
     
+    #
+    which(mcmc_output$ss[,t-1] == )
+    
     categories = sort(unique(mcmc_output$ss[,t]))
     
     alpha_vec = as.vector(table(mcmc_output$ss[,t])) #table returns counts of each category 
-    alpha_vec = alpha_vec*beta
+    alpha_vec = alpha_vec*beta/(sum(alpha_vec)) #beta: effective sample size of the importance proposal  
     
     if (length(alpha_vec)== 1){
       
@@ -158,8 +287,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-#dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)
-#dir_multi_nom_comps
+dir_multi_nom_comps2 = PROSOSAL_SS_DIR_MULTINOM_AC2(data_ssib4, mcmc_output)
+dir_multi_nom_comps2
 
 
 #APPLY
