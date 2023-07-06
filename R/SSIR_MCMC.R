@@ -49,29 +49,60 @@ SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIR <- function(x, infectivity_vec, ssir_params, eta){ #eta - a vector of length x. eta[1] = infectivity of xt[1]
+LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
   
   #Params
-  num_days = length(x)
+  num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
-  loglike = 0; count_inf = 0
+  loglike = 0; count_inf = 0; count_na = 0
   
   for (t in 2:num_days) {
     
-    total_rate = sum(eta[1:(t-1)]*infectivity_vec) 
-    eta_prob = dgamma(eta[t-1], shape = x[t-1]*k, scale = R0/k, log = TRUE)
-    #print(paste0('eta_prob', eta_prob))
+    #POISSON
+    total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
+    poi_prob = epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
+    loglike = loglike + poi_prob 
     
-    if (!is.na(eta_prob) ) { #&& !is.infinite(eta_prob)){
+    # if(is.na(loglike) || is.infinite(loglike)){
+    #   print(paste0('t', t))
+    #   print(paste0('epi_data[t]', epi_data[t]))
+    #   print(paste0('total_poi_rate', total_poi_rate))
+    # }
+    
+    #ETA; GAMMA
+    if (epi_data[t-1] > 0) { #&& !is.infinite(eta_prob)){
+      
+      eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
       loglike = loglike + eta_prob 
+      
+      if(is.na(eta_prob) || is.infinite(eta_prob)){
+        print(paste0('t', t))
+        print(paste0('eta_prob', eta_prob))
+      }
+      
     } 
+
+    # if (is.infinite(eta_prob) ) {
+    #   print(paste0('t', t))
+    #   print(paste0('eta_prob', eta_prob))
+    # }
+      
+    # if (!is.na(eta_prob) ) { #&& !is.infinite(eta_prob)){
+    #   loglike = loglike + eta_prob 
+    # } else {
+    #   count_na = count_na + 1
+    # }
     
-    poi_prob = x[t]*log(total_rate) - total_rate - lfactorial(x[t]) 
-    
-    if (!is.na(poi_prob)) { #&& !is.infinite(poi_prob)){
-      loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
+    if (is.na(loglike)) { #&& !is.infinite(poi_prob)){
+      #loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
+      count_na = count_na + 1
     }
   }
+  
+  if (count_na > 0) { 
+    print(paste0('count_na', count_na))
+  }
+  #print(paste0('count_na', count_na))
   
   return(loglike)
 }
@@ -119,16 +150,20 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   print(paste0('mcmc_vec_size', mcmc_vec_size))
   
   #MODEL PARAMETERS
-  infectivity_vec = get_infectious_curve(epidemic_data)
+  infect_curve_ga = GET_INFECT_GAMMA_CURVE(epidemic_data)
+  #infectivity_vec = get_infectious_curve(epidemic_data)
+  
   eta_dim = length(epidemic_data)-1 #epidemic_data[1:(length(epidemic_data)-1)]
+  
   eta = epidemic_data[1:eta_dim]; #print(paste0('eta = ', eta))
   eta_matrix = matrix(NA, mcmc_vec_size, eta_dim); 
+  
   ssir_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
   ssir_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssir_params = ssir_params_matrix[1,] #2x1 #as.matrix
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params, eta);  log_like = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params, eta);  log_like = log_like_vec[1]
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -159,7 +194,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     if (min(ssir_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params_dash, eta)
+      logl_new = LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params_dash, eta)
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
@@ -204,10 +239,10 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
       v[t] = 1
       
       #METROPOLIS STEP 
-      eta_dash = abs(eta + rnorm(1,0, sigma_eta[t])*v) #normalise the t_th element of eta #or variance = x[t]
+      eta_dash = abs(eta + rnorm(1, 0, sigma_eta[t])*v) #normalise the t_th element of eta #or variance = x[t]
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, ssir_params, eta_dash)
+      logl_new = LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params, eta_dash)
       log_accept_ratio = logl_new - log_like
       
       #METROPOLIS ACCEPTANCE STEP
