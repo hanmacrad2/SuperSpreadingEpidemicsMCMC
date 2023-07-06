@@ -55,6 +55,8 @@ MOCK_DATA = c(1,2,1,2,2)
 plot.ts(MOCK_DATA, main = 'MOCK DATA', ylab = 'Daily infection count', )
 saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
 
+MOCK_DATA = c(1,2)
+
 #****************************************************************
 # CANDADIAN DATA
 #****************************************************************
