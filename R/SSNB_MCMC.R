@@ -44,7 +44,34 @@ SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
 #* LOG LIKELIHOOD SSNB
 #* ***********************
 #' @export
-LOG_LIKE_SSNB <- function(x, lambda_vec, ssnb_params, 
+LOG_LIKE_SSNB_PARAMETERISATIONS <- function(epidemic_data, lambda_vec, ssnb_params, 
+                                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
+  
+  #Params
+  k = ssnb_params[1]; R0 = ssnb_params[2]
+  num_days = length(epidemic_data); loglike = 0
+  
+  for (t in 2:num_days) {
+    
+    loglike_t = dnbinom(epidemic_data[t],
+                        size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+    
+    if(!is.na(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
+      
+      loglike = loglike + loglike_t
+      
+    }
+  }
+
+  return(loglike)
+  
+}
+
+#************************
+#* LOG LIKELIHOOD SSNB
+#* ***********************
+#' @export
+LOG_LIKE_SSNB_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
   
   #Params
