@@ -74,19 +74,9 @@ n_repeats = 10
 model_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-mean(model_ev_base)# , na.rm = TRUE)
-sd(model_ev_base) #, na.rm = TRUE)
-PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
-
-#PRIOR GAMMA 
-run = '1_ga'
-model_ev_base_gp = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                             FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
-                                                                 SSIB = FALSE, SSIR = FALSE))
-# PRIORS_LIST = list(EXP_PRIOR = FALSE, GAMMA_PRIOR = TRUE)
-mean(model_ev_base_gp)# , na.rm = TRUE)
-sd(model_ev_base_gp) #, na.rm = TRUE)
-PLOT_MODEL_EV_RESULTS(model_ev_base_gp, model_type = '. Baseline w/ gamma(2, mean = R0) prior on R0')
+mean(model_ev_base)
+sd(model_ev_base) 
+#PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
 
 #*************************
 #2. SSNB
@@ -95,7 +85,6 @@ model_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, 
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
-#Results
 mean(model_ev_ssnb)
 sd(model_ev_ssnb)
 
@@ -105,7 +94,6 @@ sd(model_ev_ssnb)
 model_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-#PLOT
 #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
 mean(model_ev_sseb)
 sd(model_ev_sseb)
@@ -113,29 +101,47 @@ sd(model_ev_sseb)
 #*************************
 #4. SSIR
 #*************************
-# model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-#                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-#                                                                         SSIB = FALSE, SSIR = TRUE))
-# 
-# #PLOT
-# #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
-# mean(model_ev_ssir)
-# sd(model_ev_ssir)
+model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                        SSIB = FALSE, SSIR = TRUE))
+
+#PLOT
+#PLOT_MODEL_EV_RESULTS(model_ev_ssir)
+mean(model_ev_ssir)
+sd(model_ev_ssir)
 
 #*************************
 #5. SSIB
 #*************************
-model_ev_ssib10 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))
-mean(model_ev_ssib10)
-sd(model_ev_ssib10)
+mean(model_ev_ssib)
+sd(model_ev_ssib)
 
 #PLOT
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
 
-#SSIB2 DATA + gamma prior
+
+#***************************************************************************
+#*
+#* GAMMA PRIORS
+#* 
+#**************************************************************************
+
+#BASELINE + GAMMA PRIOR 
+run = '1_ga'
+model_ev_base_gp = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                                FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
+                                                                    SSIB = FALSE, SSIR = FALSE))
+mean(model_ev_base_gp)# , na.rm = TRUE)
+sd(model_ev_base_gp) #, na.rm = TRUE)
+PLOT_MODEL_EV_RESULTS(model_ev_base_gp, model_type = '. Baseline w/ gamma(2, mean = R0) prior on R0')
+
+#*************************
+#SSIB + GAMMA PRIOR 
+#*************************
 run = '2_ga_prior'
 model_ev_ssib2 = LOAD_MCMC_GET_MODEL_EVIDENCE(data_ssib2, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                              FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
@@ -146,7 +152,7 @@ PLOT_MODEL_EV_RESULTS(model_ev_ssib2, model_type = 'SSIB; prior(a) ~ gamma(mean 
                       data_type = 'SSIB')
 
 #*************************
-#2b. SSNB - GAMMA PRIOR ON K
+#SSNB + GAMMA PRIOR ON K
 #*************************
 run = 'gamma_prior_k'; 
 model_ev_ssnb_gak = LOAD_MCMC_GET_MODEL_EVIDENCE(data_wait_08_21_sub2, OUTER_FOLDER, run = run, n_repeats = n_repeats,

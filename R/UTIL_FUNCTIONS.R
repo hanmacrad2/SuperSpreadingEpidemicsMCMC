@@ -115,7 +115,7 @@ GET_INFECT_GAMMA_CURVE <- function(epidemic_data, shape_gamma = 6, scale_gamma =
   return(infect_curve_ga)
 }
 
-infect_curve_ga = get_infect_ga_curve(epi_data)
+#infect_curve_ga = get_infect_ga_curve(epi_data)
 
 #GET INFECTIVITY
 #' @export

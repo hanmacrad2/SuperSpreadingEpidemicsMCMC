@@ -55,12 +55,13 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
   } else if (FLAGS_MODELS$SSIR) {
     
     #PRIORS
-    pk_exp = list_priors$priors_ssnb$pk_exp
-    pR0_exp = list_priors$priors_ssnb$pR0_exp
+    pk_exp = list_priors$priors_ssir$pk_exp
+    pR0_exp = list_priors$priors_ssir$pR0_exp
     
     param_priors = cbind(rexp(samp_size_prior, rate = pk_exp[1]),
                          rexp(samp_size_prior, rate = pR0_exp[1]))
     
+    #SHOULD param_priors BE THE INPUT TO ETA_PRIORS? 
     eta_priors_matrix = GET_SAMPLES_ETA_PRIORS(param_priors, epidemic_data, samp_size_prior)
     
     theta_samples_prior = matrix(c(param_priors, eta_priors_matrix), ncol = n_dim)
@@ -124,7 +125,8 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, samp_size_prior,
     
     #PRIORS
     log_density_eta_priors = GET_DENSITY_ETA_PRIORS(theta_samples, epidemic_data)
-    log_prior_density = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) + log_density_eta_priors
+    log_prior_density = dexp(theta_samples[,1], log = TRUE) +
+      dexp(theta_samples[,2], log = TRUE) + log_density_eta_priors
     
   } else if (FLAGS_MODELS$SSIB){
     
@@ -149,19 +151,23 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, samp_size_prior,
 #************************
 #*
 #FUNCTIONS FOR DATA AUGMENTATION MODELS (SSIR #1)
-#*
+#* 
 #************************
 GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior){
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
   
-  time_length =  length(epidemic_data) - 1
+  time_length =  length(epidemic_data) #- 1
+  print(paste0('time length', time_length))
+  #epidemic_data = epidemic_data[1:time_length]
   eta_priors_matrix = matrix(nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
-  for(i in 1:samp_size_prior){
-    R0X = param_priors[i, 1]; k = mcmc_samples[i, 2]
+  for(i in 1:samp_size_prior){ #IS BELOW CORRECT, I.E PARAM_PRIORS?
+    R0X = param_priors[i, 1]; k = param_priors[i, 2] #R0X = param_priors[i, 1]; k = mcmc_samples[i, 2] #!!!WRONG THEY SHOULD BE THE SAME 
+    eta_prior = rgamma(time_length, shape = epidemic_data*k, scale = R0X*k)
+    #print(paste0('rgamma(time length)', eta_prior))
     eta_priors_matrix[i, ] = rgamma(time_length, shape = epidemic_data*k, scale = R0X*k)
   }
   
@@ -179,18 +185,20 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
   dim_cols = dim(theta_samples)[2] - 1 
-  
+  print(paste0('dim theta cols:', dim(theta_samples)))
   eta_samples_matrix = matrix(nrow = samp_size, ncol = num_etas)
   
   #For each mcmc run
   for(i in 1:samp_size){
-    R0 = theta_samples[i, 1]; k = mcmc_samples[i, 2]
+    R0 = theta_samples[i, 1]; k = theta_samples[i, 2]
     
     #print(paste0('dim2: ', length(theta_samples[i, 3:dim_cols])))
     density_samples = dgamma(theta_samples[i, 3:dim_cols], 
                              shape = epidemic_data[1:num_etas]*k,
                              scale = R0*k, log = TRUE)
-    
+   
+    print(theta_samples[i, 3:dim_cols])
+    print(density_samples)
     eta_samples_matrix[i, ] = density_samples #dgamma(theta_samples[i,3:dim_cols], shape = epidemic_data*k, scale = R0X*k, log = TRUE)
   }
   

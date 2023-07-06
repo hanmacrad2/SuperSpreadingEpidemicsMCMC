@@ -31,6 +31,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
+  print(paste0('n_dim:n_dim'))
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
   
@@ -45,13 +46,16 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
     rep(means, each = samp_size_proposal) 
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS)
   
-  print(paste0('theta samps proposal dim: ', dim(theta_samples_proposal)))
-  print(paste0('theta samps prior dim: ', dim(theta_samples_prior)))
+  print(paste0('dim theta samps proposal dim: ', dim(theta_samples_proposal)))
+  print(paste0('dim theta samps prior dim: ', dim(theta_samples_prior)))
   
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
   matrix_means =  matrix(rep(means, each = n_samples), ncol = n_dim)
+  
+  print(paste0('dim theta_samples', dim(theta_samples)))
+  print(paste0('dim matrix_means', dim(matrix_means)))
   
   #DENSITY OF PROPOSAL
   log_proposal_density = dmvt(theta_samples - matrix_means,

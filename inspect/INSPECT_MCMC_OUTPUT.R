@@ -23,6 +23,12 @@ CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/'); p
 
 #MCMC
 i = 10
+mcmc_output_baseline = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
+#PLOT
+PLOT_BASELINE_R0_MCMC(EPI_DATA, mcmc_output_baseline)
+
+#MCMC OUTPUT
 mcmc_output_baseline_exp1 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 
 mcmc_output_baseline_gamma = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
@@ -45,7 +51,23 @@ mcmc_output_nb_2 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_
 #PLOT
 plot.ts(mcmc_output_nb_2$ssnb_params_matrix)
 
+
+#*******
+#* SSEB
+#********
+run = 1
+model_type = 'sseb'
+CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/'); print(CURRENT_FOLDER)
+mcmc_sseb = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
+
+#PLOT GRID
+PLOT_SSB_MCMC_GRID(EPI_DATA, mcmc_sseb, 
+                   #sim_vals = list(m1 = 0., m2 = 0.05, m3 = 10),
+                   FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE))
+
+#****
 #SSIR
+#*****
 model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
