@@ -125,11 +125,11 @@ sd(model_ev_sseb)
 #*************************
 #5. SSIB
 #*************************
-model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssib10 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                    SSIB = TRUE, SSIR = FALSE))
-mean(model_ev_ssib)
-sd(model_ev_ssib)
+mean(model_ev_ssib10)
+sd(model_ev_ssib10)
 
 #PLOT
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',

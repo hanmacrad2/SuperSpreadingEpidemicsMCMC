@@ -76,7 +76,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #*
 #*****************************************************************************************
 GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
-                          FLAGS_MODELS, n_samples = 1000) {   
+                          FLAGS_MODELS, n_samples = 10000) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -124,6 +124,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   } else if (FLAGS_MODELS$SSIB){
     
     #GET ESTIMATE
+    print(paste0('n_samples', n_samples))
     for (i in 1:n_samples) {
       
       if (log_prior_density[i] > -Inf){
@@ -152,7 +153,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
 #******************************************************************************
 LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER, 
                                          run = run, n_repeats = n_repeats, 
-                                         start = 1, beta_ssib = 1,
+                                         start = 1, beta_ssib = 0.05,
+                                         num_is_samps = 10000,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIR = FALSE)){
   'For a given epidemic dataset and model. 
@@ -259,7 +261,8 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       #mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
 
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
-      phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, epidemic_data, beta = beta_ssib, FLAGS_MODELS)
+      phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, epidemic_data, beta = beta_ssib,
+                                                  num_is_samps = num_is_samps, FLAGS_MODELS)
       estimates_vec[i] = phat_estimate                        
       print(estimates_vec)
       

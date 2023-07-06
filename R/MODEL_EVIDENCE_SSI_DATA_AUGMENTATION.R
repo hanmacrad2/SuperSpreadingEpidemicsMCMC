@@ -25,7 +25,7 @@ library(extraDistr)
 
 
 #VECTORISED
-PROSOSAL_SS_DIR_MULTINOM_AC2 <- function(x, mcmc_output, num_is_samps = 1000,
+PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
                                         beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
   
   #PARAMS
@@ -62,7 +62,7 @@ PROSOSAL_SS_DIR_MULTINOM_AC2 <- function(x, mcmc_output, num_is_samps = 1000,
       #Match at previous time point and see where it goes. Conditional dist of st|st-1. Simulate from the part 
       alpha_vec = as.vector(table(mcmc_output$ss[wh_mcmc,t])) #table returns counts of each category 
       #Normalise
-      alpha_vec = rep(prior_dir/length(categories), length(categories)) + (alpha_vec*beta)/sum(alpha_vec) #sum(alpha) = effective sample size of the prior
+      alpha_vec = (alpha_vec*beta)/sum(alpha_vec) #+ rep(prior_dir/length(categories), length(categories))  #sum(alpha) = effective sample size of the prior
       #beta = effective sample size #Jim Burger: prior_dir = 0.8
       
       if (length(alpha_vec)== 1){ #in case matrix == one dimension 
@@ -82,7 +82,6 @@ PROSOSAL_SS_DIR_MULTINOM_AC2 <- function(x, mcmc_output, num_is_samps = 1000,
       }
       
     }
-    #
     
   }
   
@@ -90,9 +89,8 @@ PROSOSAL_SS_DIR_MULTINOM_AC2 <- function(x, mcmc_output, num_is_samps = 1000,
 } 
 
 # OPTION 2
-#
 
-PROSOSAL_SS_DIR_MULTINOM_AC <- function(x, mcmc_output, num_is_samps = 1000,
+PROSOSAL_SS_DIR_MULTINOM_SLOW <- function(x, mcmc_output, num_is_samps = 1000,
                                         beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
   
   #PARAMS
@@ -119,7 +117,7 @@ PROSOSAL_SS_DIR_MULTINOM_AC <- function(x, mcmc_output, num_is_samps = 1000,
       #Match at previous time point and see where it goes. Conditional dist of st|st-1. Simulate from the part 
       alpha_vec = as.vector(table(mcmc_output$ss[wh_mcmc,t])) #table returns counts of each category 
       #Normalise
-      alpha_vec = rep(prior_dir/length(categories), length(categories)) + (alpha_vec*beta)/sum(alpha_vec) #sum(alpha) = effective sample size of the prior
+      alpha_vec = (alpha_vec*beta)/sum(alpha_vec) #+ rep(prior_dir/length(categories), length(categories)) + #sum(alpha) = effective sample size of the prior
                                                   #beta = effective sample size #Jim Burger: prior_dir = 0.8
       
       if (length(alpha_vec)== 1){ #in case matrix == one dimension 
@@ -151,7 +149,7 @@ PROSOSAL_SS_DIR_MULTINOM_AC <- function(x, mcmc_output, num_is_samps = 1000,
 
 #**************************************************************************************
 #*
-#* 1. PROPOSALS FROM DIRICHLET MULTINOMIAL
+#* 1. PROPOSALS FROM DIRICHLET MULTINOMIAL #_NO_AC
 #*
 #*****************************************************************************************
 PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta = 0.1){ #beta strictly less than 1 
@@ -163,9 +161,6 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta =
   print(paste0('beta = ', beta))
     
   for (t in 1:length(x)){
-    
-    #
-    which(mcmc_output$ss[,t-1] == )
     
     categories = sort(unique(mcmc_output$ss[,t]))
     
@@ -236,14 +231,15 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
 }
 
 #' @export
-GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 1000,
+GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 10000,
                                         beta = 0.1, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = TRUE, SSIR = FALSE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  num_is_samps = length(mcmc_output$a_vec) #QUESTION 3
+  #num_is_samps = length(mcmc_output$a_vec) #QUESTION 3
+  print(paste0('num_is_samps', num_is_samps))
   vector_estimate_terms = rep(NA, num_is_samps)
   lambda_vec = get_lambda(epidemic_data) 
   
@@ -262,6 +258,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
   log_prior_so = log(1/(1 + epidemic_data[1]))
   
     #GET ESTIMATE
+    print(paste0('num_is_samps', num_is_samps))
     for (i in 1:num_is_samps) {
       
       if (log_prior_density[i] > -Inf){

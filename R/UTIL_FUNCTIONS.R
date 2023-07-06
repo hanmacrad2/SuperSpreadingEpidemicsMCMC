@@ -104,6 +104,19 @@ get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
   return(lambda_vec)
 }
 
+#GET INFECTIOUS GAMMA CURVE
+GET_INFECT_GAMMA_CURVE <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
+  
+  #Parameters
+  num_days = length(epidemic_data)
+  infect_curve_ga = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  return(infect_curve_ga)
+}
+
+infect_curve_ga = get_infect_ga_curve(epi_data)
+
 #GET INFECTIVITY
 #' @export
 get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){
