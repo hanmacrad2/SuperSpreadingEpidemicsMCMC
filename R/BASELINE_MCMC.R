@@ -68,15 +68,16 @@ SIMULATE_EPI_BASELINE = function(R0, num_days = 30,
 #' log_likelihood_baseline = LOG_LIKE_BASELINE(epidemic_data, R0)
 #'
 #' @export
-LOG_LIKE_BASELINE <- function(epidemic_data, R0){
+LOG_LIKE_BASELINE <- function(epidemic_data, R0,
+                              shape_gamma = 6, scale_gamma = 1){
   
   #Params
   num_days = length(epidemic_data)
+  log_likelihood = 0
   
   #Infectivity of each individual  - shape and scale of gamma distribution representing the infectivity of each individual 
-  shape_gamma = 6; scale_gamma = 1
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  log_likelihood = 0
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
   for (t in 2:num_days) {
     
