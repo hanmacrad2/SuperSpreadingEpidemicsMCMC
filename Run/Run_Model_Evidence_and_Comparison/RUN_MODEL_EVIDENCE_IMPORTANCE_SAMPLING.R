@@ -18,6 +18,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_3_DAYS/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_4/"
@@ -60,69 +61,78 @@ data_file_wait_21 = read.csv(paste0(DATA_FOLDER, 'data_waitemata_aug_21.csv'))
 data_wait_08_21 = data_file_wait_21$Cases
 plot.ts(data_wait_08_21)
 
+#MOCK DATA
+EPI_DATA = MOCK_DATA_3_DAYS
+
 #*************************************************
 #*
 #* MODEL EVIDENCE ESTIMATES
 #* 
 #****************************************************************************
 run = 1
-n_repeats = 10
+n_repeats = 5 #10
 
 #*************************
 #1. BASELINE
 #*************************
-model_ev_base = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_base2 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-mean(model_ev_base)
-sd(model_ev_base) 
+mean(model_ev_base2)
+sd(model_ev_base2) 
 #PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
 
 #*************************
 #2. SSNB
 #*************************
-model_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssnb2 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
-mean(model_ev_ssnb)
-sd(model_ev_ssnb)
+mean(model_ev_ssnb2)
+sd(model_ev_ssnb2)
 
 #*************************
 #3. SSEB
 #*************************
-model_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_sseb2 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-#PLOT_MODEL_EV_RESULTS(model_ev_sseb)
-mean(model_ev_sseb)
-sd(model_ev_sseb)
+PLOT_MODEL_EV_RESULTS(model_ev_sseb)
+mean(model_ev_sseb2)
+sd(model_ev_sseb2)
+
+#*************************
+#5. SSIB
+#*************************
+model_ev_ssib2 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+                                             FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                 SSIB = TRUE, SSIR = FALSE))
+mean(model_ev_ssib2)
+sd(model_ev_ssib2)
 
 #*************************
 #4. SSIR
 #*************************
-model_ev_ssir = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssir2 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = TRUE))
 
 #PLOT
 #PLOT_MODEL_EV_RESULTS(model_ev_ssir)
-mean(model_ev_ssir)
-sd(model_ev_ssir)
-
-#*************************
-#5. SSIB
-#*************************
-model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                               FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                                   SSIB = TRUE, SSIR = FALSE))
-mean(model_ev_ssib)
-sd(model_ev_ssib)
+mean(model_ev_ssir2)
+sd(model_ev_ssir2)
 
 #PLOT
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
 
+#*************************
+#PLOT ALL MODEL EVIDENCE
+data_type = 'Mock Data'
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base2, SSEB = model_ev_sseb2,
+                                          SSNB = model_ev_ssnb2, SSIB = model_ev_ssib2),
+                  data_type = data_type)
 
 #***************************************************************************
 #*

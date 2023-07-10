@@ -61,48 +61,39 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     #POISSON
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     poi_prob = epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
-    loglike = loglike + poi_prob 
     
-    # if(is.na(loglike) || is.infinite(loglike)){
-    #   print(paste0('t', t))
-    #   print(paste0('epi_data[t]', epi_data[t]))
-    #   print(paste0('total_poi_rate', total_poi_rate))
-    # }
+    if (!is.na(poi_prob)){
+      loglike = loglike + poi_prob 
+    }
     
-    #ETA; GAMMA
-    if (epi_data[t-1] > 0) { #&& !is.infinite(eta_prob)){
+    if (epi_data[t-1] > 0) {
       
+      #ETA; GAMMA
       eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
-      loglike = loglike + eta_prob 
+     
+       if (!is.nan(eta_prob)){
+        
+        loglike = loglike + eta_prob 
+      }
       
-      if(is.na(eta_prob) || is.infinite(eta_prob)){
-        print(paste0('t', t))
-        print(paste0('eta_prob', eta_prob))
+      else {
+        print('eta prob == NaN')
+        print(paste0('eta[t-1]', eta[t-1]))
+        print(paste0('R0', R0))
+        print(paste0('k', k))
       }
       
     } 
-
-    # if (is.infinite(eta_prob) ) {
-    #   print(paste0('t', t))
-    #   print(paste0('eta_prob', eta_prob))
-    # }
-      
-    # if (!is.na(eta_prob) ) { #&& !is.infinite(eta_prob)){
-    #   loglike = loglike + eta_prob 
-    # } else {
+    
+    # if (is.na(loglike)) { #&& !is.infinite(poi_prob)){
+    #   #loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
     #   count_na = count_na + 1
     # }
-    
-    if (is.na(loglike)) { #&& !is.infinite(poi_prob)){
-      #loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
-      count_na = count_na + 1
-    }
   }
   
-  if (count_na > 0) { 
-    print(paste0('count_na', count_na))
-  }
-  #print(paste0('count_na', count_na))
+  # if (count_na > 0) { 
+  #   print(paste0('count_na', count_na))
+  # }
   
   return(loglike)
 }

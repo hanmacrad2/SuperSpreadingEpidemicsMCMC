@@ -25,8 +25,9 @@ saveRDS(epi_data_nbIb, file = paste0(CURRENT_OUTPUT_FOLDER, '/epi_data_ssnb1bmu_
 #i.RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_nbIc = MCMC_INFER_SSNB(epi_data_nbIb, n_mcmc = 100000,
-                          FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_mu = FALSE))
+
+mcmc_nb = MCMC_INFER_SSNB(EPI_DATA, 30000)
+                         # FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_mu = FALSE))
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
 mcmc_nbIc$time_elap = time_elap

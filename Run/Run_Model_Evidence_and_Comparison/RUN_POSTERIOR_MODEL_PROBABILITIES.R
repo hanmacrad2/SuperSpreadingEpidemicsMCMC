@@ -167,35 +167,35 @@ BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSNB = post_probs_ssnb32,
                          data_type = data_type, model_ev_method = '') #IS Model Evidence.')
 
 #************************
-# PART 3: FOUR MODELS
+# PART 4: FOUR MODELS
 #************************
 
-post_probs_base2 = GET_AGG_POSTERIOR_PROBABILITES(FLAG_BASELINE = TRUE,
-                                                  list_log_mod_evid = list(model_ev_base2,
-                                                                           model_ev_sseb2,
-                                                                           model_ev_ssnb2,
-                                                                           model_ev_ssir2))
+post_probs_base = GET_AGG_POSTERIOR_PROBABILITES(4, FLAG_BASELINE = TRUE,
+                                                  list_log_mod_evid = list(model_ev_base,
+                                                                           model_ev_sseb,
+                                                                           model_ev_ssnb,
+                                                                           model_ev_ssib))
 
-post_probs_sseb2 = GET_AGG_POSTERIOR_PROBABILITES(list_log_mod_evid = list(model_ev_sseb2,
-                                                                          model_ev_base2,
-                                                                          model_ev_ssnb2,
-                                                                          model_ev_ssir2))
+post_probs_sseb = GET_AGG_POSTERIOR_PROBABILITES(4, list_log_mod_evid = list(model_ev_sseb,
+                                                                          model_ev_base,
+                                                                          model_ev_ssnb,
+                                                                          model_ev_ssib))
 
-post_probs_ssnb2 = GET_AGG_POSTERIOR_PROBABILITES(list_log_mod_evid = list(model_ev_ssnb2,
-                                                                          model_ev_base2,
-                                                                          model_ev_sseb2,
-                                                                          model_ev_ssir2))
+post_probs_ssnb = GET_AGG_POSTERIOR_PROBABILITES(4, list_log_mod_evid = list(model_ev_ssnb,
+                                                                          model_ev_base,
+                                                                          model_ev_sseb,
+                                                                          model_ev_ssir))
 
-post_probs_ssir2 = GET_AGG_POSTERIOR_PROBABILITES(list_log_mod_evid = list(model_ev_ssir2,
-                                                                          model_ev_base2,
-                                                                          model_ev_sseb2,
-                                                                          model_ev_ssnb2))
+post_probs_ssib = GET_AGG_POSTERIOR_PROBABILITES(4, list_log_mod_evid = list(model_ev_ssir,
+                                                                          model_ev_base,
+                                                                          model_ev_sseb,
+                                                                          model_ev_ssnb))
 
 #PLOT
 model_ev_method = 'IS'
-data_type = 'NZ Waitemata 08/21 Subset II'
+data_type = 'Mock Data' #NZ Waitemata 08/21 Subset II'
 par(mfrow = c(2,1))
-BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = post_probs_sseb2, BASE = post_probs_base2,
-                                                 SSNB = post_probs_ssnb2, SSI = post_probs_ssir2),
+BOX_PLOT_POSTERIOR_PROBS(list_vec_results = list(SSEB = post_probs_sseb, BASE = post_probs_base,
+                                                 SSNB = post_probs_ssnb, SSIB = post_probs_ssib),
                          data_type = data_type, model_ev_method = '') #IS Model Evidence.')
 

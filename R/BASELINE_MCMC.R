@@ -11,7 +11,7 @@
 #' @param shape_gamma Shape of the gamma distribution representing the time-varying infectivity curve of each infected individual
 #' @param scale_gamma Scale of the gamma distribution representing the time-varying infectivity curve of each infected individual
 #' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambda_t} 
-#' @return Total infections; Total daily infection counts of length \code{'num_days'}
+#' @return Total infections; Total daily infection counts of length \code{'num_days'}=
 #' @export
 #'
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
@@ -68,16 +68,15 @@ SIMULATE_EPI_BASELINE = function(R0, num_days = 30,
 #' log_likelihood_baseline = LOG_LIKE_BASELINE(epidemic_data, R0)
 #'
 #' @export
-LOG_LIKE_BASELINE <- function(epidemic_data, R0,
-                              shape_gamma = 6, scale_gamma = 1){
+LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   
   #Params
   num_days = length(epidemic_data)
-  log_likelihood = 0
   
   #Infectivity of each individual  - shape and scale of gamma distribution representing the infectivity of each individual 
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
-    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  shape_gamma = 6; scale_gamma = 1
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  log_likelihood = 0
   
   for (t in 2:num_days) {
     
@@ -215,7 +214,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     
       } else if (FLAGS_LIST$PRIOR_GAMMA) {
       
-      log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
+        log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
         dgamma(r0, shape = gamma_shape, scale = gamma_scale, log = TRUE)
 
     }

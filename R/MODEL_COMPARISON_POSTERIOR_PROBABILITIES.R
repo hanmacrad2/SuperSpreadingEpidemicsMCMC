@@ -31,7 +31,7 @@ GET_POSTERIOR_MODEL_PROB <- function(probs_models, row_model_ev){
 
 
 #GET AGGREGATE OF POSTERIOR MODEL PROBABILITIES
-GET_AGG_POSTERIOR_PROBABILITES <- function(num_models = 4, FLAG_BASELINE = FALSE,
+GET_AGG_POSTERIOR_PROBABILITES <- function(num_models, FLAG_BASELINE = FALSE,
                                    list_log_mod_evid){ 
   
   'Get posterior probabilites for mulitple P_hat reps'

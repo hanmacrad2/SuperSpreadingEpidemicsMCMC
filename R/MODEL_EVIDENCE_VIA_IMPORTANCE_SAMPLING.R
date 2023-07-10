@@ -27,7 +27,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                                         n_samples, dof = 3, prob = 0.95) {
+                                         n_samples, dof = 3, prob = 0.95) { #prob = 0.95
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -39,7 +39,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   samp_size_proposal = prob*n_samples; 
   samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1 - prob_prop
-  
+
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
@@ -54,12 +54,12 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   #DEFENSE MIXTURE
   matrix_means =  matrix(rep(means, each = n_samples), ncol = n_dim)
   
-  print(paste0('dim theta_samples', dim(theta_samples)))
-  print(paste0('dim matrix_means', dim(matrix_means)))
+  #print(paste0('dim theta_samples', dim(theta_samples)))
+  #print(paste0('dim matrix_means', dim(matrix_means)))
   
   #DENSITY OF PROPOSAL
   log_proposal_density = dmvt(theta_samples - matrix_means,
-                      sigma = cov(mcmc_samples), df = dof) #log = TRUE log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+                      sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data,
@@ -71,7 +71,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_prior_density = log_prior_density)
   
   return(imp_samp_comps)  
-}
+} #0.001
 
 
 #**************************************************************************************
@@ -99,10 +99,28 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     #GET ESTIMATE
     for (i in 1:n_samples) {
       
-      loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
-                              theta_samples[i, 2], theta_samples[i, 3])
+      if (log_prior_density[i] > -Inf ) {
+        
+        loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
+                                theta_samples[i, 2], theta_samples[i, 3])
+      } else {
+        loglike = 0
+      }
       
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+      
+      if(vector_estimate_terms[i] > 0){
+        print(paste0('i', i))
+        print('vector_estimate_terms[i] > 0')
+        print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
+        print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
+        print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
+
+        print(paste0('loglike sseb', loglike))
+        print(paste0('log_prior_density[i] ', log_prior_density[i]))
+        print(paste0('log_q[i]', log_q[i]))
+      }
+      
     }
     
     #SSNB MODEL
@@ -110,42 +128,40 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     
     for (i in 1:n_samples) {
       
+      if (log_prior_density[i] > -Inf ) {
+        
       loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
       
+      } else {
+        loglike = 0
+      }
+      
+      if (is.nan(loglike)){
+        print(paste0(' theta_samples[i,])',  theta_samples[i,]))
+      }
+
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
   } else if (FLAGS_MODELS$SSIR) {
     
-    infectivity_vec = get_infectious_curve(epidemic_data)
+    infectivity_vec = GET_INFECT_GAMMA_CURVE(epidemic_data) #get_infectious_curve(epidemic_data)
     num_etas = length(epidemic_data)-1
     
     for (i in 1:n_samples) {
-      loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],  theta_samples[i, 3:(2+num_etas)]) 
-      
+      loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
+                              theta_samples[i, 3:(2+num_etas)]) 
+
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
     
-  } else if (FLAGS_MODELS$SSIB){
-    
-    #GET ESTIMATE
-    print(paste0('n_samples', n_samples))
-    for (i in 1:n_samples) {
-      
-      if (log_prior_density[i] > -Inf){
-
-        loglike = LOG_LIKE_SSIB(epidemic_data, theta_samples[i, 1],
-                              theta_samples[i, 2], theta_samples[i, 3])
-      
-        vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
-      } else {
-        vector_estimate_terms[i] = -Inf
-      }
-    }
-    
-  }
+  } 
+  
+  print(paste0(' LOG_SUM_EXP(vector_estimate_terms)',  LOG_SUM_EXP(vector_estimate_terms)))
+  print(paste0(' -log(n_samples)',  -log(n_samples)))
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
+
   
   return(log_p_hat)
 }

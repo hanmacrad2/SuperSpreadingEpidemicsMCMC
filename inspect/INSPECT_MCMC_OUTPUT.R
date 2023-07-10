@@ -10,6 +10,8 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_3_DAYS/')
+
 #PARAMS
 NMCMC = 30000
 
@@ -39,7 +41,7 @@ PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_exp1) #exp(1) - MUCH T
 PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_gamma)
 
 #SSNB
-run = 5
+run = 1
 model_type = 'ssnb'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
@@ -72,7 +74,7 @@ model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
 #MCMC
-i = 1
+i = 10
 mcmc_output_ssir = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 #mcmc_samples =  cbind(mcmc_output$ssic_params_matrix, mcmc_output$eta_matrix)
 

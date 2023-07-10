@@ -89,7 +89,6 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
 } 
 
 # OPTION 2
-
 PROSOSAL_SS_DIR_MULTINOM_SLOW <- function(x, mcmc_output, num_is_samps = 1000,
                                         beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
   
@@ -143,8 +142,6 @@ PROSOSAL_SS_DIR_MULTINOM_SLOW <- function(x, mcmc_output, num_is_samps = 1000,
   
   return(list(matrix_rdirmult_samps = matrix_rdirmult_samps, density_dirmult_samps = density_dirmult_samps))
 } 
-
-
 
 
 #**************************************************************************************
@@ -270,7 +267,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
         log_q[i] - log_density_dirmult_samps[i]
       
       } else {
-        vector_estimate_terms[i] =  -Inf
+        vector_estimate_terms[i] =  0 #-Inf
       }
     }
   
@@ -284,8 +281,8 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
 }
 
 #PROPOSAL CHECK 
-dir_multi_nom_comps2 = PROSOSAL_SS_DIR_MULTINOM_AC2(data_ssib4, mcmc_output)
-dir_multi_nom_comps2
+#dir_multi_nom_comps2 = PROSOSAL_SS_DIR_MULTINOM(data_ssib4, mcmc_output)
+#dir_multi_nom_comps2
 
 
 #APPLY

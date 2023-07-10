@@ -44,11 +44,10 @@ SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
 #* LOG LIKELIHOOD SSNB
 #* ***********************
 #' @export
-LOG_LIKE_SSNB_PARAMETERISATIONS <- function(epidemic_data, lambda_vec, ssnb_params, 
-                                            FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
+LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
   
   #Params
-  k = ssnb_params[1]; R0 = ssnb_params[2]
+  k = ssnb_params[1]; R0 = ssnb_params[2] 
   num_days = length(epidemic_data); loglike = 0
   
   for (t in 2:num_days) {
@@ -56,10 +55,13 @@ LOG_LIKE_SSNB_PARAMETERISATIONS <- function(epidemic_data, lambda_vec, ssnb_para
     loglike_t = dnbinom(epidemic_data[t],
                         size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
     
-    if(!is.na(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
+    if(!is.nan(loglike_t)) { 
       
       loglike = loglike + loglike_t
       
+    } else {
+      print('log likelihood: NA')
+      print(paste0('k, R0', k, R0))
     }
   }
 
@@ -150,7 +152,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
   ssnb_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssnb_params = ssnb_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params, FLAG_NEGBIN_PARAMATERISATION)
+  log_like_vec[1] <- LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
   #pk_ga_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
   #pk_ga_shape = negbin_scale*priors$negbin_k_prior_ga_mean
@@ -178,7 +180,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     if (min(ssnb_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params_dash, FLAG_NEGBIN_PARAMATERISATION)
+      logl_new = LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params_dash) #, FLAG_NEGBIN_PARAMATERISATION)
       
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
@@ -192,7 +194,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
 
         log_accept_ratio = log_accept_ratio +
           dexp(k_dash, rate = priors$pk_exp[1], log = TRUE) -
-          dexp(k, rate = priors$pk_exp[1], log = TRUE)
+          dexp(k, rate = priors$pk_exp[1], log = TRUE) +
         dunif(R0_dash, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE) - #Uniform prior
         dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
         #priors_list$pr0_unif[1]*ssnb_params_dash[2] + priors_list$pr0_unif[1]*ssnb_params[2]
