@@ -27,7 +27,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                                         n_samples, dof = 3, prob = 0.95) { #prob = 0.95
+                               n_samples, dof = 3, prob = 0.95) { #prob = 0.95
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -39,15 +39,15 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   samp_size_proposal = prob*n_samples; 
   samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1 - prob_prop
-
+  
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS)
   
-  #print(paste0('dim theta samps proposal dim: ', dim(theta_samples_proposal)))
-  #print(paste0('dim theta samps prior dim: ', dim(theta_samples_prior)))
+  print(paste0('dim theta samps proposal dim: ', dim(theta_samples_proposal)))
+  print(paste0('dim theta samps prior dim: ', dim(theta_samples_prior)))
   
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
@@ -59,7 +59,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   
   #DENSITY OF PROPOSAL
   log_proposal_density = dmvt(theta_samples - matrix_means,
-                      sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+                              sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data,
@@ -80,7 +80,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #*
 #*****************************************************************************************
 GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
-                          FLAGS_MODELS, n_samples = 10000) {   
+                                   FLAGS_MODELS, n_samples = 10000) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -93,8 +93,6 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
-  #print('log_prior_density')
-  #print(log_prior_density)
   #SSEB MODEL 
   if (FLAGS_MODELS$SSEB){
     
@@ -117,7 +115,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
         print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
         print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
         print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
-
+        
         print(paste0('loglike sseb', loglike))
         print(paste0('log_prior_density[i] ', log_prior_density[i]))
         print(paste0('log_q[i]', log_q[i]))
@@ -132,8 +130,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       
       if (log_prior_density[i] > -Inf ) {
         
-      loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
-      
+        loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+        
       } else {
         loglike = 0
       }
@@ -141,7 +139,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       if (is.nan(loglike)){
         print(paste0(' theta_samples[i,])',  theta_samples[i,]))
       }
-
+      
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
   } else if (FLAGS_MODELS$SSIR) {
@@ -150,17 +148,9 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     num_etas = length(epidemic_data)-1
     
     for (i in 1:n_samples) {
-      
-      #print(paste0('log_prior_density[i] ', log_prior_density[i] ))
-      
-      if (log_prior_density[i] > -Inf && !is.na(log_prior_density[i])) {
-        loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
+      loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:(2+num_etas)]) 
       
-      } else {
-        loglike = 0
-      }
-
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
     
@@ -171,7 +161,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
-
+  
   
   return(log_p_hat)
 }
@@ -185,8 +175,8 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
                                          run = run, n_repeats = n_repeats, 
                                          start = 1, beta_ssib = 0.05,
                                          num_is_samps = 10000,
-                                FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                    SSIB = FALSE, SSIR = FALSE)){
+                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                             SSIB = FALSE, SSIR = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Load mcmc samples 2. Get estimate'
@@ -205,7 +195,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       
       print(paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-
+      
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       log_phat = GET_LOG_MODEL_EVIDENCE_BASELINE(mcmc_output$r0_vec, epidemic_data) 
       estimates_vec[i] = log_phat
@@ -267,7 +257,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
       mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
       print(paste0('dim of mcmc', dim(mcmc_samples)))
-
+      
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS)
       estimates_vec[i] = phat_estimate                        
@@ -285,11 +275,9 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     print(CURRENT_FOLDER)
     
     for (i in start:n_repeats){ #start:n_repeats
-
+      
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      #mcmc_samples =  matrix(c(mcmc_output[["a_vec"]], mcmc_output[["b_vec"]], mcmc_output[["c_vec"]]), ncol = 3)
-      #mcmc_samples =  matrix(c(mcmc_output$a_vec, mcmc_output$b_vec, mcmc_output$c_vec), ncol = 3)
-
+      
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_output, epidemic_data, beta = beta_ssib,
                                                   num_is_samps = num_is_samps, FLAGS_MODELS)
@@ -304,4 +292,96 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
   }
   
   return(estimates_vec) 
+}
+
+GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
+                                  FLAGS_MODELS, LOGLIKE_FUNC, n_samples = 10000) {   
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  vector_estimate_terms = rep(NA, n_samples)
+  lambda_vec = get_lambda(epidemic_data); 
+  
+  #PROPOSAL, PRIOR, THETA SAMPLES 
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
+  theta_samples = imp_samp_comps$theta_samples
+  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+  
+  for (i in 1:n_samples) {
+    
+    if (log_prior_density[i] > -Inf ) {
+      
+    LOGLIKE_FUNC
+  #SSEB MODEL 
+  if (FLAGS_MODELS$SSEB){
+    
+    #GET ESTIMATE
+    for (i in 1:n_samples) {
+      
+      if (log_prior_density[i] > -Inf ) {
+        
+        loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
+                                theta_samples[i, 2], theta_samples[i, 3])
+      } else {
+        loglike = 0
+      }
+      
+      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+      
+      if(vector_estimate_terms[i] > 0){
+        print(paste0('i', i))
+        print('vector_estimate_terms[i] > 0')
+        print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
+        print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
+        print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
+        
+        print(paste0('loglike sseb', loglike))
+        print(paste0('log_prior_density[i] ', log_prior_density[i]))
+        print(paste0('log_q[i]', log_q[i]))
+      }
+      
+    }
+    
+    #SSNB MODEL
+  } else if (FLAGS_MODELS$SSNB) {
+    
+    for (i in 1:n_samples) {
+      
+      if (log_prior_density[i] > -Inf ) {
+        
+        loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+        
+      } else {
+        loglike = 0
+      }
+      
+      if (is.nan(loglike)){
+        print(paste0(' theta_samples[i,])',  theta_samples[i,]))
+      }
+      
+      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+    }
+  } else if (FLAGS_MODELS$SSIR) {
+    
+    infectivity_vec = GET_INFECT_GAMMA_CURVE(epidemic_data) #get_infectious_curve(epidemic_data)
+    num_etas = length(epidemic_data)-1
+    
+    for (i in 1:n_samples) {
+      loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
+                              theta_samples[i, 3:(2+num_etas)]) 
+      
+      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+    }
+    
+  } 
+  
+  print(paste0(' LOG_SUM_EXP(vector_estimate_terms)',  LOG_SUM_EXP(vector_estimate_terms)))
+  print(paste0(' -log(n_samples)',  -log(n_samples)))
+  
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
+  print(paste0('log_p_hat = ', log_p_hat))
+  
+  
+  return(log_p_hat)
 }

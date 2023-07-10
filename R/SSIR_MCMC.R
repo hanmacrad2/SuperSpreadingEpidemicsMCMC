@@ -62,8 +62,14 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     poi_prob = epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
     
-    if (!is.na(poi_prob)){
+    if (!is.nan(poi_prob)){
       loglike = loglike + poi_prob 
+    } else {
+      
+      print(' poi_prob == NaN')
+      print(paste0('eta[t-1]', eta[t-1]))
+      print(paste0('R0', R0))
+      print(paste0('k', k))
     }
     
     if (epi_data[t-1] > 0) {

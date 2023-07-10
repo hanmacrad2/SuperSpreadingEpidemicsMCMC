@@ -189,7 +189,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
   dim_cols = dim(theta_samples)[2] #- 1 
-  print(paste0('num_etas, dim cols:', num_etas, dim_cols))
+  print(paste0('num_etas:', num_etas))
+  print(paste0('dim cols:', dim_cols))
   eta_samples_matrix = matrix(nrow = samp_size, ncol = num_etas)
   
   #For each mcmc run
@@ -198,7 +199,7 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
     
     #print(paste0('dim2: ', length(theta_samples[i, 3:dim_cols])))
     density_samples = dgamma(theta_samples[i, 3:dim_cols], 
-                             shape = epidemic_data[1:num_etas]*k,
+                             shape = epidemic_data[1:num_etas]*k, #epidemic_data*k, 
                              scale = R0*k, log = TRUE)
    
     #print(theta_samples[i, 3:dim_cols])

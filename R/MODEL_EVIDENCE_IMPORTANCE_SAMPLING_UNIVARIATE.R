@@ -48,16 +48,16 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   
   #PRIOR
   if(PRIORS_USED$BASELINE_EXP){
-    log_prior = dexp(theta_samples, log = TRUE) 
+    log_prior_density = dexp(theta_samples, log = TRUE) 
   } else if (PRIORS_USED$BASELINE_GAMMA){
     gamma_shape = 2
-    log_prior = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
+    log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
   }
   
   #LOG Q
-  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
+  log_q = log(prob_prop*exp(log_proposal) + prob_prior*exp(log_prior_density)) #CALCULATE WITH LOG SUM EXP TRICK ASWELL & SEE IF MATCH
   
-  imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_prior = log_prior)
+  imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_prior_density = log_prior_density)
   
   return(imp_samp_comps)
 }
@@ -78,15 +78,15 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   
   imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples 
-  log_q = imp_samp_comps$log_q; log_priors = imp_samp_comps$log_priors
+  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
   #PRIORS 
   if (PRIORS_USED$BASELINE_GAMMA){
     gamma_shape = 2
-    log_priors = dgamma(theta_samples,shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
+    log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
     
   } else {
-    log_priors = dexp(theta_samples, log = TRUE)
+    log_prior_density = dexp(theta_samples, log = TRUE)
   }
   
   #LOG SUM EXP (LOOP)
@@ -94,8 +94,13 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   
   for(i in 1:n_samples){         
     
+    if (log_prior_density[i] > -Inf ) {
     loglike = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])
-    vector_log_sum_exp[i] = loglike + log_priors[i] - log_q[i]
+    
+    } else {
+      loglike = 0
+    }
+    vector_log_sum_exp[i] = loglike + log_prior_density[i] - log_q[i]
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)

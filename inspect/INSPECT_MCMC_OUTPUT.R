@@ -74,12 +74,12 @@ model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
 #MCMC
-i = 10
+i = 4
 mcmc_output_ssir = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 #mcmc_samples =  cbind(mcmc_output$ssic_params_matrix, mcmc_output$eta_matrix)
 
 #PLOT
-plot.ts(mcmc_output$ssir_params_matrix)
+plot.ts(mcmc_output_ssir$ssir_params_matrix)
 plot.ts(mcmc_output$eta_matrix)
 PLOT_SSIR_MCMC_GRID(data_ssib, mcmc_output_ssir, 0, 1,
                                 0, NMCMC)
