@@ -47,7 +47,7 @@ SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
 LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
   
   #Params
-  k = ssnb_params[1]; R0 = ssnb_params[2] 
+  R0 = ssnb_params[1];  k = ssnb_params[1]
   num_days = length(epidemic_data); loglike = 0
   
   for (t in 2:num_days) {
@@ -60,7 +60,7 @@ LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
       loglike = loglike + loglike_t
       
     } else {
-      print('log likelihood: NA')
+      print('log likelihood: NaN')
       print(paste0('k, R0', k, R0))
     }
   }
@@ -69,50 +69,17 @@ LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
   
 }
 
-#************************
-#* LOG LIKELIHOOD SSNB
-#* ***********************
-#' @export
-LOG_LIKE_SSNB_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
-                          FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
-  
-  #Params
-  k = ssnb_params[1]; R0 = ssnb_params[2]
-  num_days = length(x); loglike = 0
-  
-  for (t in 2:num_days) {
-    
-    #NEGATIVE BINOMIAL PARAMETERISATION
-    if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
-      
-      loglike_t = dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
-      
-      if(!is.na(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
-        
-        loglike = loglike + loglike_t 
-      }
-      
-    } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
-      loglike_t = dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
-      
-      if(!is.na(loglike_t)) { 
-        loglike = loglike + loglike_t 
-      }
-    }
-  }
-  
-  return(loglike)
-}
 
 #********************************************************
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
 MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
-                            mcmc_inputs = list(mod_start_points = c(0.16, 1.8),
+                            mcmc_inputs = list(mod_start_points = c(1.2, 0.15),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10, burn_in_pc = 0.2),
-                            priors = list(pk_exp = c(1,0), pk_ga_shape = 0.001, pk_ga_rte = 0.001, 
+                            priors = list(pk_exp = c(1,0), pR0_exp = c(1,0),
+                                          pk_ga_shape = 0.001, pk_ga_rte = 0.001, 
                                           pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
                             PRIORS_USED = list(EXP_K = TRUE, GAMMA_K = FALSE),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, PRIOR = TRUE, BURN_IN = TRUE),
@@ -187,19 +154,18 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
       
       #PRIORS
       #EXTRACT PARAMS FORPRIORS
-      k =  ssnb_params[1]; k_dash = ssnb_params_dash[1]
-      R0 = ssnb_params[2]; R0_dash = ssnb_params_dash[2]
+      R0 = ssnb_params[1]; R0_dash = ssnb_params_dash[1]
+      k =  ssnb_params[2]; k_dash = ssnb_params_dash[2]
     
       if(FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$EXP_K) {
 
-        log_accept_ratio = log_accept_ratio +
+        log_accept_ratio = log_accept_ratio + 
+          dexp(R0_dash, rate = priors$pR0_exp[1], log = TRUE) -
+          dexp(R0, rate = priors$pR0_exp[1], log = TRUE) +
           dexp(k_dash, rate = priors$pk_exp[1], log = TRUE) -
-          dexp(k, rate = priors$pk_exp[1], log = TRUE) +
-        dunif(R0_dash, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE) - #Uniform prior
-        dunif(R0, min = priors$pr0_unif[1], max = priors$pr0_unif[2], log = TRUE)
-        #priors_list$pr0_unif[1]*ssnb_params_dash[2] + priors_list$pr0_unif[1]*ssnb_params[2]
+          dexp(k, rate = priors$pk_exp[1], log = TRUE)
 
-      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$GAMMA_K) {
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$GAMMA_K && PRIORS_USED$UNIF_R0) {
         
         log_accept_ratio = log_accept_ratio +
           dgamma(k_dash, shape =  priors$pk_ga_shape, rate = priors$pk_ga_rte, log = TRUE) -
@@ -262,3 +228,39 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate))
 } 
+
+
+#************************
+#* LOG LIKELIHOOD SSNB
+#* ***********************
+#' @export
+# LOG_LIKE_SSNB_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
+#                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
+#   
+#   #Params
+#   k = ssnb_params[1]; R0 = ssnb_params[2]
+#   num_days = length(x); loglike = 0
+#   
+#   for (t in 2:num_days) {
+#     
+#     #NEGATIVE BINOMIAL PARAMETERISATION
+#     if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
+#       
+#       loglike_t = dnbinom(x[t], size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+#       
+#       if(!is.na(loglike_t)) { #likelihood = 0; log_likelihood = -Inf
+#         
+#         loglike = loglike + loglike_t 
+#       }
+#       
+#     } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
+#       loglike_t = dnbinom(x[t], size = k*lambda_vec[t], prob =  k/(R0 + k), log = TRUE) #Neg Bin parameterisation #2
+#       
+#       if(!is.na(loglike_t)) { 
+#         loglike = loglike + loglike_t 
+#       }
+#     }
+#   }
+#   
+#   return(loglike)
+# }

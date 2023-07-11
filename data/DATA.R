@@ -58,6 +58,8 @@ saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
 MOCK_DATA = c(1,2)
 MOCK_DATA_2_DAYS = c(1,0)
 MOCK_DATA_3_DAYS = c(1,2,1)
+MOCK_DATA_3_DAYS = c(1,1,1)
+MOCK_DATA_4_DAYS = c(1,1,0,1)
 
 #****************************************************************
 # CANDADIAN DATA

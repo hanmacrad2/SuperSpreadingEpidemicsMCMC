@@ -200,7 +200,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   #******************************
   for(i in 2:n_mcmc) {
     
-    if (i%%100 == 0) {
+    if (i%%1000 == 0) {
       
       print(paste0('i = ', i))
     }

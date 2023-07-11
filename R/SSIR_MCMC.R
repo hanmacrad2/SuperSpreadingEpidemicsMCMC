@@ -90,16 +90,6 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       }
       
     } 
-    
-    # if (is.na(loglike)) { #&& !is.infinite(poi_prob)){
-    #   #loglike = loglike + poi_prob #Note want to include -Inf so don't filter infinite values
-    #   count_na = count_na + 1
-    # }
-  }
-  
-  # if (count_na > 0) { 
-  #   print(paste0('count_na', count_na))
-  # }
   
   return(loglike)
 }
@@ -182,7 +172,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   for(i in 2:n_mcmc) {
     
     #print(paste0('i = ', i))
-    #if(i%%100 == 0) print(paste0('i = ', i))
+    if(i%%5000 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
     ssir_params_dash = c(ssir_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
