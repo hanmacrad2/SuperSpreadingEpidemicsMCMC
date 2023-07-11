@@ -13,7 +13,7 @@ SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0))
                        PRIORS_USED = list(BASELINE_EXP = TRUE, BASELINE_GAMMA = FALSE,
                                           SSNB_R0_EXP = TRUE, SSNB_K_EXP = TRUE, 
                                           SSNB_K_GAMMA = FALSE, SSNB_R0_UNIF = FALSE,
-                                          SSIB_GAMMA_A = TRUE)) {
+                                          SSIB_GAMMA_A = FALSE)) {
   
   return(list(list_priors = list_priors, PRIORS_USED = PRIORS_USED))
 }
@@ -86,7 +86,7 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
                               (1 + rexp(samp_size_prior))), ncol = n_dim) 
     } else {
       param_priors = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior),
-                              (1 + rexp(samp_size_prior, rate = c_prior_exp[1]))), ncol = n_dim) 
+                              (1 + rexp(samp_size_prior, rate = list_priors$priors_ssib$c_prior_exp[1]))), ncol = n_dim) 
     }
     
     theta_samples_prior = param_priors
@@ -152,7 +152,7 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data,
     } else {
       log_prior_density = dexp(theta_samples[,1], log = TRUE) +
         dexp(theta_samples[,2], log = TRUE) +
-      dexp((theta_samples[,3] - 1), rate = priors_ssib$c_prior_exp, log = TRUE) 
+      dexp((theta_samples[,3] - 1), rate = list_priors$priors_ssib$c_prior_exp, log = TRUE) 
     }
     
   }
@@ -210,7 +210,7 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
     
     #print(paste0('dim2: ', length(theta_samples[i, 3:dim_cols])))
     density_samples = dgamma(theta_samples[i, 3:dim_cols], 
-                             shape = epidemic_data[1:num_etas]*k, #epidemic_data*k, 
+                             shape = epidemic_data[1:num_etas]*k, #epidemic_data*k, ??
                              scale = R0*k, log = TRUE)
    
     #print(theta_samples[i, 3:dim_cols])

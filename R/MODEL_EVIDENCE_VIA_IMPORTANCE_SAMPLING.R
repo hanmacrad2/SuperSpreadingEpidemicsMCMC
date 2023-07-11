@@ -27,7 +27,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                                         n_samples, dof = 3, prob = 0.95) { #prob = 0.95
+                                         n_samples, dof = 3, prob = 0.9999) { #prob = 0.95
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -92,9 +92,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
-  
-  #print('log_prior_density')
-  #print(log_prior_density)
+
   #SSEB MODEL 
   if (FLAGS_MODELS$SSEB){
     
@@ -111,9 +109,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
       
-      if(vector_estimate_terms[i] > 0){
+      if(i >  10 && i < 13){
         print(paste0('i', i))
-        print('vector_estimate_terms[i] > 0')
         print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
         print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
         print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
@@ -139,7 +136,9 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       }
       
       if (is.nan(loglike)){
+        print(paste0(' loglike)', loglike))
         print(paste0(' theta_samples[i,])',  theta_samples[i,]))
+        
       }
 
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
@@ -153,7 +152,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       
       #print(paste0('log_prior_density[i] ', log_prior_density[i] ))
       
-      if (log_prior_density[i] > -Inf && !is.na(log_prior_density[i])) {
+      if (log_prior_density[i] > -Inf && !is.nan(log_prior_density[i])) {
         loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:(2+num_etas)]) 
       
@@ -183,7 +182,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
 #******************************************************************************
 LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER, 
                                          run = run, n_repeats = n_repeats, 
-                                         start = 1, beta_ssib = 0.05,
+                                         start = 1, beta_ssib = 1000,
                                          num_is_samps = 10000,
                                 FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                     SSIB = FALSE, SSIR = FALSE)){

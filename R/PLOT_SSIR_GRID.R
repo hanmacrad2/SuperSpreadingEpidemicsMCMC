@@ -96,7 +96,7 @@ ETA_CREDIBLE_INTERVALS <- function(eta_matrix, eta_true, pchX = 16,
 #'   \item \code{"PRIOR"}  - Plot prior distributions in grid if TRUE
 #'   \item \code{"B_PRIOR_GAMMA"}  - A Gamma prior on b if TRUE, otherwise exponential
 #'   \item \code{"C_PRIOR_GAMMA"}  - A Gamma prior on c if TRUE, otherwise exponential
-,#' }
+#' }
 #' @return Dataframe of results including mcmc sample starting points, mcmc sample final means, acceptance rates, mcmc effective sizes and the mcmc sampler run time
 #' @export
 #'

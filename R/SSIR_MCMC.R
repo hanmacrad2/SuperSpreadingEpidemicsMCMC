@@ -55,41 +55,45 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
   loglike = 0; count_inf = 0; count_na = 0
-  
+  print(paste0('eta', eta))
   for (t in 2:num_days) {
     
     #POISSON
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
-    poi_prob = epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
+    log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE)
+    #epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
     
-    if (!is.nan(poi_prob)){
-      loglike = loglike + poi_prob 
+    if (!is.nan(log_poi_prob)){
+      loglike = loglike + log_poi_prob 
     } else {
       
-      print(' poi_prob == NaN')
-      print(paste0('eta[t-1]', eta[t-1]))
-      print(paste0('R0', R0))
-      print(paste0('k', k))
+      print('log_poi_prob == NaN')
+      # print(paste0('total_poi_rate: ', total_poi_rate))
+      # print(paste0('epi_data[t]: ', epi_data[t]))
+      # print(paste0('eta[t-1]: ', eta[t-1]))
+      # print(paste0('R0: ', R0))
+      # print(paste0('k: ', k))
     }
     
     if (epi_data[t-1] > 0) {
       
       #ETA; GAMMA
-      eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
+      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
      
-       if (!is.nan(eta_prob)){
+       if (!is.nan(log_eta_prob)){
         
-        loglike = loglike + eta_prob 
+        loglike = loglike + log_eta_prob 
       }
       
       else {
-        print('eta prob == NaN')
-        print(paste0('eta[t-1]', eta[t-1]))
-        print(paste0('R0', R0))
-        print(paste0('k', k))
+        print('log_eta_prob == NaN')
+        print(paste0('eta[t-1]: ', eta[t-1]))
+        print(paste0('R0: ', R0))
+        print(paste0('k: ', k))
       }
       
     } 
+  }
   
   return(loglike)
 }

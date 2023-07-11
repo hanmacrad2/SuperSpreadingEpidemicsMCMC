@@ -26,7 +26,7 @@ library(extraDistr)
 
 #VECTORISED
 PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
-                                        beta = 0.1, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
+                                        beta = 1000, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
   
   #PARAMS
   N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
@@ -149,7 +149,7 @@ PROSOSAL_SS_DIR_MULTINOM_SLOW <- function(x, mcmc_output, num_is_samps = 1000,
 #* 1. PROPOSALS FROM DIRICHLET MULTINOMIAL #_NO_AC
 #*
 #*****************************************************************************************
-PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 1000, beta = 0.1){ #beta strictly less than 1 
+PROSOSAL_SS_DIR_MULTINOM_ORIG <- function(x, mcmc_output, num_is_samps = 1000, beta = 0.1){ #beta strictly less than 1 
   
   #PARAMS
   N = dim(mcmc_output$ss)[1] #num of mcmc runs     #Sum of the counts of each category, i.e num of 0s + num of 1s (I.e )
@@ -229,7 +229,8 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, aX, bX, cX,
 
 #' @export
 GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps = 10000,
-                                        beta = 0.1, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                        beta = 1000, 
+                                        FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = TRUE, SSIR = FALSE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -263,12 +264,11 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, num_is_samps
       loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
                               theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
       
+      } else {
+        loglike = 0 #vector_estimate_terms[i] =  0 #-Inf
+      }
       vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
         log_q[i] - log_density_dirmult_samps[i]
-      
-      } else {
-        vector_estimate_terms[i] =  0 #-Inf
-      }
     }
   
   #print(vector_estimate_terms)

@@ -10,12 +10,14 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSEB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'SSIB_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 
-OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_3_DAYS/')
+OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_6_DAYS/')
 
 #PARAMS
 NMCMC = 30000
 
+#**************
 #BASELINE
+#**************
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_2/')
 run = '3_gp'
 run = 1
@@ -26,13 +28,11 @@ CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/'); p
 #MCMC
 i = 10
 mcmc_output_baseline = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-
 #PLOT
 PLOT_BASELINE_R0_MCMC(EPI_DATA, mcmc_output_baseline)
 
 #MCMC OUTPUT
 mcmc_output_baseline_exp1 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-
 mcmc_output_baseline_gamma = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
 
 #PLOT
@@ -40,7 +40,9 @@ PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_exp1) #exp(1) - MUCH T
 
 PLOT_BASELINE_R0_MCMC(data_baseline, mcmc_output_baseline_gamma)
 
+#*******
 #SSNB
+#*******
 run = 1
 model_type = 'ssnb'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
@@ -52,7 +54,6 @@ mcmc_output_nb_2 = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_
 
 #PLOT
 plot.ts(mcmc_output_nb_2$ssnb_params_matrix)
-
 
 #*******
 #* SSEB
@@ -67,9 +68,9 @@ PLOT_SSB_MCMC_GRID(EPI_DATA, mcmc_sseb,
                    #sim_vals = list(m1 = 0., m2 = 0.05, m3 = 10),
                    FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE))
 
-#****
+#***********
 #SSIR
-#*****
+#*************
 model_type = 'ssir'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
 
@@ -80,8 +81,8 @@ mcmc_output_ssir = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_
 
 #PLOT
 plot.ts(mcmc_output_ssir$ssir_params_matrix)
-plot.ts(mcmc_output$eta_matrix)
-PLOT_SSIR_MCMC_GRID(data_ssib, mcmc_output_ssir, 0, 1,
+plot.ts(mcmc_output_ssir$eta_matrix)
+PLOT_SSIR_MCMC_GRID(EPI_DATA, mcmc_output_ssir, 0, 1,
                                 0, NMCMC)
 
 #SSIB #GET DATA

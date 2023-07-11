@@ -50,16 +50,18 @@ saveRDS(data_ssib4, paste0(DATA_FOLDER, file_name))
 data_ssib4 = readRDS(paste0(DATA_FOLDER, file_name))
 
 #MOCK DATA
-file_name = 'mock_data_5_days.rds'
+EPI_DATA = MOCK_DATA_6_DAYS
 MOCK_DATA = c(1,2,1,2,2)
-plot.ts(MOCK_DATA_2_DAYS, main = 'MOCK DATA', ylab = 'Daily infection count', )
-saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
-
 MOCK_DATA = c(1,2)
 MOCK_DATA_2_DAYS = c(1,0)
 MOCK_DATA_3_DAYS = c(1,2,1)
 MOCK_DATA_3_DAYS = c(1,1,1)
 MOCK_DATA_4_DAYS = c(1,1,0,1)
+MOCK_DATA_6_DAYS = c(1,1,0,1,0,1)
+
+file_name = 'mock_data_6_days.rds'
+plot.ts(MOCK_DATA_4_DAYS, main = 'MOCK DATA', ylab = 'Daily infection count', )
+saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
 
 #****************************************************************
 # CANDADIAN DATA
