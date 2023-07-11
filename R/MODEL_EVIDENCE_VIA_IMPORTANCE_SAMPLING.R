@@ -85,7 +85,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  vector_estimate_terms = rep(NA, n_samples)
+  #vector_estimate_terms = rep(NA, n_samples)
+  vector_estimate_terms = c()
   lambda_vec = get_lambda(epidemic_data); 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
@@ -159,12 +160,25 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       } else {
         loglike = 0
       }
+      
+      vector_estimate_terms_i = loglike + log_prior_density[i] - log_q[i]
+      
+      if (!is.nan(vector_estimate_terms_i) && !is.infinite(vector_estimate_terms_i)) {
+        vector_estimate_terms = c(vector_estimate_terms, vector_estimate_terms_i)
+      } else {
+        print(paste0('vector_estimate_terms_i ', vector_estimate_terms_i ))
+        print(paste0('loglike ',loglike))
+        print(paste0('log_prior_density[i] ', log_prior_density[i]))
+        print(paste0('log_q[i] ', log_q[i]))
+      }
 
-      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
     
   } 
   
+  print(paste0('n_samples',  n_samples))
+  n_samples = length(vector_estimate_terms)
+  print(paste0('vector_estimate_terms',  vector_estimate_terms))
   print(paste0(' LOG_SUM_EXP(vector_estimate_terms)',  LOG_SUM_EXP(vector_estimate_terms)))
   print(paste0(' -log(n_samples)',  -log(n_samples)))
   

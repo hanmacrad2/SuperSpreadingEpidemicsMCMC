@@ -54,8 +54,8 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   #Params
   num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
-  loglike = 0; count_inf = 0; count_na = 0
-  print(paste0('eta', eta))
+  loglike = 0; count_na = 0; count_not_na = 0
+  #print(paste0('eta', eta)) rmvt samples 
   for (t in 2:num_days) {
     
     #POISSON
@@ -65,8 +65,9 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     
     if (!is.nan(log_poi_prob)){
       loglike = loglike + log_poi_prob 
+      count_not_na = count_not_na +1
     } else {
-      
+      count_na = count_na + 1
       print('log_poi_prob == NaN')
       # print(paste0('total_poi_rate: ', total_poi_rate))
       # print(paste0('epi_data[t]: ', epi_data[t]))
@@ -83,18 +84,22 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
        if (!is.nan(log_eta_prob)){
         
         loglike = loglike + log_eta_prob 
+        count_not_na = count_not_na +1
       }
       
       else {
-        print('log_eta_prob == NaN')
-        print(paste0('eta[t-1]: ', eta[t-1]))
-        print(paste0('R0: ', R0))
-        print(paste0('k: ', k))
+        count_na = count_na + 1
+        # print('log_eta_prob == NaN')
+        # print(paste0('eta[t-1]: ', eta[t-1]))
+        # print(paste0('R0: ', R0))
+        # print(paste0('k: ', k))
       }
       
     } 
   }
   
+  #print(paste0('count_not_na', count_not_na))
+  #print(paste0('count na', count_na))
   return(loglike)
 }
 
