@@ -60,7 +60,7 @@ MOCK_DATA_4_DAYS = c(1,1,0,1)
 MOCK_DATA_6_DAYS = c(1,1,0,1,0,1)
 
 file_name = 'mock_data_6_days.rds'
-plot.ts(MOCK_DATA_4_DAYS, main = 'MOCK DATA', ylab = 'Daily infection count', )
+plot.ts(EPI_DATA, main = 'MOCK DATA', ylab = 'Daily infection count', )
 saveRDS(MOCK_DATA, paste0(OUTER_FOLDER, file_name))
 
 #****************************************************************

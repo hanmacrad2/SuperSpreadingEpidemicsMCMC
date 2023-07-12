@@ -114,23 +114,36 @@ sd(model_ev_ssib4)
 #*************************
 #4. SSIR
 #*************************
+
+mod_sr = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+
 model_ev_ssir6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = TRUE))
+
 #PLOT
 #PLOT_MODEL_EV_RESULTS(model_ev_ssir)
-mean(model_ev_ssir5)
-sd(model_ev_ssir5)
+mean(model_ev_ssir6)
+sd(model_ev_ssir6)
 
 #PLOT
 PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
                       data_type = 'SSIB')
 
+#MODEL EVIDENCE
+mcmc_samples = cbind(mcmc_output_ssir$ssir_params_matrix, mcmc_output_ssir$eta_matrix)
+list_mod_ev = GET_LOG_MODEL_EVIDENCE(mcmc_samples, EPI_DATA, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                       SSIB = FALSE, SSIR = TRUE))
+
 #*************************
 #PLOT ALL MODEL EVIDENCE
+#*************************
 data_type = 'Mock Data'
-BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base4, SSEB = model_ev_sseb4,
-                                          SSNB = model_ev_ssnb4, SSIB = model_ev_ssib4), data_type = data_type)
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base5, SSEB = model_ev_sseb5,
+                                          SSNB = model_ev_ssnb5, SSIB = model_ev_ssib6), data_type = data_type)
+
+
+
 
 #***************************************************************************
 #*

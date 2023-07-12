@@ -63,13 +63,13 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE)
     #epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
     
-    if (!is.nan(log_poi_prob)){
+    if (!is.nan(log_poi_prob) && !is.infinite(log_poi_prob)){
       loglike = loglike + log_poi_prob 
       count_not_na = count_not_na +1
     } else {
       count_na = count_na + 1
-      print('log_poi_prob == NaN')
-      # print(paste0('total_poi_rate: ', total_poi_rate))
+      #print('log_poi_prob == NaN')
+      # print(paste0('log_poi_prob: ', log_poi_prob))
       # print(paste0('epi_data[t]: ', epi_data[t]))
       # print(paste0('eta[t-1]: ', eta[t-1]))
       # print(paste0('R0: ', R0))
@@ -81,7 +81,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
      
-       if (!is.nan(log_eta_prob)){
+       if (!is.nan(log_eta_prob) && !is.infinite(log_eta_prob)){
         
         loglike = loglike + log_eta_prob 
         count_not_na = count_not_na +1
@@ -89,7 +89,9 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       
       else {
         count_na = count_na + 1
-        # print('log_eta_prob == NaN')
+        # print(paste0('log_eta_prob: ', log_eta_prob))
+        # # print('log_eta_prob == NaN')
+        # print(paste0('epi_data[t]: ', epi_data[t]))
         # print(paste0('eta[t-1]: ', eta[t-1]))
         # print(paste0('R0: ', R0))
         # print(paste0('k: ', k))
