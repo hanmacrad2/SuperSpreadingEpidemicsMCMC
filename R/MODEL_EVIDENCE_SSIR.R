@@ -4,7 +4,8 @@
 #1. LOAD MCMC FOR MODEL EVIDENCE 
 #************************
 LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER, 
-                                        run = run, n_repeats = n_repeats, start = 1, num_is_samps = 10000,
+                                        run = run, n_repeats = n_repeats, 
+                                        start = 1, num_is_samps = 10000,
                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = FALSE, SSIR = TRUE)){
   
@@ -24,8 +25,8 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
     # eta_nonzero <- apply(mcmc_output$eta_matrix != 0, 2, any)
     # eta_nonzero_cols = mcmc_output$eta_matrix[, eta_nonzero]
     
-    mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
-    print(paste0('dim of mcmc', dim(mcmc_samples)))
+    #mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
+    #print(paste0('dim of mcmc', dim(mcmc_samples)))
     
     #GET PHAT ESTIMATE OF MODEL EVIDENCE
     phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIR(mcmc_output, EPI_DATA)
@@ -37,6 +38,7 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
   #SAVE ESTIMATES
   saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
   
+  return(estimates_vec) 
 }
 
 #************************
@@ -64,12 +66,12 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, n_samples = 10000
   
   infectivity_vec = GET_INFECT_GAMMA_CURVE(EPI_DATA) 
   num_etas = dim(theta_samples)[2] - 2 #length(EPI_DATA)-1
-  count_inf = 0
-  count_nan = 0
+  count_ok = 0
   
   for (i in 1:n_samples) {
     
     if (log_prior_density[i] > -Inf && !is.nan(log_prior_density[i])) {
+      # print(paste0('theta_samples[i, 1:2]: ', theta_samples[i, 1:2]))
       
       loglike = LOG_LIKE_SSIR(EPI_DATA, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:dim(theta_samples)[2]]) 
@@ -80,16 +82,17 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, n_samples = 10000
     
     vector_estimate_terms_i = loglike + log_prior_density[i] - log_q[i]
     
-    #vector_estimate_terms = c(vector_estimate_terms, vector_estimate_terms_i)
-    
-    if (!is.nan(vector_estimate_terms_i) && !is.infinite(vector_estimate_terms_i)) {
+    if (!is.na(vector_estimate_terms_i) && !is.infinite(vector_estimate_terms_i)) {
       vector_estimate_terms = c(vector_estimate_terms, vector_estimate_terms_i)
+      count_ok = count_ok + 1
     }
   }
   
   #ESTIMATE OVER SUM
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
+  print(paste0(' LOG_SUM_EXP(vector_estimate_terms) = ',  LOG_SUM_EXP(vector_estimate_terms)))
+  print(paste0('count_ok = ', count_ok))
   
   
   return(log_p_hat)
@@ -104,14 +107,13 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, n_samples = 10000
 #********************************************************************
 
 GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
-                               n_samples, dof = 3, prob = 0.95) { #prob = 0.95 0.9999
+                               n_samples, dof = 3, prob = 0.9999) { #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   lambda_vec = get_lambda(EPI_DATA)
   sum_estimate = 0
   
   #SAMPLING SIZE 
-  
   samp_size_proposal = prob*n_samples; 
   samp_size_prior = n_samples - samp_size_proposal
   prob_prop = prob; prob_prior = 1 - prob_prop
@@ -120,16 +122,13 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   eta_nonzero <- apply(mcmc_output$eta_matrix != 0, 2, any)
   eta_nonzero_cols = mcmc_output$eta_matrix[, eta_nonzero]
   mcmc_samples = cbind(mcmc_output$ssir_params_matrix, eta_nonzero_cols) 
-  
   n_dim = dim(mcmc_samples)[2] 
-  print(paste0('n_dim:', n_dim))
   
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(EPI_DATA, samp_size_prior, n_dim, FLAGS_MODELS)
-  
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
@@ -149,8 +148,10 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   imp_samp_comps = list(theta_samples = theta_samples, log_q = log_q, log_prior_density = log_prior_density)
   
   return(imp_samp_comps)  
-} #0.001
+} 
 
 
 #RUN
-mod_sr = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+MOD_EV_SSIR = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+mean(MOD_EV_SSIR)
+sd(MOD_EV_SSIR)

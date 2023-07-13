@@ -174,7 +174,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   #REMOVE ZEROS FROM DATA
   epidemic_data <- epidemic_data[epidemic_data != 0]
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
-  print(paste0('time length', time_length))
+  #print(paste0('time length', time_length))
   eta_priors_matrix = matrix(nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
@@ -204,8 +204,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
   dim_cols = dim(theta_samples)[2] #- 1 
-  print(paste0('num_etas:', num_etas))
-  print(paste0('dim cols:', dim_cols))
+  #print(paste0('num_etas:', num_etas))
+  #print(paste0('dim cols:', dim_cols))
   eta_samples_matrix = matrix(nrow = samp_size, ncol = num_etas)
   
   #For each mcmc run

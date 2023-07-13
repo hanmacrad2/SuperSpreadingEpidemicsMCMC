@@ -56,6 +56,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   R0 = ssir_params[1]; k = ssir_params[2]
   loglike = 0; count_na = 0; count_not_na = 0
   #print(paste0('eta', eta)) rmvt samples 
+  
   for (t in 2:num_days) {
     
     #POISSON
@@ -63,9 +64,11 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE)
     #epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
     
-    if (!is.nan(log_poi_prob) && !is.infinite(log_poi_prob)){
+    if (!is.nan(log_poi_prob) && !is.na(log_poi_prob) && !is.infinite(log_poi_prob)){
       loglike = loglike + log_poi_prob 
       count_not_na = count_not_na +1
+      #print(paste0('loglike: ', loglike))
+      
     } else {
       count_na = count_na + 1
       #print('log_poi_prob == NaN')
@@ -81,10 +84,12 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
      
-       if (!is.nan(log_eta_prob) && !is.infinite(log_eta_prob)){
+       if (!is.nan(log_eta_prob) && !is.na(log_eta_prob) && !is.infinite(log_eta_prob)){
         
         loglike = loglike + log_eta_prob 
         count_not_na = count_not_na +1
+        # print(paste0('t: ', t))
+        # print(paste0('loglike: ', loglike))
       }
       
       else {
@@ -100,8 +105,9 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     } 
   }
   
-  #print(paste0('count_not_na', count_not_na))
-  #print(paste0('count na', count_na))
+  # print(paste0('loglike: ', loglike))
+  # print(paste0('count_not_na', count_not_na))
+  # print(paste0('count na', count_na))
   return(loglike)
 }
 

@@ -90,7 +90,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   #PARAMS
   vector_estimate_terms = rep(NA, n_samples)
   #vector_estimate_terms = c()
-  lambda_vec = get_lambda(epidemic_data); 
+  lambda_vec = get_lambda(epidemic_data);
+  count_ok = 0
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
@@ -107,6 +108,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
         
         loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
                                 theta_samples[i, 2], theta_samples[i, 3])
+        count_ok = count_ok + 1
       } else {
         loglike = 0
       }
@@ -123,6 +125,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       if (log_prior_density[i] > -Inf ) {
         
       loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+      count_ok = count_ok + 1
       
       } else {
         loglike = 0
@@ -150,6 +153,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       if (log_prior_density[i] > -Inf && !is.nan(log_prior_density[i])) {
         loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:dim(theta_samples)[2]]) 
+        count_ok = count_ok + 1
       
       } else {
         loglike = 0
@@ -186,6 +190,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   #ESTIMATE OVER SUM
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
+  print(paste0('count_ok', count_ok))
   
   
   return(log_p_hat)
@@ -247,7 +252,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
       estimates_vec[i] = phat_estimate
       print(estimates_vec)
       
-    }
+    } 
     
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
