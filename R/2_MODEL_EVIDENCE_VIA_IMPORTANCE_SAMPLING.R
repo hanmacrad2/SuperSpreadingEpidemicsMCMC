@@ -294,94 +294,94 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
   return(estimates_vec) 
 }
 
-GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
-                                  FLAGS_MODELS, LOGLIKE_FUNC, n_samples = 10000) {   
-  
-  'Estimate of model evidence for SSEB model using Importance Sampling'
-  
-  #PARAMS
-  vector_estimate_terms = rep(NA, n_samples)
-  lambda_vec = get_lambda(epidemic_data); 
-  
-  #PROPOSAL, PRIOR, THETA SAMPLES 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
-  theta_samples = imp_samp_comps$theta_samples
-  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
-  
-  for (i in 1:n_samples) {
-    
-    if (log_prior_density[i] > -Inf ) {
-      
-    LOGLIKE_FUNC
-  #SSEB MODEL 
-  if (FLAGS_MODELS$SSEB){
-    
-    #GET ESTIMATE
-    for (i in 1:n_samples) {
-      
-      if (log_prior_density[i] > -Inf ) {
-        
-        loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
-                                theta_samples[i, 2], theta_samples[i, 3])
-      } else {
-        loglike = 0
-      }
-      
-      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
-      
-      if(vector_estimate_terms[i] > 0){
-        print(paste0('i', i))
-        print('vector_estimate_terms[i] > 0')
-        print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
-        print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
-        print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
-        
-        print(paste0('loglike sseb', loglike))
-        print(paste0('log_prior_density[i] ', log_prior_density[i]))
-        print(paste0('log_q[i]', log_q[i]))
-      }
-      
-    }
-    
-    #SSNB MODEL
-  } else if (FLAGS_MODELS$SSNB) {
-    
-    for (i in 1:n_samples) {
-      
-      if (log_prior_density[i] > -Inf ) {
-        
-        loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
-        
-      } else {
-        loglike = 0
-      }
-      
-      if (is.nan(loglike)){
-        print(paste0(' theta_samples[i,])',  theta_samples[i,]))
-      }
-      
-      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
-    }
-  } else if (FLAGS_MODELS$SSIR) {
-    
-    infectivity_vec = GET_INFECT_GAMMA_CURVE(epidemic_data) #get_infectious_curve(epidemic_data)
-    num_etas = length(epidemic_data)-1
-    
-    for (i in 1:n_samples) {
-      loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
-                              theta_samples[i, 3:(2+num_etas)]) 
-      
-      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
-    }
-    
-  } 
-  
-  print(paste0(' LOG_SUM_EXP(vector_estimate_terms)',  LOG_SUM_EXP(vector_estimate_terms)))
-  print(paste0(' -log(n_samples)',  -log(n_samples)))
-  
-  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
-  print(paste0('log_p_hat = ', log_p_hat))
-  
-  
-  return(log_p_hat)
-}
+# GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
+#                                   FLAGS_MODELS, LOGLIKE_FUNC, n_samples = 10000) {   
+#   
+#   'Estimate of model evidence for SSEB model using Importance Sampling'
+#   
+#   #PARAMS
+#   vector_estimate_terms = rep(NA, n_samples)
+#   lambda_vec = get_lambda(epidemic_data); 
+#   
+#   #PROPOSAL, PRIOR, THETA SAMPLES 
+#   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
+#   theta_samples = imp_samp_comps$theta_samples
+#   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+#   
+#   for (i in 1:n_samples) {
+#     
+#     if (log_prior_density[i] > -Inf ) {
+#       
+#     LOGLIKE_FUNC
+#   #SSEB MODEL 
+#   if (FLAGS_MODELS$SSEB){
+#     
+#     #GET ESTIMATE
+#     for (i in 1:n_samples) {
+#       
+#       if (log_prior_density[i] > -Inf ) {
+#         
+#         loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
+#                                 theta_samples[i, 2], theta_samples[i, 3])
+#       } else {
+#         loglike = 0
+#       }
+#       
+#       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+#       
+#       if(vector_estimate_terms[i] > 0){
+#         print(paste0('i', i))
+#         print('vector_estimate_terms[i] > 0')
+#         print(paste0('theta_samples[i, 1]', theta_samples[i, 1]))
+#         print(paste0('theta_samples[i, 2]', theta_samples[i, 2]))
+#         print(paste0('theta_samples[i, 3]', theta_samples[i, 3]))
+#         
+#         print(paste0('loglike sseb', loglike))
+#         print(paste0('log_prior_density[i] ', log_prior_density[i]))
+#         print(paste0('log_q[i]', log_q[i]))
+#       }
+#       
+#     }
+#     
+#     #SSNB MODEL
+#   } else if (FLAGS_MODELS$SSNB) {
+#     
+#     for (i in 1:n_samples) {
+#       
+#       if (log_prior_density[i] > -Inf ) {
+#         
+#         loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+#         
+#       } else {
+#         loglike = 0
+#       }
+#       
+#       if (is.nan(loglike)){
+#         print(paste0(' theta_samples[i,])',  theta_samples[i,]))
+#       }
+#       
+#       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+#     }
+#   } else if (FLAGS_MODELS$SSIR) {
+#     
+#     infectivity_vec = GET_INFECT_GAMMA_CURVE(epidemic_data) #get_infectious_curve(epidemic_data)
+#     num_etas = length(epidemic_data)-1
+#     
+#     for (i in 1:n_samples) {
+#       loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
+#                               theta_samples[i, 3:(2+num_etas)]) 
+#       
+#       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+#     }
+#     
+#   } 
+#   
+#   print(paste0(' LOG_SUM_EXP(vector_estimate_terms)',  LOG_SUM_EXP(vector_estimate_terms)))
+#   print(paste0(' -log(n_samples)',  -log(n_samples)))
+#   
+#   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
+#   print(paste0('log_p_hat = ', log_p_hat))
+#   
+#   
+#   return(log_p_hat)
+# }

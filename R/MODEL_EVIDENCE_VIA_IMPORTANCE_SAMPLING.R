@@ -27,7 +27,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                                         n_samples, dof = 3, prob = 0.95) { #prob = 0.95 0.9999
+                                         n_samples, dof = 3, prob = 0.9999) { #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -59,7 +59,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   
   #DENSITY OF PROPOSAL
   log_proposal_density = dmvt(theta_samples - matrix_means,
-                      sigma = cov(mcmc_samples), df = dof) #, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+                      sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #a = theta_samples[,1:4] - matrix_means[,1:4]
   #b = dmvt(a, sigma = cov(mcmc_samples[,1:4]), df = dof)
@@ -88,8 +88,8 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
-  #vector_estimate_terms = rep(NA, n_samples)
-  vector_estimate_terms = c()
+  vector_estimate_terms = rep(NA, n_samples)
+  #vector_estimate_terms = c()
   lambda_vec = get_lambda(epidemic_data); 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
@@ -183,16 +183,13 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
     
   } 
   
-  #print(paste0('n_samples',  n_samples))
-  n_samples = length(vector_estimate_terms)
-  print(paste0('count_nan: ', count_nan))
-  print(paste0('count_inf: ',count_inf))
-  
+  #ESTIMATE OVER SUM
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
-
   
-  return(list(imp_samp_comps = imp_samp_comps, log_p_hat = log_p_hat)) #log_p_hat
+  
+  return(log_p_hat)
+  
 } 
 
 #******************************************************************************

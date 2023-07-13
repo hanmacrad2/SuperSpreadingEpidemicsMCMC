@@ -171,9 +171,10 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
   
+  #REMOVE ZEROS FROM DATA
+  epidemic_data <- epidemic_data[epidemic_data != 0]
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
   print(paste0('time length', time_length))
-  #epidemic_data = epidemic_data[1:time_length]
   eta_priors_matrix = matrix(nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
@@ -196,6 +197,9 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
+  
+  #REMOVE ZEROS FROM DATA
+  epidemic_data <- epidemic_data[epidemic_data != 0]
   
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
