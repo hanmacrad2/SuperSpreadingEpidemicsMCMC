@@ -81,6 +81,11 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     
     if (epi_data[t-1] > 0) {
       
+      print(paste0('t', t))
+      print(paste0('epi_data[t-1]: ', epi_data[t-1]))
+      print(paste0('eta[t-1]: ', eta[t-1]))
+      print(paste0('eta: ', eta))
+      
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
      
@@ -103,6 +108,12 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       }
       
     } 
+    
+    if (epi_data[t] == 0){
+      print(paste0('epi_data[t]: ', epi_data[t]))
+      print(paste0('log_poi_prob: ', log_poi_prob))
+      print(paste0('log_eta_prob: ', log_eta_prob))
+    }
   }
   
   # print(paste0('loglike: ', loglike))

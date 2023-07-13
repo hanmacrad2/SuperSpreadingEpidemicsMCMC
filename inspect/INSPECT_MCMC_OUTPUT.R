@@ -13,14 +13,13 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_6_DAYS/')
 
 #PARAMS
+run = 1
 NMCMC = 30000
 
 #**************
 #BASELINE
 #**************
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'BASELINE_DATA/DATA_BASELINE_2/')
-run = '3_gp'
-run = 1
 
 model_type = 'baseline'; print(model_type)
 CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/'); print(CURRENT_FOLDER)

@@ -1,13 +1,13 @@
 #MODEL EVIDENCE SSIR MODEL (DATA AUG)
-
+library(mvtnorm)
+#PARAMS
+run = 1; n_repeats = 5
 #************************
 #1. LOAD MCMC FOR MODEL EVIDENCE 
 #************************
 LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER, 
                                         run = run, n_repeats = n_repeats, 
-                                        start = 1, num_is_samps = 10000,
-                                        FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                            SSIB = FALSE, SSIR = TRUE)){
+                                        start = 1){
   
   #Parameters
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -44,7 +44,10 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
 #************************
 # 2. MODEL EVIDENCE (P HAT)
 #************************
-GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, n_samples = 10000){
+GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, 
+                                        FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                            SSIB = FALSE, SSIR = TRUE),
+                                        n_samples = 10000){
   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -63,6 +66,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, n_samples = 10000
   imp_samp_comps = GET_LOG_PROPOSAL_Q_SSIR(mcmc_output, EPI_DATA, FLAGS_MODELS, n_samples)
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+  print(paste0('dim theta samples', dim(theta_samples)))
   
   infectivity_vec = GET_INFECT_GAMMA_CURVE(EPI_DATA) 
   num_etas = dim(theta_samples)[2] - 2 #length(EPI_DATA)-1
@@ -152,6 +156,6 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
 
 
 #RUN
-MOD_EV_SSIR = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-mean(MOD_EV_SSIR)
-sd(MOD_EV_SSIR)
+model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+mean(model_ev_ssir6)
+sd(model_ev_ssir6)
