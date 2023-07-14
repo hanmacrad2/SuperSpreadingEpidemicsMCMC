@@ -17,22 +17,14 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
   CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   print(CURRENT_FOLDER)
   
-  for (i in start:n_repeats){ #start:n_repeats
+  for (i in start:n_repeats){ 
     #print(paste0('i = ', i))
     mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-    
-    # #ETA ONLY IF > 0
-    # eta_nonzero <- apply(mcmc_output$eta_matrix != 0, 2, any)
-    # eta_nonzero_cols = mcmc_output$eta_matrix[, eta_nonzero]
-    
-    #mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix)
-    #print(paste0('dim of mcmc', dim(mcmc_samples)))
     
     #GET PHAT ESTIMATE OF MODEL EVIDENCE
     phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIR(mcmc_output, EPI_DATA)
     estimates_vec[i] = phat_estimate                        
-    #print(estimates_vec)
-    
+    print(estimates_vec)
   }
   
   #SAVE ESTIMATES
@@ -69,11 +61,11 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   #print(paste0('dim theta samples', dim(theta_samples)))
   
   infectivity_vec = GET_INFECT_GAMMA_CURVE(EPI_DATA) 
-  num_etas = dim(theta_samples)[2] - 2 #length(EPI_DATA)-1
+  num_etas = length(EPI_DATA)-1 # dim(theta_samples)[2] - 2
   count_ok = 0
   
   for (i in 1:n_samples) {
-    
+
     if (log_prior_density[i] > -Inf && !is.nan(log_prior_density[i])) {
       # print(paste0('theta_samples[i, 1:2]: ', theta_samples[i, 1:2]))
       
@@ -153,11 +145,26 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   #DEFENSE MIXTURE
   matrix_means =  matrix(rep(means, each = n_samples), ncol = n_dim)
   
-  #DENSITY OF PROPOSAL
+  #DENSITY OF PROPOSAL ** ADDED!! 14/07/23
+  samps_centred = theta_samples - matrix_means
+  cols_nonzero <- apply(samps_centred != 0, 2, any)
+  samps_centred = samps_centred[, cols_nonzero]
+  
   log_proposal_density = dmvt(theta_samples - matrix_means,
                               sigma = cov(mcmc_samples), df = dof) #, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
-  #PRIOR DENSITIES 
+  # j = 1
+  # if (j == 1){
+  #   print(theta_samples - matrix_means)
+  #   j = 2
+  #   print(log_proposal_density)
+  #   print('log_proposal_density dim: ')
+  #   print(length(log_proposal_density))
+  #   
+  #   break
+  # }
+  
+    #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
                                             samp_size_prior, n_dim, FLAGS_MODELS)
   
@@ -171,6 +178,6 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
 
 
 #RUN
-model_ev_ssir7 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-mean(model_ev_ssir7)
-sd(model_ev_ssir7)
+model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+mean(model_ev_ssir6)
+sd(model_ev_ssir6)

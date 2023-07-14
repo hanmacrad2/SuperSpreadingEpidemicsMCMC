@@ -117,6 +117,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   # print(paste0('loglike: ', loglike))
   # print(paste0('count_not_na', count_not_na))
   # print(paste0('count na', count_na))
+  
   return(loglike)
 }
 

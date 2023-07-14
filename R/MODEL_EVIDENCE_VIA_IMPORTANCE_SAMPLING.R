@@ -131,12 +131,6 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
         loglike = 0
       }
       
-      if (is.nan(loglike)){
-        print(paste0(' loglike)', loglike))
-        print(paste0(' theta_samples[i,])',  theta_samples[i,]))
-        
-      }
-      
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     }
   } else if (FLAGS_MODELS$SSIR) {
