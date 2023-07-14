@@ -172,20 +172,16 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   #Question: Is it correct to use the current priors r0x & k
   
   #REMOVE ZEROS FROM DATA
-  epidemic_data <- epidemic_data[epidemic_data != 0]
+  #epidemic_data <- epidemic_data[epidemic_data != 0]
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
-  #print(paste0('time length', time_length))
   eta_priors_matrix = matrix(nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
   for(i in 1:samp_size_prior){ #IS BELOW CORRECT, I.E PARAM_PRIORS?
-    R0X = param_priors[i, 1]; k = param_priors[i, 2] #R0X = param_priors[i, 1]; k = mcmc_samples[i, 2] #!!!WRONG THEY SHOULD BE THE SAME 
-    eta_prior = rgamma(time_length, shape = epidemic_data*k, scale = R0X*k)
-    #print(paste0('rgamma(time length)', eta_prior))
-    eta_priors_matrix[i, ] = rgamma(time_length, shape = epidemic_data*k, scale = R0X*k)
+    R0 = param_priors[i, 1]; k = param_priors[i, 2] #R0X = param_priors[i, 1]; k = mcmc_samples[i, 2] #!!!WRONG THEY SHOULD BE THE SAME 
+    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0*k)
+    eta_priors_matrix[i, ] = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0*k)
   }
-  
-  #print(paste0('dim eta_priors_matrix', dim(eta_priors_matrix)))
   
   return(eta_priors_matrix)
 }
@@ -199,28 +195,45 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   #Question: Is it correct to use the current priors r0x & k
   
   #REMOVE ZEROS FROM DATA
-  epidemic_data <- epidemic_data[epidemic_data != 0]
+  #epidemic_data <- epidemic_data[epidemic_data != 0]
   
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
-  dim_cols = dim(theta_samples)[2] #- 1 
-  #print(paste0('num_etas:', num_etas))
-  #print(paste0('dim cols:', dim_cols))
+  dim_cols = dim(theta_samples)[2] 
   eta_samples_matrix = matrix(nrow = samp_size, ncol = num_etas)
   
   #For each mcmc run
   for(i in 1:samp_size){
     R0 = theta_samples[i, 1]; k = theta_samples[i, 2]
     
-    #print(paste0('dim2: ', length(theta_samples[i, 3:dim_cols])))
+    # print('EPI_DATA')
+    # print(EPI_DATA)
+    # print(paste0('R0, k: ', R0, k))
+    # print('theta_samples[i, 3:dim_cols]')
+    # print(theta_samples[i, 3:dim_cols])
+    # print(paste0('epidemic_data[2:length(epidemic_data)]*k', epidemic_data[2:length(epidemic_data)]*k))
+    # print(paste0('scale: R0*K', R0*k))
+    
     density_samples = dgamma(theta_samples[i, 3:dim_cols], 
-                             shape = epidemic_data[1:num_etas]*k, #epidemic_data*k, ??
+                             shape = epidemic_data[1:length(epidemic_data)-1]*k, #epidemic_data*k
                              scale = R0*k, log = TRUE)
-   
-    #print(theta_samples[i, 3:dim_cols])
+    # 
+    # if(anyNA(density_samples)){
+    #   print('density Nan')
+    #   print(density_samples)
+    #   print(paste0('R0, k: ', R0, k))
+    #   print('theta_samples[i, 3:dim_cols]')
+    #   print(theta_samples[i, 3:dim_cols])
+    #   print(paste0('epidemic_data[2:length(epidemic_data)]*k', epidemic_data[2:length(epidemic_data)]*k))
+    #   print(paste0('scale: R0*K', R0*k))
+    # }
+    
+    #print(paste0('density_samples: '))
     #print(density_samples)
+    
     eta_samples_matrix[i, ] = density_samples #dgamma(theta_samples[i,3:dim_cols], shape = epidemic_data*k, scale = R0X*k, log = TRUE)
   }
   
   return(eta_samples_matrix)
 }
+

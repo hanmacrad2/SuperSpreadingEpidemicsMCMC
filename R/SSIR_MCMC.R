@@ -55,14 +55,12 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
   loglike = 0; count_na = 0; count_not_na = 0
-  #print(paste0('eta', eta)) rmvt samples 
   
   for (t in 2:num_days) {
     
     #POISSON
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE)
-    #epi_data[t]*log(total_poi_rate) - total_poi_rate - lfactorial(epi_data[t]) 
     
     if (!is.nan(log_poi_prob) && !is.na(log_poi_prob) && !is.infinite(log_poi_prob)){
       loglike = loglike + log_poi_prob 
@@ -81,10 +79,10 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     
     if (epi_data[t-1] > 0) {
       
-      print(paste0('t', t))
-      print(paste0('epi_data[t-1]: ', epi_data[t-1]))
-      print(paste0('eta[t-1]: ', eta[t-1]))
-      print(paste0('eta: ', eta))
+      # print(paste0('t', t))
+      # print(paste0('epi_data[t-1]: ', epi_data[t-1]))
+      # print(paste0('eta[t-1]: ', eta[t-1]))
+      # print(paste0('eta: ', eta))
       
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
@@ -109,11 +107,11 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       
     } 
     
-    if (epi_data[t] == 0){
-      print(paste0('epi_data[t]: ', epi_data[t]))
-      print(paste0('log_poi_prob: ', log_poi_prob))
-      print(paste0('log_eta_prob: ', log_eta_prob))
-    }
+    # if (epi_data[t] == 0){
+    #   print(paste0('epi_data[t]: ', epi_data[t]))
+    #   print(paste0('log_poi_prob: ', log_poi_prob))
+    #   print(paste0('log_eta_prob: ', log_eta_prob))
+    # }
   }
   
   # print(paste0('loglike: ', loglike))

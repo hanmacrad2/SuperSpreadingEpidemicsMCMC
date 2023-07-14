@@ -27,7 +27,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                                         n_samples, dof = 3, prob = 0.9999) { #prob = 0.95 0.9999
+                                         n_samples, dof = 3, prob = 0.95) { #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -82,7 +82,120 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
 #
 #*****************************************************************************************
-
+GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
+                                   FLAGS_MODELS, n_samples = 10000) {   
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  vector_estimate_terms = rep(NA, n_samples)
+  #vector_estimate_terms = c()
+  lambda_vec = get_lambda(epidemic_data);
+  count_ok = 0
+  
+  #PROPOSAL, PRIOR, THETA SAMPLES 
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
+  theta_samples = imp_samp_comps$theta_samples
+  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+  
+  #SSEB MODEL 
+  if (FLAGS_MODELS$SSEB){
+    
+    #GET ESTIMATE
+    for (i in 1:n_samples) {
+      
+      if (log_prior_density[i] > -Inf ) {
+        
+        loglike = LOG_LIKE_SSEB(epidemic_data, lambda_vec, theta_samples[i, 1],
+                                theta_samples[i, 2], theta_samples[i, 3])
+        count_ok = count_ok + 1
+      } else {
+        loglike = 0
+      }
+      
+      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+      
+    }
+    
+    #SSNB MODEL
+  } else if (FLAGS_MODELS$SSNB) {
+    
+    for (i in 1:n_samples) {
+      
+      if (log_prior_density[i] > -Inf ) {
+        
+        loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+        count_ok = count_ok + 1
+        
+      } else {
+        loglike = 0
+      }
+      
+      if (is.nan(loglike)){
+        print(paste0(' loglike)', loglike))
+        print(paste0(' theta_samples[i,])',  theta_samples[i,]))
+        
+      }
+      
+      vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+    }
+  } else if (FLAGS_MODELS$SSIR) {
+    
+    infectivity_vec = GET_INFECT_GAMMA_CURVE(epidemic_data) #get_infectious_curve(epidemic_data)
+    num_etas = dim(theta_samples)[2] - 2 #length(epidemic_data)-1
+    count_inf = 0
+    count_nan = 0
+    
+    for (i in 1:n_samples) {
+      
+      #print(paste0('log_prior_density[i] ', log_prior_density[i] ))
+      
+      if (log_prior_density[i] > -Inf && !is.nan(log_prior_density[i])) {
+        loglike = LOG_LIKE_SSIR(epidemic_data, infectivity_vec, theta_samples[i, 1:2],
+                                theta_samples[i, 3:dim(theta_samples)[2]]) 
+        count_ok = count_ok + 1
+        
+      } else {
+        loglike = 0
+      }
+      
+      vector_estimate_terms_i = loglike + log_prior_density[i] - log_q[i]
+      vector_estimate_terms = c(vector_estimate_terms, vector_estimate_terms_i)
+      
+      if (!is.nan(vector_estimate_terms_i) && !is.infinite(vector_estimate_terms_i)) {
+        vector_estimate_terms = c(vector_estimate_terms, vector_estimate_terms_i)
+      }
+      # print(paste0('vector_estimate_terms_i ', vector_estimate_terms_i ))
+      # print(paste0('loglike ',loglike))
+      # print(paste0('log_prior_density[i] ', log_prior_density[i]))
+      # print(paste0('log_q[i] ', log_q[i]))
+      
+      if (is.nan(vector_estimate_terms_i)) {
+        count_nan = count_nan + 1 #count_nan
+        print('NAN')
+        print(paste0('theta_samples i: ',theta_samples[i,]))
+        print(paste0('loglike ',loglike))
+        print(paste0('log_prior_density[i] ', log_prior_density[i]))
+        print(paste0('log_q[i] ', log_q[i]))
+      } else if (is.infinite(vector_estimate_terms_i)) {
+        count_inf = count_inf + 1 #count_nan
+        #print(paste0('theta_samples i: ',theta_samples[i,]))
+        
+      }
+      
+    }
+    
+  } 
+  
+  #ESTIMATE OVER SUM
+  log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
+  print(paste0('log_p_hat = ', log_p_hat))
+  print(paste0('count_ok', count_ok))
+  
+  
+  return(log_p_hat)
+  
+} 
 
 #******************************************************************************
 #*

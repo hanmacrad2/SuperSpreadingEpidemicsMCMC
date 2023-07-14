@@ -96,12 +96,12 @@ sd(model_ev_ssnb7)
 #*************************
 #3. SSEB
 #*************************
-model_ev_sseb7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_sseb6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
-mean(model_ev_sseb7)
-sd(model_ev_sseb7)
+mean(model_ev_sseb6)
+sd(model_ev_sseb6)
 
 #*************************
 #5. SSIB
