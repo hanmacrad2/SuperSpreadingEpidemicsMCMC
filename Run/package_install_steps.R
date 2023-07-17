@@ -1,14 +1,13 @@
 #Package install steps
 
+#1. STEPS!! 17/07/23
 library(devtools)
-install.packages("Rtools")
-library(Rtools)
 
 #1. SET WD to Parent directory
 #Code: cd ~/Documents/GitHub
 
 #2. BUILD PACKAGE 
-#Code: R CMD build SuperSpreadingEpidemicsMCMC
+#R CMD build SuperSpreadingEpidemicsMCMC
 
 #3. INSTALL PACKAGE
 #Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
@@ -40,7 +39,7 @@ ls("package:SuperSpreadingEpidemicsMCMC")
 
 #1. setwd(parent_directory)
 
-#* install.packages(devtools) *If need to install
+#install.packages(devtools) *If need to install
 
 #2. library(devtools)
 
@@ -56,3 +55,9 @@ library(devtools)
 #INSTALL PACKAGE
 check()
 install()
+
+#Rtools (don't need these lines)
+#find_rtools() 
+#library(devtools)
+#install.packages("Rtools")
+#library(Rtools)
