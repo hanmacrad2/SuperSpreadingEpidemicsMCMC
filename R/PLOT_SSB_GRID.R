@@ -1,5 +1,4 @@
 #' Grid Plot of MCMC Super-Spreading Results
-library(coda)
 #'Grid Plot of MCMC Results for Super-Spreading Epidemic Models
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts

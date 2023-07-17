@@ -105,14 +105,14 @@ BOX_PLOT_MODEL_EV <- function(list_vec_results,
   print(head(df_results))
   boxplot(df_results, main = title,
           col = c('red', 'green', 'blue', 'orange'),
-          ylim = c((min(df_results)-1), 0),
+          #ylim = c((min(df_results)-1), 0),
           cex.lab=1.3, cex.axis=1.3, cex.main=1.2, cex.sub=1.3)
   
   
 }
 
 #BOX PLOT RESULTS 
-BOX_PLOT_MODEL_EV <- function(list_vec_results = list(v1 = results1,
+BOX_PLOT_MODEL_EV_V0 <- function(list_vec_results = list(v1 = results1,
                                                       v2 = results2),
                               title = 'Model Evidence. Importance sampling vs Harmonic Mean. ',
                                   data_type = data_type, model = model) { #Posterior Model Probabilities (Model evidence via Harmonic Mean). Data - Baseline Model

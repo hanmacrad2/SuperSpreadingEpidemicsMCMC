@@ -26,7 +26,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DAT
 
 run = 1 
 run = 2
-n_repeats = 10
+n_repeats = 5
 
 #***********************
 # 1. DATA 
@@ -77,22 +77,22 @@ n_repeats = 5 #10
 #*************************
 #1. BASELINE
 #*************************
-model_ev_base7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_base6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = TRUE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = FALSE))
-mean(model_ev_base7)
-sd(model_ev_base7) 
+mean(model_ev_base6)
+sd(model_ev_base6) 
 #PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
 
 #*************************
 #2. SSNB
 #*************************
-model_ev_ssnb7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssnb6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
-mean(model_ev_ssnb7)
-sd(model_ev_ssnb7)
+mean(model_ev_ssnb6)
+sd(model_ev_ssnb6)
 
 #*************************
 #3. SSEB
@@ -107,19 +107,18 @@ sd(model_ev_sseb6)
 #*************************
 #5. SSIB
 #*************************
-model_ev_ssib7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssib6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                              FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                  SSIB = TRUE, SSIR = FALSE))
-mean(model_ev_ssib7)
-sd(model_ev_ssib7)
+mean(model_ev_ssib6)
+sd(model_ev_ssib6)
 
 #*************************
 #4. SSIR
 #*************************
+model_ev_ssir7 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
-mod_sr = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-
-model_ev_ssir6 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_ssir7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                         SSIB = FALSE, SSIR = TRUE))
 
@@ -146,7 +145,10 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base7, SSEB = model_ev
                                           SSNB = model_ev_ssnb7, SSIB = model_ev_ssib7, SSIR = model_ev_ssir7),
                   data_type = data_type)
 
-
+data_type = 'Mock Data'
+BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir6, BASE = model_ev_base6, SSEB = model_ev_sseb6,
+                                          SSNB = model_ev_ssnb6, SSIB = model_ev_ssib6),
+                  data_type = data_type)
 
 
 #***************************************************************************

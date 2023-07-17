@@ -1,10 +1,5 @@
 #MODEL EVIDENCE FOR SSI MODEL
-
-# - Dirichlet multinomial Importance sampling proposal for SSIB model with Data Augmentation - 
-#library(SuperSpreadingEpidemicsMCMC)
-#library(mvtnorm)
-library(extraDistr)
-#library(MultiRNG)
+#Dirichlet multinomial Importance sampling proposal for SSIB model with Data Augmentation - 
 
 #FUNCTIONS
 #ddirmnom(r_dir_samps, 3, alpha.vec, log = FALSE)

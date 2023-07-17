@@ -1,7 +1,6 @@
 #********************************************************
 #1. INDIVIDUAL R0 MCMC WITH ADAPTIVE SHAPING                           
 #********************************************************
-library(MASS)
 
 #*********************************************
 #* SIMULATE SSIR Model - Individual reproduction number
@@ -69,8 +68,9 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       
     } else {
       count_na = count_na + 1
-      #print('log_poi_prob == NaN')
+      # print('log_poi_prob == NaN'): 
       # print(paste0('log_poi_prob: ', log_poi_prob))
+      # print(paste0('total_poi_rate: ', total_poi_rate)) #THIS IS NEGATIVE 
       # print(paste0('epi_data[t]: ', epi_data[t]))
       # print(paste0('eta[t-1]: ', eta[t-1]))
       # print(paste0('R0: ', R0))
@@ -78,11 +78,6 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     }
     
     if (epi_data[t-1] > 0) {
-      
-      # print(paste0('t', t))
-      # print(paste0('epi_data[t-1]: ', epi_data[t-1]))
-      # print(paste0('eta[t-1]: ', eta[t-1]))
-      # print(paste0('eta: ', eta))
       
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
@@ -97,26 +92,18 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       
       else {
         count_na = count_na + 1
-        # print(paste0('log_eta_prob: ', log_eta_prob))
-        # # print('log_eta_prob == NaN')
+        # print(paste0('log_eta_prob: ', log_eta_prob)) #-Inf if:
         # print(paste0('epi_data[t]: ', epi_data[t]))
-        # print(paste0('eta[t-1]: ', eta[t-1]))
+        # print(paste0('eta[t-1]: ', eta[t-1])) #This is negative
         # print(paste0('R0: ', R0))
         # print(paste0('k: ', k))
       }
       
     } 
-    
-    # if (epi_data[t] == 0){
-    #   print(paste0('epi_data[t]: ', epi_data[t]))
-    #   print(paste0('log_poi_prob: ', log_poi_prob))
-    #   print(paste0('log_eta_prob: ', log_eta_prob))
-    # }
   }
   
-  # print(paste0('loglike: ', loglike))
-  # print(paste0('count_not_na', count_not_na))
-  # print(paste0('count na', count_na))
+  #print(paste0('count_not_na', count_not_na))
+  #print(paste0('count na', count_na))
   
   return(loglike)
 }

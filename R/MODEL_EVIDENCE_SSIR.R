@@ -1,7 +1,5 @@
 #MODEL EVIDENCE SSIR MODEL (DATA AUG)
-library(mvtnorm)
-#PARAMS
-run = 1; n_repeats = 5
+
 #************************
 #1. LOAD MCMC FOR MODEL EVIDENCE 
 #************************
@@ -150,19 +148,20 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   cols_nonzero <- apply(samps_centred != 0, 2, any)
   samps_centred = samps_centred[, cols_nonzero]
   
+  #dmvt(theta_samples - matrix_means)
   log_proposal_density = dmvt(theta_samples - matrix_means,
-                              sigma = cov(mcmc_samples), df = dof) #, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+                              sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
-  # j = 1
-  # if (j == 1){
-  #   print(theta_samples - matrix_means)
-  #   j = 2
-  #   print(log_proposal_density)
-  #   print('log_proposal_density dim: ')
-  #   print(length(log_proposal_density))
-  #   
-  #   break
-  # }
+  j = 1
+  if (j == 1){
+    print(theta_samples - matrix_means)
+    j = 2
+    print(log_proposal_density)
+    print('log_proposal_density dim: ')
+    print(length(log_proposal_density))
+
+    break
+  }
   
     #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
@@ -178,6 +177,8 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
 
 
 #RUN
-model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-mean(model_ev_ssir6)
-sd(model_ev_ssir6)
+#PARAMS
+#run = 1; n_repeats = 5
+# model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+# mean(model_ev_ssir6)
+# sd(model_ev_ssir6)

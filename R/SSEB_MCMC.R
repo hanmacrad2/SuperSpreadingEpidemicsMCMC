@@ -1,7 +1,6 @@
 #*************************************
-#SSE MODEL - POISSON-POISSON COMPOUND
+#SSEB MODEL - POISSON-POISSON COMPOUND
 #*************************************
-library(coda)
 
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL

@@ -1,7 +1,7 @@
 #Package install steps
 
 #1. STEPS!! 17/07/23
-library(devtools)
+#library(devtools)
 
 #1. SET WD to Parent directory
 #Code: cd ~/Documents/GitHub
@@ -11,6 +11,27 @@ library(devtools)
 
 #3. INSTALL PACKAGE
 #Code: R CMD INSTALL SuperSpreadingEpidemicsMCMC_0.1.0.tar.gz
+
+
+#***************************************************************8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 library(SuperSpreadingEpidemicsMCMC)
 ls("package:SuperSpreadingEpidemicsMCMC")

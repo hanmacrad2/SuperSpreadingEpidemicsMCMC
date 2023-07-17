@@ -59,6 +59,7 @@ MOCK_DATA_3_DAYS = c(1,1,1)
 MOCK_DATA_4_DAYS = c(1,1,0,1)
 MOCK_DATA_6_DAYS = c(1,1,0,1,0,1)
 MOCK_DATA_7_DAYS = c(1,1,1,1,1,1)
+MOCK_DATA_8_DAYS = c(1,1,1,1,1,1,1,1)
 
 file_name = 'mock_data_6_days.rds'
 plot.ts(EPI_DATA, main = 'MOCK DATA', ylab = 'Daily infection count', )

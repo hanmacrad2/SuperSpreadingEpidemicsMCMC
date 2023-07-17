@@ -1,6 +1,5 @@
 #********************
 #UTIL FUNCTIONS
-library(RChronoModel)
 
 #TIME FUNCTIONS
 #' @export

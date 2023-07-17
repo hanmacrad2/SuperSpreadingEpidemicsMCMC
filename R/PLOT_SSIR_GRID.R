@@ -1,7 +1,4 @@
-#LIBRARIES
-library(coda)
-library(RChronoModel)
-library(plotrix)
+#PLOT SSIR GRID
 
 #PLOT ETA ACROS DAYS
 PLOT_ETA <- function(epidemic_data, eta_matrix, true_eta_vec,

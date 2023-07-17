@@ -1,5 +1,5 @@
 #GET POSTERIOR PREDICTIVE VALUES FROM MCMC
-library(stringr)
+
 
 #FUNCTIONS
 zigzag <- function(xs) {

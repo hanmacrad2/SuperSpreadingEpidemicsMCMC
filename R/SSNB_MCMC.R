@@ -1,5 +1,5 @@
 #SSNB model
-library(MASS)
+
 #SIMULATE
 #' @export
 SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
@@ -233,7 +233,6 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
 #************************
 #* LOG LIKELIHOOD SSNB
 #* ***********************
-#' @export
 # LOG_LIKE_SSNB_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
 #                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
 #   

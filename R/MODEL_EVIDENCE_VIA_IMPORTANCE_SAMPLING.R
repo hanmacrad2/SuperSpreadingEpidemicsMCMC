@@ -2,10 +2,6 @@
 #'Touloupou, Panayiota, et al.
 #"Efficient model comparison techniques for models requiring large scale data augmentation." (2018): 437-459.'
 
-#LIBRARIES
-#library(SuperSpreadingEpidemicsMCMC)
-library(mvtnorm)
-
 #*************************************
 #* FUNCTIONS 
 #* ***********************************

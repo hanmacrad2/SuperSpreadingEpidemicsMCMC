@@ -1,5 +1,4 @@
 #PLOT MCMC GRID
-library(coda)
 
 PLOT_SSNB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,seed_count = 1,
                                 simulated = list(m1 =0.16, m2 = 1.8),
