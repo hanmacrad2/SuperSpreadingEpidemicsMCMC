@@ -19,7 +19,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_6_DAYS/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_7_DAYS/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_8_DAYS/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_4/"
@@ -116,11 +116,11 @@ sd(model_ev_ssib6)
 #*************************
 #4. SSIR
 #*************************
-model_ev_ssir7 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+model_ev_ssir8 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
-model_ev_ssir7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                                        SSIB = FALSE, SSIR = TRUE))
+# model_ev_ssir7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+#                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+#                                                                         SSIB = FALSE, SSIR = TRUE))
 
 #PLOT
 #PLOT_MODEL_EV_RESULTS(model_ev_ssir)

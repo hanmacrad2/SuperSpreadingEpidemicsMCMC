@@ -216,7 +216,7 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
     
     #ADDED!!! 14/07/23
     if (any(theta_samples[i, ] < 0)) {
-      density_samples = rep(0, time = num_etas)
+      density_samples = rep(-Inf, time = num_etas)
     } else {
       density_samples = dgamma(theta_samples[i, 3:dim_cols], 
                                shape = epidemic_data[1:length(epidemic_data)-1]*k, #epidemic_data*k
