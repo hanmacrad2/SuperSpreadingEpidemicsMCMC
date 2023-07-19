@@ -54,14 +54,33 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
   loglike = 0; count_na = 0; count_not_na = 0
+
+  #wh_non_neg <- apply(eta >0, 2, all)
+  #eta = eta[eta > 0]
   
   for (t in 2:num_days) {
     
+    #PARAMS (ADDED 19/07/23)
+    #non_neg_ind <- which(eta[1:(t-1)] > 0)
+     
     #POISSON
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
-    log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE)
+    
+    if (total_poi_rate < 0) {
+      log_poi_prob = 0
+      #print(paste0('eta[1:(t-1)]', eta[1:(t-1)]))
+    } else {
+      log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
+    }
+    
+    #log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
+    
     loglike = loglike + log_poi_prob 
     
+    # if (!is.nan(log_poi_prob)) {
+    #   print(paste0('eta[1:(t-1)]', eta[1:(t-1)]))
+    # }
+        
     # if (!is.nan(log_poi_prob) && !is.na(log_poi_prob)){
     #   loglike = loglike + log_poi_prob 
     #   count_not_na = count_not_na +1
@@ -72,10 +91,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     #   # print('log_poi_prob == NaN'): 
     #   # print(paste0('log_poi_prob: ', log_poi_prob))
     #   # print(paste0('total_poi_rate: ', total_poi_rate)) #THIS IS NEGATIVE 
-    #   # print(paste0('epi_data[t]: ', epi_data[t]))
     #   # print(paste0('eta[t-1]: ', eta[t-1]))
-    #   # print(paste0('R0: ', R0))
-    #   # print(paste0('k: ', k))
     # }
     
     if (epi_data[t-1] > 0) {
@@ -83,23 +99,6 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
       loglike = loglike + log_eta_prob
-      
-      #  if (!is.nan(log_eta_prob) && !is.na(log_eta_prob) && !is.infinite(log_eta_prob)){
-      #   
-      #   loglike = loglike + log_eta_prob 
-      #   count_not_na = count_not_na +1
-      #   # print(paste0('t: ', t))
-      #   # print(paste0('loglike: ', loglike))
-      # }
-      # 
-      # else {
-      #   count_na = count_na + 1
-      #   # print(paste0('log_eta_prob: ', log_eta_prob)) #-Inf if:
-      #   # print(paste0('epi_data[t]: ', epi_data[t]))
-      #   # print(paste0('eta[t-1]: ', eta[t-1])) #This is negative
-      #   # print(paste0('R0: ', R0))
-      #   # print(paste0('k: ', k))
-      # }
       
     } 
   }

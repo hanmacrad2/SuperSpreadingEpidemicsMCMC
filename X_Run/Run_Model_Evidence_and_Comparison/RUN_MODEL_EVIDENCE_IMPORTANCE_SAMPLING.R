@@ -116,6 +116,8 @@ sd(model_ev_ssib6)
 #*************************
 #4. SSIR
 #*************************
+model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+
 model_ev_ssir8 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
 # model_ev_ssir7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
