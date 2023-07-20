@@ -50,7 +50,7 @@ saveRDS(data_ssib4, paste0(DATA_FOLDER, file_name))
 data_ssib4 = readRDS(paste0(DATA_FOLDER, file_name))
 
 #MOCK DATA
-EPI_DATA = MOCK_DATA_8_DAYS
+EPI_DATA = MOCK_DATA_10_DAYS
 MOCK_DATA = c(1,2,1,2,2)
 MOCK_DATA = c(1,2)
 MOCK_DATA_2_DAYS = c(1,0)
@@ -58,7 +58,7 @@ MOCK_DATA_3_DAYS = c(1,2,1)
 MOCK_DATA_3_DAYS = c(1,1,1)
 MOCK_DATA_4_DAYS = c(1,1,0,1)
 MOCK_DATA_6_DAYS = c(1,1,0,1,0,1)
-MOCK_DATA_7_DAYS = c(1,1,1,1,1,1)
+MOCK_DATA_10_DAYS = c(1,0,0,0,0,1,0,0,1,1)
 MOCK_DATA_8_DAYS = c(1,1,1,1,1,1,1,1)
 
 file_name = 'mock_data_6_days.rds'

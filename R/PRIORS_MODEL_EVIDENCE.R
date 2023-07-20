@@ -222,22 +222,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
                                shape = epidemic_data[1:length(epidemic_data)-1]*k, #epidemic_data*k
                                scale = R0*k, log = TRUE) 
     }
-
-    # 
-    # if(anyNA(density_samples)){
-    #   print('density Nan')
-    #   print(density_samples)
-    #   print(paste0('R0, k: ', R0, k))
-    #   print('theta_samples[i, 3:dim_cols]')
-    #   print(theta_samples[i, 3:dim_cols])
-    #   print(paste0('epidemic_data[2:length(epidemic_data)]*k', epidemic_data[2:length(epidemic_data)]*k))
-    #   print(paste0('scale: R0*K', R0*k))
-    # }
     
-    #print(paste0('density_samples: '))
-    #print(density_samples)
-    
-    eta_samples_matrix[i, ] = density_samples #dgamma(theta_samples[i,3:dim_cols], shape = epidemic_data*k, scale = R0X*k, log = TRUE)
+    eta_samples_matrix[i, ] = density_samples 
   }
   
   return(eta_samples_matrix)

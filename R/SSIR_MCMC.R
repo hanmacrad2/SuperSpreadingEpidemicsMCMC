@@ -60,39 +60,19 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   
   for (t in 2:num_days) {
     
-    #PARAMS (ADDED 19/07/23)
+    #PARAMS
     #non_neg_ind <- which(eta[1:(t-1)] > 0)
      
-    #POISSON
+    #POISSON DENSITY
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     
     if (total_poi_rate < 0) {
       log_poi_prob = 0
-      #print(paste0('eta[1:(t-1)]', eta[1:(t-1)]))
     } else {
       log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
     }
     
-    #log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
-    
     loglike = loglike + log_poi_prob 
-    
-    # if (!is.nan(log_poi_prob)) {
-    #   print(paste0('eta[1:(t-1)]', eta[1:(t-1)]))
-    # }
-        
-    # if (!is.nan(log_poi_prob) && !is.na(log_poi_prob)){
-    #   loglike = loglike + log_poi_prob 
-    #   count_not_na = count_not_na +1
-    #   #print(paste0('loglike: ', loglike))
-    #   
-    # } else {
-    #   count_na = count_na + 1
-    #   # print('log_poi_prob == NaN'): 
-    #   # print(paste0('log_poi_prob: ', log_poi_prob))
-    #   # print(paste0('total_poi_rate: ', total_poi_rate)) #THIS IS NEGATIVE 
-    #   # print(paste0('eta[t-1]: ', eta[t-1]))
-    # }
     
     if (epi_data[t-1] > 0) {
       
@@ -102,9 +82,6 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
       
     } 
   }
-  
-  #print(paste0('count_not_na', count_not_na))
-  #print(paste0('count na', count_na))
   
   return(loglike)
 }
