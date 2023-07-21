@@ -77,16 +77,14 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
     
     param_priors = cbind(prior_R0, prior_k)
     
-    #eta_nonzero_cols = mcmc_output$eta_matrix[, wh_nonzero]
-    
     # param_priors = cbind(rexp(samp_size_prior, rate = pR0_exp[1]),
     #                      rexp(samp_size_prior, rate = pk_exp[1]))
     
-    #SHOULD param_priors BE THE INPUT TO ETA_PRIORS? 
+    #ETAS
     eta_priors_matrix = GET_SAMPLES_ETA_PRIORS(param_priors, epidemic_data, samp_size_prior)
     theta_samples_prior = cbind(param_priors, eta_priors_matrix)
     #theta_samples_prior = matrix(c(param_priors, eta_priors_matrix), ncol = n_dim): 
-    #print(paste0('dim theta_samples_prior', dim(theta_samples_prior)))
+    print(paste0('dim theta_samples_prior', dim(theta_samples_prior)))
      
   } else if (FLAGS_MODELS$SSIB) {
     
@@ -198,6 +196,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
     
     for (j in 1:time_length){
       eta_prior = rgamma(1, shape = epidemic_data[j]*k, scale = R0/k)
+      
       if (eta_prior < 0.005) {
         eta_prior = eta_prior +  runif(1, 0.01, 0.2)
       } 
@@ -205,8 +204,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
     }
     #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
     
-    eta_priors_matrix[i, ] = eta_prior_vec # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
-    
+    eta_priors_matrix[i, ] = eta_prior_vec 
   }
   
   return(eta_priors_matrix)
@@ -219,31 +217,12 @@ V0_GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_pri
   #Question: Is it correct to use the current priors r0x & k
   #browser()
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
-  wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
   eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
   for(i in 1:samp_size_prior){ 
     R0 = param_priors[i, 1]; k = param_priors[i, 2]
     eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
-      
-    #PROBLEM ETA
-    problem_eta = which(eta_prior[wh_nonzero] < 0.005) #Remove small values 
-    #print('eta_prior[problem_eta]')
-    #print(eta_prior[problem_eta])
-    
-    if (length(eta_prior[problem_eta]) > 0){
-      #print('before')
-      #print('eta_prior[problem_eta]')
-      #print(head(eta_prior[problem_eta]))
-      eta_prior[problem_eta] = eta_prior[problem_eta] + runif(length(eta_prior[problem_eta]), 0.01, 0.2)
-      #print('after')
-      #print(head(eta_prior[problem_eta]))
-    } else {
-      #print('eta_prior[problem_eta]')
-      #print(head(eta_prior[problem_eta]))
-    }
-    
     eta_priors_matrix[i, ] = eta_prior # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
     
   }
