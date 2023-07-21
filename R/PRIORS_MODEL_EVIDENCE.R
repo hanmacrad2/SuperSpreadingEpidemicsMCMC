@@ -63,11 +63,24 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
   } else if (FLAGS_MODELS$SSIR) {
     
     #PRIORS
-    pk_exp = list_priors$priors_ssir$pk_exp
+    #browser()
     pR0_exp = list_priors$priors_ssir$pR0_exp
+    pk_exp = list_priors$priors_ssir$pk_exp
     
-    param_priors = cbind(rexp(samp_size_prior, rate = pk_exp[1]),
-                         rexp(samp_size_prior, rate = pR0_exp[1]))
+    prior_R0 =  rexp(samp_size_prior) 
+    problem_R0 = which(prior_R0 < 0.09)
+    prior_R0[problem_R0] = prior_R0[problem_R0] + runif(length(prior_R0[problem_R0]), 0.1, 0.5)
+    
+    prior_k =  rexp(samp_size_prior) 
+    problem_k = which(prior_k < 0.09)
+    prior_k[problem_k] = prior_k[problem_k] + runif(length(prior_k[problem_k]), 0.1, 0.5)
+    
+    param_priors = cbind(prior_R0, prior_k)
+    
+    #eta_nonzero_cols = mcmc_output$eta_matrix[, wh_nonzero]
+    
+    # param_priors = cbind(rexp(samp_size_prior, rate = pR0_exp[1]),
+    #                      rexp(samp_size_prior, rate = pk_exp[1]))
     
     #SHOULD param_priors BE THE INPUT TO ETA_PRIORS? 
     eta_priors_matrix = GET_SAMPLES_ETA_PRIORS(param_priors, epidemic_data, samp_size_prior)
@@ -108,6 +121,7 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
 GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data,
                                   samp_size_prior, n_dim, FLAGS_MODELS){
   
+  #browser()
   #PRIORS
   list_priors = SET_PRIORS()$list_priors
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -166,21 +180,72 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data,
 #FUNCTIONS FOR DATA AUGMENTATION MODELS (SSIR #1)
 #* 
 #************************
+
 GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior){
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
-  
-  #REMOVE ZEROS FROM DATA
-  #epidemic_data <- epidemic_data[epidemic_data != 0]
+  #browser()
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
-  eta_priors_matrix = matrix(nrow = samp_size_prior, ncol = time_length)
+  wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
+  eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
   
   #For each mcmc run
-  for(i in 1:samp_size_prior){ #IS BELOW CORRECT, I.E PARAM_PRIORS?
-    R0 = param_priors[i, 1]; k = param_priors[i, 2] #R0X = param_priors[i, 1]; k = mcmc_samples[i, 2] #!!!WRONG THEY SHOULD BE THE SAME 
-    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0*k)
-    eta_priors_matrix[i, ] = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0*k)
+  for(i in 1:samp_size_prior){
+    
+    R0 = param_priors[i, 1]; k = param_priors[i, 2]
+    eta_prior_vec = c()
+    
+    for (j in 1:time_length){
+      eta_prior = rgamma(1, shape = epidemic_data[j]*k, scale = R0/k)
+      if (eta_prior < 0.005) {
+        eta_prior = eta_prior +  runif(1, 0.01, 0.2)
+      } 
+      eta_prior_vec[j] = eta_prior
+    }
+    #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+    
+    eta_priors_matrix[i, ] = eta_prior_vec # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+    
+  }
+  
+  return(eta_priors_matrix)
+}
+
+#*
+V0_GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior){
+  
+  'Get priors for all etas in the SSI model'
+  #Question: Is it correct to use the current priors r0x & k
+  #browser()
+  time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
+  wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
+  eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
+  
+  #For each mcmc run
+  for(i in 1:samp_size_prior){ 
+    R0 = param_priors[i, 1]; k = param_priors[i, 2]
+    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+      
+    #PROBLEM ETA
+    problem_eta = which(eta_prior[wh_nonzero] < 0.005) #Remove small values 
+    #print('eta_prior[problem_eta]')
+    #print(eta_prior[problem_eta])
+    
+    if (length(eta_prior[problem_eta]) > 0){
+      #print('before')
+      #print('eta_prior[problem_eta]')
+      #print(head(eta_prior[problem_eta]))
+      eta_prior[problem_eta] = eta_prior[problem_eta] + runif(length(eta_prior[problem_eta]), 0.01, 0.2)
+      #print('after')
+      #print(head(eta_prior[problem_eta]))
+    } else {
+      #print('eta_prior[problem_eta]')
+      #print(head(eta_prior[problem_eta]))
+    }
+    
+    eta_priors_matrix[i, ] = eta_prior # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+    
   }
   
   return(eta_priors_matrix)
@@ -193,28 +258,29 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
-  
-  num_etas =  length(epidemic_data) - 1
+  #browser()
   samp_size = dim(theta_samples)[1]
   dim_cols = dim(theta_samples)[2] 
-  eta_samples_matrix = matrix(nrow = samp_size, ncol = num_etas)
+  log_density_eta = rep(NA, times = samp_size) 
   
   #For each mcmc run
   for(i in 1:samp_size){
+    
     R0 = theta_samples[i, 1]; k = theta_samples[i, 2]
     
     #ADDED 14/07/23
     if (any(theta_samples[i, ] < 0)) { #WARNING CAUSED WITHOUT THIS 
-      density_samples = rep(-Inf, time = num_etas)
+      log_density_eta[i] = -Inf #rep(-Inf, time = num_etas)
     } else {
-      density_samples = dgamma(theta_samples[i, 3:dim_cols], 
-                               shape = epidemic_data[1:length(epidemic_data)-1]*k, #epidemic_data*k
-                               scale = R0*k, log = TRUE) 
+      wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
+      log_density_eta[i] = sum(dgamma(theta_samples[i, 2+wh_nonzero], 
+                               shape = epidemic_data[wh_nonzero]*k, 
+                               scale = R0/k, log = TRUE))
     }
     
-    eta_samples_matrix[i, ] = density_samples 
+    #log_density_eta[i] = density_samples 
   }
   
-  return(eta_samples_matrix)
+  return(log_density_eta)
 }
 

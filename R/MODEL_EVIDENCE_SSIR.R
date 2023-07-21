@@ -9,8 +9,9 @@
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
-                                    n_samples, dof = 3, prob = 0.9999) { #prob = 0.95 0.9999
+                                    n_samples, dof = 3, prob = 0.5) { #prob = 0.95 0.9999
   
+  #browser()
   #PARAMETERS REQUIRED 
   lambda_vec = get_lambda(EPI_DATA)
   sum_estimate = 0
@@ -34,18 +35,19 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   
   theta_samples_prior = GET_PRIOR_THETA_SAMPLES(EPI_DATA, samp_size_prior, n_dim, FLAGS_MODELS)
   
+  #which_small = apply(theta_samples_prior < 0.005, 2, any)
+  #print(theta_samples_prior[,which_small])
+  
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
   matrix_means =  matrix(rep(means, each = n_samples), ncol = n_dim)
   
   #DENSITY OF PROPOSAL ** ADDED!! 14/07/23
-  # samps_centred = theta_samples - matrix_means
-  # cols_nonzero <- apply(samps_centred != 0, 2, any)
-  # wh_non_zero = samps_centred[, cols_nonzero]
+  wh_non_zero = which(EPI_DATA[1:(length(EPI_DATA)-1)]!= 0)
   
-  log_proposal_density = dmvt(theta_samples - matrix_means, #wh_non_zero: Include wh here to only include non zero eta columns 
-                              sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+  log_proposal_density = dmvt(theta_samples[,2+wh_non_zero] - matrix_means[,2+wh_non_zero], #wh_non_zero: Include wh here to only include non zero eta columns 
+                              sigma = cov(mcmc_samples[,2+wh_non_zero]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
 
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
@@ -67,7 +69,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                             SSIB = FALSE, SSIR = TRUE), n_samples = 10000){
   
-  
+  #browser()
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
@@ -103,7 +105,15 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
       loglike = -Inf
     }
     
+    #browser()
     vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
+    
+    # if (vector_estimate_terms[i] > 0){
+    #   print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
+    #   browser()
+    # }
+    #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
+    
     
   }
   
@@ -111,11 +121,11 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
   
-  if(is.nan(log_p_hat)){
-    print('log_p_hat is NaN')
-    print(vector_estimate_terms)
-    print(paste0('sum of na vec terms', sum(is.na(vector_estimate_terms))))
-  } 
+  # if(log_p_hat > 1){
+  #   print(paste0('POSTIVE log_p_hat = ', log_p_hat))
+  #   print(paste0('loglike = ', loglike))
+  #   print(paste0('vec terms', vector_estimate_terms))
+  # } 
   
   return(log_p_hat)
   
@@ -154,6 +164,7 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
   return(estimates_vec) 
 }
 
+#MULITPLE RESULTS
 GET_MAT_RESULTS_SSIR <- function(mat_ssir, n_reps = 10){
   
   for (i in 3:n_reps) {

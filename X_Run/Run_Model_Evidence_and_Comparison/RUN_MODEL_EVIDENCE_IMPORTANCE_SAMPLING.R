@@ -116,7 +116,7 @@ sd(model_ev_ssib)
 #*************************
 #4. SSIR
 #*************************
-model_ev_ssir2 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
 mean(model_ev_ssir2)
 sd(model_ev_ssir2)
