@@ -194,9 +194,6 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
   
-  #REMOVE ZEROS FROM DATA
-  #epidemic_data <- epidemic_data[epidemic_data != 0]
-  
   num_etas =  length(epidemic_data) - 1
   samp_size = dim(theta_samples)[1]
   dim_cols = dim(theta_samples)[2] 
@@ -206,16 +203,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   for(i in 1:samp_size){
     R0 = theta_samples[i, 1]; k = theta_samples[i, 2]
     
-    # print('EPI_DATA')
-    # print(EPI_DATA)
-    # print(paste0('R0, k: ', R0, k))
-    # print('theta_samples[i, 3:dim_cols]')
-    # print(theta_samples[i, 3:dim_cols])
-    # print(paste0('epidemic_data[2:length(epidemic_data)]*k', epidemic_data[2:length(epidemic_data)]*k))
-    # print(paste0('scale: R0*K', R0*k))
-    
-    #ADDED!!! 14/07/23
-    if (any(theta_samples[i, ] < 0)) {
+    #ADDED 14/07/23
+    if (any(theta_samples[i, ] < 0)) { #WARNING CAUSED WITHOUT THIS 
       density_samples = rep(-Inf, time = num_etas)
     } else {
       density_samples = dgamma(theta_samples[i, 3:dim_cols], 

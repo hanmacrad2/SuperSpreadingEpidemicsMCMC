@@ -9,11 +9,16 @@ LOG_SUM_EXP <- function(vectorX){
   
   #REMOVE NA VALUES
   vectorX = na.omit(vectorX)
+  vectorX = vectorX[!is.nan(vectorX)]
+  vectorX = vectorX[!is.infinite(vectorX)]
   
   max_val = max(vectorX)
   
   out = max_val + log(sum(exp(vectorX - max_val)))
   
+  if (is.nan(out)){
+    print(paste0('max val', max_val))
+  }
   return(out)
 }
 

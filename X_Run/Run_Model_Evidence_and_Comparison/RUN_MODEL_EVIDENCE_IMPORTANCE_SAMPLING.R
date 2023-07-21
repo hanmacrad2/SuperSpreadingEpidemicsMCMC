@@ -19,7 +19,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_6_DAYS/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_8_DAYS/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_10_DAYS/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_4/"
@@ -116,38 +116,24 @@ sd(model_ev_ssib)
 #*************************
 #4. SSIR
 #*************************
-model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+model_ev_ssir2 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
+mean(model_ev_ssir2)
+sd(model_ev_ssir2)
 
-# model_ev_ssir7 = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-#                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-#                                                                         SSIB = FALSE, SSIR = TRUE))
+#MATRIX
+mat_ssir = matrix(0, nrow = 5, ncol = 10)
 
-#PLOT
-#PLOT_MODEL_EV_RESULTS(model_ev_ssir)
-mean(model_ev_ssir)
-sd(model_ev_ssir)
-
-#PLOT
-PLOT_MODEL_EV_RESULTS(model_ev_ssib, model_type = 'SSIB',
-                      data_type = 'SSIB')
-
-#MODEL EVIDENCE
-mcmc_samples = cbind(mcmc_output_ssir$ssir_params_matrix, mcmc_output_ssir$eta_matrix)
-list_mod_ev = GET_LOG_MODEL_EVIDENCE(mcmc_samples, EPI_DATA, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                                       SSIB = FALSE, SSIR = TRUE))
+BOX_PLOT_RESULTS(mat_ssir3, title = 'Model Evidence ',
+                             model_type = 'SSIR ',
+                             data_type = 'Mock Data, 6 days')
 
 #*************************
 #PLOT ALL MODEL EVIDENCE
 #*************************
 par(mfrow = c(2,1))
 data_type = 'Mock Data'
-BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base7, SSEB = model_ev_sseb7,
-                                          SSNB = model_ev_ssnb7, SSIB = model_ev_ssib7, SSIR = model_ev_ssir7),
-                  data_type = data_type)
-
-data_type = 'Mock Data'
-BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir8, BASE = model_ev_base, SSEB = model_ev_sseb,
+BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir2, BASE = model_ev_base, SSEB = model_ev_sseb,
                                           SSNB = model_ev_ssnb, SSIB = model_ev_ssib),
                   data_type = data_type)
 
@@ -197,6 +183,10 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(ssnb_k_exp_prior = model_ev_ssnb,
                               title = 'SSNB Model k priors compared exp(1) vs Ga(0.001, rt = 0.001). ',
                               data_type = data_type, model = '') 
 
+#MODEL EVIDENCE
+mcmc_samples = cbind(mcmc_output_ssir$ssir_params_matrix, mcmc_output_ssir$eta_matrix)
+list_mod_ev = GET_LOG_MODEL_EVIDENCE(mcmc_samples, EPI_DATA, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                                                 SSIB = FALSE, SSIR = TRUE))
 #*****************************
 #*
 #LOAD MODEL EVIDENCE ESTIMATES

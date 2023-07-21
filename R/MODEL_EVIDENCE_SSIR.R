@@ -28,8 +28,7 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples[,])
-  
-  #MAKE ALL POSTIVE!!
+
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal)
   
@@ -47,18 +46,7 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   
   log_proposal_density = dmvt(theta_samples - matrix_means, #wh_non_zero: Include wh here to only include non zero eta columns 
                               sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
-  
-  # j = 1
-  # if (j == 1){
-  #   print(theta_samples - matrix_means)
-  #   j = 2
-  #   print(log_proposal_density)
-  #   print('log_proposal_density dim: ')
-  #   print(length(log_proposal_density))
-  #   
-  #   break
-  # }
-  
+
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
                                             samp_size_prior, n_dim, FLAGS_MODELS)
@@ -112,25 +100,10 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
       count_ok = count_ok + 1
       
     } else {
-      # print(paste0('log_prior_density[i]', log_prior_density[i]))
-      # print(paste0('theta_samples[i, ]: ', theta_samples[i,]))
       loglike = -Inf
     }
     
-    # if(is.nan(loglike)){
-    #    print(paste0('loglike[i]', loglike))
-    #   print(paste0('theta_samples[i, ]: ', theta_samples[i,]))
-    # }
-    
     vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
-    
-    # if(is.nan(vector_estimate_terms[i])){
-    #   print(paste0('i', i))
-    #   print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
-    #   print(paste0('loglike[i]', loglike))
-    #   print(paste0('log_prior_density[i]', log_prior_density[i]))
-    #   print(paste0('log_q[i]', log_q[i]))
-    # }
     
   }
   
@@ -138,8 +111,11 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
   print(paste0('log_p_hat = ', log_p_hat))
   
-  #print(paste0('count_ok = ', count_ok))
-  print(paste0('count na', sum(is.na(vector_estimate_terms))))
+  if(is.nan(log_p_hat)){
+    print('log_p_hat is NaN')
+    print(vector_estimate_terms)
+    print(paste0('sum of na vec terms', sum(is.na(vector_estimate_terms))))
+  } 
   
   return(log_p_hat)
   
@@ -178,6 +154,14 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
   return(estimates_vec) 
 }
 
+GET_MAT_RESULTS_SSIR <- function(mat_ssir, n_reps = 10){
+  
+  for (i in 3:n_reps) {
+    mat_ssir[,i] = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+  }
+  
+  return(mat_ssir)
+}
 
 
 #RUN

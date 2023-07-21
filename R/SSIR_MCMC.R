@@ -53,15 +53,10 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
   #Params
   num_days = length(epi_data)
   R0 = ssir_params[1]; k = ssir_params[2]
-  loglike = 0; count_na = 0; count_not_na = 0
-
-  #wh_non_neg <- apply(eta >0, 2, all)
+  loglike = 0;
   #eta = eta[eta > 0]
   
   for (t in 2:num_days) {
-    
-    #PARAMS
-    #non_neg_ind <- which(eta[1:(t-1)] > 0)
      
     #POISSON DENSITY
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
@@ -77,7 +72,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     if (epi_data[t-1] > 0) {
       
       #ETA; GAMMA
-      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE) #dgamma with shape 0 == -Inf
+      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE)                  #dgamma with shape 0 == -Inf
       loglike = loglike + log_eta_prob
       
     } 
