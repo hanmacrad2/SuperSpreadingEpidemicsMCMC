@@ -18,7 +18,7 @@ OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
-OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_6_DAYS/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_8_DAYS/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_10_DAYS/"
 
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
@@ -118,8 +118,8 @@ sd(model_ev_ssib)
 #*************************
 model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
-mean(model_ev_ssir2)
-sd(model_ev_ssir2)
+mean(model_ev_ssir)
+sd(model_ev_ssir)
 
 #MATRIX
 mat_ssir = matrix(0, nrow = 5, ncol = 10)
@@ -133,7 +133,7 @@ BOX_PLOT_RESULTS(mat_ssir3, title = 'Model Evidence ',
 #*************************
 par(mfrow = c(2,1))
 data_type = 'Mock Data'
-BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir2, BASE = model_ev_base, SSEB = model_ev_sseb,
+BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir, BASE = model_ev_base, SSEB = model_ev_sseb,
                                           SSNB = model_ev_ssnb, SSIB = model_ev_ssib),
                   data_type = data_type)
 

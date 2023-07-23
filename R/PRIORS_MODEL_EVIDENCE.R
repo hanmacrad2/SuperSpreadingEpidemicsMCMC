@@ -199,7 +199,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
       
       if (eta_prior < 0.005) {
         eta_prior = eta_prior +  runif(1, 0.01, 0.2)
-      } 
+      }
       eta_prior_vec[j] = eta_prior
     }
     #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
@@ -210,7 +210,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   return(eta_priors_matrix)
 }
 
-#*
+#*ORIGAL
 V0_GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior){
   
   'Get priors for all etas in the SSI model'

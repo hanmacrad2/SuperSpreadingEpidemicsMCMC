@@ -33,7 +33,7 @@ run = 1
 n_repeats = 5; NMCMC = 30000
 
 #DATA
-EPI_DATA = MOCK_DATA_6_DAYS
+EPI_DATA = MOCK_DATA_7_DAYS
 EPI_DATA = data_baseline
 EPI_DATA = data_ssib2
 EPI_DATA = data_ssib4
