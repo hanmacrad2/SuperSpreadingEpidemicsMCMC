@@ -12,7 +12,7 @@
 #********************************************************************
 
 GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
-                                       dof = 3, prob = 0.95, r0_sim = 1.6) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
+                                       dof = 3, prob = 0.5, r0_sim = 1.6) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
   
   list_priors = SET_PRIORS()$list_priors
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -68,7 +68,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
 #*
 #*****************************************************************************************
 GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, 
-                                            n_samples = 1000, r0_sim = 1.6) {
+                                            n_samples = 10000, r0_sim = 1.6) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
@@ -101,6 +101,13 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
       loglike = 0
     }
     vector_log_sum_exp[i] = loglike + log_prior_density[i] - log_q[i]
+    
+    #print(paste0('vector_log_sum_exp[i]',  vector_log_sum_exp[i]))
+    
+  }
+  print('CHECKKK')
+  if (LOG_SUM_EXP(vector_log_sum_exp) > log(n_samples)){
+    browser() 
   }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)

@@ -81,8 +81,17 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   for (t in 2:num_days) {
     
     lambdaX = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
-    log_likelihood = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
+    log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
+    log_likelihood = log_likelihood + dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
+    
+    if (log_likelihood1 != log_likelihood){
+      browser()
+    }
     #print(paste0('t: ', t, '. lambaX: ', lambdaX, 'log_likelihood: ', log_likelihood))
+  }
+  
+  if(log_likelihood > 0 || is.nan(log_likelihood)){
+    browser()
   }
   
   log_likelihood

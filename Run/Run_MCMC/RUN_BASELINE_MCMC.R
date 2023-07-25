@@ -11,6 +11,10 @@ start_time = Sys.time()
 print(paste0('start_time:', start_time))
 
 mcmc_baseline = MCMC_INFER_BASELINE(EPI_DATA, n_mcmc)
+end_time = Sys.time()
+print(paste0('end_time:', end_time))
+time_elap = get_time(start_time, end_time)
+print(time_elap)
 
 mcmc_baseline$r0_vec = head(mcmc_baseline$r0_vec, -1)
 

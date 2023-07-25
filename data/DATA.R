@@ -13,7 +13,7 @@ file_name = 'data_baseline.rds'
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_baseline)
 
-data_baseline4 = SIMULATE_EPI_BASELINE(1.6, num_days = 30)
+data_baseline4 = SIMULATE_EPI_BASELINE(2.1, num_days = 30)
 plot.ts(data_baseline4)
 saveRDS(data_baseline2, paste0(DATA_FOLDER, file_name))
 

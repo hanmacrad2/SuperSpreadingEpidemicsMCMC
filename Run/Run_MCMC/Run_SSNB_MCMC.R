@@ -30,6 +30,7 @@ mcmc_nb = MCMC_INFER_SSNB(EPI_DATA, 30000)
                          # FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_mu = FALSE))
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
+print(time_elap)
 mcmc_nbIc$time_elap = time_elap
 
 #PLOT MAIN RESULTS
