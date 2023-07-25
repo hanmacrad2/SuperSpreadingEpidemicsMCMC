@@ -69,11 +69,11 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
     
     prior_R0 =  rexp(samp_size_prior) 
     problem_R0 = which(prior_R0 < 0.09)
-    prior_R0[problem_R0] = prior_R0[problem_R0] + runif(length(prior_R0[problem_R0]), 0.1, 0.5)
+    #prior_R0[problem_R0] = prior_R0[problem_R0] + runif(length(prior_R0[problem_R0]), 0.1, 0.5)
     
     prior_k =  rexp(samp_size_prior) 
     problem_k = which(prior_k < 0.09)
-    prior_k[problem_k] = prior_k[problem_k] + runif(length(prior_k[problem_k]), 0.1, 0.5)
+    #prior_k[problem_k] = prior_k[problem_k] + runif(length(prior_k[problem_k]), 0.1, 0.5)
     
     param_priors = cbind(prior_R0, prior_k)
     
@@ -183,7 +183,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
-  #browser()
+ 
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
   wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
   eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
@@ -196,10 +196,11 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
     
     for (j in 1:time_length){
       eta_prior = rgamma(1, shape = epidemic_data[j]*k, scale = R0/k)
-      
-      if (eta_prior < 0.005) {
-        eta_prior = eta_prior +  runif(1, 0.01, 0.2)
-      }
+      # 
+      # if (eta_prior < 0.005) { #((eta_prior > 0) && (eta_prior < 0.005))
+      #   #browser()
+      #   eta_prior = eta_prior +  runif(1, 0.01, 0.2)
+      # }
       eta_prior_vec[j] = eta_prior
     }
     #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
@@ -252,8 +253,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
       log_density_eta[i] = -Inf #rep(-Inf, time = num_etas)
     } else {
       wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
-      log_density_eta[i] = sum(dgamma(theta_samples[i, 2+wh_nonzero], 
-                               shape = epidemic_data[wh_nonzero]*k, 
+      log_density_eta[i] = sum(dgamma(theta_samples[i, 2+wh_nonzero, drop = FALSE], 
+                               shape = epidemic_data[wh_nonzero, drop = FALSE]*k, 
                                scale = R0/k, log = TRUE))
     }
     

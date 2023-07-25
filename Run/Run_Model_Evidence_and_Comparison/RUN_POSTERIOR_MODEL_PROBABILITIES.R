@@ -32,7 +32,7 @@ post_probs_ssib = GET_AGG_POSTERIOR_PROBABILITES(num_models = 5, list_log_mod_ev
                                                                                           model_ev_sseb, model_ev_ssir))
 #PLOT
 #model_ev_method = 'IS'
-data_type = 'SSI-B Data'# (20% Missing)'
+data_type = 'Mock data, 7 days' #SSI-B Data'# (20% Missing)'
 #data_type = 'NZ Waitemata 08/21 Subset I (3 models)'
 par(mfrow = c(2,1))
 BOX_PLOT_POSTERIOR_PROBS(list_vec_results =

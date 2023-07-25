@@ -46,8 +46,8 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   #DENSITY OF PROPOSAL ** ADDED!! 14/07/23
   wh_non_zero = which(EPI_DATA[1:(length(EPI_DATA)-1)]!= 0)
   
-  log_proposal_density = dmvt(theta_samples[,2+wh_non_zero] - matrix_means[,2+wh_non_zero], #wh_non_zero: Include wh here to only include non zero eta columns 
-                              sigma = cov(mcmc_samples[,2+wh_non_zero]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
+  log_proposal_density = dmvt(theta_samples[,2+wh_non_zero,drop=FALSE] - matrix_means[,2+wh_non_zero,drop=FALSE], #wh_non_zero: Include wh here to only include non zero eta columns 
+                              sigma = cov(mcmc_samples[,2+wh_non_zero,drop=FALSE]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
 
   #PRIOR DENSITIES 
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
@@ -96,11 +96,11 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   for (i in 1:n_samples) {
     
     if (log_prior_density[i] > -Inf) {
-      
+    
       loglike = LOG_LIKE_SSIR(EPI_DATA, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:dim(theta_samples)[2]]) 
       count_ok = count_ok + 1
-      
+      #browser()
     } else {
       loglike = -Inf
     }
@@ -108,14 +108,15 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
     #browser()
     vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     
-    # if (vector_estimate_terms[i] > 0){
-    #   print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
-    #   browser()
-    # }
+   # if (loglike > 0){
+      #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
+      #browser()
+  #  }
     #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
     
     
   }
+  
   
   #ESTIMATE OVER SUM
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)

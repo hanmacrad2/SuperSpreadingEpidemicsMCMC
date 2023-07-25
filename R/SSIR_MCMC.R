@@ -48,7 +48,7 @@ SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
+LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC = FALSE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
   
   #Params
   num_days = length(epi_data)
@@ -62,14 +62,14 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     
     if (total_poi_rate < 0) {
-      log_poi_prob = 0
+      log_poi_prob = -Inf
     } else {
       log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
     }
     
     loglike = loglike + log_poi_prob 
     
-    if (epi_data[t-1] > 0) {
+    if (FLAG_MCMC && epi_data[t-1] > 0) {
       
       #ETA; GAMMA
       log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE)                  #dgamma with shape 0 == -Inf
@@ -78,6 +78,9 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta){ #eta - a
     } 
   }
   
+  if(loglike > 0 || is.nan(loglike)){
+    browser()
+  }
   return(loglike)
 }
 
