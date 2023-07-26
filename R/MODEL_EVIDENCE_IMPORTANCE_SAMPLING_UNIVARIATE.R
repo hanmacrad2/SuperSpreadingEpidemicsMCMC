@@ -100,15 +100,15 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
     } else {
       loglike = 0
     }
-    vector_log_sum_exp[i] = loglike + log_prior_density[i] - log_q[i]
+    vector_log_sum_exp[i] = loglike + log_prior_density[i] - log_q[i] #loglike tiny, log_q a bigger negative and vec_i ends up positive sometines 
     
     #print(paste0('vector_log_sum_exp[i]',  vector_log_sum_exp[i]))
     
   }
-  print('CHECKKK')
-  if (LOG_SUM_EXP(vector_log_sum_exp) > log(n_samples)){
-    browser() 
-  }
+  # print('CHECK')
+  # if (LOG_SUM_EXP(vector_log_sum_exp) > log(n_samples)){
+  #   browser() 
+  # }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   

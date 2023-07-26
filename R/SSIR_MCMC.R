@@ -48,7 +48,7 @@ SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC = FALSE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
+LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
   
   #Params
   num_days = length(epi_data)
@@ -77,10 +77,10 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC
       
     } 
   }
-  
-  if(loglike > 0 || is.nan(loglike)){
-    browser()
-  }
+  # 
+  # if(loglike > 0 || is.nan(loglike)){
+  #   browser()
+  # }
   return(loglike)
 }
 

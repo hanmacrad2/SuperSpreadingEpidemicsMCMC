@@ -98,7 +98,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
     if (log_prior_density[i] > -Inf) {
     
       loglike = LOG_LIKE_SSIR(EPI_DATA, infectivity_vec, theta_samples[i, 1:2],
-                              theta_samples[i, 3:dim(theta_samples)[2]]) 
+                              theta_samples[i, 3:dim(theta_samples)[2]], FLAG_MCMC = FALSE) 
       count_ok = count_ok + 1
       #browser()
     } else {

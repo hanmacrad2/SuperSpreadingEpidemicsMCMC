@@ -84,9 +84,9 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
     log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     log_likelihood = log_likelihood + dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
     
-    if (log_likelihood1 != log_likelihood){
-      browser()
-    }
+    # if (log_likelihood1 != log_likelihood){
+    #   browser()
+    # }
     #print(paste0('t: ', t, '. lambaX: ', lambdaX, 'log_likelihood: ', log_likelihood))
   }
   

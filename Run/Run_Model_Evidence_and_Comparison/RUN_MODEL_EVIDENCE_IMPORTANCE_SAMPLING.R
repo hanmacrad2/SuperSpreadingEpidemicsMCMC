@@ -120,18 +120,11 @@ model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n
 mean(model_ev_ssir)
 sd(model_ev_ssir)
 
-#MATRIX
-mat_ssir = matrix(0, nrow = 5, ncol = 10)
-
-BOX_PLOT_RESULTS(mat_ssir3, title = 'Model Evidence ',
-                             model_type = 'SSIR ',
-                             data_type = 'Mock Data, 6 days')
-
 #*************************
 #PLOT ALL MODEL EVIDENCE
 #*************************
 par(mfrow = c(2,1))
-data_type = 'Mock Data'
+data_type = 'Mock Data, 2 days'
 BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir, BASE = model_ev_base, SSEB = model_ev_sseb,
                                           SSNB = model_ev_ssnb, SSIB = model_ev_ssib),
                   data_type = data_type)
@@ -186,6 +179,17 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(ssnb_k_exp_prior = model_ev_ssnb,
 mcmc_samples = cbind(mcmc_output_ssir$ssir_params_matrix, mcmc_output_ssir$eta_matrix)
 list_mod_ev = GET_LOG_MODEL_EVIDENCE(mcmc_samples, EPI_DATA, FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
                                                                                  SSIB = FALSE, SSIR = TRUE))
+
+#SSIR
+
+#MATRIX
+mat_ssir = matrix(0, nrow = 5, ncol = 10)
+
+BOX_PLOT_RESULTS(mat_ssir3, title = 'Model Evidence ',
+                 model_type = 'SSIR ',
+                 data_type = 'Mock Data, 6 days')
+
+
 #*****************************
 #*
 #LOAD MODEL EVIDENCE ESTIMATES
