@@ -71,7 +71,7 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
       #Log likelihood
       st = x[t] - nt
       inner_sum_xt = inner_sum_xt + 
-        term1*(term2)^nt*(1/factorial(nt))*
+        dpois(nt, alphaX*lambda_vec[t])*
         PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
     } 
     
@@ -81,18 +81,14 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alphaX, betaX, gammaX){
   return(logl)
 }
 
-#2. PROBABILITY OF ZT
+#2. PROBABILITY OF ST
 PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
   
-  'Probability of Zt'
-  
-  #Initialise
+  'Probability of St'
   prob_st = 0
   
   for (et in 0:max_et){
-    
     prob_st = prob_st + dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
-    
   }
   
   return(prob_st)
