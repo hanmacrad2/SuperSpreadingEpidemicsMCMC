@@ -1,7 +1,7 @@
 #Package install steps
 
 #1. STEPS!! 17/07/23
-#library(devtools)
+library(devtools)
 
 #1. SET WD to Parent directory
 #Code: cd ~/Documents/GitHub
