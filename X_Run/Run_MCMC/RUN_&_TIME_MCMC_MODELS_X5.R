@@ -1,4 +1,5 @@
 #RUN & TIME EACH MODEL
+library(SuperSpreadingEpidemicsMCMC)
 n_mcmc = 30000
 
 #1. BASELINE MODEL

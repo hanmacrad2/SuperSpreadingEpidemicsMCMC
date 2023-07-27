@@ -14,8 +14,17 @@ library(devtools)
 
 
 #***************************************************************8
+#OPTION 2
 
+# Load the devtools package
+library(devtools)
 
+# Build and install the package
+outer_folder = "~/GitHub"
+setwd(outer_folder)
+
+build("/SuperSpreadingEpidemicsMCMC")
+install(SuperSpreadingEpidemicsMCMC)
 
 
 

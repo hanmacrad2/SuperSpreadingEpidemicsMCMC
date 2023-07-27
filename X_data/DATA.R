@@ -2,20 +2,23 @@
 # DATA
 #****************************************************************
 #library(SuperSpreadingEpidemicsMCMC)
-DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
 
 #************************
 #SIMULATE DATA
 #************************
 
 #BASELINE
-file_name = 'data_baseline.rds'
+file_name = 'data_baseline2.rds'
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_baseline)
+data_base = readRDS(paste0(DATA_FOLDER, file_name))
 
-data_baseline4 = SIMULATE_EPI_BASELINE(2.1, num_days = 30)
-plot.ts(data_baseline4)
-saveRDS(data_baseline2, paste0(DATA_FOLDER, file_name))
+file_name = 'data_baseline30.rds'
+data_baseline30 = SIMULATE_EPI_BASELINE(2.1, num_days = 30)
+EPI_DATA = data_baseline30
+plot.ts(data_baseline30)
+saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 
 #SSNB
 file_name = 'data_ssnb.rds'
