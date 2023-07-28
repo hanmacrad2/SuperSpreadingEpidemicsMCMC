@@ -8,6 +8,10 @@ print(paste0('start_time:', start_time))
 
 mcmc_baseline = MCMC_INFER_BASELINE(EPI_DATA, n_mcmc)
 
+end_time = Sys.time()
+time_elap = get_time(start_time, end_time)
+print(time_elap)
+
 #2.SSE (NB)
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
@@ -22,13 +26,14 @@ print(time_elap)
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
 
-mcmc_sseb = MCMC_INFER_SSEB(EPI_DATA, n_mcmc)
+mcmc_sseb2 = MCMC_INFER_SSEB(EPI_DATA, n_mcmc)
 
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
 print(time_elap)
 
 #4. SSIB
+start_time = Sys.time()
 print(paste0('start_time:', start_time))
 
 mcmc_ssib = MCMC_INFER_SSIB(EPI_DATA, n_mcmc = n_mcmc)
@@ -41,7 +46,7 @@ print(time_elap)
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
 
-mcmc_ssi = MCMC_INFER_SSIR(EPI_DATA, n_mcmc = n_mcmc)
+mcmc_ssi = MCMC_INFER_SSIR(EPI_DATA, n_mcmc)
 
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)

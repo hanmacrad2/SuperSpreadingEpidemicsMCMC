@@ -108,10 +108,15 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
     #browser()
     vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
     
-   # if (loglike > 0){
+    if ( log_prior_density[i] + log_q[i] > log(2)){
       #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
-      #browser()
-  #  }
+      browser()
+    }
+    
+    # if (loglike > 0){
+    #   print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
+    #   browser()
+    # }
     #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
     
     

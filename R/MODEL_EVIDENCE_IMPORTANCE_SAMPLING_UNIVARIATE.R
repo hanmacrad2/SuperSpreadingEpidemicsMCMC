@@ -80,6 +80,10 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   theta_samples = imp_samp_comps$theta_samples 
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
+  #ESS
+  sum_weights = 0
+  vec_weights_squared = rep(0, times = n_samples)
+  
   #PRIORS 
   if (PRIORS_USED$BASELINE_GAMMA){
     gamma_shape = 2
@@ -102,8 +106,13 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
     }
     vector_log_sum_exp[i] = loglike + log_prior_density[i] - log_q[i] #loglike tiny, log_q a bigger negative and vec_i ends up positive sometines 
     
-    #print(paste0('vector_log_sum_exp[i]',  vector_log_sum_exp[i]))
+    sum_weights = sum_weights + exp(vector_log_sum_exp[i])
+    vec_weights_squared[i] =  (exp(vector_log_sum_exp[i]))^2
     
+    # if ( abs(log_prior_density[i] + log_q[i]) > log(2)){
+    #   #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
+    #   browser()
+    # }
   }
   # print('CHECK')
   # if (LOG_SUM_EXP(vector_log_sum_exp) > log(n_samples)){
@@ -111,6 +120,10 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   # }
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
+  
+  ESS = (sum_weights^2)/sum(vec_weights_squared)
+  
+  print(paste0('ESS: ', ESS))
   
   return(log_p_hat)
 }

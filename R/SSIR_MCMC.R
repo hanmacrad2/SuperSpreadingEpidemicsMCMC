@@ -156,7 +156,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   sigma_eta_matrix = matrix(0, mcmc_vec_size, eta_dim); sigma_eta_matrix[1,] =  sigma_eta;
   
   #DIRECTORY - SAVING
-  ifelse(!dir.exists(file.path(OUTER_FOLDER)), dir.create(file.path(OUTER_FOLDER), recursive = TRUE), FALSE)
+  #ifelse(!dir.exists(file.path(OUTER_FOLDER)), dir.create(file.path(OUTER_FOLDER), recursive = TRUE), FALSE)
   
   #MCMC (#RENAME ssir_params AS PARAMS)
   for(i in 2:n_mcmc) {

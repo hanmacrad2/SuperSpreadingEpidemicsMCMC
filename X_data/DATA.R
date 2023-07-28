@@ -16,6 +16,7 @@ data_base = readRDS(paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_baseline30.rds'
 data_baseline30 = SIMULATE_EPI_BASELINE(2.1, num_days = 30)
+data_baseline30 = readRDS(paste0(DATA_FOLDER, file_name))
 EPI_DATA = data_baseline30
 plot.ts(data_baseline30)
 saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
@@ -58,7 +59,7 @@ EPI_DATA = MOCK_DATA_2_DAYS #= c(1,0)
 MOCK_DATA = c(1,2,1,2,2)
 MOCK_DATA = c(1,2)
 MOCK_DATA_2_DAYS = c(1,0)
-MOCK_DATA_3_DAYS = c(1,2,1)
+MOCK_DATA_3_DAYS = c(1,0,0) #c(1,2,1)
 MOCK_DATA_3_DAYS = c(1,1,1)
 MOCK_DATA_4_DAYS = c(1,1,0,1)
 MOCK_DATA_6_DAYS = c(1,1,0,1,0,1)
