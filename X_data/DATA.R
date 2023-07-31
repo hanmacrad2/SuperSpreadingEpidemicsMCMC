@@ -4,11 +4,13 @@
 #library(SuperSpreadingEpidemicsMCMC)
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
 
-#************************
-#SIMULATE DATA
-#************************
-
 #BASELINE
+file_name = 'data_baseline_1_5.rds'
+data_baseline = SIMULATE_EPI_BASELINE(1.5)
+plot.ts(data_baseline)
+saveRDS(data_baseline, paste0(DATA_FOLDER, file_name))
+data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
+
 file_name = 'data_baseline2.rds'
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_baseline)
@@ -111,6 +113,48 @@ sim_data_canadaX2 = list(canada_ns, canada_ss)
 plot.ts(canadaX,
         main = 'SARs (2003) Canadian Outbreak',
         ylab = 'infection count')
+
+
+#MODEL EVIDENCE DATA
+#***********************
+# 1. DATA 
+#**********************
+EPI_DATA = MOCK_DATA_6_DAYS
+EPI_DATA = data_baseline
+EPI_DATA = data_ssib4 #data_ssib3
+file_name = 'data_ssib3.rds'
+saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
+
+#BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+
+#BASE DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
+file_name = 'epi_data_base_1.rds'
+data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_baseline)
+
+file_name = 'data_baseline2.rds'
+data_baseline2 = readRDS(file = paste0(DATA_FOLDER, file_name))
+plot.ts(data_baseline2)
+
+#SSEB DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+file_name = "epi_data_sseb_1.rds"
+data_sseb = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_sseb)
+
+#NZ DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+data_file_wait_21 = read.csv(paste0(DATA_FOLDER, 'data_waitemata_aug_21.csv'))
+data_wait_08_21 = data_file_wait_21$Cases
+plot.ts(data_wait_08_21)
+
+#MOCK DATA
+EPI_DATA = data_baseline
+EPI_DATA = MOCK_DATA_3_DAYS
+
 
 #*************************
 #SIMULATED DATA: LOAD

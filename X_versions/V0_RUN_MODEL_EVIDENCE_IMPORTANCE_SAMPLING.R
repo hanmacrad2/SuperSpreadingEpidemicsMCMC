@@ -1,10 +1,77 @@
 #**********************************************
-#
-# MODEL EVIDENCE ESTIMATES VIA IMPORTANCE SAMPLING
-#
+#GET MODEL EVIDENCE VIA IMPORTANCE SAMPLING (2018 Paper)
 #***********************
+library(SuperSpreadingEpidemicsMCMC)
+library(mvtnorm)
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/DATA_BASELINE_1/"
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+#OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
+#OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/PART_2/SSEB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21_SUBSET_I/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21_SUBSET_II/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/DATA_BASELINE_2/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/BASELINE_DATA/MISSING/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_2_DAYS/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/MOCK_DATA/MOCK_DATA_10_DAYS/"
+
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_2/"
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/SSIB_DATA/DATA_SSIB_4/"
+
 run = 1 
 n_repeats = 5
+
+#***********************
+# 1. DATA 
+#**********************
+EPI_DATA = MOCK_DATA_6_DAYS
+EPI_DATA = data_baseline
+EPI_DATA = data_ssib4 #data_ssib3
+file_name = 'data_ssib3.rds'
+saveRDS(data_ssib3, paste0(OUTER_FOLDER, file_name)) 
+
+#BASE_DATA = FALSE; SSEB_DATA = TRUE; NZ_DATA = FALSE
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+
+#BASE DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
+file_name = 'epi_data_base_1.rds'
+data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_baseline)
+
+file_name = 'data_baseline2.rds'
+data_baseline2 = readRDS(file = paste0(DATA_FOLDER, file_name))
+plot.ts(data_baseline2)
+
+#SSEB DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/SSEB_DATA/"
+file_name = "epi_data_sseb_1.rds"
+data_sseb = readRDS(file = paste0(OUTER_FOLDER, file_name))
+plot.ts(data_sseb)
+
+#NZ DATA
+OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/NZ_DATA_WAIT_21/"
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
+data_file_wait_21 = read.csv(paste0(DATA_FOLDER, 'data_waitemata_aug_21.csv'))
+data_wait_08_21 = data_file_wait_21$Cases
+plot.ts(data_wait_08_21)
+
+#MOCK DATA
+EPI_DATA = MOCK_DATA_3_DAYS
+
+#*************************************************
+#*
+#* MODEL EVIDENCE ESTIMATES
+#* 
+#****************************************************************************
+run = 1
+n_repeats = 5 #10
 
 #*************************
 #1. BASELINE

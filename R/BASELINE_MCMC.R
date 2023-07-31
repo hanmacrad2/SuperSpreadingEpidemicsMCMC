@@ -45,6 +45,7 @@ SIMULATE_EPI_BASELINE  <- function(R0, num_days = 30,
     
     #Total rate
     tot_rate = R0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
+    print(paste0('t: ', t, 'tot_rate', tot_rate))
     tot_daily_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
   
@@ -76,12 +77,12 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   #Infectivity of each individual  - shape and scale of gamma distribution representing the infectivity of each individual 
   shape_gamma = 6; scale_gamma = 1
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  log_likelihood = 0
+  log_likelihood = 0; total_rate = 0
   
   for (t in 2:num_days) {
     
     lambdaX = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
-    log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
+    #log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     log_likelihood = log_likelihood + dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
     
     # if (log_likelihood1 != log_likelihood){
