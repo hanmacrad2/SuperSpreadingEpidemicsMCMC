@@ -3,7 +3,7 @@
 #MCMC PARAMS
 run = 1
 n_repeats = 5; NMCMC = 30000
-EPI_DATA = MOCK_DATA_7_DAYS
+EPI_DATA = data_ssnb2
 
 #***********************
 # 1. RUN BASELINE MCMC

@@ -6,6 +6,8 @@
 run = 1 
 n_repeats = 5
 
+EPI_DATA = data_baseline
+
 #*************************
 #1. BASELINE
 #*************************
@@ -57,10 +59,10 @@ sd(model_ev_ssir)
 #PLOT ALL MODEL EVIDENCE
 #*************************
 par(mfrow = c(2,1))
-data_type = 'Mock Data, 2 days'
-BOX_PLOT_MODEL_EV(list_vec_results = list(SSIR = model_ev_ssir, BASE = model_ev_base, SSEB = model_ev_sseb,
-                                          SSNB = model_ev_ssnb, SSIB = model_ev_ssib),
-                  data_type = data_type)
+data_type = 'Baseline'  
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_ssnb, 
+                                          SSI = model_ev_ssir, SSEB = model_ev_sseb,
+                                         SSIB = model_ev_ssib), data_type = data_type)
 
 
 #***************************************************************************

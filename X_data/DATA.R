@@ -2,18 +2,18 @@
 # DATA
 #****************************************************************
 #library(SuperSpreadingEpidemicsMCMC)
-DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/"
 
 #BASELINE
 file_name = 'data_baseline_1_5.rds'
-data_baseline = SIMULATE_EPI_BASELINE(1.5)
-plot.ts(data_baseline)
-saveRDS(data_baseline, paste0(DATA_FOLDER, file_name))
+data_baseline2 = SIMULATE_EPI_BASELINE(1.5)
+plot.ts(data_baseline2, main = 'Baseline Data II, R0 = 1.5')
+saveRDS(data_baseline2, paste0(DATA_FOLDER, file_name))
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_baseline2.rds'
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
-plot.ts(data_baseline)
+plot.ts(data_baseline2)
 data_base = readRDS(paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_baseline30.rds'
@@ -24,9 +24,9 @@ plot.ts(data_baseline30)
 saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 
 #SSNB
-file_name = 'data_ssnb.rds'
-data_ssnb = SIMULATE_EPI_SSNB(num_days = 50)
-plot.ts(data_ssnb)
+file_name = 'data_ssnb_1_6_2.rds'
+data_ssnb2 = SIMULATE_EPI_SSNB()
+plot.ts(EPI_DATA, main = 'SSE Data, R0 = 1.6')
 saveRDS(data_ssnb, paste0(DATA_FOLDER, file_name))
 data_ssnb = readRDS(paste0(DATA_FOLDER, file_name))
 
@@ -132,7 +132,7 @@ DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/data/"
 OUTER_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/BASE_DATA/"
 file_name = 'epi_data_base_1.rds'
 data_baseline = readRDS(file = paste0(OUTER_FOLDER, file_name))
-plot.ts(data_baseline)
+plot.ts(data_baseline, main = 'Baseline data')
 
 file_name = 'data_baseline2.rds'
 data_baseline2 = readRDS(file = paste0(DATA_FOLDER, file_name))
