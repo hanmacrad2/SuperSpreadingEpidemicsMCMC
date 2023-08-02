@@ -3,6 +3,7 @@
 #****************************************************************
 #library(SuperSpreadingEpidemicsMCMC)
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/"
+DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
 
 #BASELINE
 file_name = 'data_baseline_1_5.rds'
@@ -23,21 +24,26 @@ EPI_DATA = data_baseline30
 plot.ts(data_baseline30)
 saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 
-#SSNB
+#SSE
 file_name = 'data_ssnb_1_6_2.rds'
 data_ssnb2 = SIMULATE_EPI_SSNB()
 plot.ts(EPI_DATA, main = 'SSE Data, R0 = 1.6')
 saveRDS(data_ssnb, paste0(DATA_FOLDER, file_name))
 data_ssnb = readRDS(paste0(DATA_FOLDER, file_name))
 
+file_name = 'data_sse_1_3_1.rds'
+data_sse = SIMULATE_EPI_SSNB(num_days = 30, R0 = 1.3, k = 1.0)
+plot.ts(data_sse, main = 'SSE Data, R0 = 1.3, k = 1.0')
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+                             
 #SSIR
 file_name = 'data_ssir2.rds'
-data_ssir2 = SIMULATE_EPI_SSIR()
-plot.ts(data_ssir$epidemic_data)
+data_ssir = SIMULATE_EPI_SSIR()
+plot.ts(data_ssi$epidemic_data)
 saveRDS(data_ssir, paste0(DATA_FOLDER, file_name))
 
-data_ssir2 = readRDS(paste0(DATA_FOLDER, file_name))
-data_ssir2 = data_ssir2$epidemic_data
+data_ssi = readRDS(paste0(DATA_FOLDER, file_name))
+#data_ssir2 = data_ssir2$epidemic_data
 
 #SSIB
 file_name = 'data_ssib2.rds'
