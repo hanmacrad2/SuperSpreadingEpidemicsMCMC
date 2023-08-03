@@ -12,7 +12,7 @@
 #********************************************************************
 
 GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
-                                       dof = 3, prob = 0.5, r0_sim = 1.6) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
+                                       dof = 3, prob = 0.01, r0_sim = 1.6) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
   
   list_priors = SET_PRIORS()$list_priors
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -44,7 +44,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   theta_samples = c(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
-  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = 1, log = TRUE) - log(sd_mcmc) 
+  log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) - log(sd_mcmc) 
   
   #PRIOR
   if(PRIORS_USED$BASELINE_EXP){
@@ -79,7 +79,7 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
   theta_samples = imp_samp_comps$theta_samples 
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
-  
+ 
   #ESS
   sum_weights = 0
   vec_weights_squared = rep(0, times = n_samples)
@@ -122,6 +122,7 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
   ESS = (sum_weights^2)/sum(vec_weights_squared)
+  browser()
   
   print(paste0('ESS: ', ESS))
   
