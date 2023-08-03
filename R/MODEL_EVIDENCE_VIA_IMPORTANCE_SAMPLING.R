@@ -161,7 +161,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
   #estimates_vec = rep(NA, n_repeats - start) 
   
   if (FLAGS_MODELS$BASE){
-    
+    print('CHECKKK')
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
     
