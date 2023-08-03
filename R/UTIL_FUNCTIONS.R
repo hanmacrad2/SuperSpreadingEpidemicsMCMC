@@ -180,3 +180,25 @@ get_ci_matrix <- function(mcmc_matrix){
   
   return(list(vec_lower = vec_lower, vec_upper = vec_upper))
 }
+
+#CURRENT DATE TIME FOLDER
+GET_FOLDER_TIME_STAMP <- function(folder_type){
+  
+  current_time <- Sys.time()
+  time_string <- format(current_time, "%Y-%m-%d_%H-%M-%S")
+  CURRENT_FOLDER <- paste0(folder_type, time_string)
+  print(CURRENT_FOLDER)
+  
+  return(CURRENT_FOLDER)
+}
+
+# current_time <- Sys.time()
+# 
+# # Format the current time into a string
+# time_string <- format(current_time, "%Y-%m-%d_%H-%M-%S")
+# 
+# # Create the folder name using the formatted time string
+# CURRENT_FOLDER <- paste0('data_base_', time_string)
+# 
+# # Print the folder name
+# print(CURRENT_FOLDER)
