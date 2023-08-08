@@ -3,11 +3,11 @@
 # MODEL EVIDENCE ESTIMATES VIA IMPORTANCE SAMPLING
 #
 #***********************
-run = 2 
+run = 1 
 n_repeats = 5
 
 #EPI_DATA = data_base
-data_type = 'SSI'  
+data_type = 'SSE-B'  
 
 #*************************
 #1. BASELINE

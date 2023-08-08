@@ -54,16 +54,16 @@ EPI_DATA = data_ssi2$epidemic_data
 #SSE-B
 file_name = 'data_sseb.rds'
 data_sseb = SIMULATE_EPI_SSEB(num_days = 50)
-plot.ts(data_sseb, main = 'SSE-B Data' )#, R0 = 1.6')
+plot.ts(data_sseb, main = 'SSE-B Data al: 0.8, be:0.2, ga:10' )#, R0 = 1.6')
 EPI_DATA = data_sseb
 saveRDS(data_sseb, paste0(DATA_FOLDER, file_name))
 data_sseb = readRDS(paste0(DATA_FOLDER, file_name))
 
 #SSIB
-file_name = 'data_ssib2.rds'
-data_ssib3 = SIMULATE_EPI_SSIB(aX = 0.8)
-plot.ts(data_ssib3,  main = 'SSIB DATA, R0 = 1.8', ylab = 'Daily infection count')
-saveRDS(data_ssib3, paste0(DATA_FOLDER, file_name))
+file_name = 'data_ssib.rds'
+data_ssib = SIMULATE_EPI_SSIB(num_days = 50, aX = 0.8)
+plot.ts(data_ssib,  main = 'SSIB DATA, R0 = 1.8', ylab = 'Daily infection count')
+saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
 
 data_ssib2 = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_ssib2$epidemic_data)

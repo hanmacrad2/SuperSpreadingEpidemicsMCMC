@@ -3,7 +3,7 @@
 #MCMC PARAMS
 run = 1
 n_repeats = 5; NMCMC = 30000
-EPI_DATA = data_sseb
+EPI_DATA = data_ssib
 
 #***********************
 # 1. RUN BASELINE MCMC
@@ -36,7 +36,7 @@ RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_
                                             SSIR = FALSE, SSIB = TRUE))
 
 #**************************
-# 5. RUN SSIR MCMC
+# 5. RUN SSI MCMC
 #**************************
 RUN_MCMC_MULTIPLE_TIMES(EPI_DATA, OUTER_FOLDER, run_number = run, n_repeats = n_repeats, n_mcmc = NMCMC,
                         FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE, SSNB = FALSE,
