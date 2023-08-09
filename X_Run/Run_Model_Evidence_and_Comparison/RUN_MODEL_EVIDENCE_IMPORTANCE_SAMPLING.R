@@ -7,7 +7,7 @@ run = 1
 n_repeats = 5
 
 #EPI_DATA = data_base
-data_type = 'SSE-B'  
+data_type = 'SSI-B'  
 
 #*************************
 #1. BASELINE

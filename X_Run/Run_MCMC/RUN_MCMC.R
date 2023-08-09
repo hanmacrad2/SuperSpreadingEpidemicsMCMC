@@ -3,7 +3,8 @@
 #MCMC PARAMS
 run = 1
 n_repeats = 5; NMCMC = 30000
-EPI_DATA = data_ssib
+#EPI_DATA = data_ssib
+EPI_DATA = data_ssi$epidemic_data
 
 #***********************
 # 1. RUN BASELINE MCMC
