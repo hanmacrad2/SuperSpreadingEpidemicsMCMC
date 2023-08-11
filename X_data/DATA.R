@@ -42,7 +42,7 @@ file_name = 'data_sse_50_12_03.rds'
 data_sse = SIMULATE_EPI_SSNB(num_days = num_days, R0 = R0X, k = kX)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0X, ', k = ', kX))
 
-saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+csaveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_ssnb_1_6_2.rds'
 data_ssnb2 = SIMULATE_EPI_SSNB()

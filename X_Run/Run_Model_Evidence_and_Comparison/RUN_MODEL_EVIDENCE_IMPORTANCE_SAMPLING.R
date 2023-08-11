@@ -7,7 +7,7 @@ run = 1
 n_repeats = 5
 
 EPI_DATA = data_baseline
-data_type = 'Baseline'  
+data_type = 'BASE data' #SSE data'  
 
 #*************************
 #1. BASELINE
