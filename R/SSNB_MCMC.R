@@ -47,7 +47,7 @@ SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
 LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
   
   #Params
-  R0 = ssnb_params[1];  k = ssnb_params[1]
+  R0 = ssnb_params[1];  k = ssnb_params[2]
   num_days = length(epidemic_data); loglike = 0
   
   for (t in 2:num_days) {
