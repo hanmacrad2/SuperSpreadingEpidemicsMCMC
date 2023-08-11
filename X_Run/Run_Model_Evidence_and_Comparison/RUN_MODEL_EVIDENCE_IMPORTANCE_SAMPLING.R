@@ -6,8 +6,8 @@
 run = 1 
 n_repeats = 5
 
-#EPI_DATA = data_base
-data_type = 'SSI'  
+EPI_DATA = data_baseline
+data_type = 'Baseline'  
 
 #*************************
 #1. BASELINE
@@ -20,7 +20,7 @@ sd(model_ev_base)
 #PLOT_MODEL_EV_RESULTS(model_ev_base, model_type = '. Baseline w/ exp(1) prior on R0')
 
 #*************************
-#2. SSNB
+#2. SSE
 #*************************
 model_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
@@ -30,7 +30,15 @@ mean(model_ev_ssnb)
 sd(model_ev_ssnb)
 
 #*************************
-#3. SSEB
+#3. SSI
+#*************************
+model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+
+mean(model_ev_ssir)
+sd(model_ev_ssir)
+
+#*************************
+#4. SSE-B
 #*************************
 model_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
@@ -48,13 +56,6 @@ model_ev_ssib = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, 
 mean(model_ev_ssib)
 sd(model_ev_ssib)
 
-#*************************
-#4. SSI
-#*************************
-model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-
-mean(model_ev_ssir)
-sd(model_ev_ssir)
 
 #*************************
 #PLOT ALL MODEL EVIDENCE
@@ -63,3 +64,6 @@ par(mfrow = c(2,1))
 BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_ssnb, 
                                           SSI = model_ev_ssir, SSEB = model_ev_sseb,
                                          SSIB = model_ev_ssib), data_type = data_type)
+
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_ssnb, 
+                                          SSI = model_ev_ssir), data_type = data_type)

@@ -3,7 +3,7 @@
 #MCMC PARAMS
 run = 1
 n_repeats = 5; NMCMC = 30000
-EPI_DATA = data_baseline
+EPI_DATA = data_sse # data_baseline
 #EPI_DATA = data_ssi$epidemic_data
 
 #***********************
