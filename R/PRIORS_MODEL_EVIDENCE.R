@@ -67,12 +67,12 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
     pR0_exp = list_priors$priors_ssir$pR0_exp
     pk_exp = list_priors$priors_ssir$pk_exp
     
-    prior_R0 =  rexp(samp_size_prior) 
-    problem_R0 = which(prior_R0 < 0.09)
+    prior_R0 =  rexp(samp_size_prior,  rate = pR0_exp[1]) 
+    #problem_R0 = which(prior_R0 < 0.09)
     #prior_R0[problem_R0] = prior_R0[problem_R0] + runif(length(prior_R0[problem_R0]), 0.1, 0.5)
     
-    prior_k =  rexp(samp_size_prior) 
-    problem_k = which(prior_k < 0.09)
+    prior_k =  rexp(samp_size_prior,  rate = pk_exp[1]) 
+    #problem_k = which(prior_k < 0.09)
     #prior_k[problem_k] = prior_k[problem_k] + runif(length(prior_k[problem_k]), 0.1, 0.5)
     
     param_priors = cbind(prior_R0, prior_k)
@@ -148,9 +148,11 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data,
   } else if (FLAGS_MODELS$SSIR) {
     
     #PRIORS
+    pR0_exp = list_priors$priors_ssir$pR0_exp
+    pk_exp = list_priors$priors_ssir$pk_exp
     log_density_eta_priors = GET_DENSITY_ETA_PRIORS(theta_samples, epidemic_data)
-    log_prior_density = dexp(theta_samples[,1], log = TRUE) +
-      dexp(theta_samples[,2], log = TRUE) + log_density_eta_priors
+    log_prior_density = dexp(theta_samples[,1], rate = pR0_exp[1], log = TRUE) +
+      dexp(theta_samples[,2], rate = pk_exp[1], log = TRUE) + log_density_eta_priors
     
   } else if (FLAGS_MODELS$SSIB){
     

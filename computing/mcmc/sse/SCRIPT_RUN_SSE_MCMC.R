@@ -45,8 +45,10 @@ GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
   
   result_row <- data.frame(
     true_r0 = true_r0,
+    mean_r0 = mean(r0_vec),
     lower_ci_r0 = get_lower_ci(r0_vec), # credible_intervals["lower"],
     upper_ci_r0 = get_upper_ci(r0_vec), #credible_intervals["upper"],
+    mean_k = mean(k_vec),
     lower_ci_k = get_lower_ci(k_vec),
     upper_ci_k = get_upper_ci(k_vec),
     row.names = NULL

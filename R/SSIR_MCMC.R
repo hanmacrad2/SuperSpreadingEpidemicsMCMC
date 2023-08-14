@@ -125,6 +125,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     }
   
   print(paste0('mcmc_vec_size', mcmc_vec_size))
+  print(paste0('priors: ', priors_list))
   
   #MODEL PARAMETERS
   infect_curve_ga = GET_INFECT_GAMMA_CURVE(epidemic_data)
