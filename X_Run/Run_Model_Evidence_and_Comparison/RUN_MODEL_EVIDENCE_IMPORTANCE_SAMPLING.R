@@ -7,7 +7,7 @@ run = 1
 n_repeats = 5
 
 EPI_DATA = data_baseline
-data_type = 'SSI Data, P(k) ~ exp(0.1), else exp(1)' #BASE data' #SSE data'  
+data_type = 'SSI Data,  k= 0.1, P(k) ~ exp(1), P(k) ~ exp(0.1)' #BASE data' #SSE data'  
 
 #*************************
 #1. BASELINE
@@ -22,20 +22,27 @@ sd(model_ev_base)
 #*************************
 #2. SSE
 #*************************
-model_ev_ssnb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
+model_ev_sse = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
                                                     FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
                                                                         SSIB = FALSE, SSIR = FALSE))
 
-mean(model_ev_ssnb)
-sd(model_ev_ssnb)
+mean(model_ev_sse)
+sd(model_ev_sse)
 
 #*************************
 #3. SSI
 #*************************
-model_ev_ssir = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+model_ev_ssi = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
 
-mean(model_ev_ssir)
-sd(model_ev_ssir)
+mean(model_ev_ssi)
+sd(model_ev_ssi)
+
+#EXP_01
+run = 'exp_01'
+model_ev_ssi_exp01 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+
+mean(model_ev_ssi_exp01)
+sd(model_ev_ssi)
 
 #*************************
 #4. SSE-B
@@ -61,9 +68,13 @@ sd(model_ev_ssib)
 #PLOT ALL MODEL EVIDENCE
 #*************************
 par(mfrow = c(2,1))
-BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_ssnb, 
-                                          SSI = model_ev_ssir, SSEB = model_ev_sseb,
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_sse, 
+                                          SSI = model_ev_ssi, SSEB = model_ev_sseb,
                                          SSIB = model_ev_ssib), data_type = data_type)
 
-BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_ssnb, 
-                                          SSI = model_ev_ssir), data_type = data_type)
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_sse, 
+                                          SSI = model_ev_ssi), data_type = data_type)
+
+
+BOX_PLOT_MODEL_EV(list_vec_results = list(SSI_exp1 = model_ev_ssi, SSI_exp01 = model_ev_ssi_exp01),
+                  data_type = data_type)

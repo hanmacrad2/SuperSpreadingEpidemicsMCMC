@@ -64,6 +64,7 @@ GET_PRIORS_USED <- function(){
   return(PRIORS_USED)
 }
 
+#SET_PRIORS
 SET_PRIORS <- function(){
   
   return(list(list_priors = list(
@@ -73,29 +74,6 @@ SET_PRIORS <- function(){
     priors_ssib = GET_PRIORS_SSIB()
   ), PRIORS_USED = GET_PRIORS_USED()))
 }
-
-
-# OLDDDD
-#*****************************
-SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0),
-                                                             beta_prior_a = c(1,2),
-                                                             ga_pr_ga = c(2, 1)),
-                                          priors_sse = list(pk_prior_nb = c(1,0),
-                                                             pk_ga_shape = 0.001, pk_ga_rte = 0.001,
-                                                             pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
-                                          priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)),
-                                          priors_ssib = list(a_prior_exp = c(1, 0),
-                                                             b_prior_exp = c(1,0),
-                                                             c_prior_exp = c(0.1,0),
-                                                             a_prior_gamma = c(2, 0.6))),
-                       PRIORS_USED = list(BASELINE_EXP = TRUE, BASELINE_GAMMA = FALSE,
-                                          SSE_R0_EXP = TRUE, SSE_K_EXP = TRUE, 
-                                          SSE_K_GAMMA = FALSE, SSE_R0_UNIF = FALSE,
-                                          SSIB_GAMMA_A = FALSE)) {
-  
-  return(list(list_priors = list_priors, PRIORS_USED = PRIORS_USED))
-}
-
 
 #DEFINE PRIORS
 SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0)),
