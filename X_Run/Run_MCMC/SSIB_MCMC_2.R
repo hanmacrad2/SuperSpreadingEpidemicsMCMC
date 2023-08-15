@@ -319,6 +319,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
   #******************************
   for(i in 2:n_mcmc) {
     
+    if (i%%1000 == 0) {
+      
+      print(paste0('i = ', i))
+    }
+    
     #****************************************************** s
     #a
     a_dash <- a + rnorm(1, sd = sigma1)
