@@ -114,6 +114,38 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, r0, cX,
   return(loglike)
 }
 
+#PRIOR
+SET_SSIB_PRIOR <- function(param, param_dash, r0_temp,
+                           list_priors, PRIORS_USED,
+                           a_flag = FALSE, r0_flag = FALSE, c_flag = FALSE){
+  
+  if(a_flag){
+    
+    #BETA PRIOR ON a
+    if (PRIORS_USED$SSIB$a$BETA) {
+      shape1 = list_priors$a[1]
+      shape2 = list_priors$a[2]
+      p = dbeta(param_dash/r0_temp, shape1, shape2, log = TRUE) - dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
+    }
+    
+  } else if (r0_flag) {
+    
+    if (PRIORS_USED$SSIB$R0$EXP) {
+      p = dexp(param_dash, log = TRUE) - dexp(param, log = TRUE) 
+    }
+    
+  } else if (c_flag) {
+    
+    #GAMMA PRIOR ON c
+    if (PRIORS_USED$SSIB$c$GAMMA) {
+      shape = list_priors$c[1]
+      scale = list_priors$c[2]
+      p = dgamma(param_dash -1, shape, scale, log = TRUE) - dgamma(param-1, shape, scale, log = TRUE) 
+    }
+  }
+
+  return(p)  
+}
 
 
 #' 
@@ -177,33 +209,19 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, r0, cX,
 #'
 #' @export
 #************************************************************************
-#1. SSI MCMC                              (W/ DATA AUGMENTATION OPTION)
+#1. SSI MCMC                              (W/ DATA AUGMENTATION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
-                            mcmc_inputs = list(mod_start_points = list(m1 = 0.7, m2 = 0.2, m3 = 15),
-                                               alpha_star = 0.4, 
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
+                            mod_start_points = list(m1 = 0.7, m2 = 0.2, m3 = 15),
+                            mcmc_inputs = list(alpha_star = 0.4, 
                                                burn_in_pc = 0.2, thinning_factor = 10),
-                            priors_list = list(a_prior_exp = c(1, 0),
-                                               b_prior_exp = c(1,0),
-                                               c_prior_exp = c(0.1,0),
-                                               a_prior_gamma_shape = 2,
-                                               b_prior_ga = c(10, 2/100),
-                                               c_prior_ga = c(10, 1) ),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, DATA_AUG = TRUE, BURN_IN = TRUE,
-                                              BCA_TRANSFORM = TRUE,
-                                              PRIOR = TRUE, 
-                                              A_PRIOR_EXP = TRUE, A_PRIOR_GAMMA = FALSE,
-                                              B_PRIOR_GAMMA = FALSE, C_PRIOR_GAMMA = FALSE,
-                                              THIN = TRUE)) {
+                            FLAGS_LIST = list(THIN = TRUE, ADAPTIVE = TRUE)){
   
   'Returns MCMC samples of SSI-B model parameters (a, b, c, r0 = a + b*c)
   w/ acceptance rates.
   INCLUDES; ADAPTATION, DATA AUGMENTATION, B-C & A-C transform'
   
   'Priors
-  p(a) = exp(rate) = rate*exp(-rate*x). log(r*exp(-r*x)) = log(r) - rx
-      -> E.g exp(1) = 1*exp(-1*a) = exp(-a). log(exp(-a)) = - a
-  p(b) = exp(1) or p(b) = g(shape, scale), for e.g g(3, 2)
   p(c) = exp(1) + 1 = 1 + exp(-c) = exp(c - 1)'
   
   
@@ -214,14 +232,14 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
   print(paste0('num mcmc iters = ', n_mcmc))
   
   #PRIORS
-  a_gamma_shape = priors_list$a_prior_gamma_shape #priors_list$gamma_shape
-  a_gamma_scale = a_gamma_shape*mcmc_inputs$mod_start_points$m1
+  list_priors = GET_PRIORS_SSIB() 
+  PRIORS_USED =  GET_PRIORS_USED() 
   
   #DATA: SUPERSPREADING INTIALISATION
   ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
-  print('ss:'); print(ss)
+  print('ss: '); print(ss)
   non_ss = epidemic_data - ss 
-  print('non_ss:'); print(non_ss)
+  print('non_ss: '); print(non_ss)
   data = list(non_ss, ss)
   
   #THINNING FACTOR
@@ -235,13 +253,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
   }
   
   #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
-  if(FLAGS_LIST$BURN_IN){
-    burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; 
-    print(paste0('N burn-in = ', burn_in_start))
-    
-    mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size
-    print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
-  }
+  burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; 
+  print(paste0('N burn-in = ', burn_in_start))
+  mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size
+  print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   
   #INITIALISE MCMC VECTORS
   a_vec <- vector('numeric', mcmc_vec_size); b_vec <- vector('numeric', mcmc_vec_size)
@@ -249,18 +264,19 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
   log_like_vec <- vector('numeric', mcmc_vec_size);
   
   #INITIALISE MCMC[1]
-  a_vec[1] <- mcmc_inputs$mod_start_points$m1; b_vec[1] <- mcmc_inputs$mod_start_points$m2
-  c_vec[1] <- mcmc_inputs$mod_start_points$m3; r0_vec[1] <- a_vec[1] + b_vec[1]*c_vec[1]
-  log_like_vec[1] <- LOG_LIKE_SSIB(data, a_vec[1], b_vec[1], c_vec[1])
+  a_vec[1] <- mod_start_points$m1; b_vec[1] <- mod_start_points$m2
+  c_vec[1] <- mod_start_points$m3; r0_vec[1] <- a_vec[1] + b_vec[1]*c_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSIB(data, a_vec[1], r0_vec[1], c_vec[1])
   
   #INITIALISE RUNNING PARAMS
   a = a_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
-  print(paste0('loglike 0', log_like))
+  r0 = r0_vec[1]
+  print(paste0('loglike: ', log_like))
   
   #SIGMA
-  sigma1 =  0.4*mcmc_inputs$mod_start_points$m1;  sigma2 = 0.3*mcmc_inputs$mod_start_points$m2
-  sigma3 = 0.5*mcmc_inputs$mod_start_points$m3; sigma4 = 0.85*mcmc_inputs$mod_start_points$m3
-  sigma5 = 0.85*mcmc_inputs$mod_start_points$m3
+  sigma1 =  0.4*mod_start_points$m1;  sigma2 = 0.3*mod_start_points$m2
+  sigma3 = 0.5*mod_start_points$m3; sigma4 = 0.85*mod_start_points$m3
+  sigma5 = 0.85*mod_start_points$m3
   
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
@@ -311,19 +327,12 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
       a_dash = abs(a_dash)
     }
     
-    logl_new = LOG_LIKE_SSIB(data, a_dash, b, c)
+    logl_new = LOG_LIKE_SSIB(data, a_dash, r0, c) #RO 
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     
-    #Priors
-    if (FLAGS_LIST$A_PRIOR_EXP){
-      log_accept_ratio = log_accept_ratio - a_dash + a #*Actually this is the Acceptance RATIO. ACCEPTANCE PROB = MIN(1, EXP(ACCPET_PROB))
-      
-    } else if (FLAGS_LIST$A_PRIOR_GAMMA) {
-      
-      log_accept_ratio = log_accept_ratio + dgamma(a_dash, shape = a_gamma_shape, scale = a_gamma_scale) - 
-        dgamma(a, shape = a_gamma_shape, scale = a_gamma_scale, log = TRUE)
-      
-    } else if ()
+    #PRIOR
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(a, a_dash, r0,
+                                                         list_priors, PRIORS_USED, a_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -339,28 +348,25 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
     }
     
     #************************************************************************ Only if (b > 0) ?
-    #b
-    b_dash <- b + rnorm(1, sd = sigma2)
-    if(b_dash < 0){
-      b_dash = abs(b_dash)
+    #R0
+    r0_dash <- r0 + rnorm(1, sd = sigma2)
+    
+    if(r0_dash < a){
+      r0_dash = 2*a - r0_dash
     }
     
     #loglikelihood
-    logl_new = LOG_LIKE_SSIB(data, a, b_dash, c)
+    logl_new = LOG_LIKE_SSIB(data, a, r0_dash, c)
     log_accept_ratio = logl_new - log_like
     
-    #Priors
-    if (FLAGS_LIST$B_PRIOR_GAMMA){
-      log_accept_ratio = log_accept_ratio +
-        dgamma(b_dash, shape = priors_list$b_prior_ga[1], scale = priors_list$b_prior_ga[2], log = TRUE) -
-        dgamma(b, shape = priors_list$b_prior_ga[1], scale = priors_list$b_prior_ga[2], log = TRUE)
-    } else {
-      log_accept_ratio = log_accept_ratio - b_dash + b
-    }
+    #PRIOR
+    r0_temp = r0
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, r0_temp, 
+                                                         list_priors, PRIORS_USED, r0_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-      b <- b_dash
+      r0 <- r0_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
     }
@@ -378,20 +384,12 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
       c_dash = 2 - c_dash #Prior on c: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSIB(data, a, b, c_dash)
+    logl_new = LOG_LIKE_SSIB(data, a, r0, c_dash)
     log_accept_ratio = logl_new - log_like
     
-    #Priors
-    if(FLAGS_LIST$C_PRIOR_GAMMA){
-      log_accept_ratio = log_accept_ratio +
-        dgamma(c_dash, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[1], log = TRUE) -
-        dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
-    } else {
-      log_accept_ratio = log_accept_ratio +
-        dexp(c_dash, rate = priors_list$c_prior_exp[1], log = TRUE) -
-        dexp(c, rate = priors_list$c_prior_exp[1], log = TRUE) 
-      #priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
-    }
+    #PRIOR
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(c, c_dash, r0,
+                                                         list_priors, PRIORS_USED, c_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -406,162 +404,61 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
       sigma3 =  sigma3*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
-    #*****************************************************
-    #B-C TRANSFORM
-    if(FLAGS_LIST$BCA_TRANSFORM){
-      
-      c_dash <- c + rnorm(1, sd = sigma4)
-      #Prior > 1 #* TRY WITHOUT REFLECTION
-      if(c_dash < 1){
-        c_dash = 2 - c_dash
-      }
-      #New b
-      b_transform = ((a + b*c) - a)/c_dash #b = (r0 - a)c
-      
-      if(b_transform >= 0){ #Only accept values of b > 0
-        
-        logl_new = LOG_LIKE_SSIB(data, a, b_transform, c_dash)
-        log_accept_ratio = logl_new - log_like
-        
-        #PRIORS
-        #b prior
-        if (FLAGS_LIST$B_PRIOR_GAMMA) {
-          tot_b_prior = dgamma(b_transform, shape = priors_list$b_prior_ga[1], scale = priors_list$b_prior_ga[2], log = TRUE) -
-            dgamma(b, shape = priors_list$b_prior_ga[1], scale = priors_list$b_prior_ga[2], log = TRUE)
-        } else {
-          tot_b_prior = - b_transform + b #exp(1) piror
-        }
-        
-        #c prior
-        if (FLAGS_LIST$C_PRIOR_GAMMA) {
-          tot_c_prior = dgamma(c_dash, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE) -
-            dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
-        } else {
-          tot_c_prior = - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
-        }
-        
-        #LOG ACCEPT PROB 
-        log_accept_ratio = log_accept_ratio + tot_b_prior + tot_c_prior
-        
-        #Metropolis Step
-        if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          b <- b_transform
-          c <- c_dash
-          log_like <- logl_new
-          list_accept_counts$count_accept4 = list_accept_counts$count_accept4 + 1
-        }
-        
-        #Sigma (Adpative)
-        if (FLAGS_LIST$ADAPTIVE){
-          accept_prob = min(1, exp(log_accept_ratio))
-          sigma4 = sigma4*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-        }
-      }
-    }
-    
-    #*****************************************************
-    #A-C TRANSFORM
-    if(FLAGS_LIST$BCA_TRANSFORM){
-      
-      c_dash <- c + rnorm(1, sd = sigma5)
-      #Prior > 1
-      if(c_dash < 1){
-        c_dash = 2 - c_dash
-      }
-      #New a
-      a_transform = (a + b*c) - b*c_dash #a = (r0 - b*c
-      
-      if(a_transform >= 0){ #Only accept values of b > 0
-        
-        logl_new = LOG_LIKE_SSIB(data, a_transform, b, c_dash)
-        log_accept_ratio = logl_new - log_like
-        
-        #PRIORS
-        #c prior
-        if (FLAGS_LIST$C_PRIOR_GAMMA) {
-          tot_c_prior = dgamma(c_dash, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE) -
-            dgamma(c, shape = priors_list$c_prior_ga[1], scale = priors_list$c_prior_ga[2], log = TRUE)
-        } else {
-          tot_c_prior = - priors_list$c_prior_exp[1]*c_dash + priors_list$c_prior_exp[1]*c
-        }
-        
-        #LOG ACCEPT PROB
-        log_accept_ratio = log_accept_ratio + - a_transform + a + tot_c_prior
-        
-        #Metropolis Step
-        if (!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          a <- a_transform
-          c <- c_dash
-          log_like <- logl_new
-          list_accept_counts$count_accept5 = list_accept_counts$count_accept5 + 1
-        }
-        
-        #Sigma (Adpative)
-        if (FLAGS_LIST$ADAPTIVE){
-          accept_prob = min(1, exp(log_accept_ratio))
-          sigma5 = sigma5*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-        }
-      }
-    }
-    
     #************************************
     #DATA AUGMENTATION
-    #************************************
-    if (FLAGS_LIST$DATA_AUG){
+    #***********************************
+    #FOR EACH S_T
+    for(t in 1:time){
       
-      #FOR EACH S_T
-      for(t in 1:time){
-        
-        #Copy of data (or update as necessary)
-        data_dash = data
-        
-        #STOCHASTIC PROPOSAL for s
-        if (runif(1) < 0.5) {
-          st_dash = data[[2]][t] + 1
-        } else {
-          st_dash = data[[2]][t] - 1
-        }
-        
-        #CHECK
-        if (st_dash < 0) {
-          st_dash = 0
-        }
-        
-        #ACCEPTANCE PROBABILITY
-        data_dash[[2]][t] = st_dash #s_t = st_dash
-        data_dash[[1]][t] =  data[[1]][t] + data[[2]][t] - st_dash #n_t = x_t - s_t
-        
-        # if (data_dash[[1]][t] < 0){
-        #   data_dash[[1]][t] = 0
-        # }
-        
-        #CRITERIA FOR S_T & N_T
-        if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-          #Store
-          #print(paste0('i thin', i_thin))
-          non_ss[i_thin, t] = data[[1]][t]
-          ss[i_thin, t] = data[[2]][t]
-          next
-        }
-        
-        logl_new = LOG_LIKE_SSIB(data_dash, a, b, c)
-        log_accept_ratio = logl_new - log_like
-        
-        #METROPOLIS ACCEPTANCE STEP
-        if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-          
-          #ACCEPT
-          data <- data_dash
-          log_like <- logl_new
-          #mat_count_da[i, t] = mat_count_da[i, t] + 1
-          list_accept_counts$count_accept6 = list_accept_counts$count_accept6 + 1
-        }
-        
+      #Copy of data (or update as necessary)
+      data_dash = data
+      
+      #STOCHASTIC PROPOSAL for s
+      if (runif(1) < 0.5) {
+        st_dash = data[[2]][t] + 1
+      } else {
+        st_dash = data[[2]][t] - 1
+      }
+      
+      #CHECK
+      if (st_dash < 0) {
+        st_dash = 0
+      }
+      
+      #ACCEPTANCE PROBABILITY
+      data_dash[[2]][t] = st_dash #s_t = st_dash
+      data_dash[[1]][t] =  data[[1]][t] + data[[2]][t] - st_dash #n_t = x_t - s_t
+      
+      # if (data_dash[[1]][t] < 0){
+      #   data_dash[[1]][t] = 0
+      # }
+      
+      #CRITERIA FOR S_T & N_T
+      if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
         #Store
-        if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
-          non_ss[i_thin, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
-          ss[i_thin, t] = data[[2]][t]
-        }
+        #print(paste0('i thin', i_thin))
+        non_ss[i_thin, t] = data[[1]][t]
+        ss[i_thin, t] = data[[2]][t]
+        next
+      }
+      
+      logl_new = LOG_LIKE_SSIB(data_dash, a, b, c)
+      log_accept_ratio = logl_new - log_like
+      
+      #METROPOLIS ACCEPTANCE STEP
+      if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+        
+        #ACCEPT
+        data <- data_dash
+        log_like <- logl_new
+        #mat_count_da[i, t] = mat_count_da[i, t] + 1
+        list_accept_counts$count_accept6 = list_accept_counts$count_accept6 + 1
+      }
+      
+      #Store
+      if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
+        non_ss[i_thin, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
+        ss[i_thin, t] = data[[2]][t]
       }
     }
     
@@ -572,11 +469,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
       #print(paste0('i = ', i))
-      a_vec[i_thin] <- a; b_vec[i_thin] <- b
-      c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
+      a_vec[i_thin] <- a; r0_vec[i_thin] <- r0
+      c_vec[i_thin] <- c; b_vec[i_thin] <- (r0-a)/c #a + b*c
       log_like_vec[i_thin] <- log_like 
       sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
-      sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
+      #sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
       i_thin = i_thin + 1
     }
   }
@@ -585,15 +482,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 50000, r0_sim = 1.6,
   accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
   accept_rate2 = 100*list_accept_counts$count_accept2/(n_mcmc-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
   accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
-  accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
-  accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
-  accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
+  #accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
+  #accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
+  #accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
   
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,
-                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
-                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
-                           accept_rate6 = accept_rate6)
+                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3)
+                           #accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
+                           #accept_rate6 = accept_rate6)
   print(list_accept_rates)
   
   #Return a, acceptance rate

@@ -55,10 +55,10 @@ GET_PRIORS_USED <- function(){
         SSEB =
           list(R0 = list(EXP = TRUE),
                alpha = list(EXP = FALSE, BETA = TRUE),
-               gamma = list(EXP = FALSE, GAMMA = TRUE))
+               gamma = list(EXP = FALSE, GAMMA = TRUE)),
         SSIB = 
           list(R0 = list(EXP = TRUE),
-               a = list(EXP = FALSE, BETA = TRUE),
+               a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
                c = list(EXP = FALSE, GAMMA = TRUE)))
 
   return(PRIORS_USED)
