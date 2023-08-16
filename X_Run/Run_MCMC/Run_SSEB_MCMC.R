@@ -3,22 +3,37 @@ n_mcmc = 30000
 #RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_sseb8 = MCMC_INFER_SSEB(data_sseb)
+mcmc_sseb9 = MCMC_INFER_SSEB(data_sseb)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_sseb8$time_elap = time_elap
+mcmc_sseb9$time_elap = time_elap
 
 #Plot
-PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb8, n_mcmc = n_mcmc,
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb9, n_mcmc = n_mcmc,
                    FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
-                   sim_vals = list(m1 = 0.8, m2 = 0.05, m3 = 10))                                      
+                   sim_vals = list(m1 = 0.9, m2 = 0.05, m3 = 8))                                      
 
 #SAVE
-file1 = 'priors1'
+file1 = 'mcmc_sseb_09_05_8'
 saveRDS(mcmc_sseb, paste0(OUTER_FOLDER, file1))
 
 
+#RUN ORIG CODE
+start_time = Sys.time()
+print(paste0('start_time:', start_time))
+mcmc_sseb10 = MCMC_INFER_SSEB(data_sseb)
+end_time = Sys.time()
+time_elap = get_time(start_time, end_time)
+mcmc_sseb9$time_elap = time_elap
 
+#Plot
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb10, n_mcmc = n_mcmc,
+                   FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
+                   sim_vals = list(m1 = 0.9, m2 = 0.05, m3 = 8))                                      
+
+#SAVE
+file1 = 'mcmc_sseb_09_05_8_orig'
+saveRDS(mcmc_sseb10, paste0(OUTER_FOLDER, file1))
 
 
 

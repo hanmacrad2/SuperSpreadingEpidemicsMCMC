@@ -208,7 +208,8 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   }
   
   #INITIALISE: ACCEPTANCE COUNTS
-  list_accept_counts = list(count_accept_alpha = 0, count_accept_beta = 0, count_accept_gamma = 0)
+  list_accept_counts = list(count_accept1 = 0, count_accept2 = 0,
+                            count_accept_r0, count_accept3= 0)
   
   #******************************
   #MCMC CHAIN
@@ -325,13 +326,13 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   }
   
   #Final stats
-  accept_rate_a = 100*list_accept_counts$count_accept_alpha/(n_mcmc-1)
+  accept_rate1 = 100*list_accept_counts$count_accept_alpha/(n_mcmc-1)
   accept_rate_r0 = 100*list_accept_counts$count_accept_r0/(n_mcmc-1) #(list_accept_counts$count_accept_beta + list_reject_counts$count_accept_beta)
-  accept_rate_g = 100*list_accept_counts$count_accept_gamma/(n_mcmc-1)
+  accept_rate3 = 100*list_accept_counts$count_accept_gamma/(n_mcmc-1)
   
   #Acceptance rates
-  list_accept_rates = list(accept_rate_a = accept_rate_a,
-                           accept_rate_r0 = accept_rate_r0, accept_rate_g = accept_rate_g)
+  list_accept_rates = list(accept_rate1 = accept_rate1,
+                           accept_rate_r0 = accept_rate_r0, accept_rate3 = accept_rate3)
   print(list_accept_rates)
   
   #OUTPUT

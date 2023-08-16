@@ -87,7 +87,7 @@ saveRDS(data_sseb, paste0(DATA_FOLDER, file_name))
 data_sseb = readRDS(paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_sseb_1_3.rds'
-data_sseb = SIMULATE_EPI_SSEB(num_days = 50, betaX = 0.05)
+data_sseb = SIMULATE_EPI_SSEB(num_days = 50, alphaX = 0.9, betaX = 0.05, gammaX = 8)
 plot.ts(data_sseb, main = 'SSE-B Data al: 0.8, be:0.05, ga:10' )#, R0 = 1.6')
 EPI_DATA = data_sseb
 saveRDS(data_sseb, paste0(DATA_FOLDER, file_name))

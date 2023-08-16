@@ -31,7 +31,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
 
   #PLOT
   plot.new()
-  par(mfrow=c(5,5))
+  par(mfrow=c(4,5))
   
   #PRIORS
   PRIORS_USED =  GET_PRIORS_USED() 
@@ -42,6 +42,8 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     model_type = 'SSE-B'
     mod_par_names = c('alpha', 'beta', 'gamma')
     inf_title = paste0(model_type, " Data, R0: ", r0_sim)
+    #PRIORS
+    list_priors = GET_PRIORS_SSEB() 
     
     #PRIORS
     if(PRIORS_USED$SSEB$alpha$BETA){
@@ -54,6 +56,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
       m3_prior = paste0('Gamma(', list_priors$gamma[1], ', ', list_priors$gamma[2], ')')
       xseq3 = seq(0, 20, length.out = 500)
       d3 = dgamma(xseq3 - 1, list_priors$gamma[1], list_priors$gamma[2])
+      print(paste0('m3_prior, ', m3_prior))
     }
     
     if(PRIORS_USED$SSEB$R0$EXP){
@@ -310,43 +313,44 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #********************
 
   #a vs r0
-  plot(m1_mcmc, r0_mcmc,
-       xlab = mod_par_names[1], ylab = 'R0',
-       main = paste0(mod_par_names[1], ' vs R0'),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
-
-  #b*c vs r0
-  plot(m2_mcmc*m3_mcmc, r0_mcmc,
-       xlab = paste0(mod_par_names[2],'*',mod_par_names[3]), ylab = 'R0',
-       main = paste0(mod_par_names[2],'*',mod_par_names[3], ' vs R0'),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
-
-  #m1 vs m2
-  plot(m1_mcmc, m2_mcmc,
-       xlab = mod_par_names[1], ylab = mod_par_names[2],
-       main = paste(mod_par_names[1], ' vs ', mod_par_names[2]),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
-
-  #m1 vs m3
-  plot(m1_mcmc, m3_mcmc,
-       xlab = mod_par_names[1], ylab = mod_par_names[3],
-       main = paste(mod_par_names[1], ' vs ', mod_par_names[3]),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
-
-  #v. m2 vs m3
-  plot(m2_mcmc, m3_mcmc,
-       xlab = mod_par_names[2], ylab = mod_par_names[3],
-       main = paste(mod_par_names[2], ' vs ', mod_par_names[3]),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
+  # plot(m1_mcmc, r0_mcmc,
+  #      xlab = mod_par_names[1], ylab = 'R0',
+  #      main = paste0(mod_par_names[1], ' vs R0'),
+  #      cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+  #      cex = 0.5)
+  # 
+  # #b*c vs r0
+  # plot(m2_mcmc*m3_mcmc, r0_mcmc,
+  #      xlab = paste0(mod_par_names[2],'*',mod_par_names[3]), ylab = 'R0',
+  #      main = paste0(mod_par_names[2],'*',mod_par_names[3], ' vs R0'),
+  #      cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+  #      cex = 0.5)
+  # 
+  # #m1 vs m2
+  # plot(m1_mcmc, m2_mcmc,
+  #      xlab = mod_par_names[1], ylab = mod_par_names[2],
+  #      main = paste(mod_par_names[1], ' vs ', mod_par_names[2]),
+  #      cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+  #      cex = 0.5)
+  # 
+  # #m1 vs m3
+  # plot(m1_mcmc, m3_mcmc,
+  #      xlab = mod_par_names[1], ylab = mod_par_names[3],
+  #      main = paste(mod_par_names[1], ' vs ', mod_par_names[3]),
+  #      cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+  #      cex = 0.5)
+  # 
+  # #v. m2 vs m3
+  # plot(m2_mcmc, m3_mcmc,
+  #      xlab = mod_par_names[2], ylab = mod_par_names[3],
+  #      main = paste(mod_par_names[2], ' vs ', mod_par_names[3]),
+  #      cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+  #      cex = 0.5)
 
   #********************
   #v. DATAFRAME       
   #********************
+  #browser()
   df_results <- data.frame(
     #rep = mcmc_specs$seed_count,
     n_mcmc = n_mcmc,
@@ -358,9 +362,9 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     m3_mc = round(mean(m3_mcmc), 2),
     R0 = r0_sim,
     R0_mc = round(mean(r0_mcmc), 2), 
-    #accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
-    #a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
-    #a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
+    accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
+    a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate_r0, 2),
+    a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
     a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
     b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
     c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],

@@ -485,7 +485,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #else (log_like!=LOG_LIKE_SSIB(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSIB(data, a, b, c)))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
       #print(paste0('i = ', i))
       a_vec[i_thin] <- a; r0_vec[i_thin] <- r0
       c_vec[i_thin] <- c; b_vec[i_thin] <- (r0-a)/c #a + b*c
@@ -495,6 +495,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
       i_thin = i_thin + 1
     }
   }
+  #FINAL
+  a_vec = a_vec[1:length(a_vec)-1]; b_vec = b_vec[1:length(b_vec)-1]
+  c_vec = c_vec[1:length(c_vec)-1]; r0_vec = r0_vec[1:length(r0_vec)-1]
+  log_like_vec = log_like_vec[1:length(log_like_vec)-1]
   
   #Final stats
   accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
