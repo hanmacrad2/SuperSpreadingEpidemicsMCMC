@@ -20,15 +20,20 @@ legend("topright", c(expression(paste(, lambda)), "0.1", "1"),
 
 #GAMMA
 shape <- 2; scale = 1
+
 mean <- 1.6 #1.6
+mean = 8
 scale <- shape * mean
 
 # Generate x-values for the plot
-x <- seq(0, 10, length = 100)
+x <- seq(0, 20, length = 100)
 
 # Calculate the PDF values using dgamma()
 pdf_values <- dgamma(x-1, shape, scale)
+plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Gamma Distribution with Shape and Scale Parameters")
 
+#******************
+#BETA PRIOR (FOR A)
 pdf_values <- dbeta(x/1.2, 1, 2)/1.2
 # Plot the gamma distribution
 plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Gamma Distribution with Shape and Scale Parameters")

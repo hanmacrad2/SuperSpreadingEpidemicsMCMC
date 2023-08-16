@@ -1,6 +1,29 @@
 #RUN SSEB MCMC 
-#FOLDERS
-library(SuperSpreadingEpidemicsMCMC)                                           
+n_mcmc = 30000
+#RUN MCMC
+start_time = Sys.time()
+print(paste0('start_time:', start_time))
+mcmc_sseb8 = MCMC_INFER_SSEB(data_sseb)
+end_time = Sys.time()
+time_elap = get_time(start_time, end_time)
+mcmc_sseb8$time_elap = time_elap
+
+#Plot
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb8, n_mcmc = n_mcmc,
+                   FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
+                   sim_vals = list(m1 = 0.8, m2 = 0.05, m3 = 10))                                      
+
+#SAVE
+file1 = 'priors1'
+saveRDS(mcmc_sseb, paste0(OUTER_FOLDER, file1))
+
+
+
+
+
+
+
+
 
 #OUTPUT FOLDER
 OUTPUT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/models/sseb"
@@ -37,17 +60,4 @@ saveRDS(mcmc_sseb_output7, file = paste0(CURRENT_OUTPUT_FOLDER, '/mcmc_sseb_', s
 #SEED
 seedX = seedX + 1
 
-#RUN MCMC
-n_mcmc = 50000
-start_time = Sys.time()
-print(paste0('start_time:', start_time))
-mcmc_sseb2 = MCMC_INFER_SSEB(data_sseb2, n_mcmc)
-end_time = Sys.time()
-time_elap = get_time(start_time, end_time)
-mcmc_sseb2$time_elap = time_elap
 
-#Plot
-PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb, n_mcmc = n_mcmc,
-                   FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
-                   sim_vals = list(m1 = 0.8, m2 = 0.1, m3 = 10))
-#PLOT_SSB_MCMC_GRIDPLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb, n_mcmc)

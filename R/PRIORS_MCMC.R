@@ -6,7 +6,7 @@
 GET_PRIORS_SSE <- function() {
   
   PRIORS_SSE = list(r0 = c(1,0), #exp
-         k =  c(1,0)) #exp
+                    k =  c(1,0)) #exp
   
   return(PRIORS_SSE)
 }
@@ -24,10 +24,10 @@ GET_PRIORS_SSI <- function(){
 GET_PRIORS_SSEB <- function() {
   
   PRIORS_SSEB = list(r0 = c(1,0),    #exp dist 
-                    alpha =  c(1,2), #beta dist
-                    gamma = c(2,1)) #gamma dist
+                     alpha =  c(1,2), #beta dist
+                     gamma = c(8,1)) #gamma dist 2,1
   
-  return(PRIORS_SSE)
+  return(PRIORS_SSEB)
 }
 
 #SSI-B
@@ -35,7 +35,7 @@ GET_PRIORS_SSIB <- function(){
   
   PRIORS_SSIB = list(r0 = c(1,0),    #exp dist 
                      a =  c(1,2), #beta dist
-                     c = c(7,1)) #gamma dist (2,1)
+                     c = c(8,1)) #gamma dist (2,1)
   
   return(PRIORS_SSIB)
 }
@@ -45,22 +45,22 @@ GET_PRIORS_USED <- function(){
   
   PRIORS_USED = 
     list(BASELINE = 
-         list(R0 = list(EXP = TRUE, GAMMA = FALSE)),
+           list(R0 = list(EXP = TRUE, GAMMA = FALSE)),
          SSE = 
-        list(R0 = list(EXP = TRUE, UNIF = FALSE),
-             k =  list(EXP = TRUE, GAMMA = FALSE)),
-        SSI = 
-          list(R0 = list(EXP = TRUE),
-               k =  list(EXP = TRUE)),
-        SSEB =
-          list(R0 = list(EXP = TRUE),
-               alpha = list(EXP = FALSE, BETA = TRUE),
-               gamma = list(EXP = FALSE, GAMMA = TRUE)),
-        SSIB = 
-          list(R0 = list(EXP = TRUE),
-               a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
-               c = list(EXP = FALSE, GAMMA = TRUE)))
-
+           list(R0 = list(EXP = TRUE, UNIF = FALSE),
+                k =  list(EXP = TRUE, GAMMA = FALSE)),
+         SSI = 
+           list(R0 = list(EXP = TRUE),
+                k =  list(EXP = TRUE)),
+         SSEB =
+           list(R0 = list(EXP = TRUE),
+                alpha = list(EXP = FALSE, BETA = TRUE),
+                gamma = list(EXP = FALSE, GAMMA = TRUE)),
+         SSIB = 
+           list(R0 = list(EXP = TRUE),
+                a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
+                c = list(EXP = FALSE, GAMMA = TRUE)))
+  
   return(PRIORS_USED)
 }
 
@@ -76,10 +76,10 @@ SET_PRIORS <- function(){
 }
 
 #DEFINE PRIORS
-SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0)),
+SET_PRIORS1 <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0)),
                                           priors_sse = list(pk_prior_nb = c(1,0),
-                                                             pk_ga_shape = 0.001, pk_ga_rte = 0.001,
-                                                             pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
+                                                            pk_ga_shape = 0.001, pk_ga_rte = 0.001,
+                                                            pr0_unif = c(1.0,4), p_prob_unif = c(0,1)),
                                           priors_ssir = list(pk_exp = c(1,0), pR0_exp = c(1,0)),
                                           priors_ssib = list(a_prior_exp = c(1, 0),
                                                              b_prior_exp = c(1,0),
@@ -99,7 +99,7 @@ SET_PRIORS <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0))
 #* 
 #********************************
 GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS_MODELS){
- 
+  
   #PRIORS
   list_priors = SET_PRIORS()$list_priors
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -114,16 +114,16 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
     n_dim = 2 #CHECK 
     
     if (PRIORS_USED$SSE_R0_EXP && PRIORS_USED$SSE_K_EXP){
-    
+      
       theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior)), ncol = n_dim)
-    
-     } else if (PRIORS_USED$SSE_R0_UNIF){
-       
-       pr0_unif = list_priors$priors_sse$pr0_unif 
-       p_prob_unif =  list_priors$priors_sse$p_prob_unif 
-       theta_samples_prior = matrix(c(rexp(samp_size_prior), runif(samp_size_prior,  min = pr0_unif[1],
-                                                                   max = pr0_unif[2])), ncol = n_dim)
-        
+      
+    } else if (PRIORS_USED$SSE_R0_UNIF){
+      
+      pr0_unif = list_priors$priors_sse$pr0_unif 
+      p_prob_unif =  list_priors$priors_sse$p_prob_unif 
+      theta_samples_prior = matrix(c(rexp(samp_size_prior), runif(samp_size_prior,  min = pr0_unif[1],
+                                                                  max = pr0_unif[2])), ncol = n_dim)
+      
     } else if (PRIORS_USED$SSE_K_GAMMA){ 
       
       #PRIORS
@@ -160,7 +160,7 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
     theta_samples_prior = cbind(param_priors, eta_priors_matrix)
     #theta_samples_prior = matrix(c(param_priors, eta_priors_matrix), ncol = n_dim): 
     print(paste0('dim theta_samples_prior', dim(theta_samples_prior)))
-     
+    
   } else if (FLAGS_MODELS$SSIB) {
     
     #PRIORS
@@ -241,7 +241,7 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data,
     } else {
       log_prior_density = dexp(theta_samples[,1], log = TRUE) +
         dexp(theta_samples[,2], log = TRUE) +
-      dexp((theta_samples[,3] - 1), rate = list_priors$priors_ssib$c_prior_exp, log = TRUE) 
+        dexp((theta_samples[,3] - 1), rate = list_priors$priors_ssib$c_prior_exp, log = TRUE) 
     }
     
   }
@@ -260,7 +260,7 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   
   'Get priors for all etas in the SSI model'
   #Question: Is it correct to use the current priors r0x & k
- 
+  
   time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
   wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
   eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
@@ -331,8 +331,8 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
     } else {
       wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
       log_density_eta[i] = sum(dgamma(theta_samples[i, 2+wh_nonzero, drop = FALSE], 
-                               shape = epidemic_data[wh_nonzero, drop = FALSE]*k, 
-                               scale = R0/k, log = TRUE))
+                                      shape = epidemic_data[wh_nonzero, drop = FALSE]*k, 
+                                      scale = R0/k, log = TRUE))
     }
     
     #log_density_eta[i] = density_samples 

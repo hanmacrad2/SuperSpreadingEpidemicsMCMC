@@ -91,6 +91,10 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, r0, cX,
   
   #Data
   bX = (r0 - aX)/cX
+  
+  if(is.nan(log(bX)) || is.na(log(bX)) || is.infinite(log(bX))){
+    browser()
+  }
   non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
   
   #Params
@@ -125,7 +129,8 @@ SET_SSIB_PRIOR <- function(param, param_dash, r0_temp,
     if (PRIORS_USED$SSIB$a$BETA) {
       shape1 = list_priors$a[1]
       shape2 = list_priors$a[2]
-      p = dbeta(param_dash/r0_temp, shape1, shape2, log = TRUE) - dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
+      p = dbeta(param_dash/r0_temp, shape1, shape2, log = TRUE) -
+        dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
     }
     
   } else if (r0_flag) {
@@ -140,7 +145,8 @@ SET_SSIB_PRIOR <- function(param, param_dash, r0_temp,
     if (PRIORS_USED$SSIB$c$GAMMA) {
       shape = list_priors$c[1]
       scale = list_priors$c[2]
-      p = dgamma(param_dash -1, shape, scale, log = TRUE) - dgamma(param-1, shape, scale, log = TRUE) 
+      p = dgamma(param_dash -1, shape, scale, log = TRUE) -
+        dgamma(param-1, shape, scale, log = TRUE) 
     }
   }
 
@@ -328,12 +334,14 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #****************************************************** s
     #a
     a_dash <- a + rnorm(1, sd = sigma1)
-    #browser()
-    if (!is.numeric(a_dash)){
-      browser()
-    }
-    if(a_dash < 0){
-      a_dash = abs(a_dash)
+    
+    #Boundry condition
+    while(a_dash < 0 || a_dash > r0){
+      
+      if (a_dash > r0){
+        a_dash = 2*r0 - a_dash
+      }
+      a_dash = abs(a_dash) 
     }
     
     logl_new = LOG_LIKE_SSIB(data, a_dash, r0, c) #RO 
@@ -389,6 +397,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #************************************************************************
     #c
     c_dash <- c + rnorm(1, sd = sigma3)
+    
     if(c_dash < 1){
       c_dash = 2 - c_dash #Prior on c: > 1
     }
@@ -476,7 +485,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #else (log_like!=LOG_LIKE_SSIB(data, a, b, c)) print(paste0('ERROR! logl diff = ', log_like - LOG_LIKE_SSIB(data, a, b, c)))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
       #print(paste0('i = ', i))
       a_vec[i_thin] <- a; r0_vec[i_thin] <- r0
       c_vec[i_thin] <- c; b_vec[i_thin] <- (r0-a)/c #a + b*c

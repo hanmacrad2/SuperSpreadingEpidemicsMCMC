@@ -35,37 +35,62 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   
   #PRIORS
   PRIORS_USED =  GET_PRIORS_USED() 
+  r0_sim = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
   
   #MODEL
   if (FLAGS_MODELS$SSEB){
     model_type = 'SSE-B'
     mod_par_names = c('alpha', 'beta', 'gamma')
+    inf_title = paste0(model_type, " Data, R0: ", r0_sim)
     
+    #PRIORS
+    if(PRIORS_USED$SSEB$alpha$BETA){
+      m1_prior = paste0('Beta(', list_priors$alpha[1], ', ', list_priors$alpha[2], ')')
+      xseq1 = seq(0, 1.5, length.out = 500)
+      d1 = dbeta(xseq1/r0_sim, list_priors$alpha[1], list_priors$alpha[2])/r0_sim
+    }
+    
+    if(PRIORS_USED$SSEB$gamma$GAMMA){
+      m3_prior = paste0('Gamma(', list_priors$gamma[1], ', ', list_priors$gamma[2], ')')
+      xseq3 = seq(0, 20, length.out = 500)
+      d3 = dgamma(xseq3 - 1, list_priors$gamma[1], list_priors$gamma[2])
+    }
+    
+    if(PRIORS_USED$SSEB$R0$EXP){
+      mr0_prior = paste0('exp(', list_priors$r0[1], ')')
+      xseq_r0 = seq(0, 3, length.out = 500)
+      dr0e = dexp(xseq_r0, list_priors$r0[1])
+    }
+    
+    #SSIB MODEL
   } else if (FLAGS_MODELS$SSIB){
+    
     model_type = 'SSI-B'
     mod_par_names = c('a', 'b', 'c')
+    inf_title = paste0(model_type, " Data, R0: ", r0_sim)
     #PRIORS
     list_priors = GET_PRIORS_SSIB() 
+    
+    #PRIORS
+    if(PRIORS_USED$SSIB$a$BETA){
+      m1_prior = paste0('Beta(', list_priors$a[1], ', ', list_priors$a[2], ')')
+      xseq1 = seq(0, 1.5, length.out = 500)
+      d1 = dbeta(xseq1/r0_sim, list_priors$a[1], list_priors$a[2])/r0_sim
+    }
+    
+    if(PRIORS_USED$SSIB$c$GAMMA){
+      m3_prior = paste0('Gamma(', list_priors$c[1], ', ', list_priors$c[2], ')')
+      xseq3 = seq(0, 20, length.out = 500)
+      d3 = dgamma(xseq3 - 1, list_priors$c[1], list_priors$c[2])
+    }
+    
+    if(PRIORS_USED$SSIB$R0$EXP){
+      mr0_prior = paste0('exp(', list_priors$r0[1], ')')
+      xseq_r0 = seq(0, 3, length.out = 500)
+      dr0e = dexp(xseq_r0, list_priors$r0[1])
+    }
   }
   
-  #PRIORS
-  if(PRIORS_USED$SSIB$a$BETA){
-    m1_prior = paste0('Beta(', list_priors$a[1], ', ', list_priors$a[2], ')')
-    xseq_a = seq(0, 1.5, length.out = 500)
-    dba = dbeta(xseq_a, list_priors$a[1], list_priors$a[2])
-  }
-  
-  if(PRIORS_USED$SSIB$c$GAMMA){
-    m3_prior = paste0('Gamma(', list_priors$c[1], ', ', list_priors$c[2], ')')
-    xseq_c = seq(0, 10, length.out = 500)
-    dgc = dgamma(xseq_c, list_priors$c[1], list_priors$c[2])
-  }
-  
-  if(PRIORS_USED$SSIB$R0$EXP){
-    mr0_prior = paste0('exp(', list_priors$r0[1], ')')
-    xseq_r0 = seq(0, 3, length.out = 500)
-    dr0e = dexp(xseq_r0, list_priors$r0[1])
-  }
   
   #MCMC SAMPLES
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
@@ -73,7 +98,6 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  m3_mcmc = m3_mcmc[!is.na(m3_mcmc)]
     r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
     log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
-    r0_sim = sim_vals$m1 + (sim_vals$m2*sim_vals$m3)
   
   #THINNING FACTOR
   if(FLAGS_LIST$THIN){
@@ -101,10 +125,8 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #ROW 1: DATA INFECTIONS
   #************************
   print(epidemic_data)
-  #i. TOTAL INFECTIONS
-  #inf_title = paste0(model_type, " Data") #mcmc_specs$seed_count, ' '
   plot.ts(epidemic_data, ylab = 'Daily Infections count',
-          main = 'SSIB Data')
+          main = inf_title)
          # cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5) # xlab = 'Time',
   
   if (FLAGS_LIST$PLOT_SSIB_DATA){
@@ -145,14 +167,14 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #***************
   #r0
   plot.ts(r0_mcmc, ylab = "R0", #ylim=c(0, r0_lim),
-          main = paste0("R0 Total. Simulated:", r0_sim),
+          main = paste0("R0. Sim:", r0_sim),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = r0_sim, col = 'orange', lwd = 2)
   
   #a
   plot.ts(m1_mcmc, ylab = mod_par_names[1], #ylim=c(0, m1_lim),
           main = paste(mod_par_names[1], "trace.",
-                       "Simulated: ", sim_vals$m1),
+                       "Sim: ", sim_vals$m1),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m1, col = 'red', lwd = 2)
 
@@ -160,7 +182,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #b
   plot.ts(m2_mcmc, ylab = mod_par_names[3], #ylim=c(0, max(m2_mcmc)),
           main = paste(mod_par_names[2], "trace.",
-                       "Simulated: ", sim_vals$m2),
+                       "Sim: ", sim_vals$m2),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m2, col = 'blue', lwd = 2)
 
@@ -168,7 +190,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #c
   plot.ts(m3_mcmc,  ylab =  paste0(mod_par_names[3], ",sigma"), #ylim=c(0, m3_lim),
           main = paste(mod_par_names[3], "trace.", #m3_lim =  max(sim_vals$m3, max(m3_mcmc, na.rm = TRUE))
-                       "Simulated: ", sim_vals$m3),
+                       "Sim: ", sim_vals$m3),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m3, col = 'green', lwd = 2)
 
@@ -205,7 +227,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
 
   #PRIOR PLOT
   if (FLAGS_LIST$PRIOR) {
-    lines(xseq_a, dba, type = 'l', lwd = 2) 
+    lines(xseq1, d1, type = 'l', lwd = 2) 
   }
 
   #***********
@@ -230,7 +252,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
 
   #PRIOR PLOT
   if (FLAGS_LIST$PRIOR) {
-    lines(xseq_c, dgc, type = 'l', lwd = 2) 
+    lines(xseq3, d3, type = 'l', lwd = 2) 
   }
 
   #***********
@@ -244,38 +266,36 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #ROW 4: CUMULATIVE MEAN PLOTS
   #************************************************
   
-  
   #r0 mean
   plot(seq_along(r0_mean), r0_mean, #ylim=c(0, r0_lim),
-       xlab = 'Time', ylab = 'R0', main = paste0("R0 MCMC Mean, Simulated:", r0_sim),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-      # ylim = c(0, r0_lim),lwd = 1)
+       xlab = 'Time', ylab = 'R0', main = paste0("R0 MCMC Mean, Sim:", r0_sim),
+       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
+      ylim=c(min(r0_mean, r0_sim), max(r0_mean, r0_sim)))
+     # ylim = c(0, r0_lim),lwd = 1)
   abline(h = r0_sim, col = 'orange', lwd = 2)
   
   #m1 mean
   plot(seq_along(m1_mean), m1_mean,
-       #ylim=c(0, m1_lim),
+       ylim=c(min(m1_mean, sim_vals$m1), max(m1_mean, sim_vals$m1)),
        xlab = 'Time', ylab =  mod_par_names[1],
        main = paste(mod_par_names[1], "MCMC mean, Start:", sim_vals$m1),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m1, col = 'red', lwd = 2)
 
-  #m2 mean
+  #m2 mean 
   plot(seq_along(m2_mean), m2_mean,
-       #ylim=c(0, m2_lim),
+       ylim=c(min(m2_mean, sim_vals$m2), max(m2_mean, sim_vals$m2)),
        xlab = 'Time', ylab = 'm2',
-       main = paste(mod_par_names[2], "MCMC mean, Simulated:", sim_vals$m2),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       lwd = 1)
+       main = paste(mod_par_names[2], "MCMC mean, Sim:", sim_vals$m2),
+       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5, lwd = 1)
   abline(h = sim_vals$m2, col = 'blue', lwd = 2)
 
   #m3 Mean
   plot(seq_along(m3_mean), m3_mean,
        xlab = 'Time', ylab = 'm3',
-       main = paste(mod_par_names[3], "MCMC mean, Simulated:", sim_vals$m3),
-       #ylim=c(0, m3_lim),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       lwd = 1)
+       main = paste(mod_par_names[3], "MCMC mean, Sim:", sim_vals$m3),
+       ylim=c(min(m3_mean, sim_vals$m3), max(m3_mean, sim_vals$m3)),
+       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5, lwd = 1)
   abline(h = sim_vals$m3, col = 'green', lwd = 2)
 
   #loglike mean
@@ -298,27 +318,29 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
 
   #b*c vs r0
   plot(m2_mcmc*m3_mcmc, r0_mcmc,
-       xlab = 'beta*gamma', ylab = 'R0',
-       main = 'beta*gamma vs R0',
+       xlab = paste0(mod_par_names[2],'*',mod_par_names[3]), ylab = 'R0',
+       main = paste0(mod_par_names[2],'*',mod_par_names[3], ' vs R0'),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
 
   #m1 vs m2
   plot(m1_mcmc, m2_mcmc,
        xlab = mod_par_names[1], ylab = mod_par_names[2],
-       main = paste(mod_par_names[1], 'vs', mod_par_names[2]),
+       main = paste(mod_par_names[1], ' vs ', mod_par_names[2]),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
 
   #m1 vs m3
   plot(m1_mcmc, m3_mcmc,
-       xlab = mod_par_names[1], ylab = mod_par_names[3], main = paste(mod_par_names[1], 'vs', mod_par_names[3]),
+       xlab = mod_par_names[1], ylab = mod_par_names[3],
+       main = paste(mod_par_names[1], ' vs ', mod_par_names[3]),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
 
   #v. m2 vs m3
   plot(m2_mcmc, m3_mcmc,
-       xlab = mod_par_names[2], ylab = mod_par_names[3], main = paste(mod_par_names[2], 'vs', mod_par_names[3]),
+       xlab = mod_par_names[2], ylab = mod_par_names[3],
+       main = paste(mod_par_names[2], ' vs ', mod_par_names[3]),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
 
@@ -336,9 +358,9 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     m3_mc = round(mean(m3_mcmc), 2),
     R0 = r0_sim,
     R0_mc = round(mean(r0_mcmc), 2), 
-    accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
-    a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
-    a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
+    #accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
+    #a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
+    #a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
     a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
     b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
     c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],

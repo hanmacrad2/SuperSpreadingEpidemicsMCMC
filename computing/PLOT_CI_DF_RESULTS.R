@@ -16,6 +16,7 @@ FOLDER = paste0(FOLDER, 'sse/')
 #df_file = 'sse_mcmc_2023-08-11_18-45-13.rds'
 df_file = 'sse_mcmc_2023-08-14_17-13-02.rds'
 df_file = 'sse_mcmc_2023-08-15_16-24-44.rds'
+df_file = 'sse_mcmc_2023-08-16_11-46-37.rds'
 df_results = readRDS(paste0(FOLDER, df_file))
 
 #PLOT
@@ -58,6 +59,7 @@ plotCI(x = seq_along(df_results[['lower_ci_k']]), y = df_results[['mean_k']],
        main = 'k Inference, SSE model. k true: 0.1. Mean, 95% CIs.') #101 simulations (unseen).')
 #       lwd = 1, pch = 16) #xlim = c(min(vec_alpha), max(vec_alpha)))
 
+abline(h = 0.6, col = 'red', lwd = 3)
 abline(h = 0.4, col = 'red', lwd = 3)
 abline(h = 0.1, col = 'red', lwd = 3)
 points(df_results[['true_k']], df_results[['true_r0']], col = 'red', lwd = lwdX, pch = 16)
