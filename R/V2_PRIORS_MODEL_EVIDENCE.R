@@ -5,7 +5,7 @@
 #SSE
 GET_PRIORS_SSE <- function() {
   
-  PRIORS_SSE = list(R0 = c(1,0), #exp
+  PRIORS_SSE = list(r0 = c(1,0), #exp
          k =  c(1,0)) #exp
   
   return(PRIORS_SSE)
@@ -14,7 +14,7 @@ GET_PRIORS_SSE <- function() {
 #SSI
 GET_PRIORS_SSI <- function(){
   
-  PRIORS_SSI = list(R0 = c(1,0), #exp
+  PRIORS_SSI = list(r0 = c(1,0), #exp
                     k =  c(1,0)) #exp
   
   return(PRIORS_SSI)
@@ -23,7 +23,7 @@ GET_PRIORS_SSI <- function(){
 #SSE-B
 GET_PRIORS_SSEB <- function() {
   
-  PRIORS_SSEB = list(R0 = c(1,0),    #exp dist 
+  PRIORS_SSEB = list(r0 = c(1,0),    #exp dist 
                     alpha =  c(1,2), #beta dist
                     gamma = c(2,1)) #gamma dist
   
@@ -33,7 +33,7 @@ GET_PRIORS_SSEB <- function() {
 #SSI-B
 GET_PRIORS_SSIB <- function(){
   
-  PRIORS_SSIB = list(R0 = c(1,0),    #exp dist 
+  PRIORS_SSIB = list(r0 = c(1,0),    #exp dist 
                      a =  c(1,2), #beta dist
                      c = c(2,1)) #gamma dist
   

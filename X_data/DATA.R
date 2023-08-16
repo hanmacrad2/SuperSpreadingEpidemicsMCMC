@@ -1,6 +1,7 @@
 #****************************************************************
 # DATA
 #****************************************************************
+par(mfrow=c(2,1))
 #library(SuperSpreadingEpidemicsMCMC)
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/"
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/DATA_SETS_50/"
@@ -42,7 +43,7 @@ file_name = 'data_sse_50_12_03.rds'
 data_sse = SIMULATE_EPI_SSNB(num_days = num_days, R0 = R0X, k = kX)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0X, ', k = ', kX))
 
-csaveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_ssnb_1_6_2.rds'
 data_ssnb2 = SIMULATE_EPI_SSNB()
@@ -54,6 +55,9 @@ file_name = 'data_sse_1_3_1.rds'
 data_sse = SIMULATE_EPI_SSNB(num_days = 30, R0 = 1.3, k = 1.0)
 plot.ts(data_sse, main = 'SSE Data, R0 = 1.3, k = 1.0')
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+d2 = SIMULATE_EPI_SSNB(R0 = 1.2, k = 0.6)
+plot.ts(d2)
                              
 #SSI
 R0X = 1.2

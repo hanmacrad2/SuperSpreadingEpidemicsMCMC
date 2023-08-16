@@ -247,7 +247,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
-  } else {
+    } else {
     thinning_factor = 1
     mcmc_vec_size = n_mcmc
   }
@@ -256,6 +256,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
   burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; 
   print(paste0('N burn-in = ', burn_in_start))
   mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size
+  mcmc_vec_size = mcmc_vec_size - 1 
   print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   
   #INITIALISE MCMC VECTORS
@@ -327,7 +328,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #****************************************************** s
     #a
     a_dash <- a + rnorm(1, sd = sigma1)
-    
+    #browser()
+    if (!is.numeric(a_dash)){
+      browser()
+    }
     if(a_dash < 0){
       a_dash = abs(a_dash)
     }
@@ -447,7 +451,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
         next
       }
       
-      logl_new = LOG_LIKE_SSIB(data_dash, a, b, c)
+      logl_new = LOG_LIKE_SSIB(data_dash, a, r0, c)
       log_accept_ratio = logl_new - log_like
       
       #METROPOLIS ACCEPTANCE STEP
