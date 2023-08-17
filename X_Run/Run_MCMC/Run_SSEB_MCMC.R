@@ -3,13 +3,18 @@ n_mcmc = 30000
 #RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_sseb9 = MCMC_INFER_SSEB(data_sseb)
+mcmc_sseb12 = MCMC_INFER_SSEB(data_sseb)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_sseb9$time_elap = time_elap
+mcmc_sseb12$time_elap = time_elap
+
+
+#SAVE
+file1 = 'mcmc_sseb_d2_p2_109_05_8'
+saveRDS(mcmc_sseb12, paste0(OUTER_FOLDER, file1))
 
 #Plot
-PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb9, n_mcmc = n_mcmc,
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb12, n_mcmc = n_mcmc,
                    FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
                    sim_vals = list(m1 = 0.9, m2 = 0.05, m3 = 8))                                      
 
@@ -21,21 +26,29 @@ saveRDS(mcmc_sseb, paste0(OUTER_FOLDER, file1))
 #RUN ORIG CODE
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_sseb10 = MCMC_INFER_SSEB(data_sseb)
+mcmc_sseb11 = MCMC_INFER_SSEB(data_sseb)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_sseb9$time_elap = time_elap
 
 #Plot
-PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb10, n_mcmc = n_mcmc,
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb11, n_mcmc = n_mcmc,
                    FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
                    sim_vals = list(m1 = 0.9, m2 = 0.05, m3 = 8))                                      
 
 #SAVE
-file1 = 'mcmc_sseb_09_05_8_orig'
-saveRDS(mcmc_sseb10, paste0(OUTER_FOLDER, file1))
+file1 = 'mcmc_sseb_09_05_8_orig_p2'
+saveRDS(mcmc_sseb11, paste0(OUTER_FOLDER, file1))
+mcmc_sseb10 = readRDS(paste0(OUTER_FOLDER, file1))
 
+mcmc_sseb11$alpha_vec = mcmc_sseb11$alpha_vec[1:length(mcmc_sseb11$alpha_vec)-1]
 
+mcmc_sseb11$beta_vec = mcmc_sseb11$beta_vec[1:length(mcmc_sseb11$beta_vec)-1]
+
+mcmc_sseb11$gamma_vec = mcmc_sseb11$gamma_vec[1:length(mcmc_sseb11$gamma_vec)-1]
+
+mcmc_sseb11$r0_vec = mcmc_sseb11$r0_vec[1:length(mcmc_sseb11$r0_vec)-1]
+
+mcmc_sseb11$log_like_vec = mcmc_sseb11$log_like_vec[1:length(mcmc_sseb11$log_like_vec)-1]
 
 
 

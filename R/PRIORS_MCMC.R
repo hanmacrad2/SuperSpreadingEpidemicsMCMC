@@ -3,41 +3,43 @@
 #***********
 
 #SSE
-GET_PRIORS_SSE <- function() {
+GET_LIST_PRIORS_SSE <- function() {
   
-  PRIORS_SSE = list(r0 = c(1,0), #exp
+  LIST_PRIORS_SSE = list(r0 = c(1,0), #exp
                     k =  c(1,0)) #exp
   
-  return(PRIORS_SSE)
+  return(LIST_PRIORS_SSE)
 }
 
 #SSI
-GET_PRIORS_SSI <- function(){
+GET_LIST_PRIORS_SSI <- function(){
   
-  PRIORS_SSI = list(r0 = c(1,0), #exp
+  LIST_PRIORS_SSI = list(r0 = c(1,0), #exp
                     k =  c(1,0)) #exp
   
-  return(PRIORS_SSI)
+  return(LIST_PRIORS_SSI)
 }
 
+#*************
 #SSE-B
-GET_PRIORS_SSEB <- function() {
+#*************
+GET_LIST_PRIORS_SSEB <- function() {
   
-  PRIORS_SSEB = list(r0 = c(1,0),    #exp dist 
+  LIST_PRIORS_SSEB = list(r0 = c(1,0),    #exp dist 
                      alpha =  c(1,2), #beta dist
                      gamma = c(8,1)) #gamma dist 2,1
   
-  return(PRIORS_SSEB)
+  return(LIST_PRIORS_SSEB)
 }
 
 #SSI-B
-GET_PRIORS_SSIB <- function(){
+GET_LIST_PRIORS_SSIB <- function(){
   
-  PRIORS_SSIB = list(r0 = c(1,0),    #exp dist 
+  LIST_PRIORS_SSIB = list(r0 = c(1,0),    #exp dist 
                      a =  c(1,2), #beta dist
                      c = c(8,1)) #gamma dist (2,1)
   
-  return(PRIORS_SSIB)
+  return(LIST_PRIORS_SSIB)
 }
 
 #GET PRIORS USED
@@ -55,11 +57,13 @@ GET_PRIORS_USED <- function(){
          SSEB =
            list(R0 = list(EXP = TRUE),
                 alpha = list(EXP = FALSE, BETA = TRUE),
-                gamma = list(EXP = FALSE, GAMMA = TRUE)),
+                gamma = list(EXP = FALSE, GAMMA = TRUE),
+                beta = FALSE),
          SSIB = 
            list(R0 = list(EXP = TRUE),
                 a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
-                c = list(EXP = FALSE, GAMMA = TRUE)))
+                c = list(EXP = FALSE, GAMMA = TRUE)), 
+         b = FALSE)
   
   return(PRIORS_USED)
 }
@@ -68,13 +72,107 @@ GET_PRIORS_USED <- function(){
 SET_PRIORS <- function(){
   
   return(list(list_priors = list(
-    priors_sse = GET_PRIORS_SSE(),
-    priors_ssi = GET_PRIORS_SSI(),
-    priors_sseb = GET_PRIORS_SSEB(),
-    priors_ssib = GET_PRIORS_SSIB()
-  ), PRIORS_USED = GET_PRIORS_USED()))
+    priors_sse = GET_LIST_PRIORS_SSE(),
+    priors_ssi = GET_LIST_PRIORS_SSI(),
+    priors_sseb = GET_LIST_PRIORS_SSEB(),
+    priors_ssib = GET_LIST_PRIORS_SSIB()
+  ), PRIORS_USED = GET_LIST_PRIORS_USED()))
 }
 
+#************************************
+#* PRIOR SAMPLES: IMPORTANCE SAMPLES FROM PRIOR DISTRIBUTIONS FOR MIXTURE DISTRIBUTION
+#*
+#*************************************
+
+#SSEB MODEL
+#IMPORTANCE SAMPLES FROM PRIOR DISTRIBUTIONS FOR MIXTURE DISTRIBUTION
+GET_SSEB_PRIOR_ISAMPS <- function(samp_size_prior, n_dim){
+  
+  #List priors
+  PRIORS_USED = GET_PRIORS_USED()
+  list_priors = GET_LIST_PRIORS_SSEB()
+  
+  #ALPHA *******HOW TO INCLUDE *R0??
+  if (PRIORS_USED$SSEB$alpha$BETA) {
+    shape1 = list_priors$alpha[1]
+    shape2 = list_priors$alpha[2]
+    samps_prior_alpha = rbeta(samp_size_prior, shape1, shape2)
+    # p = dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
+    # dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
+  }
+  
+  #R0
+  if (PRIORS_USED$SSEB$R0$EXP) {
+    samps_prior_r0 = rexp(samp_size_prior)
+    #p = dexp(param, log = TRUE) 
+  }
+  
+  #GAMMA
+  if (PRIORS_USED$SSEB$gamma$GAMMA) {
+    shape = list_priors$gamma[1]
+    scale = list_priors$gamma[2]
+    samps_prior_gamma = rgamma(samp_size_prior, shape1, shape2)
+    # p = dgamma(param_dash -1, shape, scale, log = TRUE) -
+    
+  }
+  
+  #EXP
+  if(PRIORS_USED$SSEB$alpha$EXP){
+    #theta_samples_prior = GET_PRIOR_THETA_SAMPLES_SSEB(samp_size_prior, n_dim)
+    theta_samples_prior = matrix(c(rexp(samp_size_prior),
+                                   rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
+    
+  }
+  
+  #THETA_SAMPLES_PRIOR
+  theta_samples_prior = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma))
+  
+  return(theta_samples_prior)  
+}
+
+#SSIB MODEL
+GET_SSIB_PRIOR_ISAMPS <- function(samp_size_prior, n_dim){
+  
+  #List priors
+  PRIORS_USED = GET_PRIORS_USED()
+  list_priors = GET_LIST_PRIORS_SSIB()
+  
+  #ALPHA *******HOW TO INCLUDE *R0??
+  if (PRIORS_USED$SSIB$a$BETA) {
+    shape1 = list_priors$a[1]
+    shape2 = list_priors$a[2]
+    samps_prior_a = rbeta(samp_size_prior, shape1, shape2)
+  }
+  
+  #R0
+  if (PRIORS_USED$SSIB$R0$EXP) {
+    samps_prior_r0 = rexp(samp_size_prior)
+  }
+  
+  #GAMMA
+  if (PRIORS_USED$SSIB$c$GAMMA) {
+    shape = list_priors$c[1]
+    scale = list_priors$c[2]
+    samps_prior_c = rgamma(samp_size_prior, shape1, shape2)
+    # p = dgamma(param_dash -1, shape, scale, log = TRUE) -
+    
+  }
+  
+  #EXP
+  if(PRIORS_USED$SSIB$a$EXP){
+    #theta_samples_prior = GET_PRIOR_THETA_SAMPLES_SSEB(samp_size_prior, n_dim)
+    theta_samples_prior_ssib = matrix(c(rexp(samp_size_prior),
+                                   rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
+    
+  }
+  
+  #THETA_SAMPLES_PRIOR
+  theta_samples_prior_ssib = matrix(c(samps_prior_a, samps_prior_r0, samps_prior_c))
+  
+  return(theta_samples_prior_ssib)  
+}
+
+  
 #DEFINE PRIORS
 SET_PRIORS1 <- function(list_priors = list(priors_sseb = list(exp_prior = c(1,0)),
                                           priors_sse = list(pk_prior_nb = c(1,0),
@@ -107,7 +205,9 @@ GET_PRIOR_THETA_SAMPLES <- function(epidemic_data, samp_size_prior, n_dim, FLAGS
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
     #PRIORS
-    theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
+    theta_samples_prior = GET_PRIOR_THETA_SAMPLES_SSEB(samp_size_prior, n_dim)
+      matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
+    #theta_samples_prior = matrix(c(rexp(samp_size_prior), rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
     #2. SSNB
   } else if (FLAGS_MODELS$SSNB){

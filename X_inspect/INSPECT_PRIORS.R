@@ -1,5 +1,5 @@
 #INSPECT PRIOR PLOTS
-par(mfrow = c(1,1))
+par(mfrow = c(2,1))
 #EXP
 # Grid of X-axis values
 x <- seq(0, 10, 0.1)
@@ -35,5 +35,9 @@ plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Gamma Dist
 #******************
 #BETA PRIOR (FOR A)
 pdf_values <- dbeta(x/1.2, 1, 2)/1.2
-# Plot the gamma distribution
-plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Gamma Distribution with Shape and Scale Parameters")
+plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Beta Distribution with Shape and Scale Parameters")
+
+y = seq(0,3, length = 100)
+pdf_values <- dbeta(y, 1, 2)
+plot(y, pdf_values, type = 'l')
+

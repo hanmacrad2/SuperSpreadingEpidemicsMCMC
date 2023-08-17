@@ -107,7 +107,8 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
                                                      beta_prior_exp = c(0.1,0),
                                                      gamma_prior_ga = c(10, 1), gamma_prior_exp = c(0.1,0)),
                                   FLAGS_LIST = list(ADAPTIVE = TRUE, ABG_TRANSFORM = TRUE,
-                                                    PRIOR = TRUE, BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = FALSE,
+                                                    PRIOR = TRUE, PRIOR_ALP_BETA = TRUE, PRIOR_BE_BE = TRUE,
+                                                    BETA_PRIOR_GA = FALSE, GAMMA_PRIOR_GA = TRUE,
                                                     THIN = TRUE, BURN_IN = TRUE)) {
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
@@ -126,8 +127,13 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   #**********************************************
   print(paste0('num mcmc iters = ', n_mcmc))
   lambda_vec = get_lambda(epidemic_data); 
-
+  
+  #PRIORS
+  list_priors = GET_PRIORS_SSEB() 
+  PRIORS_USED =  GET_PRIORS_USED() 
+  
   #THINNING FACTOR
+  i_thin = 1
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
@@ -154,6 +160,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   
   #INITIALISE RUNNING PARAMS
   alpha = alpha_vec[1]; beta = beta_vec[1]; gamma = gamma_vec[1]; log_like = log_like_vec[1]
+  r0 = r0_vec[1]
   
   #SIGMA
   sigma_alpha = sigma_starts$sigma_alpha; sigma_beta = sigma_starts$sigma_beta; 
@@ -187,7 +194,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
   }
   
   #INITIALISE: ACCEPTANCE COUNTS
-  list_accept_counts = list(count_accept_alpha = 0, count_accept_beta = 0, count_accept_gamma = 0,
+  list_accept_counts = list(count_accept1 = 0, count_accept2 = 0, count_accept3 = 0,
                             count_accept_bg = 0, count_accept_ag = 0)
   
   #******************************
@@ -211,15 +218,23 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     #log a
     logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, beta, gamma)
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
+    
     #Priors
-    if (FLAGS_LIST$PRIOR){
+    if(FLAGS_LIST$PRIOR_ALP_BETA){
+      
+      log_accept_ratio = log_accept_ratio + dbeta(alpha_dash/r0, list_priors$alpha[1], list_priors$alpha[2],
+                                                  log = TRUE) -
+        dbeta(alpha/r0, list_priors$alpha[1], list_priors$alpha[2],
+              log = TRUE)  
+      
+    } else {
       log_accept_ratio = log_accept_ratio - alpha_dash + alpha #*Actually this is the Acceptance RATIO. ACCEPTANCE PROB = MIN(1, EXP(ACCPET_PROB))
     }
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       alpha <- alpha_dash
-      list_accept_counts$count_accept_alpha = list_accept_counts$count_accept_alpha + 1
+      list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
       
       #Sigma (Adaptive)
@@ -241,7 +256,14 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     log_accept_ratio = logl_new - log_like
     
     #Priors
-    if (FLAGS_LIST$BETA_PRIOR_GA){
+    if(FLAGS_LIST$PRIOR_BE_BE){
+      
+      log_accept_ratio = log_accept_ratio + dbeta(beta_dash, list_priors$alpha[1], list_priors$alpha[2],
+                                                  log = TRUE) -
+        dbeta(beta, list_priors$alpha[1], list_priors$alpha[2],
+              log = TRUE)  
+      
+    } else if (FLAGS_LIST$BETA_PRIOR_GA){
       log_accept_ratio = log_accept_ratio +
         dgamma(beta_dash, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE) -
         dgamma(beta, shape = priors_list$beta_prior_ga[1], scale = priors_list$beta_prior_ga[2], log = TRUE)
@@ -253,7 +275,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       beta <- beta_dash
       log_like = logl_new
-      list_accept_counts$count_accept_beta = list_accept_counts$count_accept_beta + 1
+      list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
       
       #Sigma (Adpative)
       if (FLAGS_LIST$ADAPTIVE){
@@ -274,8 +296,9 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     
     #Priors
     if(FLAGS_LIST$GAMMA_PRIOR_GA){
-      log_accept_ratio = log_accept_ratio + dgamma(gamma_dash, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[1], log = TRUE) -
-        dgamma(gamma, shape = priors_list$gamma_prior_ga[1], scale = priors_list$gamma_prior_ga[2], log = TRUE)
+      log_accept_ratio = log_accept_ratio +
+        dgamma(gamma_dash - 1, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) -
+        dgamma(gamma - 1, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE)
     } else {
       log_accept_ratio = log_accept_ratio - priors_list$gamma_prior_exp[1]*gamma_dash + priors_list$gamma_prior_exp[1]*gamma
       if (i == 3) print('exp prior on')
@@ -285,7 +308,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
       log_like <- logl_new
-      list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
+      list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
       
       #Sigma (Adpative)
       if (FLAGS_LIST$ADAPTIVE){
@@ -395,16 +418,17 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 50000,
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
-    if (i%%thinning_factor == 0 & i >= burn_in_start) {
-      #print(paste0('i = ', i))
-      i_thin = i/thinning_factor; 
+    if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
       alpha_vec[i_thin] <- alpha; beta_vec[i_thin] <- beta
       gamma_vec[i_thin] <- gamma; r0_vec[i_thin] <- alpha + beta*gamma
       log_like_vec[i_thin] <- log_like
       sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_beta_vec[i_thin] = sigma_beta
       sigma_list$sigma_gamma_vec[i_thin] = sigma_gamma
       sigma_list$sigma_bg_vec[i_thin] = sigma_bg; sigma_list$sigma_ag_vec[i_thin] = sigma_ag
+      i_thin = i_thin + 1
     }
+    
+    r0 = alpha + beta*gamma
   }
   
   #Final stats

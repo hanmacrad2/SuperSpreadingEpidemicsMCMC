@@ -209,7 +209,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   
   #INITIALISE: ACCEPTANCE COUNTS
   list_accept_counts = list(count_accept1 = 0, count_accept2 = 0,
-                            count_accept_r0, count_accept3= 0)
+                            count_accept_r0 = 0, count_accept3= 0)
   
   #******************************
   #MCMC CHAIN
@@ -244,7 +244,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       alpha <- alpha_dash
-      list_accept_counts$count_accept_alpha = list_accept_counts$count_accept_alpha + 1
+      list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
       
       #Sigma (Adaptive)
@@ -304,7 +304,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
       log_like <- logl_new
-      list_accept_counts$count_accept_gamma = list_accept_counts$count_accept_gamma + 1
+      list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
       
       #Sigma (Adpative)
       if (FLAGS_LIST$ADAPTIVE){
@@ -326,9 +326,9 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   }
   
   #Final stats
-  accept_rate1 = 100*list_accept_counts$count_accept_alpha/(n_mcmc-1)
+  accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
   accept_rate_r0 = 100*list_accept_counts$count_accept_r0/(n_mcmc-1) #(list_accept_counts$count_accept_beta + list_reject_counts$count_accept_beta)
-  accept_rate3 = 100*list_accept_counts$count_accept_gamma/(n_mcmc-1)
+  accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
   
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,

@@ -48,12 +48,14 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     #PRIORS
     if(PRIORS_USED$SSEB$alpha$BETA){
       m1_prior = paste0('Beta(', list_priors$alpha[1], ', ', list_priors$alpha[2], ')')
+      #m1_prior = paste0('exp(', list_priors$r0[1], ')')
       xseq1 = seq(0, 1.5, length.out = 500)
       d1 = dbeta(xseq1/r0_sim, list_priors$alpha[1], list_priors$alpha[2])/r0_sim
     }
     
     if(PRIORS_USED$SSEB$gamma$GAMMA){
       m3_prior = paste0('Gamma(', list_priors$gamma[1], ', ', list_priors$gamma[2], ')')
+      #m3_prior = paste0('exp(', list_priors$r0[1], ')')
       xseq3 = seq(0, 20, length.out = 500)
       d3 = dgamma(xseq3 - 1, list_priors$gamma[1], list_priors$gamma[2])
       print(paste0('m3_prior, ', m3_prior))
@@ -99,7 +101,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
     m2_mcmc = mcmc_output[2]; m2_mcmc = unlist(m2_mcmc);  m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
     m3_mcmc = mcmc_output[3]; m3_mcmc = unlist(m3_mcmc);  m3_mcmc = m3_mcmc[!is.na(m3_mcmc)]
-    r0_mcmc = mcmc_output[4]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
+    r0_mcmc = mcmc_output$r0_vec; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
     log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
   
   #THINNING FACTOR
@@ -211,13 +213,14 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #HIST r0
   hist(r0_mcmc, freq = FALSE, breaks = 100,
        xlab = 'R0', #ylab = 'Density',
-       main = paste('R0, '," prior:", mr0_prior), #xlim=c(0, r0_lim),
+       main = paste('R0, '), #," prior:", mr0_prior), #xlim=c(0, r0_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = r0_sim, col = 'orange', lwd = 2)
-  #PRIOR
-  if (FLAGS_LIST$PRIOR) {
-    lines(xseq_r0, dr0e, type = 'l', lwd = 2) 
-  }
+  
+  #PRIOR #1
+  # if (FLAGS_LIST$PRIOR) {
+  #   lines(xseq_r0, dr0e, type = 'l', lwd = 2) 
+  # }
   
   #HIST m1
   hist(m1_mcmc, freq = FALSE, breaks = 100,
@@ -237,12 +240,17 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   #HIST m2
   hist(m2_mcmc, freq = FALSE, breaks = 100,
        xlab = mod_par_names[2], #ylab = 'Density',
-       main = paste(mod_par_names[2]),
-                  #  " prior:", m2_prior),
+       main = paste(mod_par_names[2],
+                   " prior:", m1_prior), #1
       # xlim=c(0, m2_lim),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = sim_vals$m2, col = 'blue', lwd = 2)
-
+  
+  #PRIOR PLOT #2
+  if (FLAGS_LIST$PRIOR) {
+    lines(xseq3, d3, type = 'l', lwd = 2) 
+  }
+  
   #***********
   #Hist m3
   hist(m3_mcmc, freq = FALSE, breaks = 100,
@@ -362,9 +370,9 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     m3_mc = round(mean(m3_mcmc), 2),
     R0 = r0_sim,
     R0_mc = round(mean(r0_mcmc), 2), 
-    accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2),
-    a_rte_m2 = round(mcmc_output$list_accept_rates$accept_rate_r0, 2),
-    a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2),
+    #accept_rate_m1 = round(mcmc_output$list_accept_rates$accept_rate1, 2), #1
+    #a_rte_r0 = round(mcmc_output$list_accept_rates$accept_rate_r0, 2),
+    #a_rte_m3 = round(mcmc_output$list_accept_rates$accept_rate3, 2), #3
     a_es = effectiveSize(as.mcmc(m1_mcmc))[[1]],
     b_es = effectiveSize(as.mcmc(m2_mcmc))[[1]],
     c_es = effectiveSize(as.mcmc(m3_mcmc))[[1]],
