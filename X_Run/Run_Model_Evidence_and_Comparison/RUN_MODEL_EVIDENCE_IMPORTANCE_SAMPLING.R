@@ -6,8 +6,8 @@
 run = 1 
 n_repeats = 5
 
-EPI_DATA = data_baseline
-data_type = 'SSI Data,  k= 0.1, P(k) ~ exp(1), P(k) ~ exp(0.1)' #BASE data' #SSE data'  
+EPI_DATA = data_sseb
+data_type = 'SSEB Data' #,  k= 0.1, P(k) ~ exp(1), P(k) ~ exp(0.1)' #BASE data' #SSE data'  
 
 #*************************
 #1. BASELINE
@@ -48,8 +48,8 @@ sd(model_ev_ssi)
 #4. SSE-B
 #*************************
 model_ev_sseb = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSNB = FALSE,
-                                                                        SSIB = FALSE, SSIR = FALSE))
+                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = TRUE, SSE = FALSE,
+                                                                        SSIB = FALSE, SSI = FALSE))
 #PLOT_MODEL_EV_RESULTS(model_ev_sseb)
 mean(model_ev_sseb)
 sd(model_ev_sseb)

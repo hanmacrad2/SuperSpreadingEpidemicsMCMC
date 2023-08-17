@@ -40,31 +40,8 @@ GET_PRIORS_SSIB <- function(){
   return(PRIORS_SSIB)
 }
 
-#GET PRIORS USED
-GET_PRIORS_USED <- function(){
-  
-  PRIORS_USED = 
-    list(BASELINE = 
-         list(R0 = list(EXP = TRUE, GAMMA = FALSE)),
-         SSE = 
-        list(R0 = list(EXP = TRUE, UNIF = FALSE),
-             k =  list(EXP = TRUE, GAMMA = FALSE)),
-        SSI = 
-          list(R0 = list(EXP = TRUE),
-               k =  list(EXP = TRUE)),
-        SSEB =
-          list(R0 = list(EXP = TRUE),
-               alpha = list(EXP = FALSE, BETA = TRUE),
-               gamma = list(EXP = FALSE, GAMMA = TRUE))
-        SSIB = 
-          list(R0 = list(EXP = TRUE),
-               a = list(EXP = FALSE, BETA = TRUE),
-               c = list(EXP = FALSE, GAMMA = TRUE)))
 
-  return(PRIORS_USED)
-}
-
-SET_PRIORS <- function(){
+SET_PRIORS1 <- function(){
   
   return(list(list_priors = list(
     priors_sse = GET_PRIORS_SSE(),

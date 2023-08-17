@@ -75,7 +75,7 @@ SET_PRIORS <- function(){
     priors_ssi = GET_LIST_PRIORS_SSI(),
     priors_sseb = GET_LIST_PRIORS_SSEB(),
     priors_ssib = GET_LIST_PRIORS_SSIB()
-  ), PRIORS_USED = GET_LIST_PRIORS_USED()))
+  ), PRIORS_USED = GET_PRIORS_USED()))
 }
 
 #************************************
@@ -126,7 +126,7 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   }
   
   #THETA_SAMPLES_PRIOR
-  theta_samples_prior_sse = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma))
+  theta_samples_prior_sse = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma), ncol = n_dim)
   
   return(theta_samples_prior_sse)  
 }

@@ -108,7 +108,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       
       if ( abs(log_prior_density[i] + log_q[i]) > log(2)){
         #print(paste0('vector_estimate_terms[i]', vector_estimate_terms[i]))
-        browser()
+        #browser()
       }
       
     }

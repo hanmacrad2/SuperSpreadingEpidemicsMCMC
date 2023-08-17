@@ -46,7 +46,6 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(epidemic_data, samp_size_prior, FLAGS_MODELS)
-  
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE
@@ -57,8 +56,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                               sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
-  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data,
-                                            samp_size_prior, n_dim, FLAGS_MODELS)
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data, FLAGS_MODELS)
   
   #PROPOSAL 
   log_q = log(prob_prop*exp(log_proposal_density) + prob_prior*exp(log_prior_density)) #1 x n_samples
@@ -115,8 +113,6 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
       vector_estimate_terms[i] = loglike + log_prior_density[i] - log_q[i]
       
     }
-    
-  }
   
   #ESTIMATE OVER SUM
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_estimate_terms)
@@ -172,7 +168,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     for (i in start:n_repeats){
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$beta_vec, mcmc_output$gamma_vec), ncol = 3)
+      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$gamma_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
