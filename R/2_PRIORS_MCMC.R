@@ -93,33 +93,28 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSEB()
   
-  #ALPHA *******HOW TO INCLUDE *R0??
+  #ALPHA: HOW TO INCLUDE R0?
   if (PRIORS_USED$SSEB$alpha$BETA) {
+    
     shape1 = list_priors$alpha[1]
     shape2 = list_priors$alpha[2]
     samps_prior_alpha = rbeta(samp_size_prior, shape1, shape2)
-    # p = dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
-    # dbeta(param/r0_temp, shape1, shape2, log = TRUE) 
   }
   
   #R0
   if (PRIORS_USED$SSEB$R0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior)
-    #p = dexp(param, log = TRUE) 
   }
   
   #GAMMA
   if (PRIORS_USED$SSEB$gamma$GAMMA) {
-    shape = list_priors$gamma[1]
-    scale = list_priors$gamma[2]
+    shape = list_priors$gamma[1]; scale = list_priors$gamma[2]
     samps_prior_gamma = rgamma(samp_size_prior, shape, scale)
-    # p = dgamma(param_dash -1, shape, scale, log = TRUE) -
     
   }
   
   #EXP
   if(PRIORS_USED$SSEB$alpha$EXP){
-    #theta_samples_prior = GET_PRIOR_THETA_SAMPLES_SSEB(samp_size_prior, n_dim)
     theta_samples_prior = matrix(c(rexp(samp_size_prior),
                                    rexp(samp_size_prior), (1 + rexp(samp_size_prior))), ncol = n_dim) 
     
