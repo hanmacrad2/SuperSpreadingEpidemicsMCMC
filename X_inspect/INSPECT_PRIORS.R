@@ -20,6 +20,7 @@ legend("topright", c(expression(paste(, lambda)), "0.1", "1"),
 
 #GAMMA
 shape <- 2; scale = 0.25
+shape = 3; scale = 3
 
 mean <- 1.6 #1.6
 mean = 8
@@ -27,10 +28,9 @@ scale <- shape * mean
 
 # Generate x-values for the plot
 x <- seq(0, 20, length = 100)
-
-# Calculate the PDF values using dgamma()
-pdf_values <- dgamma(x-1, shape, scale)
-plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Gamma Distribution with Shape and Scale Parameters")
+pdf_values <- dgamma(x-1, shape = shape, scale = scale)
+plot(x, pdf_values, type = "l", xlab = "x",
+     ylab = "Density", main = 'Gamma density')
 
 #******************
 #BETA PRIOR (FOR A)
@@ -41,3 +41,17 @@ y = seq(0,3, length = 100)
 pdf_values <- dbeta(y, 1, 2)
 plot(y, pdf_values, type = 'l')
 
+
+#OTHER
+
+beta = r0*(1 - alpha_prop)/gamma #New rate = alphaX*r0
+
+while(alpha_dash < 0 || alpha_dash > 1){
+  
+  if (alpha_dash > 1){ #keep alpha between 0 and 1 
+    alpha_dash = 2 - alpha_dash
+  }
+  alpha_dash = abs(alpha_dash) 
+}
+
+alpha = alpha_prop*r0 #alphaX is now the rate

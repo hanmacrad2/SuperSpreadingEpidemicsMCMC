@@ -86,15 +86,16 @@ SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
 #' log_like = LOG_LIKE_SSIB(epidemic_data, 0.8, 0.02, 20)
 #'
 #' @export
-LOG_LIKE_SSIB <- function(epidemic_data, aX, r0, cX, 
+LOG_LIKE_SSIB <- function(epidemic_data, a_prop, r0, c, 
                           shape_gamma = 6, scale_gamma = 1){
   
-  #Data
-  bX = (r0 - aX)/cX
+  #A = PROPORTION OF R0
+  b = r0*(1 - a_prop)/c #r0 = a_prop*r0 + b*c
+  a = a_prop*r0 
   
-  if(is.nan(log(bX)) || is.na(log(bX)) || is.infinite(log(bX))){
-    browser()
-  }
+  # if(is.nan(log(bX)) || is.na(log(bX)) || is.infinite(log(bX))){
+  #   browser()
+  # }
   non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
   
   #Params
@@ -108,11 +109,11 @@ LOG_LIKE_SSIB <- function(epidemic_data, aX, r0, cX,
   for (t in 1:num_days) { 
     
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
-    lambda_t = sum((non_ss[1:(t-1)] + cX*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    lambda_t = sum((non_ss[1:(t-1)] + c*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
     #LOG-LIKELIHOOD
-    loglike = loglike - lambda_t*(aX + bX) + non_ss[t]*(log(aX) + log(lambda_t)) +
-      ss[t]*(log(bX) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+    loglike = loglike - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
+      ss[t]*(log(b) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
   }
   
   return(loglike)
@@ -145,8 +146,8 @@ SET_SSIB_PRIOR <- function(param, param_dash, r0_temp,
     if (PRIORS_USED$SSIB$c$GAMMA) {
       shape = list_priors$c[1]
       scale = list_priors$c[2]
-      p = dgamma(param_dash -1, shape, scale, log = TRUE) -
-        dgamma(param-1, shape, scale, log = TRUE) 
+      p = dgamma(param_dash -1, shape = shape, scale = scale, log = TRUE) -
+        dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
   }
 
@@ -335,13 +336,13 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #a
     a_dash <- a + rnorm(1, sd = sigma1)
     
-    #Boundry condition
-    while(a_dash < 0 || a_dash > r0){
+    #Constraint: 0 < a < 1 (Proporition of non ss)
+    while(a_dash < 0 || a_dash > 1){
       
-      if (a_dash > r0){
-        a_dash = 2*r0 - a_dash
+      if (a_dash > 1){  
+        a_dash = 2 - a_dash
       }
-      a_dash = abs(a_dash) 
+      a = abs(a_dash) 
     }
     
     logl_new = LOG_LIKE_SSIB(data, a_dash, r0, c) #RO 
@@ -367,10 +368,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 30000,
     #************************************************************************ Only if (b > 0) ?
     #R0
     r0_dash <- r0 + rnorm(1, sd = sigma2)
-    
-    if(r0_dash < a){
-      r0_dash = 2*a - r0_dash
-    }
     
     #loglikelihood
     logl_new = LOG_LIKE_SSIB(data, a, r0_dash, c)

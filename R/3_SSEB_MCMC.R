@@ -55,29 +55,28 @@ SIMULATE_EPI_SSEB <- function(num_days = 30, alphaX = 0.8, betaX = 0.2, gammaX =
 }
 
 #1. LOG LIKELIHOOD
-LOG_LIKE_SSEB <- function(x, lambda_vec, alpha_prop, r0, gammaX){
+LOG_LIKE_SSEB <- function(x, lambda_vec, alpha_prop, r0, gamma){
   
   #Params
   num_days = length(x); logl = 0
   
-  betaX = r0*(1 - alpha_prop)/gammaX #New rate = alphaX*r0
+  beta = r0*(1 - alpha_prop)/gamma #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
   
-  alphaX = alpha_prop*r0 #alphaX is now the rate
-  #betaX = (r0 - alphaX)/gammaX #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
+  alpha = alpha_prop*r0 #alpha is now the rate
    
   for (t in 2:num_days) {
     
     #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
     inner_sum_xt = 0
-    term1 = exp(-alphaX*lambda_vec[t]); term2 = alphaX*lambda_vec[t]
+    term1 = exp(-alpha*lambda_vec[t]); term2 = alpha*lambda_vec[t]
     
     for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
       
       #Log likelihood
       st = x[t] - nt
       inner_sum_xt = inner_sum_xt + 
-        dpois(nt, alphaX*lambda_vec[t])*
-        PROBABILITY_ST(st, lambda_vec[t], alphaX, betaX, gammaX)
+        dpois(nt, alpha*lambda_vec[t])*
+        PROBABILITY_ST(st, lambda_vec[t], alpha, beta, gamma)
     } 
     
     logl = logl + log(inner_sum_xt) 
@@ -127,8 +126,8 @@ SET_SSEB_PRIOR <- function(param, param_dash, r0_temp,
       shape = list_priors$gamma[1]
       scale = list_priors$gamma[2]
       #browser()
-      p = dgamma(param_dash -1, shape, scale, log = TRUE) -
-        dgamma(param-1, shape, scale, log = TRUE) 
+      p = dgamma(param_dash -1, shape = shape, scale = scale, log = TRUE) -
+        dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
   }
   
@@ -154,7 +153,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   lambda_vec = get_lambda(epidemic_data)
   
   #PRIORS
-  list_priors = GET_PRIORS_SSEB() 
+  list_priors = GET_LIST_PRIORS_SSEB() 
   PRIORS_USED =  GET_PRIORS_USED() 
   
   #THINNING FACTOR

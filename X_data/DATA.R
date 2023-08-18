@@ -79,19 +79,22 @@ data_ssi = readRDS(paste0(DATA_FOLDER, file_name))
 
 
 #SSE-B
-file_name = 'data_sseb.rds'
-data_sseb = SIMULATE_EPI_SSEB(num_days = 50)
+file_name = 'data_sseb_1_3.rds'
+data_sseb = SIMULATE_EPI_SSEB()
 plot.ts(data_sseb, main = 'SSE-B Data al: 0.8, be:0.2, ga:10' )#, R0 = 1.6')
 EPI_DATA = data_sseb
 saveRDS(data_sseb, paste0(DATA_FOLDER, file_name))
 data_sseb = readRDS(paste0(DATA_FOLDER, file_name))
 
 file_name = 'data_sseb_09_05_8.rds'
-data_sseb = SIMULATE_EPI_SSEB(num_days = 50, alphaX = 0.9, betaX = 0.05, gammaX = 8)
+data_sseb2 = SIMULATE_EPI_SSEB(num_days = 50, alphaX = 0.9, betaX = 0.05, gammaX = 8)
 plot.ts(data_sseb, main = 'SSE-B Data al: 0.8, be:0.05, ga:10' )#, R0 = 1.6')
 EPI_DATA = data_sseb
 saveRDS(data_sseb, paste0(DATA_FOLDER, file_name))
-data_sseb = readRDS(paste0(DATA_FOLDER, file_name))
+data_sseb2 = readRDS(paste0(DATA_FOLDER, file_name))
+
+file_name = 'data_sseb.rds'
+data_sseb = SIMULATE_EPI_SSEB(num_days = 50)
 
 #SSIB
 file_name = 'data_ssib.rds'

@@ -26,7 +26,7 @@ GET_LIST_PRIORS_SSEB <- function() {
   
   LIST_PRIORS_SSEB = list(r0 = c(1,0),    #exp dist 
                      alpha =  c(1,2), #beta dist
-                     gamma = c(8,1)) #gamma dist 2,1
+                     gamma = c(3,3)) #gamma dist [2,1], [8,1]
   
   return(LIST_PRIORS_SSEB)
 }
@@ -109,7 +109,7 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   #GAMMA
   if (PRIORS_USED$SSEB$gamma$GAMMA) {
     shape = list_priors$gamma[1]; scale = list_priors$gamma[2]
-    samps_prior_gamma = 1 + rgamma(samp_size_prior, shape, scale)
+    samps_prior_gamma = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
   }
   
@@ -149,7 +149,7 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
   if (PRIORS_USED$SSIB$c$GAMMA) {
     shape = list_priors$c[1]
     scale = list_priors$c[2]
-    samps_prior_c = 1 + rgamma(samp_size_prior, shape, scale)
+    samps_prior_c = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
   }
   
@@ -244,7 +244,7 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
   if (PRIORS_USED$SSEB$gamma$GAMMA) {
     shape = list_priors$gamma[1]
     scale = list_priors$gamma[2]
-    log_prior_density_ga = dgamma(theta_samples[,3]-1, shape, scale, log = TRUE)
+    log_prior_density_ga = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
   }
   
@@ -269,7 +269,7 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
-  #ALPHA *******HOW TO INCLUDE R0?
+  #ALPHA
   if (PRIORS_USED$SSIB$a$BETA) {
     shape1 = list_priors$a[1]
     shape2 = list_priors$a[2]
@@ -285,7 +285,7 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   if (PRIORS_USED$SSIB$c$GAMMA) {
     shape = list_priors$c[1]
     scale = list_priors$c[2]
-    log_prior_density_c = dgamma(theta_samples[,3]-1, shape, scale, log = TRUE)
+    log_prior_density_c = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
   }
   

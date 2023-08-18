@@ -1,20 +1,19 @@
 #RUN SSEB MCMC 
-n_mcmc = 30000
+n_mcmc = 50000
 #RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_sseb12 = MCMC_INFER_SSEB(data_sseb)
+mcmc_sseb2 = MCMC_INFER_SSEB(data_sseb, n_mcmc = n_mcmc)
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_sseb12$time_elap = time_elap
-
+mcmc_sseb2$time_elap = time_elap
 
 #SAVE
-file1 = 'mcmc_sseb_d2_p2_109_05_8'
-saveRDS(mcmc_sseb12, paste0(OUTER_FOLDER, file1))
+file1 = 'mcmc_sseb_d1_50k'
+saveRDS(mcmc_sseb, paste0(OUTER_FOLDER, file1))
 
 #Plot
-PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb12, n_mcmc = n_mcmc,
+PLOT_SSB_MCMC_GRID(data_sseb, mcmc_sseb, n_mcmc = n_mcmc,
                    FLAGS_MODELS = list(SSEB = TRUE, SSIB = FALSE),
                    sim_vals = list(m1 = 0.9, m2 = 0.05, m3 = 8))                                      
 
