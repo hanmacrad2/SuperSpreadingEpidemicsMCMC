@@ -19,7 +19,7 @@ legend("topright", c(expression(paste(, lambda)), "0.1", "1"),
        lty = c(0, 1, 1), col = c("blue", "red"), box.lty = 0, lwd = 2)
 
 #GAMMA
-shape <- 2; scale = 1
+shape <- 2; scale = 0.25
 
 mean <- 1.6 #1.6
 mean = 8
