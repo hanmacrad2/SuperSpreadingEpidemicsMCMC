@@ -67,7 +67,7 @@ GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
 }
 
 #- Create a data frame 
-RUN_INFERENCE_SSE <- function(CURRENT_FOLDER, num_runs = 101, k = 0.6, 
+RUN_INFERENCE_SSE <- function(CURRENT_FOLDER, num_runs = 101, k = 0.8, 
                               n_mcmc = 30000) {
   
   df_results = data.frame()

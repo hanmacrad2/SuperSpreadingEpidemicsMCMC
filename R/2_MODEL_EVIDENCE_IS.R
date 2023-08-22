@@ -131,8 +131,8 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
                                          run = run, n_repeats = n_repeats, 
                                          start = 1, beta_ssib = 1000,
                                          num_is_samps = 10000,
-                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSE = FALSE,
-                                                             SSIB = FALSE, SSI = FALSE)){
+                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
+                                                             SSIB = FALSE, SSIR = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Load mcmc samples 2. Get estimate'
@@ -181,11 +181,11 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
     
-  } else if (FLAGS_MODELS$SSE){
+  } else if (FLAGS_MODELS$SSNB){
     
     model_type = 'ssnb'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
-    
+    print(paste0('current folder:', CURRENT_FOLDER))
     for (i in start:n_repeats){
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))

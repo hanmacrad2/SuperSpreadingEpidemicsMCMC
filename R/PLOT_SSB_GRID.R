@@ -77,7 +77,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     mod_par_names = c('a', 'b', 'c')
     inf_title = paste0(model_type, " Data, R0: ", r0_sim)
     #PRIORS
-    list_priors = GET_PRIORS_SSIB() 
+    list_priors = GET_LIST_PRIORS_SSIB() 
     
     #PRIORS
     if(PRIORS_USED$SSIB$a$BETA){
@@ -230,7 +230,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
        xlab = mod_par_names[1], #ylab = 'Density',
        main = paste(mod_par_names[1],
                     " prior:", m1_prior),
-       #xlim=c(0, m1_lim),
+       xlim=c(0, 1),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = sim_vals$m1, col = 'red', lwd = 2)
 

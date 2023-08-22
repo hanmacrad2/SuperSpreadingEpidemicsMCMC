@@ -75,6 +75,13 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_s
 BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_sse, 
                                           SSI = model_ev_ssi), data_type = data_type)
 
+#3 models
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_sse, 
+                                          SSEB = model_ev_sseb), data_type = data_type)
 
 BOX_PLOT_MODEL_EV(list_vec_results = list(SSI_exp1 = model_ev_ssi, SSI_exp01 = model_ev_ssi_exp01),
                   data_type = data_type)
+
+
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSEB = model_ev_sseb), data_type = data_type)
+

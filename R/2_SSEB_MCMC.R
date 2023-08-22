@@ -315,7 +315,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
       alpha_vec[i_thin] <- alpha; r0_vec[i_thin] <- r0
-      gamma_vec[i_thin] <- gamma; beta_vec[i_thin] <- (r0 - alpha)/gamma
+      gamma_vec[i_thin] <- gamma; beta_vec[i_thin] <- r0*(1-alpha)/gamma
       log_like_vec[i_thin] <- log_like
       sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_r0_vec[i_thin] = sigma_r0
       sigma_list$sigma_gamma_vec[i_thin] = sigma_gamma#
