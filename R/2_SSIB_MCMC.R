@@ -3,7 +3,7 @@
 #' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #'
 #' @export
-SIMULATE_EPI_SSIB = function(num_days = 30, aX = 0.6, bX = 0.1, cX = 10,
+SIMULATE_EPI_SSIB = function(num_days = 30, a = 0.6, b = 0.1, c = 10,
                              shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
@@ -23,9 +23,9 @@ SIMULATE_EPI_SSIB = function(num_days = 30, aX = 0.6, bX = 0.1, cX = 10,
   for (t in 2:num_days) {
     
     #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum((nss_infecteds[1:(t-1)] + cX*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nss_infecteds[t] = rpois(1, aX*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    ss_infecteds[t] = rpois(1, bX*lambda_t)
+    lambda_t = sum((nss_infecteds[1:(t-1)] + c*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    nss_infecteds[t] = rpois(1, a*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    ss_infecteds[t] = rpois(1, b*lambda_t)
     total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]
   }
   
@@ -94,9 +94,10 @@ LOG_LIKE_SSIB <- function(epidemic_data, a_prop, r0, c,
   b = (r0*(1 - a_prop))/c #r0 = a_prop*r0 + b*c
   a = a_prop*r0 
   
-  # if(is.nan(log(bX)) || is.na(log(bX)) || is.infinite(log(bX))){
-  #   browser()
-  # }
+  if(is.nan(log(b)) || is.na(log(b)) || is.na(log(a)) || is.infinite(log(b))){
+    browser()
+  }
+  
   non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
   
   #Params
