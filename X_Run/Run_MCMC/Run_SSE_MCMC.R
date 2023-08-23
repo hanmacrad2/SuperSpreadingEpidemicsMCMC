@@ -16,8 +16,9 @@ mcmc_sseb2 = readRDS(paste0(OUTER_FOLDER, filename))
 saveRDS(mcmc_sse, paste0(OUTER_FOLDER, file1))
 
 #Plot
+sim_vals = list(m1 = R0, m2 = k)
 PLOT_SSE_MCMC_GRID(data_sse, mcmc_sse, n_mcmc,
-                   sim_vals = list(m1 = 1.3, m2 = 0.6))
+                   sim_vals = sim_vals)
 
 
 #*********************

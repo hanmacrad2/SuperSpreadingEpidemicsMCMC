@@ -2,7 +2,7 @@
 # DATA
 #****************************************************************
 par(mfrow=c(2,1))
-#library(SuperSpreadingEpidemicsMCMC)
+
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/"
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/DATA_SETS/DATA_SETS_50/"
 DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
@@ -36,16 +36,30 @@ EPI_DATA = data_baseline30
 plot.ts(data_baseline30)
 saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 
-#SSE
-R0X = 1.2
-kX = 0.1
-file_name = 'data_sse_50_12_03.rds'
-data_sse = SIMULATE_EPI_SSNB(num_days = num_days, R0 = R0X, k = kX)
-plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0X, ', k = ', kX))
+#************************************************
+# 2. SSE
+#***********************************************
+DATA_FOLDER = paste0(DATA_FOLDER, '/SSE/')
+num_days = 50
+
+#Data: k
+R0 = 1.2
+k = 2.0
+file_name = '10_data_sse_50_12_2.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+#Data I
+R0 = 1.3
+k = 0.1
+file_name = 'data_sse_50_12_01_dies.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
-#data II
+#Data II
 R0X = 1.3
 kX = 0.6
 file_name = 'data_sse_50_1_3_06.rds'
@@ -53,6 +67,31 @@ data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = 1.3, k = 0.6)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0X, ', k = ', kX))
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
+#Data III
+R0 = 1.3
+k = 0.4
+file_name = 'data_sse_50_1_3_04.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+#Data IV
+R0 = 1.3
+k = 1.1
+file_name = 'data_sse_50_1_3_1_1.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+#Data V
+R0 = 1.0
+k = 0.6
+file_name = 'data_sse_50_1_0_6_dies.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+#Data V
 file_name = 'data_ssnb_1_6_2.rds'
 data_ssnb2 = SIMULATE_EPI_SSNB()
 plot.ts(EPI_DATA, main = 'SSE Data, R0 = 1.6')
@@ -66,8 +105,11 @@ saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
 d2 = SIMULATE_EPI_SSNB(R0 = 1.2, k = 0.6)
 plot.ts(d2)
-                             
+  
+#*********************************************                           
 #SSI
+#*********************************************
+
 R0X = 1.2
 k = 0.1
 file_name = 'data_ssi_50_1_2_0_3_v2.rds'
@@ -85,8 +127,10 @@ plot.ts(data_ssi$epidemic_data, main = 'SSI Data', ylab = 'Daily count')
 saveRDS(data_ssir, paste0(DATA_FOLDER, file_name))
 data_ssi = readRDS(paste0(DATA_FOLDER, file_name))
 
-
+#******************************
 #SSE-B
+#******************************
+
 file_name = 'data_sseb_1_3.rds'
 data_sseb = SIMULATE_EPI_SSEB()
 plot.ts(data_sseb, main = 'SSE-B Data al: 0.8, be:0.2, ga:10' )#, R0 = 2.8')
@@ -111,7 +155,18 @@ data_sseb3 = readRDS(paste0(DATA_FOLDER, file_name))
 file_name = 'data_sseb.rds'
 data_sseb = SIMULATE_EPI_SSEB(num_days = 50)
 
+#*********************************************
 #SSIB
+#*********************************************
+
+#Data I
+a = 0.8; b = 0.1; c = 10
+file_name = 'data_ssib_50_08_01_10.rds'
+data_ssib = SIMULATE_EPI_SSIB(num_days = 50, a = a, b = b, c = c)
+plot.ts(data_ssib,  main = 'SSIB DATA, R0 = 1.3', ylab = 'Daily infection count')
+saveRDS(data_ssib, paste0(DATA_FOLDER, file_name))
+
+
 file_name = 'data_ssib.rds'
 data_ssib = SIMULATE_EPI_SSIB(num_days = 50, aX = 0.8)
 plot.ts(data_ssib,  main = 'SSIB DATA, R0 = 1.8', ylab = 'Daily infection count')
