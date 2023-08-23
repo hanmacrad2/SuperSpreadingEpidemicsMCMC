@@ -1,5 +1,6 @@
 #RUN SSEB MCMC 
 n_mcmc = 30000
+
 #RUN MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))

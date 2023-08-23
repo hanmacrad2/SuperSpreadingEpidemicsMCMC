@@ -101,7 +101,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
           #SSE MODEL 
         } else if (FLAGS_MODELS$SSE) {
           
-          loglike = LOG_LIKE_SSNB(epidemic_data, lambda_vec, theta_samples[i,]) 
+          loglike = LOG_LIKE_SSE(epidemic_data, lambda_vec, theta_samples[i,]) 
           
         } 
         
@@ -131,8 +131,8 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
                                          run = run, n_repeats = n_repeats, 
                                          start = 1, beta_ssib = 1000,
                                          num_is_samps = 10000,
-                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                             SSIB = FALSE, SSIR = FALSE)){
+                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSE = FALSE,
+                                                             SSIB = FALSE, SSI = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Load mcmc samples 2. Get estimate'
@@ -181,7 +181,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     #SAVE ESTIMATES
     saveRDS(estimates_vec, file = paste0(CURRENT_FOLDER, '/model_evidence_', model_type, '_', run, '.rds'))
     
-  } else if (FLAGS_MODELS$SSNB){
+  } else if (FLAGS_MODELS$SSE){
     
     model_type = 'ssnb'; print(model_type)
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')

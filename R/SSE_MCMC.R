@@ -1,8 +1,8 @@
-#SSNB model
+#SSE model
 
 #SIMULATE
 #' @export
-SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
+SIMULATE_EPI_SSE <- function(num_days = 30, R0 = 1.6, k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
                               epi_data = c(0,0,0), SIM_DATA = TRUE,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
@@ -44,7 +44,7 @@ SIMULATE_EPI_SSNB <- function(num_days = 30, R0 = 1.6, k = 0.16,
 #* LOG LIKELIHOOD SSNB
 #* ***********************
 #' @export
-LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
+LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, ssnb_params){
   
   #Params
   R0 = ssnb_params[1];  k = ssnb_params[2]
@@ -74,7 +74,7 @@ LOG_LIKE_SSNB <- function(epidemic_data, lambda_vec, ssnb_params){
 #1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
+MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
                             mcmc_inputs = list(mod_start_points = c(1.2, 0.15),
                                                dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10, burn_in_pc = 0.2),
@@ -119,7 +119,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
   ssnb_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssnb_params = ssnb_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params) #, FLAG_NEGBIN_PARAMATERISATION)
+  log_like_vec[1] <- LOG_LIKE_SSE(epidemic_data, lambda_vec, ssnb_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
   #pk_ga_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
   #pk_ga_shape = negbin_scale*priors$negbin_k_prior_ga_mean
@@ -147,7 +147,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
     if (min(ssnb_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSNB(epidemic_data, lambda_vec, ssnb_params_dash) #, FLAG_NEGBIN_PARAMATERISATION)
+      logl_new = LOG_LIKE_SSE(epidemic_data, lambda_vec, ssnb_params_dash) #, FLAG_NEGBIN_PARAMATERISATION)
       
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
@@ -233,7 +233,7 @@ MCMC_INFER_SSNB <- function(epidemic_data, n_mcmc,
 #************************
 #* LOG LIKELIHOOD SSNB
 #* ***********************
-# LOG_LIKE_SSNB_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
+# LOG_LIKE_SSE_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
 #                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
 #   
 #   #Params

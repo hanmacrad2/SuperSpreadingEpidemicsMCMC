@@ -44,6 +44,8 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     #ALPHA PROP
     sim_vals$alpha = sim_vals$m1
     sim_vals$m1 = round(sim_vals$alpha/r0_sim, 2)
+    a_trace_title = paste(mod_par_names[1],
+          "sim: ", sim_vals$m1, ". alpha sim:", sim_vals$alpha)
     inf_title = paste0(model_type, " Data, R0: ", r0_sim)
     #PRIORS
     list_priors = GET_LIST_PRIORS_SSEB() 
@@ -74,7 +76,12 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   } else if (FLAGS_MODELS$SSIB){
     
     model_type = 'SSI-B'
-    mod_par_names = c('a', 'b', 'c')
+    mod_par_names = c('a_prop', 'b', 'c')
+    #ALPHA PROP
+    sim_vals$a = sim_vals$m1
+    sim_vals$m1 = round(sim_vals$a/r0_sim, 2)
+    a_trace_title = paste(mod_par_names[1],
+                          "sim: ", sim_vals$m1, ". a sim:", sim_vals$a)
     inf_title = paste0(model_type, " Data, R0: ", r0_sim)
     #PRIORS
     list_priors = GET_LIST_PRIORS_SSIB() 
@@ -88,7 +95,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     
     if(PRIORS_USED$SSIB$c$GAMMA){
       m3_prior = paste0('Gamma(', list_priors$c[1], ', ', list_priors$c[2], ')')
-      xseq3 = seq(0, 20, length.out = 500)
+      xseq3 = seq(0, 30, length.out = 1000)
       d3 = dgamma(xseq3 - 1, shape = list_priors$c[1], scale = list_priors$c[2])
     }
     
@@ -98,7 +105,6 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
       dr0e = dexp(xseq_r0, list_priors$r0[1])
     }
   }
-  
   
   #MCMC SAMPLES
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
@@ -181,8 +187,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   
   #a
   plot.ts(m1_mcmc, ylab = mod_par_names[1], #ylim=c(0, m1_lim),
-          main = paste(mod_par_names[1],
-                       "sim: ", sim_vals$m1, ". alpha sim:", sim_vals$alpha),
+          main = a_trace_title,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m1, col = 'red', lwd = 2)
 
@@ -229,7 +234,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
   hist(m1_mcmc, freq = FALSE, breaks = 100,
        xlab = mod_par_names[1], #ylab = 'Density',
        main = paste(mod_par_names[1],
-                    " prior:", m1_prior),
+                    " prior:", m1_prior), 
        xlim=c(0, 1),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = sim_vals$m1, col = 'red', lwd = 2)

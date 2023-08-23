@@ -1,7 +1,30 @@
-#RUN SSEB MCMC 
-#FOLDERS
-library(MASS)
-library(SuperSpreadingEpidemicsMCMC)
+#RUN SSE MCMC 
+n_mcmc = 30000
+
+#RUN MCMC
+start_time = Sys.time()
+print(paste0('start_time:', start_time))
+mcmc_sse = MCMC_INFER_SSE(data_sse, n_mcmc = n_mcmc)
+end_time = Sys.time()
+time_elap = get_time(start_time, end_time)
+mcmc_sse$time_elap = time_elap
+
+#SAVE
+file1 = 'mcmc_sseb_d2_50k_22_08_23.rds'
+filename = 'mcmc_sseb_d1_50k.rds'
+mcmc_sseb2 = readRDS(paste0(OUTER_FOLDER, filename))
+saveRDS(mcmc_sse, paste0(OUTER_FOLDER, file1))
+
+#Plot
+PLOT_SSE_MCMC_GRID(data_sse, mcmc_sse, n_mcmc,
+                   sim_vals = list(m1 = 1.3, m2 = 0.6))
+
+
+#*********************
+#* 
+#* RUN: VERSION 1
+#* 
+#* ******************
 
 #OUTPUT FOLDER
 seedX = 1; n_mcmc = 100000

@@ -23,8 +23,8 @@ sd(model_ev_base)
 #2. SSE
 #*************************
 model_ev_sse = LOAD_MCMC_GET_MODEL_EVIDENCE(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats,
-                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = TRUE,
-                                                                        SSIB = FALSE, SSIR = FALSE))
+                                                    FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSE = TRUE,
+                                                                        SSIB = FALSE, SSI = FALSE))
 
 mean(model_ev_sse)
 sd(model_ev_sse)
@@ -83,5 +83,5 @@ BOX_PLOT_MODEL_EV(list_vec_results = list(SSI_exp1 = model_ev_ssi, SSI_exp01 = m
                   data_type = data_type)
 
 
-BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSEB = model_ev_sseb), data_type = data_type)
+BOX_PLOT_MODEL_EV(list_vec_results = list(BASE = model_ev_base, SSE = model_ev_sse, SSEB = model_ev_sseb), data_type = data_type)
 
