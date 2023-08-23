@@ -32,6 +32,17 @@ pdf_values <- dgamma(x-1, shape = shape, scale = scale)
 plot(x, pdf_values, type = "l", xlab = "x",
      ylab = "Density", main = 'Gamma density')
 
+
+#******************
+#BETA PRIOR
+pdf_values <- dbeta(x/1.2, 1, 2)/1.2
+plot(x, pdf_values, type = "l", xlab = "x", ylab = "Density", main = "Beta Distribution with Shape and Scale Parameters")
+
+y = seq(0,3, length = 100)
+pdf_values <- dbeta(y, 1, 2)
+plot(y, pdf_values, type = 'l')
+
+
 #******************
 #BETA PRIOR (FOR A)
 pdf_values <- dbeta(x/1.2, 1, 2)/1.2

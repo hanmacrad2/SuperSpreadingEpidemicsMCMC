@@ -59,7 +59,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     }
     
     if(PRIORS_USED$SSEB$gamma$GAMMA){
-      m3_prior = paste0('Gamma(', list_priors$gamma[1], ', ', list_priors$gamma[2], ')')
+      m3_prior = paste0('1 + Gamma(', list_priors$gamma[1], ', ', list_priors$gamma[2], ')')
       #m3_prior = paste0('exp(', list_priors$r0[1], ')')
       xseq3 = seq(0, 20, length.out = 500)
       d3 = dgamma(xseq3 - 1, shape = list_priors$gamma[1], scale = list_priors$gamma[2])
@@ -94,7 +94,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 50000,
     }
     
     if(PRIORS_USED$SSIB$c$GAMMA){
-      m3_prior = paste0('Gamma(', list_priors$c[1], ', ', list_priors$c[2], ')')
+      m3_prior = paste0('1 + Gamma(', list_priors$c[1], ', ', list_priors$c[2], ')')
       xseq3 = seq(0, 30, length.out = 1000)
       d3 = dgamma(xseq3 - 1, shape = list_priors$c[1], scale = list_priors$c[2])
     }
