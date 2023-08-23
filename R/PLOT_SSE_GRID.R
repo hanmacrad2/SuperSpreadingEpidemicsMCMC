@@ -1,8 +1,8 @@
 #PLOT SSE MCMC GRID
 PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, 
                                 sim_vals = list(m1 =0.16, m2 = 1.8),
+                                mod_par_names = c('R0', 'k'),
                                 mcmc_specs = list(model_type = 'Simulated',
-                                                  mod_par_names = c('R0', 'k'),
                                                   burn_in_pc = 0.2, thinning_factor = 10),
                                 FLAGS_LIST = list(PRIOR = TRUE, MULTI_ALG = TRUE, 
                                                   PLOT_ADAPTIVE = FALSE)){
@@ -53,20 +53,21 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #* PLOTS *
   #******************************************************************
   
-  #*****************
-  #ROW 1: DATA INFECTIONS + JOINT DISTRIBUTIONS/MARGINALS
-  #********************
+  #***********************************
+  #ROW 1: DATA INFECTIONS + MARGINALS
+  #***********************************
   
   #i. TOTAL INFECTIONS
-  inf_tite = paste0(mcmc_specs$model_type, " Data. R0: ", sim_vals$m1, 'k:', sim_vals$m2) 
+  inf_tite = paste0(mcmc_specs$model_type, " Data. R0: ",
+                    sim_vals$m1, ', k: ', sim_vals$m2) 
   plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
           main = inf_tite,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   
   #r0 VS K
   plot(m1_mcmc, m2_mcmc,
-       xlab = mcmc_specs$mod_par_names[1], ylab = mcmc_specs$mod_par_names[2],
-       main = paste0(mcmc_specs$mod_par_names[1], ' vs ', mcmc_specs$mod_par_names[2]),
+       xlab = mod_par_names[1], ylab = mod_par_names[2],
+       main = paste0(mod_par_names[1], ' vs ', mod_par_names[2]),
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
        cex = 0.5)
   
@@ -78,33 +79,33 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #************************
   
   #R0
-  r0_title = bquote(bold(R[0] ~ "MCMC. sim: " ~ .(sim_vals$m1)))
-  plot.ts(m1_mcmc, ylab = mcmc_specs$mod_par_names[1], ylim = m1_lim, #bquote("Hello" ~ r[xy] == .(cor) ~ "and" ~ B^2)
+  r0_title = bquote(bold(R[0] ~ "MCMC, sim: " ~ .(sim_vals$m1)))
+  plot.ts(m1_mcmc, ylab = mod_par_names[1], ylim = m1_lim, #bquote("Hello" ~ r[xy] == .(cor) ~ "and" ~ B^2)
           main = r0_title,
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m1, col = 'red', lwd = 2) #True = green
   
   if (FLAGS_LIST$PLOT_ADAPTIVE){
     sig1 = mcmc_output$sigma$sigma1_vec
-    plot.ts(m1_mcmc, ylab = paste0(mcmc_specs$mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
-            main = paste(mcmc_specs$mod_par_names[1], "MCMC",
-                         "Start: ", sim_vals$m1, ', Sigma (red)'),
+    plot.ts(m1_mcmc, ylab = paste0(mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
+            main = paste(mod_par_names[1], "MCMC",
+                         "Sim: ", sim_vals$m1, ', Sigma (red)'), #'Start'
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
     lines(mcmc_output$sigma$sigma1_vec, col = 'red')
   }
   
   #***************
   #k
-  plot.ts(m2_mcmc, ylab = mcmc_specs$mod_par_names[2], ylim= m2_lim,
-          main = paste(mcmc_specs$mod_par_names[2], "MCMC.",
-                       "sim: ", sim_vals$m2),
+  plot.ts(m2_mcmc, ylab = mod_par_names[2], ylim= m2_lim,
+          main = paste(mod_par_names[2],
+                       "MCMC, sim: ", sim_vals$m2),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(h = sim_vals$m2, col = 'blue', lwd = 2) #True = green
   
   if (FLAGS_LIST$PLOT_ADAPTIVE){
-    plot.ts(m2_mcmc, ylab = paste0(mcmc_specs$mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
-            main = paste(mcmc_specs$mod_par_names[2], "MCMC",
-                         "Start: ", sim_vals$m2, ', Sigma (blue)'),
+    plot.ts(m2_mcmc, ylab = paste0(mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
+            main = paste(mod_par_names[2], "MCMC",
+                         "Sim: ", sim_vals$m2, ', Sigma (blue)'), #Start
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
     lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
   }
@@ -124,7 +125,7 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #HIST m1
   r0_titleII = bquote(bold(R[0])) # ~ "Prior: exp("~.(priors_list$r0_prior[1])~")"))
   hist(m1_mcmc, freq = FALSE, breaks = 100,
-       xlab = mcmc_specs$mod_par_names[1], #ylab = 'Density',
+       xlab = mod_par_names[1], #ylab = 'Density',
        main = paste("R0, prior:", mr0_prior),
        xlim = m1_lim,
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
@@ -139,7 +140,7 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #HIST m2
   ktitle = bquote(bold(k)) # ~ "Prior: exp("~.(priors_list$k_prior[1])~")"))
   hist(m2_mcmc, freq = FALSE, breaks = 100,
-       xlab = mcmc_specs$mod_par_names[2], #ylab = 'Density',
+       xlab = mod_par_names[2], #ylab = 'Density',
        main = paste(mod_par_names[2],
                     " prior:", m2_prior),
        xlim= m2_lim,
@@ -165,13 +166,13 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   
   #m1 mean
   titleX = bquote(R[0] ~ "MCMC mean, Start:" ~ .(sim_vals$m1))
-  PLOT_CUM_MEAN_MCMC(m1_mcmc, titleX = titleX, ylabX =  mcmc_specs$mod_par_names[1],
+  PLOT_CUM_MEAN_MCMC(m1_mcmc, titleX = titleX, ylabX =  mod_par_names[1],
                      ylim = c(m1_min, m1_max))
   abline(h = sim_vals$m1, col = 'blue', lwd = 2)
   
   #m2 mean
-  titleX = paste(mcmc_specs$mod_par_names[2], "MCMC mean, Start:", sim_vals$m2)
-  PLOT_CUM_MEAN_MCMC(m2_mcmc, title = titleX, ylabX =  mcmc_specs$mod_par_names[2],
+  titleX = paste(mod_par_names[2], "MCMC mean, Start:", sim_vals$m2)
+  PLOT_CUM_MEAN_MCMC(m2_mcmc, title = titleX, ylabX =  mod_par_names[2],
                      ylim = c(m2_min, m2_max))
   abline(h = sim_vals$m2, col = 'red', lwd = 2)
   
@@ -192,7 +193,7 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
     r0_mean_mcmc = round(mean(m1_mcmc), 2), 
     r0_lo_95_cred_int = round(get_lower_ci(m1_mcmc), 2), 
     r0_up_95_cred_int = round(get_upper_ci(m1_mcmc), 2), 
-    k_sim = sim_vals$m1[2], 
+    k_sim = sim_vals$m2, 
     k_mean_mcmc = round(mean(m2_mcmc), 2),
     k_lo_95_cred_int = round(get_lower_ci(m2_mcmc), 2),
     k_up_95_cred_int = round(get_upper_ci(m2_mcmc), 2), 
