@@ -10,7 +10,7 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   #PLOT
   plot.new(); par(mfrow=c(4,3))
   
-  #PRIORS
+  #PRIORS 
   PRIORS_USED =  GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE() 
   

@@ -24,7 +24,7 @@ GET_FOLDER_TIME_STAMP <- function(folder_type, array_index){
 }
 
 #MCMC
-GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
+GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output, level = 0.95){
   
   # Create a row for the dataframe
   r0_vec = mcmc_output$ssnb_params_matrix[,1]
@@ -33,11 +33,43 @@ GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
   result_row <- data.frame(
     true_r0 = true_r0,
     mean_r0 = mean(r0_vec),
-    lower_ci_r0 = get_lower_ci(r0_vec), # credible_intervals["lower"],
-    upper_ci_r0 = get_upper_ci(r0_vec), #credible_intervals["upper"],
+    lower_ci_r0 = get_lower_ci(r0_vec, level = level), # credible_intervals["lower"],
+    upper_ci_r0 = get_upper_ci(r0_vec, level = level), #credible_intervals["upper"],
     mean_k = mean(k_vec),
-    lower_ci_k = get_lower_ci(k_vec),
-    upper_ci_k = get_upper_ci(k_vec),
+    lower_ci_k = get_lower_ci(k_vec, level = level),
+    upper_ci_k = get_upper_ci(k_vec, level = level),
+    row.names = NULL
+  )
+  
+  #Make numeric
+  #result_row$true_r0 <- as.numeric(result_row$true_r0)
+  #result_row$lower_ci_r0 <- as.numeric(result_row$lower_ci_r0)
+  #result_row$upper_ci_r0 <- as.numeric(result_row$upper_ci_r0)
+  #result_row$lower_ci_k <- as.numeric(result_row$lower_ci_k)
+  #result_row$upper_ci_k <- as.numeric(result_row$upper_ci_k)
+  
+  # Add the row to the results dataframe
+  return(result_row)
+  
+}
+
+#K
+GET_SSE_MCMC_ROW_K <- function(true_k, mcmc_output, level = 0.95){
+  
+  # Create a row for the dataframe
+  r0_vec = mcmc_output$ssnb_params_matrix[,1]
+  k_vec = mcmc_output$ssnb_params_matrix[,2]
+  
+  result_row <- data.frame(
+    true_k = true_k,
+    mean_k = mean(k_vec),
+    lower_ci_k = get_lower_ci(k_vec, level = level),
+    upper_ci_k = get_upper_ci(k_vec, level = level),
+    mean_r0 = mean(r0_vec),
+    lower_ci_r0 = get_lower_ci(r0_vec, level = level), # credible_intervals["lower"],
+    upper_ci_r0 = get_upper_ci(r0_vec, level = level), #credible_intervals["upper"],
+    lower_ci_k_90 = get_lower_ci(k_vec, level = 0.90),
+    upper_ci_k_90 = get_upper_ci(k_vec, level = 0.90),
     row.names = NULL
   )
   
@@ -54,31 +86,37 @@ GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
 }
 
 #- Create a data frame 
-RUN_INFERENCE_SSE <- function(DATA_FOLDER, 
-                              n_mcmc = 30000) {
+RUN_INFERENCE_SSE <- function(DATA_FOLDER, level = 0.95,
+                              n_mcmc = 50000) {
   
   #R0
-  vec_r0 = c(0.1, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.1, 1.5, 2.0)
+  #vec_r0 = c(0.1, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.1, 1.5, 2.0)
+  vec_r0 = seq(from = 0.1, to = 2.0, by = 0.1)
   
   #Files
-  data_list <- list.files(path = DATA_FOLDER, pattern = "\\.rds$", full.names = TRUE)
+  file_list <- list.files(path = DATA_FOLDER, pattern = "\\.rds$", full.names = TRUE)
+  #SORT FILES
+  numeric_part <- as.numeric(sub("^(\\d+).*", "\\1", basename(file_list)))
+  file_list <- file_list[order(numeric_part)]
+  
   df_results = data.frame()
   
-  for (i in 1:length(data_list)){
+  for (i in 1:length(file_list)){
     
     r0 = vec_r0[i]
-    data_sse <- readRDS(data_list[i]) 
+    data_sse <- readRDS(file_list[i]) 
     #Check
     print(paste0('r0: ', r0))
-    print(paste0(data_list[i]))
+    print(file_list[i])
+    print(paste0(file_list[i]))
     
     #mcmc_file <- paste("mcmc_sse_", r0, "_", k, '_', i, ".rds", sep = "")
     
     #MCMC
-    mcmc_output = MCMC_INFER_SSNB(data_sse, n_mcmc)
+    mcmc_output = MCMC_INFER_SSE(data_sse, n_mcmc)
     
     #Row result
-    result_row = GET_SSE_MCMC_ROW(r0, mcmc_output)
+    result_row = GET_SSE_MCMC_ROW_K(r0, mcmc_output, level = level)
     df_results <- rbind(df_results, result_row)
     
     #SAVE

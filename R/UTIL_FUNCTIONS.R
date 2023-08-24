@@ -142,27 +142,27 @@ get_infectious_curve <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1
 
 #MCMC COLUMNS
 #' @export
-get_lower_ci <- function(mcmc_col){
+get_lower_ci <- function(mcmc_col, level = 0.95){
   
   #print(CredibleInterval(mcmc_col, level = 0.95)[[2]])
   mcmc_col[is.na(mcmc_col)] <- 0
-  lower_interval = CredibleInterval(mcmc_col, level = 0.95)[[2]]
+  lower_interval = CredibleInterval(mcmc_col, level = level)[[2]]
   
   return(lower_interval)
 }
 
 #' @export
-get_upper_ci <- function(mcmc_col){
+get_upper_ci <- function(mcmc_col, level = 0.95){
   
   mcmc_col[is.na(mcmc_col)] <- 0
   #print(CredibleInterval(mcmc_col, level = 0.95)[[3]])
-  upper_interval = CredibleInterval(mcmc_col, level = 0.95)[[3]]
+  upper_interval = CredibleInterval(mcmc_col, level = level)[[3]]
   
   return(upper_interval)
 }
 
 #' @export
-get_ci_matrix <- function(mcmc_matrix){
+get_ci_matrix <- function(mcmc_matrix, level = 0.95){
   
   #Storage
   num_cols = dim(mcmc_matrix)[2]
@@ -173,8 +173,8 @@ get_ci_matrix <- function(mcmc_matrix){
     
     #print(mcmc_matrix[, i])
     
-    vec_lower[i] = get_lower_ci(mcmc_matrix[, i])
-    vec_upper[i] = get_upper_ci(mcmc_matrix[, i])
+    vec_lower[i] = get_lower_ci(mcmc_matrix[, i], level = level)
+    vec_upper[i] = get_upper_ci(mcmc_matrix[, i], level = level)
     
   }
   
@@ -202,3 +202,13 @@ GET_FOLDER_TIME_STAMP <- function(folder_type){
 # 
 # # Print the folder name
 # print(CURRENT_FOLDER)
+
+#****************
+# FILES
+#****************
+
+#SORTED FILES
+numeric_part <- as.numeric(sub("^(\\d+).*", "\\1", basename(filenames)))
+
+# Sort filenames based on numeric part
+sorted_filenames <- filenames[order(numeric_part)]

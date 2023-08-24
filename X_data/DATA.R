@@ -44,8 +44,8 @@ num_days = 50
 
 #Data: k
 R0 = 1.2
-k = 2.0
-file_name = '10_data_sse_50_12_2.rds'
+k = 0.4
+file_name = '_data_sse_50_12_04.rds'
 data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
@@ -109,13 +109,26 @@ plot.ts(d2)
 #*********************************************                           
 #SSI
 #*********************************************
+DATA_FOLDER = paste0(DATA_FOLDER, 'SSI/')
 
-R0X = 1.2
+R0 = 1.2
+k = 0.5
+file_name = 'data_ssi_50_1_2_0_5.rds'
+data_ssi = SIMULATE_EPI_SSI(num_days = 50, R0 = R0, k = k)
+plot.ts(data_ssi$epidemic_data,
+        main = paste0('SSI Data, R0: ', R0, ', k: ', k),
+        ylab = 'Daily count')
+saveRDS(data_ssi, paste0(DATA_FOLDER, file_name))
+data_ssi = readRDS(paste0(DATA_FOLDER, file_name))
+EPI_DATA = data_ssi$epidemic_data
+
+
+R0 = 1.2
 k = 0.1
-file_name = 'data_ssi_50_1_2_0_3_v2.rds'
+file_name = 'data_ssi_50_1_2_0_1.rds'
 data_ssi = SIMULATE_EPI_SSIR(num_days = 50, R0X = R0X, k = k)
 plot.ts(data_ssi$epidemic_data,
-        main = paste0('SSI Data, R0: ', R0X, ', k: ', k),
+        main = paste0('SSI Data, R0: ', R0, ', k: ', k),
         ylab = 'Daily count')
 saveRDS(data_ssi, paste0(DATA_FOLDER, file_name))
 data_ssi = readRDS(paste0(DATA_FOLDER, file_name))

@@ -6,7 +6,7 @@
 #* SIMULATE SSIR Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
+SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
                         shape_gamma = 6, scale_gamma = 1,
                         epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -48,7 +48,7 @@ SIMULATE_EPI_SSIR <- function(num_days = 30, R0X = 1.6, k = 0.16,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
+LOG_LIKE_SSI <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
   
   #Params
   num_days = length(epi_data)
@@ -88,7 +88,7 @@ LOG_LIKE_SSIR <- function(epi_data, infect_curve_ga, ssir_params, eta, FLAG_MCMC
 #1. MCMC INFERENCE FOR ssir MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
+MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
                               mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(R0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10, burn_in_pc = 0.2),
@@ -141,7 +141,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params, eta);  log_like = log_like_vec[1]
+  log_like_vec[1] <- LOG_LIKE_SSI(epidemic_data, infect_curve_ga, ssir_params, eta);  log_like = log_like_vec[1]
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -172,7 +172,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
     if (min(ssir_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params_dash, eta)
+      logl_new = LOG_LIKE_SSI(epidemic_data, infect_curve_ga, ssir_params_dash, eta)
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
@@ -220,7 +220,7 @@ MCMC_INFER_SSIR <- function(epidemic_data, n_mcmc = 50000,
       eta_dash = abs(eta + rnorm(1, 0, sigma_eta[t])*v) #normalise the t_th element of eta #or variance = x[t]
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIR(epidemic_data, infect_curve_ga, ssir_params, eta_dash)
+      logl_new = LOG_LIKE_SSI(epidemic_data, infect_curve_ga, ssir_params, eta_dash)
       log_accept_ratio = logl_new - log_like
       
       #METROPOLIS ACCEPTANCE STEP
