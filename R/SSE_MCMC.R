@@ -21,7 +21,8 @@ SIMULATE_EPI_SSE <- function(num_days = 30, R0 = 1.6, k = 0.16,
   
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
   #Days of Infection Spreading
   for (t in 2:num_days) {
@@ -31,9 +32,13 @@ SIMULATE_EPI_SSE <- function(num_days = 30, R0 = 1.6, k = 0.16,
     
     #NEGATIVE BINOMIAL PARAMETERISATION
     if (FLAG_NEGBIN_PARAMATERISATION$param_prob){
+      
       x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(R0 + k)) #Neg Bin parameterisation #1
-    } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu) {
-      x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Neg Bin parameterisation #2
+    
+      } else if (FLAG_NEGBIN_PARAMATERISATION$param_mu) {
+      
+      x[t] = rnbinom(1, size = k*lambda_t, mu =  R0*lambda_t)
+      #x[t] = rnbinom(1, size = k, mu =  R0*lambda_t) #Neg Bin parameterisation #2
     }
   }
   
@@ -53,7 +58,7 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, ssnb_params){
   for (t in 2:num_days) {
     
     loglike_t = dnbinom(epidemic_data[t],
-                        size = k, mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+                        size = k*lambda_vec[t], mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
     
     if(!is.nan(loglike_t)) { 
       

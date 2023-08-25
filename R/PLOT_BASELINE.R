@@ -40,6 +40,12 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = r0_sim, col = 'orange', lwd = 2)
   
+  #PRIOR
+  mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
+  xseq_r0 = seq(0, 3, length.out = 500)
+  dr0e = dexp(xseq_r0, 1) #list_priors$r0[1])
+  lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+  
   #ii. MEAN PLOTS
   r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
   plot(seq_along(r0_mean), r0_mean,

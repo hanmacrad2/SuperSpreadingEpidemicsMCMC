@@ -10,11 +10,23 @@ DATA_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/X_data/"
 #PARAMS
 num_days = 50
 
+#**********
 #BASELINE
-file_name = 'data_base_50_1_2.rds'
-R0X = 1.2
-data_baseline = SIMULATE_EPI_BASELINE(R0X, num_days = 50)
-plot.ts(data_baseline, main = paste0('Baseline Data, R0 = ', R0X))
+#********
+DATA_FOLDER = paste0(DATA_FOLDER, '/BASE/')
+
+file_name = 'data_base_50_1_2_2.rds'
+R0 = 1.2
+data_baseline = SIMULATE_EPI_BASELINE(R0, num_days = 50)
+plot.ts(data_baseline, main = paste0('Baseline Data, R0 = ', R0))
+saveRDS(data_baseline, paste0(DATA_FOLDER, file_name))
+data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
+
+
+file_name = 'data_base_50_1_.rds'
+R0 = 1.5
+data_baseline = SIMULATE_EPI_BASELINE(R0, num_days = 50)
+plot.ts(data_baseline, main = paste0('Baseline Data, R0 = ', R0))
 saveRDS(data_baseline, paste0(DATA_FOLDER, file_name))
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 
@@ -41,6 +53,17 @@ saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 #***********************************************
 DATA_FOLDER = paste0(DATA_FOLDER, '/SSE/')
 num_days = 50
+
+#Data: k
+par(mfrow=c(2,3))
+R0 = 1.5
+k = 1.5
+file_name = 'data_sse_50_12_15.rds'
+data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
 
 #Data: k
 R0 = 1.2
@@ -110,6 +133,15 @@ plot.ts(d2)
 #SSI
 #*********************************************
 DATA_FOLDER = paste0(DATA_FOLDER, 'SSI/')
+
+par(mfrow = c(4,4))
+R0 = 2.0
+k = 0.3
+#file_name = 'data_ssi_50_1_2_0_9.rds'
+data_ssi = SIMULATE_EPI_SSI(num_days = 50, R0 = R0, k = k)
+plot.ts(data_ssi$epidemic_data,
+        main = paste0('SSI Data, R0: ', R0, ', k: ', k),
+        ylab = 'Daily count')
 
 R0 = 1.2
 k = 0.9

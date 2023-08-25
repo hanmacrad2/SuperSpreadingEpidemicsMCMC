@@ -278,7 +278,7 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   
   #***************
   #LOG LIKELIHOOD
-  plot.ts(log_like_mcmc, ylab = "log likelihood", ylim= m4_lim,
+  plot.ts(log_like_mcmc, ylab = "log likelihood",# ylim= m4_lim,
           main = paste("Log Likelihood. N MCMC:", n_mcmc, ". Burn-in:", mcmc_specs$burn_in_pc),
           cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   #abline(h = log_like_sim, col = 'orange', lwd = 2)
@@ -330,7 +330,7 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   
   #***********
   #HIST LOG_LIKE_VEC
-  hist(log_like_mcmc, freq = FALSE, breaks = 100, xlim= m4_lim,
+  hist(log_like_mcmc, freq = FALSE, breaks = 100, #xlim= m4_lim,
        xlab = 'Log likelihood', #ylab = 'Density',
        main = 'Log likelihood',
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)

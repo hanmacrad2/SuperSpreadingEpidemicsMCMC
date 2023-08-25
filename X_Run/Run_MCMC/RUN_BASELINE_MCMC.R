@@ -2,6 +2,7 @@
 n_mcmc = 30000
 
 #DATA
+EPI_DATA = data_baseline
 file_name = 'data_baseline.rds'
 data_baseline = readRDS(paste0(DATA_FOLDER, file_name))
 plot.ts(data_baseline)
@@ -21,7 +22,7 @@ mcmc_baseline$r0_vec = head(mcmc_baseline$r0_vec, -1)
 mcmc_baseline$log_like_vec = head(mcmc_baseline$log_like_vec, -1)
                             
 #PLOT
-PLOT_BASELINE_R0_MCMC(EPI_DATA, mcmc_baseline)
+PLOT_BASELINE_R0_MCMC(EPI_DATA, mcmc_baseline, r0_sim = R0)
 
 #2.RUN MCMC - exp prior
 start_time = Sys.time()
