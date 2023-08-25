@@ -112,8 +112,8 @@ plot.ts(d2)
 DATA_FOLDER = paste0(DATA_FOLDER, 'SSI/')
 
 R0 = 1.2
-k = 0.5
-file_name = 'data_ssi_50_1_2_0_5.rds'
+k = 0.9
+file_name = 'data_ssi_50_1_2_0_9.rds'
 data_ssi = SIMULATE_EPI_SSI(num_days = 50, R0 = R0, k = k)
 plot.ts(data_ssi$epidemic_data,
         main = paste0('SSI Data, R0: ', R0, ', k: ', k),
