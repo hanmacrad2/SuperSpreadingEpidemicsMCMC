@@ -23,6 +23,8 @@ SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
   }
   
   #INFECTIOUSNESS (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
+  
+  #Infectiousness Pressure
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
@@ -36,7 +38,7 @@ SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
     infectivity = rev(prob_infect[1:t]) 
     
     #POISSON; OFFSPRING DISTRIBUTION
-    total_rate = sum(eta_vec*infectivity) #DOT PRODUCT
+    total_rate = sum(eta_vec*infectivity) 
     
     x[t] = rpois(1, total_rate)
     
