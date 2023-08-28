@@ -18,25 +18,25 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc,
   if(PRIORS_USED$SSE$R0$EXP){
     mr0_prior = paste0('exp(', list_priors$r0[1], ')')
     xseq_r0 = seq(0, 3, length.out = 500)
-    dr0e = dexp(xseq_r0, list_priors$r0[1])
+    dr0e = dexp(xseq_r0, rate = list_priors$r0[1])
   }
   
   #PRIOR k 
   if(PRIORS_USED$SSE$k$EXP){
     m2_prior = paste0('exp(', list_priors$k[1], ')')
     x2 = seq(0, 3, length.out = 500)
-    d2 = dexp(x2, list_priors$k[1])
+    d2 = dexp(x2, rate = list_priors$k[1])
   }
   
   #MCMC + LIKELIHOOD SAMPLES EXTRACT 
   sse_sim_params = c(sim_vals$m1, sim_vals$m2)
   lambda_vec =  get_lambda(epidemic_data); 
-  log_like_sim = LOG_LIKE_SSNB(epidemic_data, lambda_vec, sse_sim_params) 
+  log_like_sim = LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_sim_params) 
   log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
   
   if (FLAGS_LIST$MULTI_ALG){
-    m1_mcmc = mcmc_output$ssnb_params_matrix[,1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m2_mcmc = mcmc_output$ssnb_params_matrix[,2]; m2_mcmc = unlist(m2_mcmc); m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
+    m1_mcmc = mcmc_output$sse_params_matrix[,1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
+    m2_mcmc = mcmc_output$sse_params_matrix[,2]; m2_mcmc = unlist(m2_mcmc); m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
     
   } else {
     m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]

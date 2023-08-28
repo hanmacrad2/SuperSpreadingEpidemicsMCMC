@@ -1,13 +1,22 @@
 #INSPECT PRIOR PLOTS
 par(mfrow = c(2,1))
+
 #EXP
 # Grid of X-axis values
-x <- seq(0, 10, 0.1)
+x <- seq(0, 100, 0.1)
+
+rate = (1/10)
+plot(x, dexp(x-1, rate = rate), type = "l", ylab = "", lwd = 2, col = "blue",
+     main = 'Exponential priors') #, xlim = c(0,10))
+plot(x-1, dexp(x, rate = rate), type = "l", ylab = "", lwd = 2, col = "blue",
+     main = 'Exponential priors') #, xlim = c(0,10))
+
 
 # lambda = 0.1
 rate_1 = 1
 rate_2 = 0.1
-rate_3 = 10
+rate_3 = 1/10
+
 plot(x, dexp(x, rate = rate_1), type = "l", ylab = "", lwd = 2, col = "blue",
      main = 'Exponential priors', xaxt = "n", xlim = c(0,10))
 # lambda = 1

@@ -55,10 +55,9 @@ DATA_FOLDER = paste0(DATA_FOLDER, '/SSE/')
 num_days = 50
 
 #Data: k
-par(mfrow=c(2,3))
 R0 = 1.5
-k = 1.5
-file_name = 'data_sse_50_12_15.rds'
+k = 5.0
+file_name = 'data_sse_50_15_50.rds'
 data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 

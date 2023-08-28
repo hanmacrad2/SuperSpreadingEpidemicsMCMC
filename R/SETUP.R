@@ -1,5 +1,4 @@
 #SETUP
-
 #LIBRARIES
 library(SuperSpreadingEpidemicsMCMC)
 library(coda)

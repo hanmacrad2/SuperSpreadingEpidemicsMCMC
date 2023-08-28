@@ -6,7 +6,7 @@
 #* SIMULATE SSIR Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
+SIMULATE_EPI_SSI <- function(num_days = 50, R0 = 1.6, k = 1.1,
                         shape_gamma = 6, scale_gamma = 1,
                         epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -23,7 +23,6 @@ SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
   }
   
   #INFECTIOUSNESS (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
-  
   #Infectiousness Pressure
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
@@ -32,13 +31,14 @@ SIMULATE_EPI_SSI <- function(num_days = 30, R0X = 1.6, k = 0.16,
   for (t in 2:num_days) {
     
     #ETA (t-1)
-    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = R0X/k) #Draw eta from previous time step
+    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = R0/k) #Draw eta from previous time step
     
     #INFECTIVITY
-    infectivity = rev(prob_infect[1:t]) 
+    infectivity = rev(prob_infect[1:t-1]) 
     
     #POISSON; OFFSPRING DISTRIBUTION
-    total_rate = sum(eta_vec*infectivity) 
+    #browser()
+    total_rate = sum(eta_vec[1:t-1]*infectivity) 
     
     x[t] = rpois(1, total_rate)
     
