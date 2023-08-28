@@ -56,13 +56,12 @@ num_days = 50
 
 #Data: k
 R0 = 1.5
-k = 5.0
+k = 1.1
 file_name = 'data_sse_50_15_50.rds'
 data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
-
 
 #Data: k
 R0 = 1.2
@@ -132,8 +131,16 @@ plot.ts(d2)
 #SSI
 #*********************************************
 DATA_FOLDER = paste0(DATA_FOLDER, 'SSI/')
-
 par(mfrow = c(4,4))
+
+R0 = 1.5
+k = 9.0
+#file_name = 'data_ssi_50_1_2_0_9.rds'
+data_ssi = SIMULATE_EPI_SSI(num_days = 50, R0 = R0, k = k)
+plot.ts(data_ssi$epidemic_data,
+        main = paste0('SSI Data, R0: ', R0, ', k: ', k),
+        ylab = 'Daily count')
+
 R0 = 2.0
 k = 0.3
 #file_name = 'data_ssi_50_1_2_0_9.rds'
@@ -333,7 +340,6 @@ plot.ts(data_wait_08_21)
 #MOCK DATA
 EPI_DATA = data_baseline
 EPI_DATA = MOCK_DATA_3_DAYS
-
 
 #*************************
 #SIMULATED DATA: LOAD

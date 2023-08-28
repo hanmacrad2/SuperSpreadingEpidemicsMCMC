@@ -99,9 +99,12 @@ PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
 }
 
 #PRIOR
-SET_SSEB_PRIOR <- function(param, param_dash, r0_temp,
-                           list_priors, PRIORS_USED,
+SET_SSEB_PRIOR <- function(param, param_dash,
                            alpha_flag = FALSE, r0_flag = FALSE, gamma_flag = FALSE){
+  
+  #PARAMS
+  list_priors = GET_LIST_PRIORS_SSEB() 
+  PRIORS_USED =  GET_PRIORS_USED() 
   
   if(alpha_flag){
     
@@ -116,7 +119,8 @@ SET_SSEB_PRIOR <- function(param, param_dash, r0_temp,
   } else if (r0_flag) {
     
     if (PRIORS_USED$SSEB$R0$EXP) {
-      p = dexp(param_dash, log = TRUE) - dexp(param, log = TRUE) 
+      p = dexp(param_dash, rate = list_priors$r0[1], log = TRUE) -
+        dexp(param, rate = list_priors$r0[1], log = TRUE) 
     }
     
   } else if (gamma_flag) {
@@ -151,12 +155,6 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
-  
-  #PRIORS
-  list_priors = GET_LIST_PRIORS_SSEB() 
-  PRIORS_USED =  GET_PRIORS_USED() 
-  
-  #THINNING FACTOR
   i_thin = 1
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
@@ -240,8 +238,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     
     #Priors
-    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(alpha, alpha_dash, r0,
-                                                         list_priors, PRIORS_USED, alpha_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(alpha, alpha_dash, alpha_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -265,9 +262,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     log_accept_ratio = logl_new - log_like
     
     #Prior
-    r0_temp = r0
-    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(r0, r0_dash, r0_temp, 
-                                                         list_priors, PRIORS_USED, r0_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(r0, r0_dash,r0_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -296,8 +291,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     log_accept_ratio = logl_new - log_like
     
     #Prior
-    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(gamma, gamma_dash, r0,
-                                                         list_priors, PRIORS_USED, gamma_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(gamma, gamma_dash, gamma_flag = TRUE)
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
