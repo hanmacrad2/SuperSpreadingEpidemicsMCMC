@@ -98,13 +98,13 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
   return(matrix_sim_temp)
 }
 
-SAMPLE_SSNB_MCMC <- function(mcmc_output, num_days, n_sample_repeats, 
+SAMPLE_SSE_MCMC <- function(mcmc_output, num_days, n_sample_repeats, 
                              epi_data = c(0,0,0),
                              SIM_DATA = TRUE, PLOT = FALSE){
   
   #SAMPLE
   num_days = length(epi_data); print(paste0('num_days', num_days))
-  n_mcmc = length(mcmc_output$ssnb_params_matrix[,1])
+  n_mcmc = length(mcmc_output$SSE_params_matrix[,1])
   #sample_index = sample(1:n_mcmc, 1)
   sample_indices = sample(1:n_mcmc, n_sample_repeats)
   matrix_sim_temp = matrix(nrow = n_sample_repeats, ncol = num_days)
@@ -114,9 +114,9 @@ SAMPLE_SSNB_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
     sample_index = sample_indices[i]
     
     #SAMPLE PARAMETERS
-    kX = mcmc_output$ssnb_params_matrix[sample_index, 1]; R0X = mcmc_output$ssnb_params_matrix[sample_index, 2]
+    kX = mcmc_output$SSE_params_matrix[sample_index, 1]; R0X = mcmc_output$SSE_params_matrix[sample_index, 2]
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_SSNB(R0 = R0X, k = kX)
+    posterior_pred_data = SIMULATE_EPI_SSE(R0 = R0X, k = kX)
     print(length(posterior_pred_data))
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
@@ -129,15 +129,15 @@ SAMPLE_SSNB_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
 
 #SAMPLE FROM SSEB MODEL
 #' @export
-V0_SAMPLE_SSNB_MCMC <- function(mcmc_output, PLOT = FALSE){
+V0_SAMPLE_SSE_MCMC <- function(mcmc_output, PLOT = FALSE){
   
   #SAMPLE
-  n_mcmc = length(mcmc_output$ssnb_params_matrix[,1])
+  n_mcmc = length(mcmc_output$SSE_params_matrix[,1])
   sample_index = sample(1:n_mcmc, 1)
   #SAMPLE PARAMETERS
-  kX = mcmc_output$ssnb_params_matrix[sample_index, 1]; R0X = mcmc_output$ssnb_params_matrix[sample_index, 2]
+  kX = mcmc_output$SSE_params_matrix[sample_index, 1]; R0X = mcmc_output$SSE_params_matrix[sample_index, 2]
   #POSTERIOR PRED DATA
-  posterior_pred_data = SIMULATE_EPI_SSNB(num_days = 50, R0 = R0X, k = kX)
+  posterior_pred_data = SIMULATE_EPI_SSE(num_days = 50, R0 = R0X, k = kX)
   
   #PLOT
   if(PLOT)lines(posterior_pred_data, col = 'blue')
@@ -150,7 +150,7 @@ V0_SAMPLE_SSNB_MCMC <- function(mcmc_output, PLOT = FALSE){
 PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6,
                                          run = 1, n_repeats = 100, n_sample_repeats = 5, burn_in = 2000,
                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = TRUE,
-                                                             SSNB = TRUE, SSIB = FALSE)){
+                                                             SSE = TRUE, SSIB = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Run mcmc 2. Get estimate'
@@ -162,7 +162,7 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
   #PLOT TRUE
   par(mfrow = c(1,1))
   count = 0
-  data_title = bquote("Posterior Predictive data. Baseline model (red), SSEB model (green), SSNB model (blue). " ~ bold(R[0]: ~ .(true_R0)))
+  data_title = bquote("Posterior Predictive data. Baseline model (red), SSEB model (green), SSE model (blue). " ~ bold(R[0]: ~ .(true_R0)))
   plot.ts(true_epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
           ylim = c(0,100),
           main = data_title, lwd = 2,
@@ -187,11 +187,11 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
     } 
   }
   
-  if(FLAGS_MODELS$SSNB){
+  if(FLAGS_MODELS$SSE){
     
     #FOLER 
-    RESULTS_FOLDER = paste0(OUTER_FOLDER, 'SSNB/run_', run) 
-    print('ssnb')
+    RESULTS_FOLDER = paste0(OUTER_FOLDER, 'SSE/run_', run) 
+    print('SSE')
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
@@ -200,7 +200,7 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', i ,'.rds'))
       
       for (j in 1:n_sample_repeats){
-        SAMPLE_SSNB_MCMC(mcmc_output, PLOT = TRUE)
+        SAMPLE_SSE_MCMC(mcmc_output, PLOT = TRUE)
         count = count+ 1
       }
     } 
@@ -236,9 +236,9 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
                                          run = 1, num_reps = 50, n_sample_repeats = 100,
                                          SIM_DATA = TRUE, 
                                          MODELS = list(BASELINE = 'BASELINE', SSEB = 'SSEB',
-                                                       SSNB = 'SSNB', SSIB = 'SSIB', SSIR = 'SSIR'),
+                                                       SSE = 'SSE', SSIB = 'SSIB', SSIR = 'SSIR'),
                                          FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
-                                                             SSNB = FALSE, SSIB = FALSE, SSIR = FALSE)){
+                                                             SSE = FALSE, SSIB = FALSE, SSIR = FALSE)){
   #STORE MATRIX DATA
   num_days = length(true_epidemic_data)                                                            
   matrix_sim_data <- matrix(0, nrow = num_reps*n_sample_repeats, ncol = num_days)
@@ -279,16 +279,16 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
     
   }
   
-  if (FLAGS_MODELS$SSNB){
+  if (FLAGS_MODELS$SSE){
     
     #FOLDER
-    model_type = MODELS$SSNB
+    model_type = MODELS$SSE
     RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run) 
     
     for (i in 1:num_reps){
       #READ MCMC SAMPLES
       mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
-      matrix_sim_temp = SAMPLE_SSNB_MCMC(mcmc_output, num_days, n_sample_repeats,
+      matrix_sim_temp = SAMPLE_SSE_MCMC(mcmc_output, num_days, n_sample_repeats,
                                          epi_data = true_epidemic_data)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
     }
