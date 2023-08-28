@@ -7,7 +7,7 @@ zigzag <- function(xs) {
 }
 
 #POSTERIOR PREDICTIVE PLOTS
-POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type){
+POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type, titleX){
   
   #SETUP
   par(mfrow = c(1, 2))
@@ -23,7 +23,9 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type){
   #PLOTS
   print('upper_bounds'); print(upper_bounds)
   print('lower_bounds'); print(lower_bounds)
-  titleX = paste0('Plot of True data (blk), 95% quantile of sim data. ',  str_to_sentence(model_type), ' model')
+  
+  #titleX = paste0(str_to_sentence(model_type), ' model. True data (blk) & 95% quantile of sim data. ')
+  
   ylim = c(0, max(true_data, upper_bounds))
   plot(1:num_days, true_data, type = 'l', ylim = ylim,
        main = titleX, xlab = 'time', ylab = 'Infection count')
@@ -104,20 +106,21 @@ SAMPLE_SSE_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
   
   #SAMPLE
   num_days = length(epi_data); print(paste0('num_days', num_days))
-  n_mcmc = length(mcmc_output$SSE_params_matrix[,1])
+  n_mcmc = length(mcmc_output$sse_params_matrix[,1])
   #sample_index = sample(1:n_mcmc, 1)
   sample_indices = sample(1:n_mcmc, n_sample_repeats)
   matrix_sim_temp = matrix(nrow = n_sample_repeats, ncol = num_days)
-  print(dim(matrix_sim_temp))
+  #print(dim(matrix_sim_temp))
+  
   #SAMPLE PARAMETERS
   for (i in 1:n_sample_repeats){
     sample_index = sample_indices[i]
     
     #SAMPLE PARAMETERS
-    kX = mcmc_output$SSE_params_matrix[sample_index, 1]; R0X = mcmc_output$SSE_params_matrix[sample_index, 2]
+    R0 = mcmc_output$sse_params_matrix[sample_index, 1]; k = mcmc_output$sse_params_matrix[sample_index, 2]
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_SSE(R0 = R0X, k = kX)
-    print(length(posterior_pred_data))
+    posterior_pred_data = SIMULATE_EPI_SSE(R0 = R0, k = k)
+    #print(length(posterior_pred_data))
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
     if(PLOT)lines(posterior_pred_data, col = 'orange')
@@ -190,14 +193,16 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
   if(FLAGS_MODELS$SSE){
     
     #FOLER 
-    RESULTS_FOLDER = paste0(OUTER_FOLDER, 'SSE/run_', run) 
+    #RESULTS_FOLDER = paste0(OUTER_FOLDER, 'SSE/run_', run) 
+    RESULTS_FOLDER = OUTER_FOLDER
     print('SSE')
     for (i in 1:n_repeats){
       
       print(paste0('i = ', i))
       #MCMC OUTPUT
       print(paste0(RESULTS_FOLDER, '/mcmc_', i ))
-      mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', i ,'.rds'))
+      #mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', i ,'.rds'))
+      mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/', file_name))
       
       for (j in 1:n_sample_repeats){
         SAMPLE_SSE_MCMC(mcmc_output, PLOT = TRUE)
@@ -228,17 +233,16 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
         lwd = 2, cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
 }
 
-#Apply
-#PLOT_POSTERIOR_PRED_EPI_DATA(data_baseI, OUTER_FOLDER)
 
 #POSTERIOR PREDICTIVE CHECKING
-RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
+RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, sim_vals, 
+                                           OUTER_FOLDER, file_name,
                                          run = 1, num_reps = 50, n_sample_repeats = 100,
                                          SIM_DATA = TRUE, 
                                          MODELS = list(BASELINE = 'BASELINE', SSEB = 'SSEB',
-                                                       SSE = 'SSE', SSIB = 'SSIB', SSIR = 'SSIR'),
+                                                       SSE = 'SSE', SSIB = 'SSIB', SSIR = 'SSI'),
                                          FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
-                                                             SSE = FALSE, SSIB = FALSE, SSIR = FALSE)){
+                                                             SSE = FALSE, SSIB = FALSE, SSI = FALSE)){
   #STORE MATRIX DATA
   num_days = length(true_epidemic_data)                                                            
   matrix_sim_data <- matrix(0, nrow = num_reps*n_sample_repeats, ncol = num_days)
@@ -283,17 +287,21 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, OUTER_FOLDER,
     
     #FOLDER
     model_type = MODELS$SSE
-    RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run) 
+    #RESULTS_FOLDER = paste0(OUTER_FOLDER, model_type, '/run_', run) 
+    RESULTS_FOLDER = OUTER_FOLDER
     
     for (i in 1:num_reps){
       #READ MCMC SAMPLES
-      mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
+      #mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/mcmc_', tolower(model_type), '_', i, '.rds'))
+      mcmc_output = readRDS(file = paste0(RESULTS_FOLDER, '/', file_name))
       matrix_sim_temp = SAMPLE_SSE_MCMC(mcmc_output, num_days, n_sample_repeats,
                                          epi_data = true_epidemic_data)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
     }
     #POSTERIOR PREDICTIVE PLOTS
-    POSTERIOR_PREDICTIVE_PLOTS(matrix_sim_data, true_epidemic_data, model_type)
+    titleX = paste0(str_to_sentence(model_type), ' model. R0 = ', sim_vals$R0,
+                    ', k = ', sim_vals$k, '. Sim data (blk) & 95% CIs of sim data')
+    POSTERIOR_PREDICTIVE_PLOTS(matrix_sim_data, true_epidemic_data, model_type, titleX)
     
   }
   

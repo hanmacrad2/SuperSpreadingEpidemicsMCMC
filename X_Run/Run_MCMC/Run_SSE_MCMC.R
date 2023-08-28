@@ -1,5 +1,5 @@
 #RUN SSE MCMC 
-n_mcmc = 30000
+n_mcmc = 50000
 
 #RUN MCMC
 start_time = Sys.time()
@@ -10,9 +10,12 @@ time_elap = get_time(start_time, end_time)
 mcmc_sse$time_elap = time_elap
 
 #SAVE
+file_name = 'mcmc_sse_k3.rds'
+saveRDS(mcmc_sse, paste0(OUTER_FOLDER, file_name))
+
 file1 = 'mcmc_sseb_d2_50k_22_08_23.rds'
 filename = 'mcmc_sseb_d1_50k.rds'
-mcmc_sseb2 = readRDS(paste0(OUTER_FOLDER, filename))
+mcmc_sse = readRDS(paste0(OUTER_FOLDER, filename))
 saveRDS(mcmc_sse, paste0(OUTER_FOLDER, file1))
 
 #Plot

@@ -2,7 +2,7 @@
 library(SuperSpreadingEpidemicsMCMC)
 ls("package:SuperSpreadingEpidemicsMCMC")
 
-PROJECT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
+#PROJECT_FOLDER = "~/PhD_Warwick/Project_Epidemic_Modelling/Results/model_comparison/model_evidence/"
 #DATA SPECFIC 
 DATA = 'NZ_DATA_WAIT_21_SUBSET_I/'
 DATA = 'NZ_DATA_WAIT_21/'
@@ -16,10 +16,13 @@ OUTER_FOLDER = paste0(PROJECT_FOLDER, DATA)
 #**********************
 #SSE
 #**********************
-matrix_sim_SSE = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_SSE, OUTER_FOLDER,
+#file_name = 'mcmc_sse_d_15_15.rds'
+sim_vals = list(R0 = R0, k = k)
+matrix_sim_sse = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_sse, sim_vals,
+                                                OUTER_FOLDER, file_name,
                                                 SIM_DATA = TRUE,
                                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
-                                                                    SSE = TRUE, SSIB = FALSE, SSIR = FALSE))
+                                                                    SSE = TRUE, SSIB = FALSE, SSI = FALSE))
 
 
 #1. BASELINE

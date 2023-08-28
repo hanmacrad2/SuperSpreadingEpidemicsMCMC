@@ -51,16 +51,30 @@ saveRDS(data_baseline30, paste0(DATA_FOLDER, file_name))
 #************************************************
 # 2. SSE
 #***********************************************
-DATA_FOLDER = paste0(DATA_FOLDER, '/SSE/')
+DATA_FOLDER = paste0(DATA_FOLDER, 'SSE/')
 num_days = 50
 
 #Data: k
 R0 = 1.5
-k = 1.1
+k = 1.5
 file_name = 'data_sse_50_15_50.rds'
+#data_sse = readRDS(paste0(DATA_FOLDER, file_name))
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+
+data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
+saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
+
+#Data: k
+R0 = 1.5
+k = 3.0
+file_name = 'data_sse_50_15_3.rds'
+#data_sse = readRDS(paste0(DATA_FOLDER, file_name))
 data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
 plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 
+data_sse = SIMULATE_EPI_SSE(num_days = num_days, R0 = R0, k = k)
+plot.ts(data_sse, main = paste0('SSE Data, R0 = ', R0, ', k = ', k))
 saveRDS(data_sse, paste0(DATA_FOLDER, file_name))
 
 #Data: k
