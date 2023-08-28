@@ -8,38 +8,42 @@ DATA = 'NZ_DATA_WAIT_21_SUBSET_I/'
 DATA = 'NZ_DATA_WAIT_21/'
 DATA = 'BASELINE/'
 DATA = 'SSEB/'
-DATA = 'SSNB/'
+DATA = 'SSE/'
 OUTER_FOLDER = paste0(PROJECT_FOLDER, DATA)
 
 #DATA
+
+#**********************
+#SSE
+#**********************
+matrix_sim_SSE = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_SSE, OUTER_FOLDER,
+                                                SIM_DATA = TRUE,
+                                                FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
+                                                                    SSE = TRUE, SSIB = FALSE, SSIR = FALSE))
+
 
 #1. BASELINE
 matrix_sim = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
                                             SIM_DATA = FALSE,
                                FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE,
-                                                   SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
+                                                   SSE = FALSE, SSIB = FALSE, SSIR = FALSE))
 
 matrix_sim_base = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_baseline, OUTER_FOLDER,
                                             FLAGS_MODELS = list(BASELINE = TRUE, SSEB = FALSE,
-                                                                SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
+                                                                SSE = FALSE, SSIB = FALSE, SSIR = FALSE))
 
 #1. SSEB
 matrix_sim_sseb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
                                                  SIM_DATA = TRUE,
                                             FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
-                                                                SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
+                                                                SSE = FALSE, SSIB = FALSE, SSIR = FALSE))
 
 matrix_sim_sseb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21, OUTER_FOLDER,
                                                  SIM_DATA = FALSE,
                                                  FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
-                                                                     SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
+                                                                     SSE = FALSE, SSIB = FALSE, SSIR = FALSE))
 
 matrix_sim_sseb1 = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_wait_08_21_sub1, OUTER_FOLDER,
                                                   SIM_DATA = FALSE,
                                                  FLAGS_MODELS = list(BASELINE = FALSE, SSEB = TRUE,
-                                                                     SSNB = FALSE, SSIB = FALSE, SSIR = FALSE))
-#3. SSNB
-matrix_sim_ssnb = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_ssnb, OUTER_FOLDER,
-                                                 SIM_DATA = TRUE,
-                                                 FLAGS_MODELS = list(BASELINE = FALSE, SSEB = FALSE,
-                                                                     SSNB = TRUE, SSIB = FALSE, SSIR = FALSE))
+                                                                     SSE = FALSE, SSIB = FALSE, SSIR = FALSE))
