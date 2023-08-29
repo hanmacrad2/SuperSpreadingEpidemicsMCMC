@@ -6,46 +6,6 @@ zigzag <- function(xs) {
   sum(abs(diff(xs)))
 }
 
-#POSTERIOR PREDICTIVE PLOTS
-POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type, titleX){
-  
-  #SETUP
-  par(mfrow = c(1, 2))
-  num_days = length(true_data)
-  
-  #TEST STATS
-  mean_est <- apply(matrix_sim_data, 2, mean) |> unlist()
-  upper_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.975) |> unlist()
-  lower_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.025) |> unlist()
-  posterior_zig_zag = apply(matrix_sim_data, 1, zigzag)
-  zigzag_true = zigzag(true_data)
-  
-  #PLOTS
-  print('upper_bounds'); print(upper_bounds)
-  print('lower_bounds'); print(lower_bounds)
-  
-  #titleX = paste0(str_to_sentence(model_type), ' model. True data (blk) & 95% quantile of sim data. ')
-  
-  ylim = c(0, max(true_data, upper_bounds))
-  plot(1:num_days, true_data, type = 'l', ylim = ylim,
-       main = titleX, xlab = 'time', ylab = 'Infection count')
-  lines(1:num_days, upper_bounds, col = 'red', lwd = 2) #, type = 'l') #, ylim = c(-5, 5))
-  lines(1:num_days, lower_bounds, col = 'red', lwd = 2) #, type = 'l')
-  
-  #HISTOGRAM OF ZIG-ZAG 
-  max_x_lim = max(max(zigzag_true), max(posterior_zig_zag)); min_x_lim =  min(min(zigzag_true), min(posterior_zig_zag))
-  hist(posterior_zig_zag, breaks = 50, xlim = c(min_x_lim, max_x_lim), #xlim = c(0, max(max(posterior_zig_zag), zigzag(true_data) * 2)),
-       main = 'Zig-zag of data: sum(abs(diff(data)))')
-  abline(v = quantile(posterior_zig_zag, probs = c(0.025, 0.975)), col = 'red', lwd = 2)
-  abline(v = zigzag(true_data), col = 'green', lwd = 2)
-  
-  #lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l') #quantile of parameter as we know its distribution
-  #lines(1:num_days, mean_est, type = 'l')
-  #lines(1:num_days, rep(qnorm(p=0.975, sd = 2), num_days), type = 'l')
- 
-}
-
-
 #SAMPLE FROM BASELINE MODEL
 #' @export 
 SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
@@ -233,6 +193,45 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
         lwd = 2, cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
 }
 
+
+#POSTERIOR PREDICTIVE PLOTS
+POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type, titleX){
+  
+  #SETUP
+  par(mfrow = c(1, 2))
+  num_days = length(true_data)
+  
+  #TEST STATS
+  mean_est <- apply(matrix_sim_data, 2, mean) |> unlist()
+  upper_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.975) |> unlist()
+  lower_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.025) |> unlist()
+  posterior_zig_zag = apply(matrix_sim_data, 1, zigzag)
+  zigzag_true = zigzag(true_data)
+  
+  #PLOTS
+  print('upper_bounds'); print(upper_bounds)
+  print('lower_bounds'); print(lower_bounds)
+  
+  #titleX = paste0(str_to_sentence(model_type), ' model. True data (blk) & 95% quantile of sim data. ')
+  
+  ylim = c(0, max(true_data, upper_bounds))
+  plot(1:num_days, true_data, type = 'l', ylim = ylim,
+       main = titleX, xlab = 'time', ylab = 'Infection count')
+  lines(1:num_days, upper_bounds, col = 'red', lwd = 2) #, type = 'l') #, ylim = c(-5, 5))
+  lines(1:num_days, lower_bounds, col = 'red', lwd = 2) #, type = 'l')
+  
+  #HISTOGRAM OF ZIG-ZAG 
+  max_x_lim = max(max(zigzag_true), max(posterior_zig_zag)); min_x_lim =  min(min(zigzag_true), min(posterior_zig_zag))
+  hist(posterior_zig_zag, breaks = 50, xlim = c(min_x_lim, max_x_lim), #xlim = c(0, max(max(posterior_zig_zag), zigzag(true_data) * 2)),
+       main = 'Zig-zag of data: sum(abs(diff(data)))')
+  abline(v = quantile(posterior_zig_zag, probs = c(0.025, 0.975)), col = 'red', lwd = 2)
+  abline(v = zigzag(true_data), col = 'green', lwd = 2)
+  
+  #lines(1:num_days, rep(qnorm(p=0.025, sd = 2), num_days), type = 'l') #quantile of parameter as we know its distribution
+  #lines(1:num_days, mean_est, type = 'l')
+  #lines(1:num_days, rep(qnorm(p=0.975, sd = 2), num_days), type = 'l')
+  
+}
 
 #POSTERIOR PREDICTIVE CHECKING
 RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, sim_vals, 
