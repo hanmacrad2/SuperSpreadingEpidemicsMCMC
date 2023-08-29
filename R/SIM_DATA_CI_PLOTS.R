@@ -28,7 +28,8 @@ PLOT_BOUNDS <-function(num_days = 50, R0 = 1.5, k = 0.2){
 }
 
 
-GET_MATRIX_SIM_SSE <- function(n_sample_repeats = 1000, model_type = 'SSE',
+GET_MATRIX_SIM_SSE <- function(n_sample_repeats = 1000, num_days = 50,
+                               model_type = 'SSE',
                                R0 = 1.5, k = 0.2) {
   #PARAMS
   matrix_sim_temp = matrix(nrow = n_sample_repeats, ncol = num_days)
@@ -48,4 +49,4 @@ GET_MATRIX_SIM_SSE <- function(n_sample_repeats = 1000, model_type = 'SSE',
 
 
 #APPLY
-PLOT_BOUNDS(k = 10)
+#PLOT_BOUNDS(k = 10)

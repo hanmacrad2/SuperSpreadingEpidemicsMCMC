@@ -208,7 +208,7 @@ GET_FOLDER_TIME_STAMP <- function(folder_type){
 #****************
 
 #SORTED FILES
-numeric_part <- as.numeric(sub("^(\\d+).*", "\\1", basename(filenames)))
+#numeric_part <- as.numeric(sub("^(\\d+).*", "\\1", basename(filenames)))
 
 # Sort filenames based on numeric part
-sorted_filenames <- filenames[order(numeric_part)]
+#sorted_filenames <- filenames[order(numeric_part)]
