@@ -17,6 +17,7 @@ OUTER_FOLDER = paste0(PROJECT_FOLDER, DATA)
 #SSE
 #**********************
 #file_name = 'mcmc_sse_d_15_15.rds'
+file_name = ''
 sim_vals = list(R0 = R0, k = k)
 matrix_sim_sse = RUN_POSTERIOR_PREDICTIVE_PLOTS(data_sse, sim_vals,
                                                 OUTER_FOLDER, file_name,
