@@ -331,7 +331,7 @@ GET_DENSITY_PRIOR_SSI <- function(theta_samples){
   
   #k
   if (PRIORS_USED$SSI$k$EXP) {
-    log_prior_density_k = dexp(theta_samples[,2], , rate = list_priors$k[1], log = TRUE)
+    log_prior_density_k = dexp(theta_samples[,2], rate = list_priors$k[1], log = TRUE)
   }
   
   return(log_prior_density)  

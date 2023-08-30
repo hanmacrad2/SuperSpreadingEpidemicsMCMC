@@ -43,13 +43,13 @@ SIMULATE_EPI_SSE <- function(num_days = 30, R0 = 1.6, k = 0.16,
 }
 
 #************************
-#* LOG LIKELIHOOD SSNB
+#* LOG LIKELIHOOD sse
 #* ***********************
 #' @export
-LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, ssnb_params){
+LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
   
   #Params
-  R0 = ssnb_params[1];  k = ssnb_params[2]
+  R0 = sse_params[1];  k = sse_params[2]
   num_days = length(epidemic_data); loglike = 0
   
   for (t in 2:num_days) {
@@ -117,11 +117,11 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   
   #MODEL PARAMETERS
   lambda_vec = get_lambda(epidemic_data)
-  ssnb_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
-  ssnb_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssnb_params = ssnb_params_matrix[1,] #2x1 #as.matrix
+  sse_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
+  sse_params_matrix[1,] <- mcmc_inputs$mod_start_points; sse_params = sse_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
-  log_like_vec[1] <- LOG_LIKE_SSE(epidemic_data, lambda_vec, ssnb_params) #, FLAG_NEGBIN_PARAMATERISATION)
+  log_like_vec[1] <- LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
   #pk_ga_scale = ((priors$negbin_k_prior_ga_sd)^2)/priors$negbin_k_prior_ga_mean
   #pk_ga_shape = negbin_scale*priors$negbin_k_prior_ga_mean
@@ -131,9 +131,9 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
   c_star = (2.38^2)/mcmc_inputs$dim; termX = mcmc_inputs$v0 + mcmc_inputs$dim
   delta = 1/(mcmc_inputs$target_acceptance_rate*(1 - mcmc_inputs$target_acceptance_rate))
-  x_bar = 0.5*(ssnb_params + ssnb_params_matrix[1,])
+  x_bar = 0.5*(sse_params + sse_params_matrix[1,])
   sigma_i = diag(mcmc_inputs$dim); scaling = 1
-  sigma_i = (1/(termX + 3))*(tcrossprod(ssnb_params_matrix[1,]) + tcrossprod(ssnb_params) -
+  sigma_i = (1/(termX + 3))*(tcrossprod(sse_params_matrix[1,]) + tcrossprod(sse_params) -
                                2*tcrossprod(x_bar) + (termX + 1)*sigma_i) #CHANGE TO USE FUNCTIONS
   
   #MCMC
@@ -143,21 +143,21 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
     
     #PROPOSAL
     #print(paste0('scaling*c_star*sigma_i', scaling*c_star*sigma_i))
-    ssnb_params_dash = c(ssnb_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
+    sse_params_dash = c(sse_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
-    if (min(ssnb_params_dash - vec_min) >= 0){ 
+    if (min(sse_params_dash - vec_min) >= 0){ 
       
       #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSE(epidemic_data, lambda_vec, ssnb_params_dash) #, FLAG_NEGBIN_PARAMATERISATION)
+      logl_new = LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_params_dash) #, FLAG_NEGBIN_PARAMATERISATION)
       
       #ACCEPTANCE RATIO
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
       #EXTRACT PARAMS FORPRIORS
-      R0 = ssnb_params[1]; R0_dash = ssnb_params_dash[1]
-      k =  ssnb_params[2]; k_dash = ssnb_params_dash[2]
+      R0 = sse_params[1]; R0_dash = sse_params_dash[1]
+      k =  sse_params[2]; k_dash = sse_params_dash[2]
     
       if(FLAG_NEGBIN_PARAMATERISATION$param_mu && PRIORS_USED$EXP_K) {
 
@@ -186,15 +186,15 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
  
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-        ssnb_params <- ssnb_params_dash
+        sse_params <- sse_params_dash
         count_accept = count_accept + 1
         log_like = logl_new
       }
       
       #SIGMA - ADAPTIVE SHAPING
       xbar_prev = x_bar
-      x_bar = (i-1)/i*xbar_prev + (1/i)*ssnb_params
-      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(ssnb_params)
+      x_bar = (i-1)/i*xbar_prev + (1/i)*sse_params
+      sigma_i = (1/(i + termX + 1))*( (i + termX)*sigma_i +tcrossprod(sse_params)
                                       + (i-1)*tcrossprod(xbar_prev)
                                       -i*tcrossprod(x_bar))
       
@@ -215,7 +215,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
       #print(paste0('i = ', i))
       idx_thinned = idx_thinned + 1
       #print(paste0('idx_thinned = ', idx_thinned))
-      ssnb_params_matrix[idx_thinned,] = ssnb_params
+      sse_params_matrix[idx_thinned,] = sse_params
       log_like_vec[idx_thinned] <- log_like
       scaling_vec[idx_thinned] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
     }
@@ -226,20 +226,20 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   accept_rate = 100*count_accept/(n_mcmc-1)
   
   #Return a, acceptance rate
-  return(list(ssnb_params_matrix = ssnb_params_matrix,
+  return(list(sse_params_matrix = sse_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate))
 } 
 
 
 #************************
-#* LOG LIKELIHOOD SSNB
+#* LOG LIKELIHOOD sse
 #* ***********************
-# LOG_LIKE_SSE_PARAMETERISATIONS <- function(x, lambda_vec, ssnb_params, 
+# LOG_LIKE_SSE_PARAMETERISATIONS <- function(x, lambda_vec, sse_params, 
 #                           FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)){
 #   
 #   #Params
-#   k = ssnb_params[1]; R0 = ssnb_params[2]
+#   k = sse_params[1]; R0 = sse_params[2]
 #   num_days = length(x); loglike = 0
 #   
 #   for (t in 2:num_days) {

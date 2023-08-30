@@ -50,8 +50,7 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
                               sigma = cov(mcmc_samples[,2+wh_non_zero,drop=FALSE]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
 
   #PRIOR DENSITIES 
-  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA,
-                                            samp_size_prior, n_dim, FLAGS_MODELS)
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA, FLAGS_MODELS) #n_dim
   
   #PROPOSAL 
   
