@@ -46,20 +46,20 @@ GET_PRIORS_USED <- function(){
   
   PRIORS_USED = 
     list(BASELINE = 
-           list(R0 = list(EXP = TRUE, GAMMA = FALSE)),
+           list(r0 = list(EXP = TRUE, GAMMA = FALSE)),
          SSE = 
-           list(R0 = list(EXP = TRUE, UNIF = FALSE),
+           list(r0 = list(EXP = TRUE, UNIF = FALSE),
                 k =  list(EXP = TRUE, GAMMA = FALSE)),
          SSI = 
-           list(R0 = list(EXP = TRUE),
+           list(r0 = list(EXP = TRUE),
                 k =  list(EXP = TRUE)),
          SSEB =
-           list(R0 = list(EXP = TRUE),
+           list(r0 = list(EXP = TRUE),
                 alpha = list(EXP = FALSE, BETA = TRUE),
                 gamma = list(EXP = FALSE, GAMMA = TRUE),
                 beta = FALSE),
          SSIB = 
-           list(R0 = list(EXP = TRUE),
+           list(r0 = list(EXP = TRUE),
                 a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
                 c = list(EXP = FALSE, GAMMA = TRUE)), 
          b = FALSE)
@@ -93,7 +93,7 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSEB()
   
-  #ALPHA: HOW TO INCLUDE R0?
+  #ALPHA: HOW TO INCLUDE r0?
   if (PRIORS_USED$SSEB$alpha$BETA) {
     
     shape1 = list_priors$alpha[1]
@@ -101,8 +101,8 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
     samps_prior_alpha = rbeta(samp_size_prior, shape1, shape2)
   }
   
-  #R0
-  if (PRIORS_USED$SSEB$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSEB$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
   }
   
@@ -140,8 +140,8 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
     samps_prior_a = rbeta(samp_size_prior, shape1, shape2)
   }
   
-  #R0
-  if (PRIORS_USED$SSIB$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSIB$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
   }
   
@@ -167,8 +167,8 @@ GET_PRIOR_SAMPS_SSE <- function(samp_size_prior, n_dim = 2){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE()
   
-  #R0
-  if (PRIORS_USED$SSE$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSE$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
   }
   
@@ -190,8 +190,8 @@ GET_PRIOR_SAMPS_SSI <- function(samp_size_prior, n_dim = 2){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSI()
   
-  #R0
-  if (PRIORS_USED$SSI$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSI$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
   }
   
@@ -227,8 +227,8 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
     log_prior_density_alpha = dbeta(theta_samples[,1], shape1, shape2, log = TRUE)
   }
   
-  #R0
-  if (PRIORS_USED$SSEB$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSEB$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,2], rate = list_priors$r0[1], log = TRUE)
   }
   
@@ -267,8 +267,8 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
     log_prior_density_a = dbeta(theta_samples[,1], shape1, shape2, log = TRUE)
   }
   
-  #R0
-  if (PRIORS_USED$SSIB$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSIB$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,2], rate = list_priors$r0[1], log = TRUE)
   }
   
@@ -300,8 +300,8 @@ GET_DENSITY_PRIOR_SSE <- function(theta_samples){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE()
   
-  #R0
-  if (PRIORS_USED$SSE$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSE$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
   }
   
@@ -324,8 +324,8 @@ GET_DENSITY_PRIOR_SSI <- function(theta_samples){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSI()
   
-  #R0
-  if (PRIORS_USED$SSI$R0$EXP) {
+  #r0
+  if (PRIORS_USED$SSI$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
   }
   
@@ -425,14 +425,14 @@ GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior)
   #For each mcmc run
   for(i in 1:samp_size_prior){
     
-    R0 = param_priors[i, 1]; k = param_priors[i, 2]
+    r0 = param_priors[i, 1]; k = param_priors[i, 2]
     eta_prior_vec = c()
     
     for (j in 1:time_length){
-      eta_prior = rgamma(1, shape = epidemic_data[j]*k, scale = R0/k)
+      eta_prior = rgamma(1, shape = epidemic_data[j]*k, scale = r0/k)
       eta_prior_vec[j] = eta_prior
     }
-    #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+    #eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = r0/k)
     
     eta_priors_matrix[i, ] = eta_prior_vec 
   }
@@ -452,7 +452,7 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   #For each mcmc run
   for(i in 1:samp_size){
     
-    R0 = theta_samples[i, 1]; k = theta_samples[i, 2]
+    r0 = theta_samples[i, 1]; k = theta_samples[i, 2]
     
     if (any(theta_samples[i, ] < 0)) { #WARNING CAUSED WITHOUT THIS 
       log_density_eta[i] = -Inf #rep(-Inf, time = num_etas)
@@ -460,7 +460,7 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
       wh_nonzero = which(epidemic_data[1:(length(epidemic_data)-1)]!= 0)
       log_density_eta[i] = sum(dgamma(theta_samples[i, 2+wh_nonzero, drop = FALSE], 
                                       shape = epidemic_data[wh_nonzero, drop = FALSE]*k, 
-                                      scale = R0/k, log = TRUE))
+                                      scale = r0/k, log = TRUE))
     }
     
     #log_density_eta[i] = density_samples 
@@ -480,9 +480,9 @@ V0_GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_pri
   
   #For each mcmc run
   for(i in 1:samp_size_prior){ 
-    R0 = param_priors[i, 1]; k = param_priors[i, 2]
-    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
-    eta_priors_matrix[i, ] = eta_prior # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = R0/k)
+    r0 = param_priors[i, 1]; k = param_priors[i, 2]
+    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = r0/k)
+    eta_priors_matrix[i, ] = eta_prior # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = r0/k)
     
   }
   

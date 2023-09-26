@@ -71,9 +71,39 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
   
 }
 
+#****************
+#* SET PRIOR SSE
+#* **************
+SET_SSE_PRIOR <- function(param, param_dash, r0_flag = FALSE,
+                          k_flag = FALSE){
+  
+  #PARAMS
+  list_priors = GET_LIST_PRIORS_SSE() 
+  PRIORS_USED =  GET_PRIORS_USED() 
+  
+  if(r0_flag){
+    
+    #BETA PRIOR ON a (Just a)
+    if (PRIORS_USED$SSE$r0$EXP) {
+      
+      p = dexp(param_dash, rate = list_priors$r0[1], log = TRUE) -
+        dexp(param, rate = list_priors$r0[1], log = TRUE) 
+    }
+    
+  } else if (k_flag) {
+    
+    if (PRIORS_USED$SSE$k$EXP) {
+      p = dexp(param_dash, rate = list_priors$k[1], log = TRUE) -
+        dexp(param, rate = list_priors$k[1], log = TRUE) 
+    }
+    
+  }
+
+  return(p)
+}
 
 #********************************************************
-#1. MCMC INFERENCE FOR SSIC MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
+#1. MCMC INFERENCE FOR SSE MODEL 
 #********************************************************
 #' @export
 MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
