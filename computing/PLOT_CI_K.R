@@ -2,18 +2,23 @@
 
 #DATAFRAME
 df_sse1 = df_results
-file2 = 'sse_mcmc_2023-08-30_19-40-19.rds'
-file2 = 'sse_mcmc_2023-08-31_17-02-05.rds'
-df_sse2 = readRDS(paste0(COMP_FOLDER, file2))
-df_results = df_sse2
+file = 'sse_mcmc_2023-08-30_19-40-19.rds'
+file = 'sse_mcmc_2023-08-31_17-02-05.rds'
+df_sse = readRDS(paste0(COMP_FOLDER, file))
+df_results = df_sse
+
+#Data
+max_infs = 50
+df_sse3 = df_results[df_results$k < 1, ]
+df_sse3 = df_sse3[df_sse3$tot_infs > 50, ]
+df_results = df_sse3
 
 #********************************
 #PLOT CIs
 #********************************
-k_range = '1:10'
+k_range = '0:1'
 R0 = 1.5
-cap = 0.009
-max_infs = 300
+cap = 0.009 #100
 col_ci = 'orange'; col_mean = 'red'
 plot(df_results$k, df_results$mean_k, type = "p",
      main = paste0('SSE Model. k Inference. R0 = ', R0, ', k = ', k_range, '. Tot infs > ', max_infs), #0.1 - 0.9. True(blk) Mean (red)' ),
@@ -112,3 +117,10 @@ legend("topright", legend = c("True k", "Mean k mcmc"),
 #Load and save
 file_name = 'df_sse_k_01_09_range_2023-08-30.rds'
 df2 = readRDS(paste0(OUTER_FOLDER, file_name))
+
+
+#****************************
+#* 1/k
+#* *****************************
+df_sse2 = df_sse
+df_sse2['upper_ci_k'] = 1/df_sse2['upper_ci_k']

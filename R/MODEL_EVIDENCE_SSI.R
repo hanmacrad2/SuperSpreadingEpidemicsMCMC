@@ -1,14 +1,14 @@
 #********************************************************************
-#MODEL EVIDENCE SSIR MODEL (DATA AUG)
+#MODEL EVIDENCE SSI MODEL (DATA AUG)
 #********************************************************************
 
 
 #********************************************************************
 #*
-#1. GET PROPOSAL DENSITY SSIR MODEL
+#1. GET PROPOSAL DENSITY SSI MODEL
 #*
 #********************************************************************
-GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
+GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
                                     n_samples, dof = 3, prob = 0.5) { #prob = 0.95 0.9999
   
   #browser()
@@ -24,7 +24,7 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   #ETA REMOVE 0
   #wh_nonzero <- apply(mcmc_output$eta_matrix != 0, 2, any)
   #eta_nonzero_cols = mcmc_output$eta_matrix[, wh_nonzero]
-  mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)  
+  mcmc_samples = cbind(mcmc_output$SSI_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)  
   n_dim = dim(mcmc_samples)[2] 
   
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
@@ -64,9 +64,9 @@ GET_LOG_PROPOSAL_Q_SSIR <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
 #************************
 # 2. MODEL EVIDENCE (P HAT)
 #************************
-GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA, 
+GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA, 
                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSNB = FALSE,
-                                                            SSIB = FALSE, SSIR = TRUE), n_samples = 10000){
+                                                            SSIB = FALSE, SSI = TRUE), n_samples = 10000){
   
   #browser()
   'Estimate of model evidence for SSEB model using Importance Sampling'
@@ -74,7 +74,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   #PARAMS
   #eta_nonzero <- apply(mcmc_output$eta_matrix != 0, 2, any)
   #eta_nonzero_cols = mcmc_output$eta_matrix[, eta_nonzero]
-  #mcmc_samples = cbind(mcmc_output$ssir_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)
+  #mcmc_samples = cbind(mcmc_output$SSI_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)
   
   vector_estimate_terms = rep(NA, n_samples)
   
@@ -82,7 +82,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
   lambda_vec = get_lambda(EPI_DATA); 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_SSIR(mcmc_output, EPI_DATA, FLAGS_MODELS, n_samples) 
+  imp_samp_comps = GET_LOG_PROPOSAL_Q_SSI(mcmc_output, EPI_DATA, FLAGS_MODELS, n_samples) 
   
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
@@ -96,7 +96,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
     
     if (log_prior_density[i] > -Inf) {
     
-      loglike = LOG_LIKE_SSIR(EPI_DATA, infectivity_vec, theta_samples[i, 1:2],
+      loglike = LOG_LIKE_SSI(EPI_DATA, infectivity_vec, theta_samples[i, 1:2],
                               theta_samples[i, 3:dim(theta_samples)[2]], FLAG_MCMC = FALSE) 
       count_ok = count_ok + 1
       #browser()
@@ -141,7 +141,7 @@ GET_LOG_MODEL_EVIDENCE_SSIR <- function(mcmc_output, EPI_DATA,
 #************************
 #1. LOAD MCMC FOR MODEL EVIDENCE 
 #************************
-LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER, 
+LOAD_MCMC_GET_SSI_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER, 
                                         run = run, n_repeats = n_repeats, 
                                         start = 1){
   
@@ -149,7 +149,7 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   estimates_vec = rep(NA, n_repeats) 
   
-  model_type = 'ssir'; print(model_type)
+  model_type = 'SSI'; print(model_type)
   CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')
   print(CURRENT_FOLDER)
   
@@ -158,7 +158,7 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
     mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
     
     #GET PHAT ESTIMATE OF MODEL EVIDENCE
-    phat_estimate = GET_LOG_MODEL_EVIDENCE_SSIR(mcmc_output, EPI_DATA) 
+    phat_estimate = GET_LOG_MODEL_EVIDENCE_SSI(mcmc_output, EPI_DATA) 
     estimates_vec[i] = phat_estimate                        
     print(estimates_vec)
   }
@@ -170,19 +170,19 @@ LOAD_MCMC_GET_SSIR_MODEL_EV <- function(EPI_DATA, OUTER_FOLDER,
 }
 
 #MULITPLE RESULTS
-GET_MAT_RESULTS_SSIR <- function(mat_ssir, n_reps = 10){
+GET_MAT_RESULTS_SSI <- function(mat_SSI, n_reps = 10){
   
   for (i in 3:n_reps) {
-    mat_ssir[,i] = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+    mat_SSI[,i] = LOAD_MCMC_GET_SSI_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
   }
   
-  return(mat_ssir)
+  return(mat_SSI)
 }
 
 
 #RUN
 #PARAMS
 #run = 1; n_repeats = 5
-# model_ev_ssir6 = LOAD_MCMC_GET_SSIR_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
-# mean(model_ev_ssir6)
-# sd(model_ev_ssir6)
+# model_ev_SSI6 = LOAD_MCMC_GET_SSI_MODEL_EV(EPI_DATA, OUTER_FOLDER, run = run, n_repeats = n_repeats)
+# mean(model_ev_SSI6)
+# sd(model_ev_SSI6)

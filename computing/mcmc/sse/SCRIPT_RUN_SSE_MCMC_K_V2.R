@@ -65,10 +65,10 @@ GET_SSE_MCMC_ROW <- function(true_r0, mcmc_output){
   
   # Add the row to the results dataframe
   return(result_row)
-
+  
 }
 
-GET_SSE_MCMC_ROW_K <- function(k, mcmc_output, data_sse, R0 = 2.0){
+GET_SSE_MCMC_ROW_K <- function(k, mcmc_output, data_sse, num_days, r0){
   
   #browser()
   # Create a row for the dataframe
@@ -80,22 +80,23 @@ GET_SSE_MCMC_ROW_K <- function(k, mcmc_output, data_sse, R0 = 2.0){
     mean_k = mean(k_vec),
     lower_ci_k = get_lower_ci(k_vec),
     upper_ci_k = get_upper_ci(k_vec),
-    true_r0 = R0,
+    true_r0 = r0,
     mean_r0 = mean(r0_vec),
     lower_ci_r0 = get_lower_ci(r0_vec), # credible_intervals["lower"],
     upper_ci_r0 = get_upper_ci(r0_vec), #credible_intervals["upper"],
     tot_infs = sum(data_sse),
+    end_day = data_sse[num_days],
     row.names = NULL
   )
-
+  
   # Add the row to the results dataframe
   return(result_row)
   
 }
 
 #- Create a data frame 
-RUN_INFERENCE_SSE_R0 <- function(CURRENT_FOLDER, num_runs = 1000, k = 0.8, 
-                              n_mcmc = 30000) {
+RUN_INFERENCE_SSE_r0 <- function(CURRENT_FOLDER, num_runs = 1000, k = 0.8, 
+                                 n_mcmc = 30000) {
   
   df_results = data.frame()
   list_r0 = seq(from = 0.8, to = 2.0, length.out = num_runs)
@@ -103,7 +104,7 @@ RUN_INFERENCE_SSE_R0 <- function(CURRENT_FOLDER, num_runs = 1000, k = 0.8,
   for (i in 1:length(list_r0)){
     
     r0 = list_r0[i]
-    data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = r0, k = k)
+    data_sse = SIMULATE_EPI_SSE(num_days = 50, r0 = r0, k = k)
     data_file <- paste("data_sse_", r0, "_", k, '_', i, ".rds", sep = "")
     mcmc_file <- paste("mcmc_sse_", r0, "_", k, '_', i, ".rds", sep = "")
     
@@ -128,11 +129,15 @@ RUN_INFERENCE_SSE_R0 <- function(CURRENT_FOLDER, num_runs = 1000, k = 0.8,
 #********
 #k
 #********
-RUN_INFERENCE_SSE_K <- function(CURRENT_FOLDER, num_runs = 2000, R0 = 2.0, 
-                              n_mcmc = 50000) {
+RUN_INFERENCE_SSE_K <- function(CURRENT_FOLDER, num_days = 50, 
+                                num_runs = 1000, r0 = 2.0, 
+                                n_mcmc = 50000) {
   
   df_results = data.frame()
-  list_k = seq(from = 0.1, to = 10, length.out = num_runs)
+  list1 = seq(from = 0.05, to = 1.0, length.out = num_runs)
+  list2 = seq(from = 1.0, to = 10, length.out = num_runs/2)
+  list_k = c(list1, list2)
+  #list_k = seq(from = 0.1, to = 10, length.out = num_runs)
   #list_k = seq(from = 0.1, to = 0.95, length.out = num_runs)
   
   for (i in 1:length(list_k)){
@@ -145,7 +150,7 @@ RUN_INFERENCE_SSE_K <- function(CURRENT_FOLDER, num_runs = 2000, R0 = 2.0,
     }
     
     k = list_k[i]
-    data_sse = SIMULATE_EPI_SSE(num_days = 50, R0 = R0, k = k)
+    data_sse = SIMULATE_EPI_SSE(num_days = num_days, r0 = r0, k = k)
     #data_file <- paste("data_sse_", r0, "_", k, '_', i, ".rds", sep = "")
     #mcmc_file <- paste("mcmc_sse_", r0, "_", k, '_', i, ".rds", sep = "")
     
@@ -153,14 +158,14 @@ RUN_INFERENCE_SSE_K <- function(CURRENT_FOLDER, num_runs = 2000, R0 = 2.0,
     mcmc_output = MCMC_INFER_SSE(data_sse, n_mcmc)
     
     #Row result
-    result_row = GET_SSE_MCMC_ROW_K(k, mcmc_output, data_sse)
+    result_row = GET_SSE_MCMC_ROW_K(k, mcmc_output, data_sse, num_days, r0)
     df_results <- rbind(df_results, result_row)
     
     #SAVE
     #saveRDS(data_sse, file = paste0(CURRENT_FOLDER, data_file))
     #saveRDS(mcmc_output, file = paste0(CURRENT_FOLDER, mcmc_file))
     
-  
+    
   }
   #PRINT
   print(df_results)

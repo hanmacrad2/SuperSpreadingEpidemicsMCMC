@@ -7,7 +7,7 @@
 GET_LIST_PRIORS_SSE <- function() {
   
   LIST_PRIORS_SSE = list(r0 = c(1,0), #exp
-                    k =  c(0.1,0)) #exp(1)
+                    k =  c(1,0)) #exp(1), exp(0.1)
   
   return(LIST_PRIORS_SSE)
 }

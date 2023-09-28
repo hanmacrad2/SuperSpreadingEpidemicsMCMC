@@ -1,14 +1,14 @@
 #SETUP
 # #LIBRARIES
-# library(SuperSpreadingEpidemicsMCMC)
-# library(coda)
-# library(mvtnorm)
-# library(MASS)
-# library(plotrix)
-# library(purrr)
-# library(RChronoModel)
-# library(stringr)
-# library(extraDistr)
+library(SuperSpreadingEpidemicsMCMC)
+library(coda)
+library(mvtnorm)
+library(MASS)
+library(plotrix)
+library(purrr)
+library(RChronoModel)
+library(stringr)
+library(extraDistr)
 
 #remove.packages("")
 
@@ -60,6 +60,5 @@ OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_4_DAYS/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_6_DAYS/')
 OUTER_FOLDER = paste0(OUTER_FOLDER, 'MOCK_DATA/MOCK_DATA_10_DAYS/')
 
-
 #FOLDERS: INFERENCE
-COMP_FOLDER = "~/GitHub/Computing/mcmc/sse/"
+COMP_FOLDER = "~/GitHub/SuperSpreadingEpidemicsMCMC/computing/mcmc/sse/"

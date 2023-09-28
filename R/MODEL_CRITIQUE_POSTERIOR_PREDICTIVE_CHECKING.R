@@ -21,7 +21,7 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
   for (i in 1:n_sample_repeats){
     sample_index = sample_indices[i]
     r0 = r0_vec[sample_index]
-    posterior_pred_data = SIMULATE_EPI_BASELINE(r0, num_days, epi_data = epi_data, SIM_DATA = SIM_DATA)
+    posterior_pred_data = SIMULATE_EPI_BASELINE(r0) #, num_days, epi_data = epi_data, SIM_DATA = SIM_DATA)
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
     if(PLOT)lines(posterior_pred_data, col = 'red')
@@ -49,8 +49,8 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days, n_sample_repeats,
     gamma = mcmc_output$beta_vec[sample_index]
 
     posterior_pred_data = SIMULATE_EPI_SSEB(num_days = num_days,
-                                            alphaX = alpha, betaX = beta, gammaX = gamma,
-                                            epi_data = epi_data, SIM_DATA = SIM_DATA)
+                                            alphaX = alpha, betaX = beta, gammaX = gamma)
+                                            #epi_data = epi_data, SIM_DATA = SIM_DATA)
     
     matrix_sim_temp[i, ] = posterior_pred_data
     #PLOT
