@@ -113,7 +113,6 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   
   #MCMC PARAMS + VECTORS
   i_thin = 1
-  print(FLAG_NEGBIN_PARAMATERISATION)
   num_days = length(epidemic_data)
   vec_min = rep(0, mcmc_inputs$dim)
   count_accept = 0; idx_thinned = 0

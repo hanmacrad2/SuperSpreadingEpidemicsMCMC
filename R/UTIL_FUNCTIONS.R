@@ -2,7 +2,36 @@
 #UTIL FUNCTIONS
 
 #TIME FUNCTIONS
-#' @export
+
+GET_CURRENT_TIME_STAMP <- function(){
+  
+  current_time <- Sys.time()
+  time_string <- format(current_time, "%Y-%m-%d_%H-%M-%S")
+  
+  return(time_string)
+}
+
+GET_FOLDER_TIME_STAMP <- function(folder_type){
+  
+  current_time <- Sys.time()
+  time_string <- format(current_time, "%Y-%m-%d_%H-%M-%S")
+  CURRENT_FOLDER <- paste0(folder_type, '_', time_string, '/')
+  print(CURRENT_FOLDER)
+  
+  return(CURRENT_FOLDER)
+}
+
+GET_FOLDER_TIME_STAMPV0 <- function(folder_type, array_index){
+  
+  current_time <- Sys.time()
+  time_string <- format(current_time, "%Y-%m-%d_%H-%M-%S")
+  CURRENT_FOLDER <- paste0(folder_type, '_', array_index, '_', time_string, '/')
+  print(CURRENT_FOLDER)
+  
+  return(CURRENT_FOLDER)
+}
+
+#' @export #Time elapsed
 get_time <- function(start_time, end_time, show = TRUE){
   'Print difference between end & start time'
   

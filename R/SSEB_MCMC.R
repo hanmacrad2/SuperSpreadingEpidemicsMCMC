@@ -1,10 +1,66 @@
 #*************************************
 #SSEB MODEL - POISSON-POISSON COMPOUND
 #*************************************
+#**************************************
+#SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
+SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 1.5, alpha = 0.8, gamma = 10,
+                                 shape_gamma = 6, scale_gamma = 1,
+                                 epi_data = c(0,0,0), SIM_DATA = TRUE) {
+  
+  'Simulate an epidemic with Superspreading events
+  alpha - rate of non super-spreading events/days
+  Beta = Proportion of superspreading events/days
+  gamma = increased rate of superspreading event'
+  
+  #MODEL PARAMS
+  beta = r0*(1 - alpha)/gamma #rate of infections = r0_sse/num infections
+  alpha = alpha*r0 #alpha is now the rate
+  
+  print(paste0('alpha = ', alpha)); print(paste0('beta = ', beta))
+  print(paste0('gamma = ', gamma))
+  #Set up
+  total_infecteds = vector('numeric', num_days)
+  nsse_infecteds = vector('numeric', num_days)
+  sse_infecteds = vector('numeric', num_days)
+  
+  if (SIM_DATA){
+    total_infecteds[1] = 2
+    nsse_infecteds[1] = 2
+    sse_infecteds[1] = 0 
+  } else {
+    total_infecteds[1] = epi_data[1]
+    nsse_infecteds[1] = epi_data[1]
+    sse_infecteds[1] = 0 
+  }
+  
+  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
+  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  #Days of Infection Spreading
+  for (t in 2:num_days) {
+    
+    #Regular infecteds (tot_rate = lambda) fix notation
+    lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
+    tot_rate = alpha*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    
+    #Super-spreaders
+    n_t = rpois(1, beta*lambda_t) #Number of super-spreading events (beta)
+    sse_infecteds[t] = rpois(1, gamma*n_t) #z_t: Total infecteds due to super-spreading event - num of events x Num individuals
+    
+    total_infecteds[t] = nsse_infecteds[t] + sse_infecteds[t]
+  }
+  
+  total_infecteds
+}
+
+
 
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
-SIMULATE_EPI_SSEB <- function(num_days = 30, alphaX = 0.8, betaX = 0.2, gammaX = 10,
+SIMULATE_EPI_SSEB_V0 <- function(num_days = 30, alphaX = 0.8, betaX = 0.2, gammaX = 10,
                               shape_gamma = 6, scale_gamma = 1,
                               epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -143,7 +199,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
 #************************************************************************
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                             mcmc_inputs = 
-                              list(param_starts = list(alpha_start = 0.8, beta_start = 0.1, gamma_start = 10),
+                              list(param_starts = list(alpha_start = 0.8, gamma_start = 10, r0_start = 1.0),
                                    alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_alpha = 0.3, sigma_r0 = 0.03, sigma_gamma = 3),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
@@ -177,8 +233,10 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   log_like_vec <- vector('numeric', mcmc_vec_size);
   
   #INITIALISE MCMC[1]
-  alpha_vec[1] <- mcmc_inputs$param_starts$alpha_start; beta_vec[1] <- mcmc_inputs$param_starts$beta_start
-  gamma_vec[1] <- mcmc_inputs$param_starts$gamma_start; r0_vec[1] <- alpha_vec[1] + beta_vec[1]*gamma_vec[1]
+  alpha_vec[1] <- mcmc_inputs$param_starts$alpha_start
+  gamma_vec[1] <- mcmc_inputs$param_starts$gamma_start
+  r0_vec[1] <- mcmc_inputs$param_starts$r0_start
+  beta_vec[1] <-  r0_vec[1]*(1 - alpha_vec[1])/gamma_vec[1]
   log_like_vec[1] <- LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_vec[1], r0_vec[1], gamma_vec[1])
   
   #INITIALISE RUNNING PARAMS
