@@ -50,7 +50,8 @@ SIMULATE_EPI_SSI <- function(num_days = 50, R0 = 1.6, k = 1.1,
 #LOG LIKELIHOOD
 #**********************************************
 #' @export
-LOG_LIKE_SSI <- function(epi_data, infect_curve_ga, ssi_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
+LOG_LIKE_SSI <- function(epi_data, infect_curve_ga,
+                         ssi_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
   
   #Params
   num_days = length(epi_data)
@@ -61,6 +62,7 @@ LOG_LIKE_SSI <- function(epi_data, infect_curve_ga, ssi_params, eta, FLAG_MCMC =
   for (t in 2:num_days) {
      
     #POISSON DENSITY
+    #browser()
     total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
     
     if (total_poi_rate < 0) {
@@ -96,7 +98,7 @@ SET_SSI_PRIOR <- function(params, params_dash){
   R0 = params[1]; R0_dash = params_dash[1]
   k =  params[2]; k_dash = params_dash[2]
   
-  if(PRIORS_USED$SSI$R0$EXP){
+  if(PRIORS_USED$SSI$r0$EXP){
     
     p = dexp(R0_dash, rate = list_priors$r0[1], log = TRUE) -
       dexp(R0, rate = list_priors$r0[1], log = TRUE)

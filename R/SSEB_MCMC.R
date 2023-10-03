@@ -174,7 +174,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
     
   } else if (r0_flag) {
     
-    if (PRIORS_USED$SSEB$R0$EXP) {
+    if (PRIORS_USED$SSEB$r0$EXP) {
       p = dexp(param_dash, rate = list_priors$r0[1], log = TRUE) -
         dexp(param, rate = list_priors$r0[1], log = TRUE) 
     }

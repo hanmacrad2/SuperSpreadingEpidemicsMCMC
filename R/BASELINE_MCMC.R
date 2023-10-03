@@ -45,7 +45,7 @@ SIMULATE_EPI_BASELINE  <- function(R0, num_days = 50,
     
     #Total rate
     tot_rate = R0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
-    print(paste0('t: ', t, 'tot_rate', tot_rate))
+    #print(paste0('t: ', t, 'tot_rate', tot_rate))
     tot_daily_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
   
@@ -91,9 +91,9 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
     #print(paste0('t: ', t, '. lambaX: ', lambdaX, 'log_likelihood: ', log_likelihood))
   }
   
-  if(log_likelihood > 0 || is.nan(log_likelihood)){
-    browser()
-  }
+  # if(log_likelihood > 0 || is.nan(log_likelihood)){
+  #   browser()
+  # }
   
   log_likelihood
 }
@@ -163,7 +163,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   #PRIORS
   gamma_shape = priors_list$gamma_shape
   gamma_scale = priors_list$gamma_shape*r0_sim
-  print(paste0('Gamma prior? ', FLAGS_LIST$PRIOR_GAMMA))
+  #print(paste0('Gamma prior? ', FLAGS_LIST$PRIOR_GAMMA))
   
   #THINNING FACTOR
   i_thin = 1
