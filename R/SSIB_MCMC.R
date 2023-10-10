@@ -24,6 +24,9 @@ SIMULATE_EPI_SSIB = function(num_days = 30, a = 0.6, b = 0.1, c = 10,
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum((nss_infecteds[1:(t-1)] + c*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    # if (t > 3) {
+    #   browser()
+    # }
     nss_infecteds[t] = rpois(1, a*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
     ss_infecteds[t] = rpois(1, b*lambda_t)
     total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]

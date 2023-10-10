@@ -175,7 +175,8 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
   #SIGMA ETA (ONE DIMENSION - ROBINS MUNROE) 
   sigma_eta =  0.5*rep(1, eta_dim)
   sigma_eta_matrix = matrix(0, mcmc_vec_size, eta_dim); sigma_eta_matrix[1,] =  sigma_eta;
-
+  vec_count_accept_da = vector('numeric', eta_dim)
+  
   #MCMC
   for(i in 2:n_mcmc) {
 
@@ -239,7 +240,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
         #ACCEPT
         eta <- eta_dash
         log_like <- logl_new
-        count_accept_da = count_accept_da + 1
+        vec_count_accept_da[t] = vec_count_accept_da[t] + 1
       }
       
       accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
@@ -267,5 +268,5 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
   return(list(ssi_params_matrix = ssi_params_matrix, eta_matrix = eta_matrix,
               sigma_eta_matrix = sigma_eta_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              accept_rate = accept_rate, accept_rate_da = accept_rate_da))
+              accept_rate = accept_rate, vec_count_accept_da = vec_count_accept_da))
 } 
