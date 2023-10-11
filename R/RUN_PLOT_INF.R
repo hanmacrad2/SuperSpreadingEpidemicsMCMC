@@ -1,4 +1,161 @@
 #PLOT INFERENCE RESULTS
+#******************
+#* 1. BASELINE 
+#*****************
+
+#1. Tot infs > 3
+pdf_file = "3fig_baseline_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_base, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE, 
+                                                   alpha = FALSE, gamma = FALSE),
+                 FLAG_FILTER = list(end_day = FALSE, tot_infs = TRUE))
+dev.off()
+
+#Include pdf too (in func)
+
+#2. Final day > 0
+title = 'Baseline Model - R0 Inference'
+pdf_file = "2fig_baseline_end_gt0.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_base, title,  FLAG_PARAM = list(r0 = TRUE, k = FALSE),
+               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#******************
+#* 2. SSE 
+#*****************
+title = 'SSE Model - k Inference'
+pdf_file = "fig_sse_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_sse, title, FLAG_PARAM = list(r0 = FALSE, k = TRUE),
+               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+#2. Final day > 0
+title = 'SSE Model - k Inference'
+pdf_file = "fig_sse_end_gt0.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_sse, title,  FLAG_PARAM = list(r0 = FALSE, k = TRUE),
+               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#RENAME
+df_sse$true_k <- df_sse$k
+df_sse$k <- NULL 
+
+#***********
+#FIXED SSE: R0
+#***********
+title = 'SSE Model - R0 Inference. k:0-1'
+pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sse1, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE),
+                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+title = 'SSE Model - R0 Inference. k:0-1'
+pdf_file = "fig_sse1_r0_dies.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sse1, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE),
+                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#************************
+#* SSEB
+#* **********************
+#R0
+title = 'SSEB Model - gamma Inference'
+pdf_file = "fig_gamma_sseb_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE,
+                                                 alpha = FALSE, gamma = TRUE),
+               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+#2. Final day > 0
+title = 'SSEB Model - gamma Inference'
+pdf_file = "fig_gamma_sseb_end_gt0.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_sseb, title,  FLAG_PARAM = list(r0 = FALSE, k = FALSE,
+                                                  alpha = FALSE, gamma = TRUE),    
+               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#***********
+#OTHER FIXED PARAMS SSEB
+#***********
+title = 'SSEB Model'
+pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sseb, title, 
+                    FLAG_PARAM = list(r0 = FALSE, k = FALSE,
+                                      alpha = FALSE, gamma = TRUE),
+                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+title = 'SSE Model - R0 Inference. k:0-1'
+pdf_file = "fig_sse1_r0_dies.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
+                                                      gamma = TRUE),
+                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#gamma
+title = 'SSEB Model'
+pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sseb, title, 
+                    FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE, gamma = TRUE),
+                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+title = 'SSE Model - R0 Inference. k:0-1'
+pdf_file = "fig_sse1_r0_dies.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE, gamma = TRUE),
+                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+
+#***********
+#* SSI
+#***********
+title = 'SSI Model - k Inference'
+pdf_file = "fig_ssi1_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_ssi1, title, FLAG_PARAM = list(r0 = FALSE, k = TRUE),
+               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+#2. Final day > 0
+title = 'SSI Model - k Inference'
+pdf_file = "fig_ssi1_end_gt0.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAMS(df_ssi1, title,  FLAG_PARAM = list(r0 = FALSE, k = TRUE),
+               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+#***********
+#FIXED SSI: R0
+#***********
+title = 'SSI Model - R0 Inference'
+pdf_file = "fig_ssi_r0_sum_gt3.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_ssi, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE,
+                                                     alpha = FALSE, gamma = FALSE),
+                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
+dev.off()
+
+title = 'SSI Model - R0 Inference' #. k:0-1'
+pdf_file = "fig_ssi_r0_dies.pdf" 
+pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+PLOT_CI_PARAM_FIXED(df_ssi, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE,
+                                                     alpha = FALSE, gamma = FALSE),
+                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
+dev.off()
+
+
 
 #ALL PARAMS: NEW COLOUR
 PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, 
@@ -161,157 +318,3 @@ PLOT_CI_PARAM_FIXED <- function(df_results, title, cex = 0.8,
 }
 
 
-#******************
-#* 1. BASELINE 
-#*****************
-
-#1. Tot infs > 3
-title = 'Baseline Model - R0 Inference'
-pdf_file = "3fig_baseline_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_base, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE, 
-                                                 alpha = FALSE, gamma = FALSE),
-                        FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-#2. Final day > 0
-title = 'Baseline Model - R0 Inference'
-pdf_file = "2fig_baseline_end_gt0.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_base, title,  FLAG_PARAM = list(r0 = TRUE, k = FALSE),
-                  FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#******************
-#* 2. SSE 
-#*****************
-title = 'SSE Model - k Inference'
-pdf_file = "fig_sse_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_sse, title, FLAG_PARAM = list(r0 = FALSE, k = TRUE),
-                  FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-#2. Final day > 0
-title = 'SSE Model - k Inference'
-pdf_file = "fig_sse_end_gt0.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_sse, title,  FLAG_PARAM = list(r0 = FALSE, k = TRUE),
-                  FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#RENAME
-df_sse$true_k <- df_sse$k
-df_sse$k <- NULL 
-
-#***********
-#FIXED SSE: R0
-#***********
-title = 'SSE Model - R0 Inference. k:0-1'
-pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sse1, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE),
-               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-title = 'SSE Model - R0 Inference. k:0-1'
-pdf_file = "fig_sse1_r0_dies.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sse1, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE),
-                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#************************
-#* SSEB
-#* **********************
-#R0
-title = 'SSEB Model - R0 Inference'
-pdf_file = "fig_sseb_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE,
-                                          alpha = FALSE, gamma = TRUE),
-               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-#2. Final day > 0
-title = 'SSEB Model' # - R0 Inference'
-pdf_file = "fig_sseb_end_gt0.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_sseb, title,  FLAG_PARAM = list(r0 = FALSE, k = FALSE,
-                                            alpha = FALSE, gamma = TRUE),    
-               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#***********
-#OTHER FIXED PARAMS SSEB
-#***********
-title = 'SSEB Model'
-pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sseb, title, 
-                    FLAG_PARAM = list(r0 = FALSE, k = FALSE,
-                                      alpha = FALSE, gamma = TRUE),
-                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-title = 'SSE Model - R0 Inference. k:0-1'
-pdf_file = "fig_sse1_r0_dies.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
-                                                      gamma = TRUE),
-                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#gamma
-title = 'SSEB Model'
-pdf_file = "fig_sse1_r0_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sseb, title, 
-                    FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE, gamma = TRUE),
-                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-title = 'SSE Model - R0 Inference. k:0-1'
-pdf_file = "fig_sse1_r0_dies.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_sseb, title, FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE, gamma = TRUE),
-                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-
-#***********
-#* SSI
-#***********
-title = 'SSI Model - k Inference'
-pdf_file = "fig_ssi1_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_ssi1, title, FLAG_PARAM = list(r0 = FALSE, k = TRUE),
-               FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-#2. Final day > 0
-title = 'SSI Model - k Inference'
-pdf_file = "fig_ssi1_end_gt0.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAMS(df_ssi1, title,  FLAG_PARAM = list(r0 = FALSE, k = TRUE),
-               FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
-
-#***********
-#FIXED SSI: R0
-#***********
-title = 'SSI Model - R0 Inference'
-pdf_file = "fig_ssi_r0_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_ssi, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE,
-                                                     alpha = FALSE, gamma = FALSE),
-                    FLAG_FILTER = list(FINAL_DAY = FALSE, SUM = TRUE))
-dev.off()
-
-title = 'SSI Model - R0 Inference' #. k:0-1'
-pdf_file = "fig_ssi_r0_dies.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
-PLOT_CI_PARAM_FIXED(df_ssi, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE,
-                                                     alpha = FALSE, gamma = FALSE),
-                    FLAG_FILTER = list(FINAL_DAY = TRUE, SUM = FALSE))
-dev.off()
