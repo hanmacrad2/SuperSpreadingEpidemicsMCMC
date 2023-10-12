@@ -45,9 +45,7 @@ PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, num_conds = 5,
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Posterior mean R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    #title = paste0(model, ' Model R0 Inference')
-    #title =  expression(bold(paste(.(model), " Model ", bolditalic(R[0]), " Inference")))
-    title =  expression(bold(paste(.(model), " Model ", italic("R[0]"), " Inference")))
+    title = bquote(bold(paste(.(model) ~ "Model ", italic(R[0]), " Inference")))
       
   } else {
     xlab <- paste0('true ', true_param)
