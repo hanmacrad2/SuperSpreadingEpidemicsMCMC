@@ -4,8 +4,8 @@
 #*****************
 
 #1. Tot infs > 3
-pdf_file = "3fig_baseline_sum_gt3.pdf" 
-pdf(paste0(COMP_FOLDER, pdf_file), width = 6, height = 5)
+pdf_file = "fig1_baseline.pdf" 
+pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 10.0, height = 7.5)
 PLOT_CI_PARAMS(df_base, title, FLAG_PARAM = list(r0 = TRUE, k = FALSE, 
                                                    alpha = FALSE, gamma = FALSE),
                  FLAG_FILTER = list(end_day = FALSE, tot_infs = TRUE))
@@ -310,7 +310,7 @@ PLOT_CI_PARAM_FIXED <- function(df_results, title, cex = 0.8,
   lines(seq_along(true_total), true_total, col = list_colors$col_true, lwd = 4)
   
   #Legend
-  legend("topleft", legend_list,
+  legend("center", legend_list,
          col = c(list_colors$col_true, list_colors$col_mean_gt, #list_colors$col_ci
                  list_colors$col_mean_lt), lwd = c(1.5, 1.5, 1.5), # 2),
          lty = c(1,1,1),

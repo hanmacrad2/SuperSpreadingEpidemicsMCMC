@@ -7,11 +7,15 @@ PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, num_conds = 5,
                                                 tot_infs = FALSE), 
                            FLAG_MODEL = list(Baseline = TRUE, SSE = FALSE)){
   
+  #Plot
+  par(mar=c(5.1, 4.1, 3.0, 9.6), xpd=TRUE) #Margins; bottom, left, top, right
+  
   #Params
   true_param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
+  true_total = unlist(df_results[paste0('true_', true_param)])
   filter_param = names(FLAG_FILTER)[which(unlist(FLAG_FILTER))]
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
-  title = paste0(model, ' Model ', true_param, ' Inference')
+  #paste0(model, ' Model ', true_param, ' Inference')
   
   #Colours
   viridis_palette <- viridis(10)
@@ -27,15 +31,24 @@ PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, num_conds = 5,
   )
   
   # Create a list of legends for each subset
-  #legend_list <- c(paste0(true_param, " True "),
-  #                 paste0(true_param, " Mean mcmc"))
+  if(FLAG_FILTER$tot_infs){
+    legend_list <- c(paste0(true_param, " True "),
+                     paste0(true_param, " posterior mean, infs == 2"),
+                     paste0(true_param, " posterior mean, infs == 3"),
+                     paste0(true_param, " posterior mean, infs: [4, 5]"),
+                     paste0(true_param, " posterior mean, infs: [6, 10]"),
+                     paste0(true_param, "posterior mean, infs > 19"))
+    }
+  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   
   # LABELS
   if (FLAG_PARAM$r0) {
-    xlab <- expression(paste('true R'[0])) #paste0(expression(paste('true R'[0])))  #
-    ylab <- expression(paste('mean R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    title = paste0(model, ' Model R0 Inference')
-    #title =  expression(paste(model, " Model R[0] Inference")) #paste0(model, ' Model ', xlab, 'Inference')
+    xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
+    ylab <- expression(paste('Posterior mean R'[0])) #paste0(expression(paste('mean R'[0]))) 
+    #title = paste0(model, ' Model R0 Inference')
+    #title =  expression(bold(paste(.(model), " Model ", bolditalic(R[0]), " Inference")))
+    title =  expression(bold(paste(.(model), " Model ", italic("R[0]"), " Inference")))
+      
   } else {
     xlab <- paste0('true ', true_param)
     ylab <- paste0('mean', true_param)
@@ -57,7 +70,7 @@ PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, num_conds = 5,
       plot(true_subset, mean_subset, type = "p",
            main = title,
            xlab = xlab, ylab = ylab,
-           ylim = c(0, max(true_subset, upper_ci_subset)),
+           ylim = y_lim,
            col = colour, pch = 16, cex = cex)
       
     } else {
@@ -77,17 +90,20 @@ PLOT_CI_PARAMS <- function(df_results, title, cex = 0.8, num_conds = 5,
     points(true_subset, mean_subset, type = "p",
            col = colour, pch = 16)
     
-    # Legend
-    # legend("topleft", legend_list,
-    #        col = c(list_colors$col_true, list_colors$col_mean_gt),
-    #        lwd = c(1.5, 1.5),
-    #        lty = c(1, 1),
-    #        pch = c(NA, 19),
-    #        text.font = 1.5,
-    #        bty = "n")
   }
   
   # TRUE line
-  true_total = unlist(df_results[paste0('true_', true_param)])
   lines(true_total, true_total, col = 'black', lwd = 3)
+  
+  # Legend
+  #plot(0, 0, type = "n", axes = FALSE, xlab = "", ylab = "")
+  legend('bottomright', #x = "topleft", y = "topleft", #"center", legend_list,
+         legend_list,
+         inset=c(-0.4,0),
+         col = c('black', selected_colors),
+         lwd = rep(1.8, num_conds),
+         lty = rep(1, num_conds), #c(1, 1),
+         pch = c(NA, 19, 19, 19, 19, 19),
+         text.font = 1.0,
+         bty = "n")
 }
