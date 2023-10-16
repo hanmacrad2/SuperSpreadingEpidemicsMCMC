@@ -18,6 +18,16 @@ PLOT_CI_PARAMS(df_sse, COMP_FOLDER, PDF = FALSE,
                                  SSEB = FALSE, SSIB = FALSE),
                FLAG_FILTER = list(end_day = FALSE, tot_infs = TRUE))
 
+#****************
+#FIXED
+PLOT_CI_PARAMS_FIXED(df_sse1, COMP_FOLDER, fig_num = '01', PDF = TRUE, 
+                                 FIXED_PARAM = list(r0 = TRUE, k = FALSE,
+                                                    alpha = FALSE, gamma = FALSE),
+                                 VAR_PARAM = list(r0 = FALSE, k = TRUE,
+                                                  alpha = FALSE, gamma = FALSE),
+                                 FLAG_MODEL = list(BASELINE = FALSE, SSE = TRUE, SSI = FALSE,
+                                                   SSEB = FALSE, SSIB = FALSE))
+
 
 #******************
 #* 1. SSI 
