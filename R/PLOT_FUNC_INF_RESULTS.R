@@ -8,16 +8,20 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
                                                 tot_infs = FALSE), 
                            FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
                                              SSEB = FALSE, SSIB = FALSE)){
-  
-  #Plot
-  par(mar=c(4.9, 4.1, 3.0, 15.0), xpd=TRUE) #Margins; bottom, left, top, right
-  
+
   #Params
   true_param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   true_total = unlist(df_results[paste0('true_', true_param)])
   filter_param = names(FLAG_FILTER)[which(unlist(FLAG_FILTER))]
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
   #paste0(model, ' Model ', true_param, ' Inference')
+  
+  #Plot
+  if(PDF){
+    pdf_file = paste0('Fig_', model, '_param_', true_param, '_', fig_num, '.pdf') 
+    pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 13.0, height = 8.0)
+  }
+  par(mar=c(4.9, 4.1, 3.0, 15.0), xpd=TRUE) #Margins; bottom, left, top, right
   
   #Colours
   viridis_palette <- viridis(10)
@@ -112,8 +116,6 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
          bty = "n")
   
   if(PDF){
-    pdf_file = paste0('Fig_', model, '_param_', true_param, '_', fig_num, '.pdf') 
-    pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 13.0, height = 8.0)
     dev.off()
   }
 }
@@ -130,15 +132,7 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
                                               tot_infs = TRUE), 
                            FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
                                              SSEB = FALSE, SSIB = FALSE)){
-  
-  #Plot
-  par(mar=c(4.9, 4.1, 3.0, 15.0), xpd=TRUE) #Margins; bottom, left, top, right
-  
-  if(PDF){
-    pdf_file = paste0('Fig_', model, '_fixed_', fixed_param, '_', fig_num, '.pdf')  
-    pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 13.0, height = 8.0)
-  }
-  
+
   #Params
   var_param =  names(VAR_PARAM)[which(unlist(VAR_PARAM))]
   fixed_param = names(FIXED_PARAM)[which(unlist(FIXED_PARAM))]
@@ -147,6 +141,14 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
   filter_param = names(FLAG_FILTER)[which(unlist(FLAG_FILTER))]
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
   #paste0(model, ' Model ', true_param, ' Inference')
+  
+  #Plot
+  if(PDF){
+    pdf_file = paste0('Fig_', model, '_fixed_', fixed_param, '_', fig_num, '.pdf')  
+    pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 13.0, height = 8.0)
+  }
+  
+  par(mar=c(4.9, 4.1, 3.0, 15.0), xpd=TRUE) #Margins; bottom, left, top, right
   
   #Colours
   viridis_palette <- viridis(10)
@@ -183,7 +185,7 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
     
   } else {
     xlab <- paste0('True ', var_param)
-    ylab <- paste0('Posterior mean of ', var_param)
+    ylab <- paste0('Posterior mean of ', fixed_param)
     titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(fixed_param) ~ "Inference")))
   }
   
