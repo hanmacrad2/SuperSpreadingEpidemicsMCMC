@@ -174,7 +174,7 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
                      paste0(fixed_param, " posterior mean, infs > 10"))
     print(legend_list)
   }
-  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', fixed_param)]))) 
+  y_lim = c(0, max(fixed_total, max(df_results[paste0('upper_ci_', fixed_param)]))) 
   x_lim = c(min(df_results[paste0('true_', var_param)]), max(df_results[paste0('true_', var_param)]))
   
   # LABELS

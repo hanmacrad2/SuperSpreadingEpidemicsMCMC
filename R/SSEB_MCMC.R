@@ -3,7 +3,7 @@
 #*************************************
 #**************************************
 #SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
-SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 1.5, alpha = 0.8, gamma = 10,
+SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 2.0, alpha = 0.5, gamma = 10,
                                  shape_gamma = 6, scale_gamma = 1,
                                  epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -14,7 +14,7 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 1.5, alpha = 0.8, gamma = 10,
   
   #MODEL PARAMS
   beta = r0*(1 - alpha)/gamma #rate of infections = r0_sse/num infections
-  alpha = alpha*r0 #alpha is now the rate
+  #alpha = alpha*r0 #alpha is now the rate
   
   print(paste0('alpha = ', alpha)); print(paste0('beta = ', beta))
   print(paste0('gamma = ', gamma))
@@ -43,7 +43,7 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 1.5, alpha = 0.8, gamma = 10,
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = alpha*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    tot_rate = alpha*r0*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
     nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
     
     #Super-spreaders
@@ -111,14 +111,13 @@ SIMULATE_EPI_SSEB_V0 <- function(num_days = 30, alphaX = 0.8, betaX = 0.2, gamma
 }
 
 #1. LOG LIKELIHOOD
-LOG_LIKE_SSEB <- function(x, lambda_vec, alpha_prop, r0, gamma){
+LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
   
   #Params
   num_days = length(x); logl = 0
   
-  beta = r0*(1 - alpha_prop)/gamma #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
-  
-  alpha = alpha_prop*r0 #alpha is now the rate
+  beta = r0*(1 - alpha)/gamma #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
+  #alpha = alpha_prop*r0 #alpha is now the rate
    
   for (t in 2:num_days) {
     
@@ -131,8 +130,8 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha_prop, r0, gamma){
       #Log likelihood
       st = x[t] - nt
       inner_sum_xt = inner_sum_xt + 
-        dpois(nt, alpha*lambda_vec[t])*
-        PROBABILITY_ST(st, lambda_vec[t], alpha, beta, gamma)
+        dpois(nt, alpha*r0*lambda_vec[t])*
+        PROBABILITY_ST(st, lambda_vec[t], beta, gamma)
     } 
     
     logl = logl + log(inner_sum_xt) 
@@ -142,13 +141,13 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha_prop, r0, gamma){
 }
 
 #2. PROBABILITY OF ST
-PROBABILITY_ST <- function(st, lambda_t, alphaX, betaX, gammaX, max_et = 5){
+PROBABILITY_ST <- function(st, lambda_t, beta, gamma, max_et = 5){
   
   'Probability of St'
   prob_st = 0
   
   for (et in 0:max_et){
-    prob_st = prob_st + dpois(et, betaX*lambda_t)*dpois(st, gammaX*et)
+    prob_st = prob_st + dpois(et, beta*lambda_t)*dpois(st, gamma*et)
   }
   
   return(prob_st)
@@ -199,7 +198,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
 #************************************************************************
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
                             mcmc_inputs = 
-                              list(param_starts = list(alpha_start = 0.8, gamma_start = 10, r0_start = 1.0),
+                              list(param_starts = list(alpha_start = 0.5, gamma_start = 10, r0_start = 1.0),
                                    alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_alpha = 0.3, sigma_r0 = 0.03, sigma_gamma = 3),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE)) {

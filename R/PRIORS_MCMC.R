@@ -35,7 +35,7 @@ GET_LIST_PRIORS_SSEB <- function() {
 GET_LIST_PRIORS_SSIB <- function(){
   
   LIST_PRIORS_SSIB = list(r0 = c(1,0),    #exp dist 
-                     a =  c(2,2), #beta dist c(2,2)
+                     alpha =  c(2,2), #beta dist c(2,2)
                      c = c(3,3)) #gamma dist (2,1)
   
   return(LIST_PRIORS_SSIB)
@@ -60,7 +60,7 @@ GET_PRIORS_USED <- function(){
                 beta = FALSE),
          SSIB = 
            list(r0 = list(EXP = TRUE),
-                a = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
+                alpha = list(EXP = FALSE, BETA = TRUE, GAMMA = FALSE),
                 c = list(EXP = FALSE, GAMMA = TRUE)), 
          b = FALSE)
   
