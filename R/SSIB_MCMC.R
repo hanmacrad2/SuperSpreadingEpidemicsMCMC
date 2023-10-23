@@ -278,12 +278,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  time = length(epidemic_data) #length(data[[1]])
+  time = length(epidemic_data)
   print(paste0('num mcmc iters = ', n_mcmc))
   
   #PRIORS
-  list_priors = GET_LIST_PRIORS_SSIB() 
-  PRIORS_USED =  GET_PRIORS_USED() 
+  list_priors = GET_LIST_PRIORS_SSIB(); PRIORS_USED =  GET_PRIORS_USED() 
   
   #DATA: SUPERSPREADING INTIALISATION
   ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
@@ -298,8 +297,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
     } else {
-    thinning_factor = 1
-    mcmc_vec_size = n_mcmc
+    thinning_factor = 1; mcmc_vec_size = n_mcmc
   }
   
   #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
@@ -316,8 +314,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   
   #INITIALISE MCMC[1]
   alpha_vec[1] <- mod_start_points$m1; 
-  c_vec[1] <- mod_start_points$m3; 
-  r0_vec[1] <- mod_start_points$r0
+  c_vec[1] <- mod_start_points$m3; r0_vec[1] <- mod_start_points$r0
   #b_vec[1] <- mod_start_points$m2
   log_like_vec[1] <- LOG_LIKE_SSIB(data, alpha_vec[1], r0_vec[1], c_vec[1])
   
@@ -335,33 +332,21 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
     
-    #SIGMA
     sigma1_vec <- vector('numeric', mcmc_vec_size); sigma2_vec <- vector('numeric', mcmc_vec_size)
     sigma3_vec <- vector('numeric', mcmc_vec_size)
-    #sigma4_vec <- vector('numeric', mcmc_vec_size) sigma5_vec <- vector('numeric', mcmc_vec_size);
-    
-    #SIGMA; INITIALISE FIRST ELEMENT
-    sigma1_vec[1] =  sigma1; sigma2_vec[1] =  sigma2; sigma3_vec[1] =  sigma3
-    #sigma4_vec[1] =  sigma4; sigma5_vec[1] =  sigma5
-    
-    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
-    sigma = list() #sigma1_vec = sigma1_vec, sigma2_vec = sigma2_vec, sigma3_vec = sigma3_vec,
-    #sigma4_vec = sigma4_vec, sigma5_vec = sigma5_vec)
-    
+    sigma1_vec[1] =  sigma1; sigma2_vec[1] =  sigma2; 
+    sigma3_vec[1] =  sigma3
+    sigma = list()
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
     
   } else {
-    
-    #SIGMA; List of sigma vectors for each iteration of the MCMC algorithm
     sigma = list(sigma1 <- sigma1, sigma2 <- sigma2,
                  sigma3 <- sigma3) #, sigma4 <- sigma4, sigma5 <- sigma5)
   }
   
-  #INITIALISE: ACCEPTANCE COUNTS
   list_accept_counts = list(count_accept1 = 0, count_accept2 = 0, count_accept3 = 0)
-                            #count_accept4 = 0, count_accept5 = 0, count_accept6 = 0)
-  
+                            
   #DATA AUG OUTPUT
   #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
   non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
@@ -371,8 +356,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   #MCMC CHAIN
   #******************************
   for(i in 2:n_mcmc) {
-    
-    #print(paste0('i = ', i))
     
     if (i%%1000 == 0) {
       
@@ -404,10 +387,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       alpha <- alpha_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
-      #browser()
-    } else {
-      #browser()
-    }
+    } 
     
     #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
@@ -426,15 +406,17 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     #PRIOR
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
                                                          list_priors, PRIORS_USED, r0_flag = TRUE)
+    #Check
+    if(is.na(log_accept_ratio)){
+      browser()
+    }
     
     #Metropolis Acceptance Step
     if(log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
-    } else {
-      #browser()
-    }
+    } 
     
     #Sigma (Adpative)
     if (FLAGS_LIST$ADAPTIVE){
@@ -476,7 +458,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     #FOR EACH S_T
     for(t in 1:time){
       
-      #Copy of data (or update as necessary)
       data_dash = data
       
       #STOCHASTIC PROPOSAL for s
@@ -486,7 +467,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
         st_dash = data[[2]][t] - 1
       }
       
-      #CHECK
       if (st_dash < 0) {
         st_dash = 0
       }
@@ -495,14 +475,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       data_dash[[2]][t] = st_dash #s_t = st_dash
       data_dash[[1]][t] =  data[[1]][t] + data[[2]][t] - st_dash #n_t = x_t - s_t
       
-      # if (data_dash[[1]][t] < 0){
-      #   data_dash[[1]][t] = 0
-      # }
-      
       #CRITERIA FOR S_T & N_T
       if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-        #Store
-        #print(paste0('i thin', i_thin))
         non_ss[i_thin, t] = data[[1]][t]
         ss[i_thin, t] = data[[2]][t]
         next
@@ -514,11 +488,9 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
         
-        #ACCEPT
         data <- data_dash
         log_like <- logl_new
         #mat_count_da[i, t] = mat_count_da[i, t] + 1
-        #list_accept_counts$count_accept6 = list_accept_counts$count_accept6 + 1
       }
       
       #Store
@@ -534,12 +506,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
-      #print(paste0('i = ', i))
-      alpha_dash[i_thin] <- alpha; r0_vec[i_thin] <- r0
+      alpha_vec[i_thin] <- alpha; r0_vec[i_thin] <- r0
       c_vec[i_thin] <- c; b_vec[i_thin] <- (r0*(1-alpha))/c     #(r0-a)/c #a + b*c
       log_like_vec[i_thin] <- log_like 
       sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
-      #sigma$sigma4[i_thin] = sigma4; sigma$sigma5[i_thin] = sigma5
       i_thin = i_thin + 1
     }
   }
@@ -552,15 +522,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
   accept_rate2 = 100*list_accept_counts$count_accept2/(n_mcmc-1) #(list_accept_counts$count_accept2 + list_reject_counts$count_accept2)
   accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
-  #accept_rate4 = 100*list_accept_counts$count_accept4/(n_mcmc-1)
-  #accept_rate5 = 100*list_accept_counts$count_accept5/(n_mcmc-1)
   #accept_rate6 = 100*list_accept_counts$count_accept6/((n_mcmc-1)*time) #i x t
   
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,
                            accept_rate2 = accept_rate2, accept_rate3 = accept_rate3)
-                           #accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
-                           #accept_rate6 = accept_rate6)
   print(list_accept_rates)
   
   #Return a, acceptance rate
