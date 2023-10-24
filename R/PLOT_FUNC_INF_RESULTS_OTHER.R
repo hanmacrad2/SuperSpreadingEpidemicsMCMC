@@ -1,12 +1,12 @@
 #PLOT INFERENCE RESULTS
 PLOT_CI_PARAM_OTHER <- function(df_results, COMP_FOLDER, fig_num = '1',
-                           cex = 1.0,
-                           PDF = FALSE, 
+                           cex = 1.0, PDF = TRUE, 
                            FLAG_PARAM = list(r0 = FALSE, k = FALSE,
                                              alpha = FALSE, gamma = FALSE),
                            FLAG_FILTER = list(end_day = FALSE,
                                               tot_infs = FALSE,
-                                              max_eta_x = TRUE), 
+                                              max_eta_x = FALSE,
+                                              day_max = FALSE), 
                            FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = TRUE,
                                              SSEB = FALSE, SSIB = FALSE)){
   
@@ -24,39 +24,61 @@ PLOT_CI_PARAM_OTHER <- function(df_results, COMP_FOLDER, fig_num = '1',
   }
   par(mar=c(4.9, 4.1, 3.0, 15.0), xpd=TRUE) #Margins; bottom, left, top, right
   
-  #Colours
-  viridis_palette <- viridis(10) #inferno(10) #viridis, turbo
-  selected_colors <- viridis_palette #[c(3, 4, 1, 8, 5, 7, 6, 10, 2, 9)] #[1:9] #[c(9, 10, 6, 8, 5)]
-  num_conds = length(selected_colors)
-  
   # Define different filters and their corresponding labels
-  filter_list <- list(
-    df1 = df_results[df_results[[filter_param]] < 0.5, ],
-    df2 = df_results[(df_results[[filter_param]] >= 0.5) & (df_results[[filter_param]] < 1), ],
-    df3 = df_results[(df_results[[filter_param]] >= 1) & (df_results[[filter_param]] < 2), ],
-    df4 = df_results[(df_results[[filter_param]] >= 2) & (df_results[[filter_param]] <= 4), ],
-    df5 = df_results[(df_results[[filter_param]] >= 5) & (df_results[[filter_param]] <= 10), ],
-    df7 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 15), ],
-    df8 = df_results[(df_results[[filter_param]] > 15) & (df_results[[filter_param]] <= 20), ],
-    df9 = df_results[(df_results[[filter_param]] > 20) & (df_results[[filter_param]] <= 25), ],
-    df10 = df_results[df_results[[filter_param]] > 30, ]
-  )
-  #browser()
+  if(FLAG_FILTER$max_eta_x){
+
+    filter_list <- list(
+      df1 = df_results[df_results[[filter_param]] < 0.5, ],
+      df2 = df_results[(df_results[[filter_param]] >= 0.5) & (df_results[[filter_param]] < 1), ],
+      df3 = df_results[(df_results[[filter_param]] >= 1) & (df_results[[filter_param]] < 2), ],
+      df4 = df_results[(df_results[[filter_param]] >= 2) & (df_results[[filter_param]] <= 4), ],
+      df5 = df_results[(df_results[[filter_param]] >= 5) & (df_results[[filter_param]] <= 10), ],
+      df7 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 15), ],
+      df8 = df_results[(df_results[[filter_param]] > 15) & (df_results[[filter_param]] <= 20), ],
+      df9 = df_results[(df_results[[filter_param]] > 20) & (df_results[[filter_param]] <= 25), ],
+      df10 = df_results[df_results[[filter_param]] > 30, ])
+    
+    legend_list <- c(paste0(true_param, " True "),
+                     paste0(true_param, " post. mean, max eta/x < 0.5"),
+                     paste0(true_param, " post. mean, max eta/x: [0.5, 1]"),
+                     paste0(true_param, " post. mean, max eta/x: [1, 2]"),
+                     paste0(true_param, " post. mean, max eta/x: [2, 4]"),
+                     paste0(true_param, " post. mean, max eta/x: [5, 10]"),
+                     paste0(true_param, " post. mean, max eta/x: [10, 15]"),
+                     paste0(true_param, " post. mean, max eta/x: [15, 20]"),
+                     paste0(true_param, " post. mean, max eta/x: [20, 25]"),
+                     paste0(true_param, " post. mean, max eta/x: > 30"))
+      
+  } else if (FLAG_FILTER$day_max){
+    
+    filter_list <- list(
+      df1 = df_results[df_results[[filter_param]] == 1, ],
+      df4 = df_results[(df_results[[filter_param]] >= 3) & (df_results[[filter_param]] <= 4), ],
+      df5 = df_results[(df_results[[filter_param]] >= 5) & (df_results[[filter_param]] <= 10), ],
+      df7 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 15), ],
+      df8 = df_results[(df_results[[filter_param]] > 15) & (df_results[[filter_param]] <= 20), ],
+      df9 = df_results[(df_results[[filter_param]] > 20) & (df_results[[filter_param]] <= 30), ],
+      df10 = df_results[(df_results[[filter_param]] > 30) & (df_results[[filter_param]] <= 40), ],
+      df11 = df_results[(df_results[[filter_param]] > 40) & (df_results[[filter_param]] <= 50), ])
+      
+      legend_list <- c(paste0(true_param, " True "),
+                       paste0(true_param, " post. mean, day 1"),
+                       paste0(true_param, " post. mean, days 3, 4"),
+                       paste0(true_param, " post. mean, days 5-10"),
+                       paste0(true_param, " post. mean, days 10-15"),
+                       paste0(true_param, " post. mean, days 15-20"),
+                       paste0(true_param, " post. mean, days 20-30"),
+                       paste0(true_param, " post. mean, days 30-40"),
+                       paste0(true_param, " post. mean, days 40-50"))
+    
+  }
   
-  # Create a list of legends for each subset
-  #if(FLAG_FILTER$tot_infs){
-  legend_list <- c(paste0(true_param, " True "),
-                   paste0(true_param, " post. mean, max eta/x < 0.5"),
-                   paste0(true_param, " post. mean, max eta/x: [0.5, 1]"),
-                   paste0(true_param, " post. mean, max eta/x: [1, 2]"),
-                   paste0(true_param, " post. mean, max eta/x: [2, 4]"),
-                   paste0(true_param, " post. mean, max eta/x: [5, 10]"),
-                   paste0(true_param, " post. mean, max eta/x: [10, 15]"),
-                   paste0(true_param, " post. mean, max eta/x: [15, 20]"),
-                   paste0(true_param, " post. mean, max eta/x: [20, 25]"),
-                   paste0(true_param, " post. mean, max eta/x: > 30"))
-                     
-  #}
+  #browser()
+  #Colours
+  num_conds = length(filter_list)
+  viridis_palette <- viridis(num_conds) #inferno(10) #viridis, turbo
+  selected_colors <- viridis_palette #[c(3, 4, 1, 8, 5, 7, 6, 10, 2, 9)] #[1:9] #[c(9, 10, 6, 8, 5)]
+
   y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   
