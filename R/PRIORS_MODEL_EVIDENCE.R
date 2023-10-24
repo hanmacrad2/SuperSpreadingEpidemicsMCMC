@@ -41,9 +41,9 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   # }
   
   #THETA_SAMPLES_PRIOR
-  theta_samples_prior_sse = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma), ncol = n_dim)
+  theta_samples_prior_sseb = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma), ncol = n_dim)
   
-  return(theta_samples_prior_sse)  
+  return(theta_samples_prior_sseb)  
 }
 
 #SSIB MODEL
