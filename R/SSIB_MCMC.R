@@ -37,90 +37,14 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
   
   total_infecteds
 }
-
-
-#' Simulation function for the Super-Spreading Individuals (SSI) epidemic model
-#'
-#' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
-#'
-#' @export
-#' 
-SIMULATE_EPI_SSIB_ORIG = function(num_days = 30, a = 0.6, b = 0.1, c = 10,
-                             shape_gamma = 6, scale_gamma = 1) {
-  'Simulate an epidemic with Superspreading individuals'
-  
-  #Set up
-  total_infecteds = vector('numeric', num_days)
-  nss_infecteds = vector('numeric', num_days)
-  ss_infecteds = vector('numeric', num_days)
-  total_infecteds[1] = 3
-  nss_infecteds[1] = 2
-  ss_infecteds[1] = 1 
-  
-  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
-  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  #Days of Infection Spreading
-  for (t in 2:num_days) {
-    
-    #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum((nss_infecteds[1:(t-1)] + c*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    # if (t > 3) {
-    #   browser()
-    # }
-    nss_infecteds[t] = rpois(1, a*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    ss_infecteds[t] = rpois(1, b*lambda_t)
-    total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]
-  }
-  
-  total_infecteds
-}
-
-#' Simulation function for the Super-Spreading Individuals (SSI) epidemic model
-#'
-#' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
-#' Returns non super-spreaders super-spreaders separately
-#' @export
-SIMULATE_EPI_SSIB_II = function(num_days = 50, aX = 0.6, bX = 0.1, cX = 10,
-                                shape_gamma = 6, scale_gamma = 1) {
-  'Simulate an epidemic with Superspreading individuals'
-  
-  #Set up
-  total_infecteds = vector('numeric', num_days)
-  nss_infecteds = vector('numeric', num_days)
-  ss_infecteds = vector('numeric', num_days)
-  total_infecteds[1] = 3
-  nss_infecteds[1] = 2
-  ss_infecteds[1] = 1 
-  
-  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
-  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  #Days of Infection Spreading
-  for (t in 2:num_days) {
-    
-    #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum((nss_infecteds[1:(t-1)] + cX*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nss_infecteds[t] = rpois(1, aX*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    ss_infecteds[t] = rpois(1, bX*lambda_t)
-    total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]
-  }
-  
-  return(list(nss_infecteds, ss_infecteds))
-}
-
-
-
 #' Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
 #'
 #' Returns the Log likelihood of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #'
 #' @param data data from the epidemic, namely daily infection counts
-#' @param aX SSI model parameter \code{"a"}
-#' @param bX SSI model parameter \code{"b"}
-#' @param cX SSI model parameter \code{"c"}
+#' @param r0 SSI model parameter \code{"r0"}
+#' @param alpha SSI model parameter \code{"alpha"}
+#' @param c SSI model parameter \code{"c"}
 #' @return Log likelihood of the SSI model
 #' @export
 #'
@@ -189,7 +113,7 @@ SET_SSIB_PRIOR <- function(param, param_dash,
     if (PRIORS_USED$SSIB$c$GAMMA) {
       shape = list_priors$c[1]
       scale = list_priors$c[2]
-      p = dgamma(param_dash -1, shape = shape, scale = scale, log = TRUE) -
+      p = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
         dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
   }
@@ -397,8 +321,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     
     #************************************************************************ Only if (b > 0) ?
     #R0
-    r0_dash <- r0 + rnorm(1, sd = sigma2)
-    
+    r0_dash <- abs(r0 + rnorm(1, sd = sigma2))
+
     #loglikelihood
     logl_new = LOG_LIKE_SSIB(data, alpha, r0_dash, c)
     log_accept_ratio = logl_new - log_like
@@ -407,12 +331,12 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
                                                          list_priors, PRIORS_USED, r0_flag = TRUE)
     #Check
-    if(is.na(log_accept_ratio)){
-      browser()
-    }
+    # if(is.na(log_accept_ratio)){
+    #   browser()
+    # }
     
-    #Metropolis Acceptance Step
-    if(log(runif(1)) < log_accept_ratio) {
+    #Metropolis Acceptance Step 
+    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1

@@ -56,60 +56,6 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 2.0, alpha = 0.5, gamma = 10,
   total_infecteds
 }
 
-
-
-#**************************************
-#SIMULATE AN EPIDEMIC FROM THE SSEB MODEL
-SIMULATE_EPI_SSEB_V0 <- function(num_days = 30, alphaX = 0.8, betaX = 0.2, gammaX = 10,
-                              shape_gamma = 6, scale_gamma = 1,
-                              epi_data = c(0,0,0), SIM_DATA = TRUE) {
-  
-  'Simulate an epidemic with Superspreading events
-  alpha - rate of non super-spreading events/days
-  Beta = Proportion of superspreading events/days
-  gamma = increased rate of superspreading event'
-  
-  #MODEL PARAMS
-  print(paste0('alpha = ', alphaX)); print(paste0('beta = ', betaX))
-  print(paste0('gamma = ', gammaX))
-  #Set up
-  total_infecteds = vector('numeric', num_days)
-  nsse_infecteds = vector('numeric', num_days)
-  sse_infecteds = vector('numeric', num_days)
-  
-  if (SIM_DATA){
-    total_infecteds[1] = 2
-    nsse_infecteds[1] = 2
-    sse_infecteds[1] = 0 
-  } else {
-    total_infecteds[1] = epi_data[1]
-    nsse_infecteds[1] = epi_data[1]
-    sse_infecteds[1] = 0 
-  }
-  
-  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
-  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
-  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
-    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
-  
-  #Days of Infection Spreading
-  for (t in 2:num_days) {
-    
-    #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = alphaX*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    
-    #Super-spreaders
-    n_t = rpois(1, betaX*lambda_t) #Number of super-spreading events (beta)
-    sse_infecteds[t] = rpois(1, gammaX*n_t) #z_t: Total infecteds due to super-spreading event - num of events x Num individuals
-    
-    total_infecteds[t] = nsse_infecteds[t] + sse_infecteds[t]
-  }
-  
-  total_infecteds
-}
-
 #1. LOG LIKELIHOOD
 LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
   
@@ -196,7 +142,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
                             mcmc_inputs = 
                               list(param_starts = list(alpha_start = 0.5, gamma_start = 10, r0_start = 1.0),
                                    alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
@@ -221,7 +167,6 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   #BURN_IN: Initial samples are not completely valid; the Markov Chain has not stabilized to the stationary distribution. The burn in samples allow you to discard these initial samples that are not yet at the stationary.
   if(FLAGS_LIST$BURN_IN){
     burn_in_start = mcmc_inputs$burn_in_pc*n_mcmc; print(paste0('N burn-in = ', burn_in_start))
-    
     mcmc_vec_size = mcmc_vec_size - mcmc_inputs$burn_in_pc*mcmc_vec_size;
     print(paste0('Post burn-in mcmc vec size = ', mcmc_vec_size))
   }
@@ -259,7 +204,6 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     delta = 1/(mcmc_inputs$alpha_star*(1-mcmc_inputs$alpha_star))
     
   } else {
-    
     sigma_list = list(sigma_alpha = sigma_alpha, sigma_r0 = sigma_r0,
                       sigma_gamma = sigma_gamma)
   }
@@ -312,7 +256,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     
     #************************************************************************ Only if (b > 0)
     #r0
-    r0_dash <- r0 + rnorm(1, sd = sigma_r0)
+    r0_dash <- abs(r0 + rnorm(1, sd = sigma_r0))
     
     #loglikelihood
     logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha, r0_dash, gamma)
@@ -339,7 +283,6 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     gamma_dash <- gamma + rnorm(1, sd = sigma_gamma)
     
     if(gamma_dash < 1){
-      
       gamma_dash = 2 - gamma_dash #Prior on c: > 1
     }
     
@@ -349,6 +292,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
     
     #Prior
     log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(gamma, gamma_dash, gamma_flag = TRUE)
+    
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       gamma <- gamma_dash
@@ -392,4 +336,3 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 30000,
   
   return(mcmc_output)
 }
-

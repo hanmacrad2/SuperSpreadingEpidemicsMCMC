@@ -115,7 +115,7 @@ SET_SSI_PRIOR <- function(params, params_dash){
 
     
 #********************************************************
-#1. MCMC INFERENCE FOR ssi MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
+#1. MCMC INFERENCE FOR SSI MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
 MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
