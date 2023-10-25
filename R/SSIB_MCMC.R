@@ -59,7 +59,7 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
 LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c, 
                           shape_gamma = 6, scale_gamma = 1){
   
-  #A = PROPORTION OF R0
+  #A = PROPORTION OF r0
   b = (r0*(1 - alpha))/c #r0 = a_prop*r0 + b*c
   a = alpha*r0 
   
@@ -320,7 +320,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     }
     
     #************************************************************************ Only if (b > 0) ?
-    #R0
+    #r0
     r0_dash <- abs(r0 + rnorm(1, sd = sigma2))
 
     #loglikelihood

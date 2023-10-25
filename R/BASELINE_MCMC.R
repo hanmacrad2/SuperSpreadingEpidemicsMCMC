@@ -10,7 +10,7 @@
 #' @param num_days Number of days of the epidemic
 #' @param shape_gamma Shape of the gamma distribution representing the time-varying infectivity curve of each infected individual
 #' @param scale_gamma Scale of the gamma distribution representing the time-varying infectivity curve of each infected individual
-#' @param R0  Model parameter \code{"R0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{R0}*\code{\lambda_t} 
+#' @param r0  Model parameter \code{"r0"}. The daily infection count from regular spreading is assumed to follow a poisson distribution with rate \code{r0}*\code{\lambda_t} 
 #' @return Total infections; Total daily infection counts of length \code{'num_days'}=
 #' @export
 #'
@@ -18,7 +18,7 @@
 #'
 #' @examples
 #'
-#' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, R0 = 1.2)S
+#' tot_daily_infections = SIMULATE_BASELINE_EPIDEMIC(num_days = 50, shape_gamma = 6, scale_gamma = 1, r0 = 1.2)S
 #'
 #' @export
 SIMULATE_EPI_BASELINE  <- function(num_days = 50, r0 = 2.0,
@@ -44,7 +44,7 @@ SIMULATE_EPI_BASELINE  <- function(num_days = 50, r0 = 2.0,
   for (t in 2:num_days) {
     
     #Total rate
-    tot_rate = R0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
+    tot_rate = r0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
     #print(paste0('t: ', t, 'tot_rate', tot_rate))
     tot_daily_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
@@ -55,21 +55,21 @@ SIMULATE_EPI_BASELINE  <- function(num_days = 50, r0 = 2.0,
 #*
 #' Log likelihood of the baseline epidemic model
 #'
-#' Returns the log likelihood of the baseline epidemic model for given \code{"epidemic_data"} and reproduction number \code{"R0"}
+#' Returns the log likelihood of the baseline epidemic model for given \code{"epidemic_data"} and reproduction number \code{"r0"}
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts
-#' @param R0 Reproduction number R0
+#' @param r0 Reproduction number r0
 #' @return Log likelihood of the baseline model
 #' @export
 #'
 #' @author Hannah Craddock, Xavier Didelot, Simon Spencer
 #'
 #' @examples
-#' R0 = 1.2
-#' log_likelihood_baseline = LOG_LIKE_BASELINE(epidemic_data, R0)
+#' r0 = 1.2
+#' log_likelihood_baseline = LOG_LIKE_BASELINE(epidemic_data, r0)
 #'
 #' @export
-LOG_LIKE_BASELINE <- function(epidemic_data, R0){
+LOG_LIKE_BASELINE <- function(epidemic_data, r0){
   
   #Params
   num_days = length(epidemic_data)
@@ -81,7 +81,7 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
   
   for (t in 2:num_days) {
     
-    lambdaX = R0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
+    lambdaX = r0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
     #log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     log_likelihood = log_likelihood + dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
     
@@ -104,14 +104,14 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #'
 #' MCMC adaptive algorithm for a baseline epidemic model
 #'
-#' MCMC algorithm with adaptation for obtaining samples of the reproduction number R0 of an epidemic model
+#' MCMC algorithm with adaptation for obtaining samples of the reproduction number r0 of an epidemic model
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts
 #' @param mcmc_inputs A list of MCMC specifications including
 #' \itemize{
 #'   \item \code{"n_mcmc"} - Number of iterations of the MCMC sampler.
-#'   \item \code{"r0_start"} - Model parameter starting points; where the MCMC algorithm begins sampling the reproduction number R0 from.
-#'   \item \code{"r0_prior_exp"} - Prior on R0. Default prior is an exponential distribution with rate 1.
+#'   \item \code{"r0_start"} - Model parameter starting points; where the MCMC algorithm begins sampling the reproduction number r0 from.
+#'   \item \code{"r0_prior_exp"} - Prior on r0. Default prior is an exponential distribution with rate 1.
 #'   \item \code{"target_accept_rate"} - target acceptance rate. Used in the adaptive algorithm
 #'   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept.
 #' }
@@ -123,10 +123,10 @@ LOG_LIKE_BASELINE <- function(epidemic_data, R0){
 #' }
 #' @return MCMC samples, acceptance rates etc.
 #' \itemize{
-#'   \item \code{"r0_vec"} - A vector containing MCMC samples of R0, the repoduction number of the epidemic.
+#'   \item \code{"r0_vec"} - A vector containing MCMC samples of r0, the repoduction number of the epidemic.
 #'   \item \code{"log_like_vec"}  - A vector containing the log likelihood at each of the MCMC iterations, of size of \code{"mcmc_vec_size"}.
 #'   \item \code{"sigma_vec"} - A vector containing sigma adapted at each iteration of the MCMC algorithm, of size of \code{"mcmc_vec_size"} if \code{"FLAGS_LIST$ADAPTIVE"} is TRUE. Otherwise sigma_vec is a constant value.
-#'   \item \code{"accept_rate"}  - The MCMC acceptance rate (percentage) for R0. 
+#'   \item \code{"accept_rate"}  - The MCMC acceptance rate (percentage) for r0. 
 #'   }
 #'@export
 #'
@@ -208,7 +208,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   for(i in 2:n_mcmc) {
     
     #****************************************************** s
-    #R0 proposal
+    #r0 proposal
     r0_dash <- r0 + rnorm(1, sd = sigmaX)
     
     if(r0_dash < 0){
