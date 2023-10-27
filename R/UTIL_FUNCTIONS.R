@@ -2,7 +2,7 @@
 #UTIL FUNCTIONS
 
 #TIME FUNCTIONS
-
+#' @export
 GET_CURRENT_TIME_STAMP <- function(){
   
   current_time <- Sys.time()
@@ -10,7 +10,7 @@ GET_CURRENT_TIME_STAMP <- function(){
   
   return(time_string)
 }
-
+#' @export
 GET_FOLDER_TIME_STAMP <- function(folder_type){
   
   current_time <- Sys.time()
