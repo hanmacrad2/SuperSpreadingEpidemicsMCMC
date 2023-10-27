@@ -1,6 +1,6 @@
 #PLOT INFERENCE RESULTS
 PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                           cex = 1.0, num_conds = 5,
+                           num_days = 50, cex = 1.0, num_conds = 5,
                              PDF = FALSE, FLAG_PARAM = list(r0 = FALSE, k = FALSE,
                                                alpha = FALSE, gamma = FALSE),
                              FLAG_FILTER = list(end_day = FALSE,
@@ -39,10 +39,10 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
   if(FLAG_FILTER$tot_infs){
     legend_list <- c(paste0(true_param, " True "),
                      paste0(true_param, " posterior mean, infs: [2]"),
-                     paste0(true_param, " posterior mean, infs: [3]"),
-                     paste0(true_param, " posterior mean, infs: [4, 5]"),
-                     paste0(true_param, " posterior mean, infs: [6, 10]"),
-                     paste0(true_param, " posterior mean, infs > 10"))
+                     paste0(true_param, " post. mean, infs: [3]"),
+                     paste0(true_param, " post. mean, infs: [4, 5]"),
+                     paste0(true_param, " post. mean, infs: [6, 10]"),
+                     paste0(true_param, " post. mean, infs > 10"))
     }
   y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
@@ -51,12 +51,13 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
       
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Posterior mean of ', true_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~ "Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~
+                                 "Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
   # Create the plot for each subset
@@ -240,7 +241,7 @@ PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #PLOT INFERENCE RESULTS
 PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
-                           cex = 1.0, num_conds = 5,
+                           num_days = 50, cex = 1.0, num_conds = 5,
                            PDF = FALSE, 
                            FIXED_PARAM = list(r0 = FALSE, k = FALSE,
                                              alpha = FALSE, gamma = FALSE),
@@ -286,10 +287,10 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
     print('LEGEND')
     legend_list <- c(paste0(fixed_param, " True "),
                      paste0(fixed_param, " posterior mean, infs: [2]"),
-                     paste0(fixed_param, " posterior mean, infs: [3]"),
-                     paste0(fixed_param, " posterior mean, infs: [4, 5]"),
-                     paste0(fixed_param, " posterior mean, infs: [6, 10]"),
-                     paste0(fixed_param, " posterior mean, infs > 10"))
+                     paste0(fixed_param, " post. mean, infs: [3]"),
+                     paste0(fixed_param, " post. mean, infs: [4, 5]"),
+                     paste0(fixed_param, " post. mean, infs: [6, 10]"),
+                     paste0(fixed_param, " post. mean, infs > 10"))
     print(legend_list)
   }
   y_lim = c(0, max(fixed_total, max(df_results[paste0('upper_ci_', fixed_param)]))) 
@@ -298,10 +299,10 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
   # LABELS
   if (FIXED_PARAM$r0){
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   } else {
     ylab <- paste0('Posterior mean of ', fixed_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(fixed_param) ~ "Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(fixed_param) ~  " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
   #x label
