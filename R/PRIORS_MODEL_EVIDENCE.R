@@ -13,7 +13,7 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSEB()
   
-  #ALPHA: HOW TO INCLUDE r0?
+  #ALPHA: HOW TO INCLUDE r0
   if (PRIORS_USED$SSEB$alpha$BETA) {
     
     shape1 = list_priors$alpha[1]
@@ -240,6 +240,7 @@ GET_DENSITY_PRIOR_SSE <- function(theta_samples){
 #SSE MODEL
 GET_DENSITY_PRIOR_SSI <- function(theta_samples){
   
+  #browser()
   #List priors
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSI()
@@ -253,6 +254,9 @@ GET_DENSITY_PRIOR_SSI <- function(theta_samples){
   if (PRIORS_USED$SSI$k$EXP) {
     log_prior_density_k = dexp(theta_samples[,2], rate = list_priors$k[1], log = TRUE)
   }
+  
+  #THETA_SAMPLES_PRIOR
+  log_prior_density =  log_prior_density_r0 + log_prior_density_k
   
   return(log_prior_density)  
 }
@@ -311,7 +315,7 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, FLAGS_MODELS){
     log_prior_density = GET_DENSITY_PRIOR_SSE(theta_samples)
     
   } else if (FLAGS_MODELS$SSI) {
-    
+    #browser()
     log_density_params = GET_DENSITY_PRIOR_SSI(theta_samples)
     log_density_eta_priors = GET_DENSITY_ETA_PRIORS(theta_samples, epidemic_data)
     log_prior_density = log_density_params + log_density_eta_priors
@@ -387,24 +391,4 @@ GET_DENSITY_ETA_PRIORS <- function(theta_samples, epidemic_data){
   }
   
   return(log_density_eta)
-}
-
-#*ORIGINAL
-V0_GET_SAMPLES_ETA_PRIORS <- function(param_priors, epidemic_data, samp_size_prior){
-  
-  'Get priors for all etas in the SSI model'
-  #Question: Is it correct to use the current priors r0x & k
-  #browser()
-  time_length =  length(epidemic_data) - 1 #ETA LENGTH TIME - 1
-  eta_priors_matrix = matrix(0, nrow = samp_size_prior, ncol = time_length)
-  
-  #For each mcmc run
-  for(i in 1:samp_size_prior){ 
-    r0 = param_priors[i, 1]; k = param_priors[i, 2]
-    eta_prior = rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = r0/k)
-    eta_priors_matrix[i, ] = eta_prior # rgamma(time_length, shape = epidemic_data[1:time_length]*k, scale = r0/k)
-    
-  }
-  
-  return(eta_priors_matrix)
 }

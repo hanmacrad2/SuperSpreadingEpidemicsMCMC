@@ -1,12 +1,12 @@
 #********************************************************
-#1. INDIVIDUAL R0 MCMC WITH ADAPTIVE SHAPING                           
+#1. INDIVIDUAL r0 MCMC WITH ADAPTIVE SHAPING                           
 #********************************************************
 
 #*********************************************
-#* SIMULATE ssi Model - Individual reproduction number
+#* SIMULATE SSI Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSI <- function(num_days = 50, R0 = 1.6, k = 1.1,
+SIMULATE_EPI_SSI <- function(num_days = 50, r0 = 2.0, k = 1.1,
                         shape_gamma = 6, scale_gamma = 1,
                         epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -31,7 +31,7 @@ SIMULATE_EPI_SSI <- function(num_days = 50, R0 = 1.6, k = 1.1,
   for (t in 2:num_days) {
     
     #ETA (t-1)
-    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = R0/k) #Draw eta from previous time step
+    eta_vec[t-1] <- rgamma(1, shape = x[t-1]*k, scale = r0/k) #Draw eta from previous time step
     
     #INFECTIVITY
     infectivity = rev(prob_infect[1:t-1]) 
@@ -55,7 +55,7 @@ LOG_LIKE_SSI <- function(epi_data, infect_curve_ga,
   
   #Params
   num_days = length(epi_data)
-  R0 = ssi_params[1]; k = ssi_params[2]
+  r0 = ssi_params[1]; k = ssi_params[2]
   loglike = 0;
   #eta = eta[eta > 0]
   
@@ -76,15 +76,12 @@ LOG_LIKE_SSI <- function(epi_data, infect_curve_ga,
     if (FLAG_MCMC && epi_data[t-1] > 0) {
       
       #ETA; GAMMA
-      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = R0/k, log = TRUE)                  #dgamma with shape 0 == -Inf
+      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = r0/k, log = TRUE)                  #dgamma with shape 0 == -Inf
       loglike = loglike + log_eta_prob
       
     } 
   }
-  # 
-  # if(loglike > 0 || is.nan(loglike)){
-  #   browser()
-  # }
+
   return(loglike)
 }
 
@@ -95,13 +92,13 @@ SET_SSI_PRIOR <- function(params, params_dash){
   list_priors = GET_LIST_PRIORS_SSI() 
   PRIORS_USED =  GET_PRIORS_USED() 
   
-  R0 = params[1]; R0_dash = params_dash[1]
+  r0 = params[1]; r0_dash = params_dash[1]
   k =  params[2]; k_dash = params_dash[2]
   
   if(PRIORS_USED$SSI$r0$EXP){
     
-    p = dexp(R0_dash, rate = list_priors$r0[1], log = TRUE) -
-      dexp(R0, rate = list_priors$r0[1], log = TRUE)
+    p = dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
+      dexp(r0, rate = list_priors$r0[1], log = TRUE)
   }
   
   if (PRIORS_USED$SSI$k$EXP) {
@@ -115,12 +112,12 @@ SET_SSI_PRIOR <- function(params, params_dash){
 
     
 #********************************************************
-#1. MCMC INFERENCE FOR SSI MODEL - INDIVIDUAL R0  (INC. ADAPTIVE SCALING)                           
+#1. MCMC INFERENCE FOR SSI MODEL - INDIVIDUAL r0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 50000,
+MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 40000,
                               mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
-                                                 dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(R0_prior = c(1, 0), k_prior = c()),
+                                                 dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(r0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10, burn_in_pc = 0.2),
                               FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE)) {    
   

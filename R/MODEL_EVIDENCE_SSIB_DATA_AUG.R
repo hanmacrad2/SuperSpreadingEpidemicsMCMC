@@ -5,6 +5,56 @@
 #ddirmnom(r_dir_samps, 3, alpha.vec, log = FALSE)
 #rdirmnom(10, 1, c(2,3))
 
+
+# MODEL EVIDENCE
+
+#' @export
+GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, 
+                                        num_is_samps = 10000, beta = 1000, 
+                                        FLAGS_MODELS = list(BASE = FALSE, SSE = FALSE, SSI = FALSE,
+                                                            SSEB = FALSE, SSIB = TRUE)) {   
+  
+  'Estimate of model evidence for SSEB model using Importance Sampling'
+  
+  #PARAMS
+  vector_estimate_terms = rep(NA, num_is_samps)
+  lambda_vec = get_lambda(epidemic_data) 
+  
+  #PROPOSAL, PRIOR, THETA SAMPLES 
+  mcmc_param_samples = matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$c_vec), ncol = 3)
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
+  theta_samples = imp_samp_comps$theta_samples
+  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
+  
+  #SS MULTINOM DIR
+  dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps, beta = beta)
+  theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
+  log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
+  
+  log_prior_so = log(1/(1 + epidemic_data[1])) #What is this? s_0?
+  
+  #GET ESTIMATE
+  for (i in 1:num_is_samps) {
+    
+    if (log_prior_density[i] > -Inf){
+      
+      loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
+                                       theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
+      
+    } else {
+      loglike = 0 #vector_estimate_terms[i] =  0 #-Inf
+    }
+    vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
+      log_q[i] - log_density_dirmult_samps[i]
+  }
+  
+  log_model_ev_est = -log(num_is_samps) + LOG_SUM_EXP(vector_estimate_terms)
+  print(paste0('log_model_ev_est = ', log_model_ev_est))
+  
+  return(log_model_ev_est)
+}
+
+
 #R SAMP DIRICHLET  MULTINOMIAL
 #' Title
 #'
@@ -30,7 +80,7 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
   
   density_dirmult_samps = rep(0, num_is_samps) #c()
   
-  print(paste0('beta = ', beta))
+  #print(paste0('beta = ', beta))
   
   for (t in 1:length(x)){
     
@@ -100,11 +150,11 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, c,
   #Data
   non_ss = epidemic_data - ss
   
-  if(min(non_ss)<0){
-    print('WARNING')
-    print(non_ss)
-    print(ss)
-  }
+  # if(min(non_ss)<0){
+  #   print('WARNING')
+  #   print(non_ss)
+  #   print(ss)
+  # }
   
   #Params
   num_days = length(epidemic_data)
@@ -120,8 +170,11 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, c,
     lambda_t = sum((non_ss[1:(t-1)] + c*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
     #LOG-LIKELIHOOD
-    loglike_t = - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
-      ss[t]*(log(b) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+    loglike_t = dpois(non_ss[t], a*lambda_t, log = TRUE) +
+      dpois(ss[t], b*lambda_t, log = TRUE)
+    
+    # loglike_t = - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
+    #   ss[t]*(log(b) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
     
     loglike = loglike + loglike_t
     
@@ -130,52 +183,6 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, c,
   return(loglike)
 }
 
-#' @export
-GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, 
-                                        num_is_samps = 10000, beta = 1000, 
-                                        FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSE = FALSE,
-                                                            SSIB = TRUE, SSI = FALSE)) {   
-  
-  'Estimate of model evidence for SSEB model using Importance Sampling'
-  
-  #PARAMS
-  vector_estimate_terms = rep(NA, num_is_samps)
-  lambda_vec = get_lambda(epidemic_data) 
-  
-  #PROPOSAL, PRIOR, THETA SAMPLES 
-  mcmc_param_samples = matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$c_vec), ncol = 3)
-  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
-  theta_samples = imp_samp_comps$theta_samples
-  log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
-  
-  #SS MULTINOM DIR
-  dir_multinom_comps = PROSOSAL_SS_DIR_MULTINOM(epidemic_data, mcmc_output, num_is_samps, beta = beta)
-  theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
-  log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
-  
-  log_prior_so = log(1/(1 + epidemic_data[1])) #What is this? s_0?
-  
-    #GET ESTIMATE
-    for (i in 1:num_is_samps) {
-      
-      if (log_prior_density[i] > -Inf){
-      
-      loglike = LOG_LIKE_DATA_AUG_SSIB(epidemic_data, theta_samples_proposal_ss[i,], theta_samples[i, 1],
-                              theta_samples[i, 2], theta_samples[i, 3]) #theta_samples_proposal_ss
-      
-      } else {
-        loglike = 0 #vector_estimate_terms[i] =  0 #-Inf
-      }
-      vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
-        log_q[i] - log_density_dirmult_samps[i]
-    }
-  
-  #print(vector_estimate_terms)
-  log_model_ev_est = -log(num_is_samps) + LOG_SUM_EXP(vector_estimate_terms)
-  print(paste0('log_model_ev_est = ', log_model_ev_est))
-  
-  return(log_model_ev_est)
-}
 
 #PROPOSAL CHECK 
 #dir_multi_nom_comps = PROSOSAL_SS_DIR_MULTINOM(data_ssib, mcmc_output)

@@ -16,9 +16,9 @@ LOG_SUM_EXP <- function(vectorX){
   
   out = max_val + log(sum(exp(vectorX - max_val)))
   
-  if (is.nan(out)){
-    print(paste0('max val', max_val))
-  }
+  # if (is.nan(out)){
+  #   print(paste0('max val', max_val))
+  # }
   return(out)
 }
 
@@ -32,7 +32,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
-  print(paste0('n_dim:', n_dim))
+  #print(paste0('n_dim:', n_dim))
   lambda_vec = get_lambda(epidemic_data)
   sum_estimate = 0
   
@@ -73,15 +73,14 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #
 #*****************************************************************************************
 GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
-                                   FLAGS_MODELS, n_samples = 10000) {   
+                                   FLAGS_MODELS = list(BASELINE = FALSE, SSE = FALSE,
+                                   SSI = FALSE, SSEB = FALSE, SSIB = FALSE), n_samples = 10000) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PARAMS
   vector_estimate_terms = rep(NA, n_samples)
-  #vector_estimate_terms = c()
   lambda_vec = get_lambda(epidemic_data);
-  count_ok = 0
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
@@ -131,8 +130,8 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
                                          run = run, n_repeats = n_repeats, 
                                          start = 1, beta_ssib = 1000,
                                          num_is_samps = 10000,
-                                         FLAGS_MODELS = list(BASE = FALSE, SSEB = FALSE, SSE = FALSE,
-                                                             SSIB = FALSE, SSI = FALSE)){
+                                         FLAGS_MODELS = list(BASELINE = FALSE, SSE = FALSE,  SSI = FALSE,
+                                                            SSEB = FALSE, SSIB = FALSE)){
   'For a given epidemic dataset and model. 
   Get importance sampling estimate of model evidence. 
   1. Load mcmc samples 2. Get estimate'
@@ -141,7 +140,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   estimates_vec = rep(NA, n_repeats) 
   
-  if (FLAGS_MODELS$BASE){
+  if (FLAGS_MODELS$BASELINE){
     
     model_type = 'baseline'
     CURRENT_FOLDER = paste0(OUTER_FOLDER, toupper(model_type), '/run_', run, '/')

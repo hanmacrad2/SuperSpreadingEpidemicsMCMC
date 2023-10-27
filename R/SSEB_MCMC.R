@@ -69,14 +69,13 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
     
     #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
     inner_sum_xt = 0
-    term1 = exp(-alpha*lambda_vec[t]); term2 = alpha*lambda_vec[t]
-    
+  
     for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
       
       #Log likelihood
       st = x[t] - nt
       inner_sum_xt = inner_sum_xt + 
-        dpois(nt, alpha*r0*lambda_vec[t])*
+        dpois(nt, alpha*r0*lambda_vec[t])*            #dpois(nt, alpha*r0*lambda_vec[t])
         PROBABILITY_ST(st, lambda_vec[t], beta, gamma)
     } 
     

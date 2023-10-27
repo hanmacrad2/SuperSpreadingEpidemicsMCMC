@@ -68,23 +68,30 @@ LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c,
   #Params
   num_days = length(non_ss)
   loglike = 0
+  loglike2 = 0
 
   #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
     pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
-  for (t in 1:num_days) { 
+  for (t in 2:num_days) { 
     
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
     lambda_t = sum((non_ss[1:(t-1)] + c*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
-    #LOG-LIKELIHOOD
-    loglike = loglike - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
-      ss[t]*(log(b) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+    loglike = loglike + dpois(non_ss[t], a*lambda_t, log = TRUE) +
+      dpois(ss[t], b*lambda_t, log = TRUE) 
   }
-  
+
   return(loglike)
 }
+
+#LOG-LIKELIHOOD
+# loglike = loglike - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
+#   ss[t]*(log(b) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+
+#vec = c(2,1,3,2,1,0,0,1,100,200)
+#ll = LOG_LIKE_SSIB(vec, 0.1, 2, 10)
 
 #PRIOR
 SET_SSIB_PRIOR <- function(param, param_dash,
@@ -206,7 +213,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   print(paste0('num mcmc iters = ', n_mcmc))
   
   #PRIORS
-  list_priors = GET_LIST_PRIORS_SSIB(); PRIORS_USED =  GET_PRIORS_USED() 
+  list_priors = GET_LIST_PRIORS_SSIB(); PRIORS_USED = GET_PRIORS_USED() 
   
   #DATA: SUPERSPREADING INTIALISATION
   ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
@@ -282,7 +289,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   for(i in 2:n_mcmc) {
     
     if (i%%1000 == 0) {
-      
       print(paste0('i = ', i))
     }
     
@@ -330,11 +336,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     #PRIOR
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
                                                          list_priors, PRIORS_USED, r0_flag = TRUE)
-    #Check
-    # if(is.na(log_accept_ratio)){
-    #   browser()
-    # }
-    
     #Metropolis Acceptance Step 
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
@@ -401,20 +402,17 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       
       #CRITERIA FOR S_T & N_T
       if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-        non_ss[i_thin, t] = data[[1]][t]
-        ss[i_thin, t] = data[[2]][t]
-        next
+        log_accept_ratio = -Inf 
+      } else {
+        logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c)
+        log_accept_ratio = logl_new - log_like
       }
-      
-      logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c)
-      log_accept_ratio = logl_new - log_like
-      
+
       #METROPOLIS ACCEPTANCE STEP
-      if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+      if(log(runif(1)) < log_accept_ratio) {
         
         data <- data_dash
         log_like <- logl_new
-        #mat_count_da[i, t] = mat_count_da[i, t] + 1
       }
       
       #Store

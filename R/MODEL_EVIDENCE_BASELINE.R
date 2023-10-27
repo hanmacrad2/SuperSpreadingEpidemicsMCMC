@@ -12,7 +12,7 @@
 #********************************************************************
 
 GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
-                                       dof = 3, prob = 0.01, r0_sim = 1.6) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
+                                       dof = 3, prob = 0.01, r0_sim = 2.0) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
   
   list_priors = SET_PRIORS()$list_priors
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
@@ -33,9 +33,9 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   theta_samples_proposal = sd_mcmc*rt(samp_size_proposal, df = dof) + mean_mcmc 
   
   #PRIORS
-  if(PRIORS_USED$BASELINE$R0$EXP){
+  if(PRIORS_USED$BASELINE$r0$EXP){
     theta_samples_prior = c(rexp(samp_size_prior))
-  } else if (PRIORS_USED$BASELINE$R0$GAMMA) {
+  } else if (PRIORS_USED$BASELINE$r0$GAMMA) {
     gamma_shape = 2 
     theta_samples_prior = c(rgamma(samp_size_prior, shape = 2, scale = gamma_shape*r0_sim))
   }
@@ -47,9 +47,9 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   log_proposal = dt((theta_samples - mean_mcmc)/sd_mcmc, df = dof, log = TRUE) - log(sd_mcmc) 
   
   #PRIOR
-  if(PRIORS_USED$BASELINE$R0$EXP){
+  if(PRIORS_USED$BASELINE$r0$EXP){
     log_prior_density = dexp(theta_samples, log = TRUE) 
-  } else if (PRIORS_USED$BASELINE$R0$GAMMA){
+  } else if (PRIORS_USED$BASELINE$r0$GAMMA){
     gamma_shape = 2
     log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
   }
@@ -85,10 +85,10 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   vec_weights_squared = rep(0, times = n_samples)
   
   #PRIORS 
-  if (PRIORS_USED$BASELINE$R0$EXP){
+  if (PRIORS_USED$BASELINE$r0$EXP){
     log_prior_density = dexp(theta_samples, log = TRUE)
     
-  } else if (PRIORS_USED$BASELINE$R0$GAMMA) {
+  } else if (PRIORS_USED$BASELINE$r0$GAMMA) {
     gamma_shape = 2
     log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
     
@@ -99,6 +99,7 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   
   for(i in 1:n_samples){         
     
+    #browser()
     if (log_prior_density[i] > -Inf ) {
     loglike = LOG_LIKE_BASELINE(epidemic_data, theta_samples[i])
     
@@ -122,10 +123,8 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data,
   
   log_p_hat = -log(n_samples) + LOG_SUM_EXP(vector_log_sum_exp)
   
-  ESS = (sum_weights^2)/sum(vec_weights_squared)
-  #browser()
-  
-  print(paste0('ESS: ', ESS))
+  #ESS = (sum_weights^2)/sum(vec_weights_squared)
+  #print(paste0('ESS: ', ESS))
   
   return(log_p_hat)
 }

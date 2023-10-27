@@ -8,7 +8,7 @@ SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.16,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
   
   'Simulate an epidemic with Superspreading events
-  alpha - R0'
+  alpha - r0'
   
   #INTIALISE VECTORS
   x = vector('numeric', num_days); 
@@ -33,11 +33,11 @@ SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.16,
     #NEGATIVE BINOMIAL PARAMETERISATION
     if (FLAG_NEGBIN_PARAMATERISATION$param_mu){
       
-      x[t] = rnbinom(1, size = k*lambda_t, mu =  R0*lambda_t) #Neg Bin parameterisation #1
+      x[t] = rnbinom(1, size = k*lambda_t, mu =  r0*lambda_t) #Neg Bin parameterisation #1
       
     } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
       
-      x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(R0 + k)) #Neg Bin parameterisation #2
+      x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(r0 + k)) #Neg Bin parameterisation #2
     
     }
   }
@@ -52,13 +52,13 @@ SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.16,
 LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
   
   #Params
-  R0 = sse_params[1];  k = sse_params[2]
+  r0 = sse_params[1];  k = sse_params[2]
   num_days = length(epidemic_data); loglike = 0
   
   for (t in 2:num_days) {
     
     loglike_t = dnbinom(epidemic_data[t],
-                        size = k*lambda_vec[t], mu =  R0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+                        size = k*lambda_vec[t], mu =  r0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
     
     if(!is.nan(loglike_t)) { 
       
@@ -66,7 +66,7 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
       
     } else {
       print('log likelihood: NaN')
-      print(paste0('k, R0', k, R0))
+      print(paste0('k, r0', k, r0))
     }
   }
 
