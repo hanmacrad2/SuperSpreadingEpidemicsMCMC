@@ -216,7 +216,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
   #******************************
   for(i in 2:n_mcmc) {
     
-    if (i%%1000 == 0) {
+    if (i%%5000 == 0) {
       
       print(paste0('i = ', i))
     }
@@ -262,7 +262,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
     log_accept_ratio = logl_new - log_like
     
     #Prior
-    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(r0, r0_dash,r0_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSEB_PRIOR(r0, r0_dash, r0_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {

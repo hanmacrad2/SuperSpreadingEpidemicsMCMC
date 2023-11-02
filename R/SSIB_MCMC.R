@@ -68,7 +68,6 @@ LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c,
   #Params
   num_days = length(non_ss)
   loglike = 0
-  loglike2 = 0
 
   #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
@@ -194,7 +193,7 @@ SET_SSIB_PRIOR <- function(param, param_dash,
 #************************************************************************
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
                             mod_start_points = list(m1 = 0.5, m2 = 0.1, m3 = 10, r0 = 2.0),
-                            mcmc_inputs = list(alpha_star = 0.4, 
+                            mcmc_inputs = list(alpha_star = 0.3, 
                                                burn_in_pc = 0.2, thinning_factor = 10),
                             FLAGS_LIST = list(THIN = TRUE, ADAPTIVE = TRUE)){
   
@@ -255,8 +254,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   print(paste0('loglike: ', log_like))
   
   #SIGMA
-  sigma1 =  0.4*mod_start_points$m1
-  sigma2 = 0.4*r0
+  sigma1 =0.4 #mod_start_points$m1
+  sigma2 = 0.5 #0.4*r0
   sigma3 = 0.5*mod_start_points$m3; 
   #sigma4 = 0.85*mod_start_points$m3; sigma5 = 0.85*mod_start_points$m3
   
@@ -288,11 +287,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   #******************************
   for(i in 2:n_mcmc) {
     
-    if (i%%1000 == 0) {
+    if (i%%5000 == 0) {
       print(paste0('i = ', i))
     }
     
-    #****************************************************** s
+    #******************************************************
     #a
     alpha_dash <- alpha + rnorm(1, sd = sigma1)
     
@@ -313,7 +312,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
                                                          list_priors, PRIORS_USED, alpha_flag = TRUE)
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    if(log(runif(1)) < log_accept_ratio) {
       alpha <- alpha_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
@@ -337,7 +337,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
                                                          list_priors, PRIORS_USED, r0_flag = TRUE)
     #Metropolis Acceptance Step 
-    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    if(log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
@@ -365,7 +366,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
                                                          list_priors, PRIORS_USED, c_flag = TRUE)
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
+    if(log(runif(1)) < log_accept_ratio) {
       c <- c_dash
       log_like <- logl_new
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
@@ -387,9 +389,9 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       
       #STOCHASTIC PROPOSAL for s
       if (runif(1) < 0.5) {
-        st_dash = data[[2]][t] + 1
+        st_dash = data[[2]][t] + 1 
       } else {
-        st_dash = data[[2]][t] - 1
+        st_dash = data[[2]][t] - 1 
       }
       
       if (st_dash < 0) {
@@ -404,13 +406,12 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
         log_accept_ratio = -Inf 
       } else {
-        logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c)
+        logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c) #+include alpha prior 
         log_accept_ratio = logl_new - log_like
       }
 
       #METROPOLIS ACCEPTANCE STEP
       if(log(runif(1)) < log_accept_ratio) {
-        
         data <- data_dash
         log_like <- logl_new
       }

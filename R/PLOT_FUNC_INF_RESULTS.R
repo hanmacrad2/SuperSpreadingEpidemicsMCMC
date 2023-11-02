@@ -123,7 +123,7 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
 #*********************
 #* PLOT 2
 PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
-                           cex = 1.0, num_conds = 5,
+                              num_days = 50, cex = 1.0, num_conds = 5,
                            PDF = FALSE, 
                            FLAG_PARAM = list(r0 = FALSE, k = FALSE,
                                              alpha = FALSE, gamma = FALSE),
@@ -175,12 +175,13 @@ PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
     
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Posterior mean of ', true_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~ "Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~
+                                 "Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
   # Create the plot for each subset
@@ -370,7 +371,7 @@ PLOT_CI_PARAMS_FIXED <- function(df_results, COMP_FOLDER, fig_num = '1',
 }
 
 PLOT_CI_PARAMS_FIXED_II <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                 cex = 1.0, num_conds = 5,
+                                    num_days = 50, cex = 1.0, num_conds = 5,
                                  PDF = FALSE, 
                                  FIXED_PARAM = list(r0 = FALSE, k = FALSE,
                                                     alpha = FALSE, gamma = FALSE, c = FALSE),
@@ -426,11 +427,11 @@ PLOT_CI_PARAMS_FIXED_II <- function(df_results, COMP_FOLDER, fig_num = '1',
   # LABELS
   if (FIXED_PARAM$r0){
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference")))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   } else {
     ylab <- paste0('Posterior mean of ', fixed_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(fixed_param) ~ "Inference")))
-  }
+    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(fixed_param) ~  " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
+  } 
   
   #x label
   if (VAR_PARAM$r0) { #Var param should be x axis 
