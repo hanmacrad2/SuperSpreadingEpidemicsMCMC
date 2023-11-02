@@ -103,14 +103,14 @@ SET_SSIB_PRIOR <- function(param, param_dash,
     if (PRIORS_USED$SSIB$alpha$BETA) {
       shape1 = list_priors$alpha[1]
       shape2 = list_priors$alpha[2]
-      p = dbeta(param_dash, shape1, shape2, log = TRUE) -
+      log_p = dbeta(param_dash, shape1, shape2, log = TRUE) -
         dbeta(param, shape1, shape2, log = TRUE) 
     }
     
   } else if (r0_flag) {
     
     if (PRIORS_USED$SSIB$r0$EXP) {
-      p = dexp(param_dash, log = TRUE) - dexp(param, log = TRUE) 
+      log_p = dexp(param_dash, log = TRUE) - dexp(param, log = TRUE) 
     }
     
   } else if (c_flag) {
@@ -119,12 +119,12 @@ SET_SSIB_PRIOR <- function(param, param_dash,
     if (PRIORS_USED$SSIB$c$GAMMA) {
       shape = list_priors$c[1]
       scale = list_priors$c[2]
-      p = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
+      log_p = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
         dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
   }
   
-  return(p)  
+  return(log_p)  
 }
 
 
@@ -215,11 +215,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   list_priors = GET_LIST_PRIORS_SSIB(); PRIORS_USED = GET_PRIORS_USED() 
   
   #DATA: SUPERSPREADING INTIALISATION
-  ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
-  print('ss: '); print(ss)
-  non_ss = epidemic_data - ss 
-  print('non_ss: '); print(non_ss)
-  data = list(non_ss, ss)
+  ss_vec = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
+  print('ss vec: '); print(ss_vec)
+  non_ss_vec = epidemic_data - ss_vec 
+  print('non_ss: '); print(non_ss_vec)
+  data = list(non_ss_vec, ss_vec)
   
   #THINNING FACTOR
   i_thin = 1
@@ -249,8 +249,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   log_like_vec[1] <- LOG_LIKE_SSIB(data, alpha_vec[1], r0_vec[1], c_vec[1])
   
   #INITIALISE RUNNING PARAMS
-  alpha = alpha_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
-  r0 = r0_vec[1]
+  alpha = alpha_vec[1]; b = b_vec[1]; c = c_vec[1];
+  r0 = r0_vec[1]; log_like = log_like_vec[1]
   print(paste0('loglike: ', log_like))
   
   #SIGMA
@@ -280,8 +280,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   
   #DATA AUG OUTPUT
   #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
-  non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
-  ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  non_ss_matrix = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  ss_matrix = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
   
   #******************************
   #MCMC CHAIN
@@ -384,35 +384,55 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     #DATA AUGMENTATION
     #***********************************
     #FOR EACH S_T
-    for(t in 1:time){
+    for(t in which(epidemic_data > 1)){
+      
+      print(paste0('i = ', i, 't = ', t))
       
       data_dash = data
       
-      #STOCHASTIC PROPOSAL for s
+      #STOCHASTIC PROPOSAL
       x = data[[1]][t] + data[[2]][t]
-      d = round(runif(1, min = 1, max = round(x/2))) #replace U(1, x/2)
-     
-      d = ifelse(data[[2]][t] + d == x, d-1, d)
+      d = round(runif(1, min = 0, max = ceiling(x/2))) #replace U(1, x/2)
       
-      if (runif(1) < 0.5) {
-        st_dash = data[[2]][t] + d # + d + 1 #replace U(1, x/2)
+      ss = data[[2]][t]
+      d = ifelse(ss + d == x, d-1, d)
+      
+      if (runif(1) < 0.5) {#1 
         
-        new_alpha_ratio = (x - st_dash + d)/(x - st_dash)*
-          (x - st_dash + c*st_dash)/(x-st_dash + d + c*st_dash - c*d)
+        new_alpha_ratio = (ss + d)*(c*ss + x - ss)/(ss*(c*(ss+d) + x - ss - d))
         alpha_dash = alpha*new_alpha_ratio
+        st_dash = ss + d  
+        # new_alpha_ratio = (x - st_dash + d)/(x - st_dash)*
+        #   (x - st_dash + c*st_dash)/(x-st_dash + d + c*st_dash - c*d)
         
       } else {
-        st_dash = data[[2]][t] - d #- 1 
         
-        new_alpha_ratio = (x - st_dash - d)/(x - st_dash)*
-          (x - st_dash + c*st_dash)/(x - st_dash - d + c*st_dash + c*d)
+        new_alpha_ratio = (ss-d)*(c*ss + x - ss)/(ss*(c*(ss-d) + x - ss + d))
         alpha_dash = alpha*new_alpha_ratio
+        st_dash = ss - d 
+        # new_alpha_ratio = (x - st_dash - d)/(x - st_dash)*
+        #   (x - st_dash + c*st_dash)/(x - st_dash - d + c*st_dash + c*d)
       }
       
-      browser()
-      if (st_dash < 0) {
-        st_dash = 0
+      #Constraint: 0 < a < 1 (Proporition of non ss)
+      if (is.infinite(alpha_dash)){
+        browser()
       }
+      
+      while(alpha_dash < 0 || alpha_dash > 1){
+        
+        if (alpha_dash > 1){  
+          alpha_dash = 2 - alpha_dash
+        }
+        alpha_dash = abs(alpha_dash) 
+        
+        # print(paste0('i = ', i, 't = ', t))
+        # print(paste0('alpha_dash', alpha_dash))
+      }
+
+      # if (st_dash < 0) {
+      #   st_dash = 0
+      # }
       
       #ACCEPTANCE PROBABILITY
       data_dash[[2]][t] = st_dash #s_t = st_dash
@@ -422,7 +442,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
         log_accept_ratio = -Inf 
       } else {
-        logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c) #+include alpha prior 
+        logl_new = LOG_LIKE_SSIB(data_dash, alpha_dash, r0, c) #+include alpha prior 
         log_accept_ratio = logl_new - log_like
         
         #PRIOR
@@ -440,8 +460,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       
       #Store
       if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
-        non_ss[i_thin, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
-        ss[i_thin, t] = data[[2]][t]
+        non_ss_matrix[i_thin, t] = data[[1]][t] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
+        ss_matrix[i_thin, t] = data[[2]][t]
       }
     }
     
@@ -478,6 +498,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   return(list(alpha_vec = alpha_vec, b_vec = b_vec, c_vec = c_vec, r0_vec = r0_vec,
               log_like_vec = log_like_vec, sigma = sigma,
               list_accept_rates = list_accept_rates,
-              data = data, non_ss = non_ss, ss = ss))
+              data = data, non_ss_matrix = non_ss_matrix, ss_matrix = ss_matrix))
 }
 
