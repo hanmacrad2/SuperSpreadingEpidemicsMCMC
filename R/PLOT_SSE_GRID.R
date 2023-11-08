@@ -1,5 +1,5 @@
 #PLOT SSE MCMC GRID
-PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals,
+PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = list(m1 = 0, m2 = 0),
                                 mod_par_names = c('R0', 'k'),
                                 mcmc_specs = list(model_type = 'Simulated',
                                                   burn_in_pc = 0.2, thinning_factor = 10),
@@ -14,7 +14,7 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals,
   list_priors = GET_LIST_PRIORS_SSE() 
   
   #PRIOR R0
-  if(PRIORS_USED$SSE$R0$EXP){
+  if(PRIORS_USED$SSE$r0$EXP){
     mr0_prior = paste0('exp(', list_priors$r0[1], ')')
     xseq_r0 = seq(0, 10, length.out = 500)
     dr0e = dexp(xseq_r0, rate = list_priors$r0[1])

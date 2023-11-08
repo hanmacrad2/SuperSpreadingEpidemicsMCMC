@@ -69,7 +69,7 @@ PLOT_SSB_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc = 40000,
       print(paste0('m3_prior, ', m3_prior))
     }
     
-    if(PRIORS_USED$SSEBr0EXP){
+    if(PRIORS_USED$SSEB$r0$EXP){
       mr0_prior = paste0('exp(', list_priors$r0[1], ')')
       xseq_r0 = seq(0, 3, length.out = 500)
       dr0e = dexp(xseq_r0, list_priors$r0[1])

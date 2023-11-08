@@ -57,7 +57,7 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
 #' @export
 
 LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c, 
-                          shape_gamma = 6, scale_gamma = 1){
+                          shape_gamma = 6, scale_gamma = 1, temp = 1.2){
   
   #A = PROPORTION OF r0
   b = (r0*(1 - alpha))/c #r0 = a_prop*r0 + b*c
@@ -81,7 +81,16 @@ LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c,
     loglike = loglike + dpois(non_ss[t], a*lambda_t, log = TRUE) +
       dpois(ss[t], b*lambda_t, log = TRUE) 
   }
-
+  
+  #Tempering
+  # if(loglike < 0){
+  #   loglike = abs(loglike)^temp
+  #   loglike = -loglike
+  # } else {
+  #   loglike = loglike^temp
+  # }
+  
+  
   return(loglike)
 }
 
@@ -292,7 +301,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     }
     
     #******************************************************
-    #a
+    #alpha
     alpha_dash <- alpha + rnorm(1, sd = sigma1)
     
     #Constraint: 0 < a < 1 (Proporition of non ss)
@@ -312,7 +321,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
                                                          list_priors, PRIORS_USED, alpha_flag = TRUE)
     
     #Metropolis Acceptance Step
-    #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
     if(log(runif(1)) < log_accept_ratio) {
       alpha <- alpha_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
@@ -337,7 +345,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
                                                          list_priors, PRIORS_USED, r0_flag = TRUE)
     #Metropolis Acceptance Step 
-    #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
     if(log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
       log_like = logl_new
@@ -387,15 +394,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       
       data_dash = data
       
+      #Propose
+      x = data[[1]][t] + data[[2]][t]
+      d = round(runif(1, min = 0, max = x/2))
+      
       #STOCHASTIC PROPOSAL for s
       if (runif(1) < 0.5) {
-        st_dash = data[[2]][t] + 1 
+        st_dash = data[[2]][t] + d #1 
       } else {
-        st_dash = data[[2]][t] - 1 
-      }
-      
-      if (st_dash < 0) {
-        st_dash = 0
+        st_dash = data[[2]][t] - d #1 
       }
       
       #ACCEPTANCE PROBABILITY

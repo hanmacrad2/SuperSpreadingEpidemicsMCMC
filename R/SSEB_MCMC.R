@@ -100,7 +100,8 @@ PROBABILITY_ST <- function(st, lambda_t, beta, gamma, max_et = 5){
 
 #PRIOR
 SET_SSEB_PRIOR <- function(param, param_dash,
-                           alpha_flag = FALSE, r0_flag = FALSE, gamma_flag = FALSE){
+                           alpha_flag = FALSE, r0_flag = FALSE,
+                           gamma_flag = FALSE){
   
   #PARAMS
   list_priors = GET_LIST_PRIORS_SSEB() 
@@ -144,7 +145,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
 MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
                             mcmc_inputs = 
                               list(param_starts = list(alpha_start = 0.5, gamma_start = 10, r0_start = 1.0),
-                                   alpha_star = 0.4, thinning_factor = 10, burn_in_pc = 0.2), 
+                                   alpha_star = 0.3, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_alpha = 0.3, sigma_r0 = 0.03, sigma_gamma = 3),
                             FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
   
@@ -156,6 +157,8 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
   #PARAMS
   lambda_vec = get_lambda(epidemic_data)
   i_thin = 1
+  alpha_star = mcmc_inputs$alpha_star
+  
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
     mcmc_vec_size = n_mcmc/thinning_factor; print(paste0('thinned mcmc vec size = ', mcmc_vec_size))
@@ -216,7 +219,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
   #******************************
   for(i in 2:n_mcmc) {
     
-    if (i%%5000 == 0) {
+    if (i%%500 == 0) {
       
       print(paste0('i = ', i))
     }
@@ -224,17 +227,14 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
     #****************************************************** 
     #alpha
     alpha_dash <- alpha + rnorm(1, sd = sigma_alpha)
-    
-    while(alpha_dash < 0 || alpha_dash > 1){
-      
-      if (alpha_dash > 1){ #keep alpha between 0 and 1 
-        alpha_dash = 2 - alpha_dash
-      }
-      alpha_dash = abs(alpha_dash) 
+    alpha_dash <- alpha_dash %% 2
+    if (alpha_dash > 1) {
+      alpha_dash <- 2 - alpha_dash
     }
     
     #log a
     logl_new = LOG_LIKE_SSEB(epidemic_data, lambda_vec, alpha_dash, r0, gamma)
+    
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     
     #Priors
