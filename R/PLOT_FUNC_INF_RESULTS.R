@@ -1,11 +1,11 @@
 #PLOT INFERENCE RESULTS
 PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                           num_days = 50, cex = 1.0, num_conds = 5,
-                             PDF = FALSE, FLAG_PARAM = list(r0 = FALSE, k = FALSE,
+                           num_days = 50, cex = 1.6, num_conds = 5,
+                             PDF = TRUE, FLAG_PARAM = list(r0 = FALSE, k = FALSE,
                                                alpha = FALSE, gamma = FALSE),
                              FLAG_FILTER = list(end_day = FALSE,
                                                 tot_infs = FALSE), 
-                           FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
+                           FLAG_MODEL = list(Baseline = FALSE, SSE = FALSE, SSI = FALSE,
                                              SSEB = FALSE, SSIB = FALSE)){
 
   #Params
@@ -51,13 +51,14 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. ")))
+    #Epidemic length: " ~ .(num_days) ~ ' days')))
       
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Posterior mean of ', true_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~
-                                 "Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
+    titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param))))
+                                # "Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
   # Create the plot for each subset
@@ -79,9 +80,8 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
            xlim = x_lim,
            ylim = y_lim,
            col = colour, pch = 16, 
-           #text.font = 4.0,
-           cex = cex)
-      title(main = list(titleX, cex = 1.2, font = 2.0))
+           cex.lab=1.4, cex.axis=1.4, cex.sub=1.2)
+      title(main = list(titleX, cex = 2.0, font = 2.0))
       
     } else {
       
@@ -112,7 +112,7 @@ PLOT_CI_PARAMS <- function(df_results, COMP_FOLDER, fig_num = '1',
          lwd = rep(1.8, num_conds),
          lty = rep(1, num_conds), #c(1, 1),
          pch = c(NA, 19, 19, 19, 19, 19),
-         text.font = 1.0,
+         text.font = 1.6,
          bty = "n")
   
   if(PDF){
@@ -175,13 +175,13 @@ PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
+    titleX = bquote(bold(paste(.(model) ~ "Model - ", italic(R[0]), " Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
     
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Posterior mean of ', true_param)
     titleX = bquote(bold(paste(.(model) ~ "Model - " ~ .(true_param) ~
-                                 "Inference. Epidemic length: " ~ .(num_days) ~ ' days')))
+                                 "Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
   # Create the plot for each subset
@@ -200,8 +200,9 @@ PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
       plot(true_subset, mean_subset, type = "p",
            main = "", xlab = xlab, ylab = ylab,
            xlim = x_lim, ylim = y_lim,
-           col = colour, pch = 16, cex = cex)#text.font = 4.0,
-      title(main = list(titleX, cex = 1.2, font = 2.0))
+           col = colour, pch = 16, 
+           cex.lab=1.2, cex.axis=1.2, cex.sub=1.2) #cex = cex text.font = 4.0,
+      title(main = list(titleX, cex = 1.8, font = 2.0))
       
     } else {
       
@@ -232,7 +233,7 @@ PLOT_CI_PARAMS_II <- function(df_results, COMP_FOLDER, fig_num = '1',
          lwd = rep(1.8, num_conds),
          lty = rep(1, num_conds), #c(1, 1),
          pch = c(NA, 19, 19, 19, 19, 19),
-         text.font = 1.0,
+         text.font = 1.2,
          bty = "n")
   
   if(PDF){
