@@ -61,76 +61,35 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
   
   #Params
   num_days = length(x); logl = 0
-  
   beta = r0*(1 - alpha)/gamma #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
-  #alpha = alpha_prop*r0 #alpha is now the rate
   
   for (t in 2:num_days) {
     
-    #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-    vec_inner_sum_xt = vector('numeric', length = x[t] + 1)
-    
-    for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
-      
-      #Log likelihood
-      st = x[t] - nt
-      vec_inner_sum_xt[nt + 1] = dpois(nt, alpha*r0*lambda_vec[t], log = TRUE) +           #dpois(nt, alpha*r0*lambda_vec[t])
-        PROBABILITY_ST(st, lambda_vec[t], beta, gamma)
-    } 
-    
-    logl = logl + LOG_SUM_EXP(vec_inner_sum_xt)
+    logl = logl + PROBABILITY_XT(x[t], lambda_vec[t], beta, gamma, alpha, r0)
     
   }
   
   return(logl)
 }
 
-
-# LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
-#   
-#   #Params
-#   num_days = length(x); logl = 0
-#   
-#   beta = r0*(1 - alpha)/gamma #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
-#   #alpha = alpha_prop*r0 #alpha is now the rate
-#    
-#   for (t in 2:num_days) {
-#     
-#     #lambda_t = sum(x[1:(t-1)]*rev(prob_infect[1:(t-1)]))
-#     inner_sum_xt = 0
-#   
-#     for (nt in 0:x[t]){ #Sum for all possible values of nt, xt-nt
-#       
-#       #Log likelihood
-#       st = x[t] - nt
-#       inner_sum_xt = inner_sum_xt + 
-#         dpois(nt, alpha*r0*lambda_vec[t])*            #dpois(nt, alpha*r0*lambda_vec[t])
-#         PROBABILITY_ST(st, lambda_vec[t], beta, gamma)
-#     } 
-#     
-#     logl = logl + log(inner_sum_xt) 
-#   }
-#   
-#   return(logl)
-# }
-
-#2. PROBABILITY OF ST
-PROBABILITY_ST <- function(st, lambda_t, beta, gamma, max_et = 20){
+PROBABILITY_XT <- function(xt, lambda_t, beta, gamma, alpha, r0, max_et = 100){
   
-  'Probability of St'
-  prob_st = 0
-  vec_prob_st = vector('numeric', length = max_et + 1)
+  'Probability of xt in SSEB model'
+  
+  #SETUP
+  prob_xt = 0
+  vec_prob_xt = vector('numeric', length = max_et + 1)
   
   for (et in 0:max_et){
-    
-    vec_prob_st[et + 1] =  dpois(et, beta*lambda_t, log = TRUE) +
-      dpois(st, gamma*et, log = TRUE)
+    vec_prob_xt[et + 1] =  dpois(et, beta*lambda_t, log = TRUE) +
+      dpois(xt, gamma*et+alpha*r0*lambda_t, log = TRUE)
   }
   
-  prob_st = LOG_SUM_EXP(vec_prob_st)
+  prob_xt = LOG_SUM_EXP(vec_prob_xt)
   
-  return(prob_st)
+  return(prob_xt)
 }
+
 
 #PRIOR
 SET_SSEB_PRIOR <- function(param, param_dash,
