@@ -72,7 +72,24 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, gamma){
   return(logl)
 }
 
-PROBABILITY_XT <- function(xt, lambda_t, beta, gamma, alpha, r0, max_et = 100){
+
+PROBABILITY_XT <- function(xt, lambda_t, beta, gamma, alpha, r0, max_et = 100) {
+  prob_xt = 0
+  vec_prob_xt = vector('numeric', length = max_et + 1)
+  
+  beta_lambda_t = beta*lambda_t
+  alpha_r0_lambda_t = alpha * r0 * lambda_t
+  
+  et_values <- 0:max_et
+  vec_prob_xt = dpois(et_values, beta_lambda_t, log = TRUE) +
+    dpois(xt, gamma * et_values + alpha_r0_lambda_t, log = TRUE)
+  
+  prob_xt = LOG_SUM_EXP(vec_prob_xt)
+  
+  return(prob_xt)
+}
+
+PROBABILITY_XT_V0 <- function(xt, lambda_t, beta, gamma, alpha, r0, max_et = 100){
   
   'Probability of xt in SSEB model'
   
