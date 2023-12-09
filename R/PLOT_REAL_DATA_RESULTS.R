@@ -1,35 +1,39 @@
 #RESULTS REAL DATA
 
 #PLOT TRACE
-PLOT_TRACE <-function(mcmc_vec, model_name){
+PLOT_TRACE <-function(mcmc_vec, model_name, color_model){
   
   #TITLE
-  trace_title = bquote(bold(paste(italic(R[0]),
-                                 " trace; ", .(model_name) ~ "model. ")))
+  trace_title = bquote(bold(paste(.(model_name) ~ "model. ", italic(R[0]),
+                                  " Trace")))
+  #trace_title = bquote(bold(paste(italic(R[0]), " trace; ", .(model_name) ~ "model. ")))
   ylab =  bquote(paste(italic(R[0])))
   
   plot(seq_along(mcmc_vec), mcmc_vec,  type = 'l',
        xlab = 'Time', ylab = ylab, 
        main = trace_title,
+       col = color_model,
        cex.lab=1.3, cex.axis=1.3, cex.main=1.3, cex.sub=1.3)
 }
 
 #PLOT SAMPLES
-PLOT_SAMPLES <-function(mcmc_vec, model_name){
+PLOT_SAMPLES <-function(mcmc_vec, model_name, color_model){
   
   #TITLE
   trace_title = bquote(bold(paste(italic(R[0]),
                                   " Posterior; ", .(model_name) ~ "model. ")))
   xlab =  bquote(paste(italic(R[0])))
-  hist(mcmc_vec, freq = FALSE, breaks = 150,
+  hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = xlab,
+       border = color_model,
+       col = color_model, 
        main = trace_title,
        cex.lab=1.3, cex.axis=1.3, cex.main=1.3, cex.sub=1.3)
   
 }
 
 #PLOT CUM MEAN
-PLOT_CUM_MEAN <-function(mcmc_vec, model_name){
+PLOT_CUM_MEAN <-function(mcmc_vec, model_name, color_model){
   
   'Cumulative mean'
   
@@ -48,6 +52,7 @@ PLOT_CUM_MEAN <-function(mcmc_vec, model_name){
   
   plot(seq_along(cum_mean), cum_mean, 
        ylim = ylimits,
+       col = color_model,
        xlab = 'Time', ylab = ylab,
        main = trace_title,
        cex.lab=1.3, cex.axis=1.3, cex.main=1.3, cex.sub=1.3)
@@ -56,10 +61,11 @@ PLOT_CUM_MEAN <-function(mcmc_vec, model_name){
 #************************
 #PLOT REAL DATA FUNCTION
 #************************
-PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = '1',
+PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = '2',
                                use = 'Waitemata', list_mcmc =
                                  list(Baseline = mcmc_baseline, SSE = mcmc_sse,
-                                      SSI = mcmc_ssi, SSEB = mcmc_sseb, SSIB = mcmc_ssib)){
+                                      SSI = mcmc_ssi, SSEB = mcmc_sseb, SSIB = mcmc_ssib), 
+                               list_colors = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') ){
   
   
   'PLOT MCMC REAL DATA'
@@ -103,7 +109,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = 
      
     #TRACE PLOTS
     #browser()
-    PLOT_TRACE(list_r0_vec[[model]], model)
+    PLOT_TRACE(list_r0_vec[[model]], model, list_colors[i])
     
   }
   
@@ -111,7 +117,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = 
     
     model = names(list_mcmc[i]) 
     #HIST SAMPLES
-    PLOT_SAMPLES(list_r0_vec[[model]], model)
+    PLOT_SAMPLES(list_r0_vec[[model]], model, list_colors[i])
   }
   
   #MEAN
@@ -119,7 +125,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = 
 
     model = names(list_mcmc[i])
     #HIST SAMPLES
-    PLOT_CUM_MEAN(list_r0_vec[[model]], model)
+    PLOT_CUM_MEAN(list_r0_vec[[model]], model, list_colors[i])
   }
   
   if(PDF){
