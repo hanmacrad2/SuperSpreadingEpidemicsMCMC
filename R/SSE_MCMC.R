@@ -2,7 +2,7 @@
 
 #SIMULATE
 #' @export
-SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.16,
+SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.8, #k = 0.16,
                               shape_gamma = 6, scale_gamma = 1,
                               epi_data = c(0,0,0), SIM_DATA = TRUE,
                               FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {

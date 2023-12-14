@@ -6,7 +6,7 @@
 #* SIMULATE SSI Model - Individual reproduction number
 #**********************************************
 #' @export
-SIMULATE_EPI_SSI <- function(num_days = 50, r0 = 2.0, k = 1.1,
+SIMULATE_EPI_SSI <- function(num_days = 50, r0 = 2.0, k = 0.8,
                         shape_gamma = 6, scale_gamma = 1,
                         epi_data = c(0,0,0), SIM_DATA = TRUE) {
   
@@ -41,7 +41,7 @@ SIMULATE_EPI_SSI <- function(num_days = 50, r0 = 2.0, k = 1.1,
     total_rate = sum(eta_vec[1:t-1]*infectivity) 
     
     x[t] = rpois(1, total_rate)
-    
+    print(paste0('total_rate', total_rate))
   }
   return(list(epidemic_data = x, eta_vec = eta_vec))
 }

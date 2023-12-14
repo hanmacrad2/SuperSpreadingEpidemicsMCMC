@@ -22,6 +22,37 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '') {
 }
 
 
+BOX_PLOT_POST_PROBS <- function(df_results, title = '') {
+  
+  # SETUP
+  title <- paste0('Posterior Model Probabilities. ', title)
+  
+  box_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
+  
+  boxplot(df_results, col = box_colors, names = colnames(df_results),
+          main = title, xlab = 'Model', ylab = 'Posterior Probability',
+          cex.lab = 1.5, cex.axis = 1.6, cex.main = 1.6, 
+          cex.names = 1.6, cex.sub = 1.6)
+  
+  legend('topright', legend = colnames(df_results), fill = box_colors)
+}
+
+BOX_PLOT_MOD_EV <- function(df_results, title = 'Model Evidence') {
+  
+  # SETUP
+  #title <- paste0('Posterior Model Probabilities. ', title)
+  
+  box_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
+  model_names = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB')
+  
+  boxplot(df_results, col = box_colors, names = model_names,
+          main = title, xlab = 'Model', ylab = 'log Model Evidence',
+          cex.lab = 1.3, cex.axis = 1.3, cex.main = 1.3, 
+          cex.names = 1.3, cex.sub = 1.3)
+  
+  #legend('topright', legend = colnames(df_results), fill = box_colors)
+}
+
 #PLOT TWO
 BOX_PLOT_POSTERIOR_PROBS <- function(list_vec_results, titleX = '') { 
   

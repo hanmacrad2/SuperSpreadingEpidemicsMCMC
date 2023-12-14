@@ -25,6 +25,7 @@ PLOT_SAMPLES <-function(mcmc_vec, model_name, color_model){
   xlab =  bquote(paste(italic(R[0])))
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = xlab,
+       xlim = c(0.5, 2.1),
        border = color_model,
        col = color_model, 
        main = trace_title,
@@ -42,13 +43,13 @@ PLOT_CUM_MEAN <-function(mcmc_vec, model_name, color_model){
                                   " Posterior mean; ", .(model_name) ~ "")))
   ylab =  bquote(paste(italic(R[0])))
   cum_mean = cumsum(mcmc_vec)/seq_along(mcmc_vec)
-  
+  ylimits = c(1.0, 1.15) #1.13)
   #ylim
-  if(model_name == 'SSIB'){
-    ylimits = c(0.63, 1.13)
-  } else {
-    ylimits = c(1.0, 1.13)
-  }
+  # if(model_name == 'SSIB'){
+  #   ylimits = c(0.63, 1.13)
+  # } else {
+  #   ylimits = c(1.0, 1.13)
+  # }
   
   plot(seq_along(cum_mean), cum_mean, 
        ylim = ylimits,
