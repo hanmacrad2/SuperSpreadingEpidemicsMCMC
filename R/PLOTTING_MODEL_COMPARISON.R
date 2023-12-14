@@ -69,10 +69,9 @@ BOX_PLOT_POST_PROBS_MULT <- function(df_results, title = '') {
   model_names = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB')
   
   boxplot(df_results, col = box_colors, names = model_names,
-          main = title, xlab = 'Model', ylab = 'Posterior Probability',
-          cex.lab = 1.3, cex.axis = 1.3, cex.main = 1.3, 
-          cex.names = 1.3, cex.sub = 1.3)
-  
+          main = title, xlab = 'Model', ylab = 'Posterior Model Probability',
+          cex.lab = 1.5, cex.axis = 1.6, cex.main = 1.6, 
+          cex.names = 1.6, cex.sub = 1.6)
   #legend('topright', legend = colnames(df_results), fill = box_colors)
 }
 
