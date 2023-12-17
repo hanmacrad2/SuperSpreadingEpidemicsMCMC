@@ -771,7 +771,7 @@ PLOT_CI_PARAMS_FIXED_III <- function(df_results, COMP_FOLDER, fig_num = '1',
          col = c('black', selected_colors),
          lwd = rep(1.8, num_conds),
          lty = rep(1, num_conds), #c(1, 1),
-         pch = c(NA, 19, 19, 19, 19, 19),
+         pch = c(NA, 19, 19, 19, 19, 19, 19),
          text.font = 1.0,
          bty = "n")
   
