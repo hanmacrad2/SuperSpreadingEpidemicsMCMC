@@ -1,9 +1,9 @@
 #SSE SIMULATIONS
 par(mfrow = c(3,2))
-PLOT_BOUNDS <-function(num_days = 50, R0 = 1.5, k = 0.2){
+PLOT_BOUNDS <-function(num_days = 50, r0 = 1.5, k = 0.2){
   
   #MATRIX OF SIMULATIONS
-  list_matrix_sims = GET_MATRIX_SIM_SSE(R0 = R0, k = k)
+  list_matrix_sims = GET_MATRIX_SIM_SSE(r0 = r0, k = k)
   matrix_sim_data = list_matrix_sims$matrix_sim_temp
   model_detail = list_matrix_sims$model_detail
   
@@ -30,16 +30,16 @@ PLOT_BOUNDS <-function(num_days = 50, R0 = 1.5, k = 0.2){
 
 GET_MATRIX_SIM_SSE <- function(n_sample_repeats = 1000, num_days = 50,
                                model_type = 'SSE',
-                               R0 = 1.5, k = 0.2) {
+                               r0 = 1.5, k = 0.2) {
   #PARAMS
   matrix_sim_temp = matrix(nrow = n_sample_repeats, ncol = num_days)
-  model_detail = paste0(model_type, ' model. Mean(black) 95% CIs(red) of ', n_sample_repeats, ' sims. R0: ', R0, ' k: ', k)
-  print(paste0('R0:, ', R0)); print(paste0('k:, ', k))
+  model_detail = paste0(model_type, ' model. Mean(black) 95% CIs(red) of ', n_sample_repeats, ' sims. r0: ', r0, ' k: ', k)
+  print(paste0('r0:, ', r0)); print(paste0('k:, ', k))
   
   #SIMULATE
   for (i in 1:n_sample_repeats){
     
-    sim_data_sse = SIMULATE_EPI_SSE(R0 = R0, k = k)
+    sim_data_sse = SIMULATE_EPI_SSE(r0 = r0, k = k)
     matrix_sim_temp[i, ] = sim_data_sse
     
   }

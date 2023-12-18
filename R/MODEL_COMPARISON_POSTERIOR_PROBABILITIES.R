@@ -38,5 +38,5 @@ GET_MODELS_POSTERIOR_PROBS <- function(vec_log_mod_ev, num_models = 5,
 
 
 #DATAFRAME OF POSTERIOR PROBS FOR MULTIPLE SIMULATIONS/MODEL EVIDENCE RUNS
-df_post_probs = apply(df_mod_ev_plot, MARGIN=1, FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2) )
+#df_post_probs = apply(df_mod_ev_plot, MARGIN=1, FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2) )
 
