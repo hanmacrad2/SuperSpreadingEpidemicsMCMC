@@ -41,11 +41,11 @@ SIMULATE_EPI_BASELINE  <- function(num_days = 50, r0 = 2.0,
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
   
   #Days of Infection Spreading
+  #inf_count = 0
   for (t in 2:num_days) {
     
     #Total rate
     tot_rate = r0*sum(tot_daily_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #Product of infections & their probablilty of infection along the gamma dist at that point in time
-    #print(paste0('t: ', t, 'tot_rate', tot_rate))
     tot_daily_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
   }
   
@@ -141,13 +141,14 @@ LOG_LIKE_BASELINE <- function(epidemic_data, r0){
 #'
 #' @export
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, 
+                                PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
-                                                  PRIOR_EXP = TRUE, PRIOR_GAMMA = FALSE,
                                                   THIN = TRUE, BURN_IN = TRUE),
                                 r0_sim = 1.3, mcmc_inputs = list(r0_start = 1.2,
                                                       target_accept_rate = 0.4, thinning_factor = 10,
                                                       burn_in_pc = 0.2), 
-                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0))) {
+                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0),
+                                                   unif_min = 0, unif_max = 10)) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -219,18 +220,20 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     log_accept_ratio = loglike_new - log_likelihood 
     
     #Priors
-    if (FLAGS_LIST$PRIOR_EXP){
+    if (PRIORS$EXP){
       log_accept_ratio = log_accept_ratio - r0_dash + r0 #Acceptance RATIO. Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
     
-      } else if (FLAGS_LIST$PRIOR_GAMMA) {
+      } else if (PRIORS$GAMMA) {
       
         log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
         dgamma(r0, shape = gamma_shape, scale = gamma_scale, log = TRUE)
 
+      } else if (PRIORS$UNIF){
+      
+        log_accept_ratio = log_accept_ratio + 
+          dunif(r0_dash, min = priors_list$unif_min, max = priors_list$unif_max, log = TRUE) - 
+          dunif(r0, min = priors_list$unif_min, max = priors_list$unif_max, log = TRUE)
     }
-    
-    #print(paste0(' log_accept_ratio ',  log_accept_ratio))
-    #print(paste0(' log(runif(1)) ',  log(runif(1)) ))
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {

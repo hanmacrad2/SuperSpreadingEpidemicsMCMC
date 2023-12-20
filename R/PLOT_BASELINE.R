@@ -7,7 +7,8 @@
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
 #' 
 PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
-                                  true_loglike = 0, data_type = 'Baseline', ADAPTIVE = TRUE) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
+                                  true_loglike = 0, data_type = 'Baseline', ADAPTIVE = TRUE,
+                                  PRIORS = list(EXP = FALSE, UNIF = TRUE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
   
   #PLOT
   plot.new(); par(mfrow=c(2,3))
@@ -17,6 +18,13 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
   #Limits
   ll_lim_min = min(true_loglike, min(mcmc_output$log_like_vec, na.rm = TRUE))
   ll_lim_max = max(true_loglike, max(mcmc_output$log_like_vec, na.rm = TRUE))
+  
+  #priors
+  if(PRIORS$EXP){
+   prior_tit = 'Exponential(1)' 
+  } else if (PRIORS$UNIF){
+    prior_tit = 'Uniform(0,10)' 
+  }
   
   #***********
   #* PLOTS *
@@ -36,15 +44,24 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
   #iii. RO SAMPLES - HISTOGRAM
   hist(r0_mcmc, freq = FALSE, breaks = 100,
        xlab = 'R0 total', 
-       main = paste('R0 total MCMC samples'), 
+       main = paste0('R0, Prior = ', prior_tit), 
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = r0_sim, col = 'orange', lwd = 2)
   
   #PRIOR
-  mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
-  xseq_r0 = seq(0, 3, length.out = 500)
-  dr0e = dexp(xseq_r0, 1) #list_priors$r0[1])
-  lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+  if(PRIORS$EXP){
+    mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
+    xseq_r0 = seq(0, 3, length.out = 500)
+    dr0e = dexp(xseq_r0, 1) #list_priors$r0[1])
+    lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+    
+  } else if(PRIORS$UNIF){
+    mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
+    xseq_r0 = seq(0, 15, length.out = 1000)
+    dr0e = dunif(xseq_r0, min = 0, max = 10) #list_priors$r0[1])
+    lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+  }
+
   
   #ii. MEAN PLOTS
   r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
