@@ -8,7 +8,7 @@
 #' 
 PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
                                   true_loglike = 0, data_type = 'Baseline', ADAPTIVE = TRUE,
-                                  PRIORS = list(EXP = FALSE, UNIF = TRUE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
+                                  PRIORS = list(EXP = FALSE, UNIF = FALSE, GAMMA = FALSE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
   
   #PLOT
   plot.new(); par(mfrow=c(2,3))
@@ -21,9 +21,11 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
   
   #priors
   if(PRIORS$EXP){
-   prior_tit = 'Exponential(1)' 
+   prior_title = 'Exponential(1)' 
   } else if (PRIORS$UNIF){
-    prior_tit = 'Uniform(0,10)' 
+    prior_title = 'Uniform(0,10)' 
+  } else if (PRIORS$GAMMA){
+    prior_title = 'Gamma(1,5)' 
   }
   
   #***********
@@ -44,7 +46,7 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
   #iii. RO SAMPLES - HISTOGRAM
   hist(r0_mcmc, freq = FALSE, breaks = 100,
        xlab = 'R0 total', 
-       main = paste0('R0, Prior = ', prior_tit), 
+       main = paste0('R0, Prior = ', prior_title), 
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = r0_sim, col = 'orange', lwd = 2)
   

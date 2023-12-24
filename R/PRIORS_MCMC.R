@@ -7,6 +7,7 @@
 GET_LIST_PRIORS_SSE <- function() {
   
   LIST_PRIORS_SSE = list(r0 = c(1,0), #exp
+                         r0_gamma = c(1, 5),
                     k =  c(1,0)) #exp(1), exp(0.1)
   
   return(LIST_PRIORS_SSE)
@@ -48,7 +49,7 @@ GET_PRIORS_USED <- function(){
     list(BASELINE = 
            list(r0 = list(EXP = TRUE, GAMMA = FALSE)),
          SSE = 
-           list(r0 = list(EXP = TRUE, UNIF = FALSE),
+           list(r0 = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE),
                 k =  list(EXP = TRUE, GAMMA = FALSE)),
          SSI = 
            list(r0 = list(EXP = TRUE),

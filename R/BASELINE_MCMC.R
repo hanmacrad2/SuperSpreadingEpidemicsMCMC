@@ -147,7 +147,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
                                 r0_sim = 1.3, mcmc_inputs = list(r0_start = 1.2,
                                                       target_accept_rate = 0.4, thinning_factor = 10,
                                                       burn_in_pc = 0.2), 
-                                priors_list = list(gamma_shape = 2, r0_prior_exp = c(1, 0),
+                                priors_list = list(gamma_shape = 1, gamma_scale = 5,  
+                                                   r0_prior_exp = c(1, 0),
                                                    unif_min = 0, unif_max = 10)) {
   
   'Returns MCMC samples of the reproduction number of the data
@@ -163,7 +164,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   print(paste0('num mcmc iters = ', n_mcmc))
   #PRIORS
   gamma_shape = priors_list$gamma_shape
-  gamma_scale = priors_list$gamma_shape*r0_sim
+  gamma_scale = priors_list$gamma_scale #*r0_sim
   #print(paste0('Gamma prior? ', FLAGS_LIST$PRIOR_GAMMA))
   
   #THINNING FACTOR
@@ -225,7 +226,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     
       } else if (PRIORS$GAMMA) {
       
-        log_accept_ratio = log_accept_ratio + dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
+        log_accept_ratio = log_accept_ratio + 
+          dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
         dgamma(r0, shape = gamma_shape, scale = gamma_scale, log = TRUE)
 
       } else if (PRIORS$UNIF){
