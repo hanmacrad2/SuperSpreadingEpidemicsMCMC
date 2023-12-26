@@ -21,9 +21,12 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
   
   #PLOT
+  plot_folder = paste0(COMP_FOLDER, '/plots/')
+  create_folder(plot_folder)
+  
   if(PDF){
-    pdf_file = paste0('Fig_', model, '_', true_param, '_', fig_num, '.pdf') 
-    pdf(paste0(COMP_FOLDER, '/plots/', pdf_file), width = 13.0, height = 8.0)
+    pdf_file = paste0(model, '_', true_param, '_', fig_num, '.pdf') #'Fig_', 
+    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0)
   }
   par(mar=c(4.9, 4.6, 3.0, 17.0), xpd=TRUE) #Margins; bottom, left, top, right
   
@@ -34,7 +37,8 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds 
   
   #PLOT
-  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  #y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  y_lim = c(0, 2+max(true_total, max(df_results[paste0('mean_', true_param)]))) 
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   
   #PRIORS

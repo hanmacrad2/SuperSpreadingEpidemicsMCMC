@@ -144,7 +144,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
                                 PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
                                                   THIN = TRUE, BURN_IN = TRUE),
-                                r0_sim = 1.3, mcmc_inputs = list(r0_start = 1.2,
+                                r0_sim = 1.3, mcmc_inputs = list(r0_start = 1.0, #1.2 changed 24/12/23
                                                       target_accept_rate = 0.4, thinning_factor = 10,
                                                       burn_in_pc = 0.2), 
                                 priors_list = list(gamma_shape = 1, gamma_scale = 5,  

@@ -3,9 +3,9 @@
 #SIMULATE
 #' @export
 SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.8, #k = 0.16,
-                              shape_gamma = 6, scale_gamma = 1,
-                              epi_data = c(0,0,0), SIM_DATA = TRUE,
-                              FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
+                             shape_gamma = 6, scale_gamma = 1,
+                             epi_data = c(0,0,0), SIM_DATA = TRUE,
+                             FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
   
   'Simulate an epidemic with Superspreading events
   alpha - r0'
@@ -38,7 +38,7 @@ SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.8, #k = 0.16,
     } else if (FLAG_NEGBIN_PARAMATERISATION$param_prob) {
       
       x[t] = rnbinom(1, size = k*lambda_t, prob =  k/(r0 + k)) #Neg Bin parameterisation #2
-    
+      
     }
   }
   
@@ -69,7 +69,7 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
       print(paste0('k, r0', k, r0))
     }
   }
-
+  
   return(loglike)
   
 }
@@ -77,47 +77,51 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
 #****************
 #* SET PRIOR SSE
 #* **************
-SET_SSE_PRIOR <- function(sse_params, sse_params_dash){
+SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
   
   #EXTRACT PARAMS FOR PRIORS
   r0 = sse_params[1]; r0_dash = sse_params_dash[1]
   k =  sse_params[2]; k_dash = sse_params_dash[2]
   list_priors = GET_LIST_PRIORS_SSE() 
-  PRIORS_USED =  GET_PRIORS_USED() 
+  #PRIORS_USED =  GET_PRIORS_USED() 
   prior = 0
-    
+  
   if (PRIORS_USED$SSE$r0$EXP) {
     
     prior = prior + dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
       dexp(r0, rate = list_priors$r0[1], log = TRUE) 
     
-  } else if (PRIORS_USED$SSE$r0$EXP){
-    print('Gamma prior used r0 sse')
+  } else if (PRIORS_USED$SSE$r0$GAMMA){
+    #print('Gamma prior used r0 sse')
     
-    prior = prior + dgamma(r0_dash, shape = , scale = , log = TRUE) -
-      dgamma(r0, shape = list_priors$r0[1], scale = log = TRUE) 
+    prior = prior + dgamma(r0_dash, shape = list_priors$r0_gamma[1], scale = list_priors$r0_gamma[2], log = TRUE) -
+      dgamma(r0, shape = list_priors$r0_gamma[1], scale = list_priors$r0_gamma[2], log = TRUE) 
   }
-    
+  
   if (PRIORS_USED$SSE$k$EXP) {
     prior = prior + dexp(k_dash, rate = list_priors$k[1], log = TRUE) -
       dexp(k, rate = list_priors$k[1], log = TRUE) 
   }
-
+  
   return(prior)
 }
 
 #********************************************************
-#1. MCMC INFERENCE FOR SSE MODEL 
+#1. MCMC INFERENCE FOR SSE MODEL  #24/12/23 mod_start_points = c(1.2, 0.15), #= GET_PRIORS_USED(), 
 #********************************************************
 #' @export
-MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
-                            mod_start_points = c(1.2, 0.15),
+MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED, mod_start_points = c(1.0, 0.5), 
                            mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
-                                               thinning_factor = 10, burn_in_pc = 0.2),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
-                                              PRIOR = TRUE, BURN_IN = TRUE)){    
+                                              thinning_factor = 10, burn_in_pc = 0.2),
+                           FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
+                                             PRIOR = TRUE, BURN_IN = TRUE)){    
+  
+  #MCMC INITIAL POINTS
+  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+  mod_start_points[1] = r0_start
   
   #MCMC PARAMS + VECTORS
+  print(paste0('MOD STARTING POINTS;', mod_start_points))
   i_thin = 1
   num_days = length(epidemic_data)
   vec_min = rep(0, mcmc_inputs$dim)
@@ -158,7 +162,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   
   #MCMC
   for(i in 2:n_mcmc) {
-
+    
     if(i%%10000 == 0) print(paste0('i = ', i))
     
     #PROPOSAL
@@ -174,8 +178,8 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
       log_accept_ratio = logl_new - log_like
       
       #PRIORS
-      log_accept_ratio = log_accept_ratio + SET_SSE_PRIOR(sse_params, sse_params_dash)
- 
+      log_accept_ratio = log_accept_ratio + SET_SSE_PRIOR(sse_params, sse_params_dash, PRIORS_USED)
+      
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
         sse_params <- sse_params_dash
@@ -194,7 +198,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
       accept_prob = min(1, exp(log_accept_ratio))
       
     } else {
-     accept_prob = 0
+      accept_prob = 0
     }
     
     #ADAPTIVE SCALING (needs acceptance probability)
@@ -216,7 +220,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc,
   #Return a, acceptance rate
   return(list(sse_params_matrix = sse_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              accept_rate = accept_rate))
+              accept_rate = accept_rate, r0_start = r0_start))
 } 
 
 
