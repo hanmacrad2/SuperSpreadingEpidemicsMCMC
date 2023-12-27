@@ -38,7 +38,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
   
   #PLOT
   #y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
-  y_lim = c(0, 2+max(true_total, max(df_results[paste0('mean_', true_param)]))) 
+  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   
   #PRIORS
@@ -191,6 +191,24 @@ SUBSET_DFS <- function(df_results, filter_param, true_param, GT_20 = GT_20, num_
 #* PLOT PERFORMANCE & INFERENCE RESULTS
 #* 
 #* **********************
+SIM_PERFORMANCE_R0 <- function(df_results){
+  
+  #Bias, MAE
+  df_results$MAE = abs(df_results$mean_r0 - df_results$true_r0)
+  df_results$bias = df_results$mean_r0 - df_results$true_r0
+  num_runs = length(df_results$true_r0)
+  
+  #Results
+  print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
+  print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
+  print(paste0('mean sd: ', round(mean(df_results$sd_r0), 3)))
+  print(paste0('coverage: ', sum(df_results$coverage_r0)))
+  print(paste0('% coverage: ', sum(df_results$coverage_r0)/num_runs))
+  
+  #return(df_results)
+  
+}
+
 SIM_PERFORMANCE <- function(df_results){
   
   #Bias, MAE
@@ -206,4 +224,48 @@ SIM_PERFORMANCE <- function(df_results){
   
   #return(df_results)
   
+}
+
+
+#*****************************
+#* PRIORS
+#*****************************
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE,
+                                          GAMMA = FALSE, UNIF = FALSE),
+                            x_min = 0, x_max = 25, cex = 1.6){
+  
+  #Setup
+  x = seq(from = x_min, to = x_max, length = 500)
+  #prior = names(PRIORS)[which(unlist(PRIORS))]
+  
+  #PRIORS
+  if(PRIORS$EXP){
+    print('a')
+    y = dexp(x, 1)
+    prior_title =  paste0('Exponential(1) Prior')
+    
+  } else if (PRIORS$GAMMA){
+    prior_title =  paste0('Gamma(1, 5) Prior')
+    y = dgamma(x, shape = 1, scale = 5)
+    
+  } else if (PRIORS$UNIF){
+    prior_title =  paste0('Uniform(0, 10) Prior')
+    y = dunif(x, 0, 10)
+  }
+  
+  plot(x, y, type = 'l', lwd = 2, #col = 'orange',
+       main = prior_title, ylab = 'Density',
+       cex.lab=cex, cex.axis=cex, cex.main= cex, cex.sub=cex)
+}
+
+GET_PRIOR_TITLE <-function(PRIORS){
+  
+  #PRIORS
+  if(PRIORS$EXP){
+    prior_title =  'Exponential(1) Prior used'
+  } else if (PRIORS$GAMMA){
+    prior_title =  'Gamma(1, 5) Prior used'
+  } else if (PRIORS$UNIF){
+    prior_title =  'Uniform(0, 10) Prior used'
+  }
 }

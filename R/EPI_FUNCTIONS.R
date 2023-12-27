@@ -6,13 +6,13 @@ GET_R0_INITIAL_MCMC <-function(epi_data){
   'INITIALSE R0 DEPENDING ON DATA'
   
   if(sum(epi_data)<=100){
-    r0_start = runif(1, 0.9, 1.2)
+    r0_start = runif(1, 0.9, 2.5)
   } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
-    r0_start = runif(1, 1, 2)
-  }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
     r0_start = runif(1, 1, 3)
+  }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
+    r0_start = runif(1, 1.75, 4)
   } else if (sum(epi_data) > 10000){
-    r0_start = runif(1, 2, 4)
+    r0_start = runif(1, 2.5, 4)
   }
   
   return(r0_start)
