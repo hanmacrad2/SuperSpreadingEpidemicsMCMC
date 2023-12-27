@@ -16,7 +16,8 @@ GET_LIST_PRIORS_SSE <- function() {
 #SSI
 GET_LIST_PRIORS_SSI <- function(){
   
-  LIST_PRIORS_SSI = list(r0 = c(1,0), #exp
+  LIST_PRIORS_SSI = list(r0 = c(1,0), #r0 = list(exp = c(1,0), gamma = c(1,5))
+                         gamma = c(1,5),
                     k =  c(1,0)) #exp
   
   return(LIST_PRIORS_SSI)
