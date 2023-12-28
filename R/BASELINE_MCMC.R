@@ -98,6 +98,36 @@ LOG_LIKE_BASELINE <- function(epidemic_data, r0){
   log_likelihood
 }
 
+#****************
+#* SET PRIOR SSE
+#* **************
+SET_BASELINE_PRIOR <- function(r0, r0_dash, PRIORS_USED){
+  
+  #PRIOR
+  list_priors = GET_LIST_PRIORS_BASELINE() 
+  
+  if (PRIORS_USED$BASELINE$r0$EXP) {
+    
+    prior = dexp(r0_dash, rate = list_priors$exp[1], log = TRUE) -
+      dexp(r0, rate = list_priors$exp[1], log = TRUE) 
+    
+  } else if (PRIORS_USED$BASELINE$r0$GAMMA){
+    #print('Gamma prior used r0 sse')
+    
+    prior = dgamma(r0_dash, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) -
+      dgamma(r0, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) 
+  }
+  
+  else if (PRIORS_USED$BASELINE$r0$UNIF) {
+    
+    prior = dunif(r0_dash, min = list_priors$unif[1], max = list_priors$unif[2], log = TRUE) - 
+      dunif(r0, min = list_priors$unif[1], max = list_priors$unif[2], log = TRUE)
+
+  }
+  
+  return(prior)
+}
+
 #************************************************************************
 # BASELINE MCMC
 #************************************************************************
@@ -141,15 +171,11 @@ LOG_LIKE_BASELINE <- function(epidemic_data, r0){
 #'
 #' @export
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, 
-                                PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
+                                PRIORS_USED = GET_PRIORS_USED(), #PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
                                                   THIN = TRUE, BURN_IN = TRUE),
-                                r0_sim = 1.3, mcmc_inputs = list(r0_start = 1.0, #1.2 changed 24/12/23
-                                                      target_accept_rate = 0.4, thinning_factor = 10,
-                                                      burn_in_pc = 0.2), 
-                                priors_list = list(gamma_shape = 1, gamma_scale = 5,  
-                                                   r0_prior_exp = c(1, 0),
-                                                   unif_min = 0, unif_max = 10)) {
+                                mcmc_inputs = list(target_accept_rate = 0.4, thinning_factor = 10, #r0_start = 1.0, #1.2 changed 24/12/23
+                                                      burn_in_pc = 0.2)) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -161,13 +187,12 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
-  print(paste0('num mcmc iters = ', n_mcmc))
-  #PRIORS
-  gamma_shape = priors_list$gamma_shape
-  gamma_scale = priors_list$gamma_scale #*r0_sim
-  #print(paste0('Gamma prior? ', FLAGS_LIST$PRIOR_GAMMA))
   
+  #MCMC INITIAL POINTS
+  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+
   #THINNING FACTOR
+  print(paste0('num mcmc iters = ', n_mcmc))
   i_thin = 1
   if(FLAGS_LIST$THIN){
     thinning_factor = mcmc_inputs$thinning_factor
@@ -184,7 +209,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   
   #MCMC VECTORS - INITIALISE
   r0_vec <- vector('numeric', mcmc_vec_size); log_like_vec <- vector('numeric', mcmc_vec_size)
-  r0_vec[1] <- mcmc_inputs$r0_start
+  r0_vec[1] <- r0_start
   r0 = r0_vec[1]; 
   
   log_like_vec[1] <- LOG_LIKE_BASELINE(epidemic_data, r0_vec[1])
@@ -192,7 +217,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   count_accept = 0
   
   #SIGMA - INITIALISE
-  sigmaX =  0.5*mcmc_inputs$r0_start
+  sigmaX =  0.5*r0_start
   
   if (FLAGS_LIST$ADAPTIVE){
     
@@ -220,22 +245,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     loglike_new = LOG_LIKE_BASELINE(epidemic_data, r0_dash)
     log_accept_ratio = loglike_new - log_likelihood 
     
-    #Priors
-    if (PRIORS$EXP){
-      log_accept_ratio = log_accept_ratio - r0_dash + r0 #Acceptance RATIO. Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
-    
-      } else if (PRIORS$GAMMA) {
-      
-        log_accept_ratio = log_accept_ratio + 
-          dgamma(r0_dash, shape = gamma_shape, scale = gamma_scale, log = TRUE) - 
-        dgamma(r0, shape = gamma_shape, scale = gamma_scale, log = TRUE)
-
-      } else if (PRIORS$UNIF){
-      
-        log_accept_ratio = log_accept_ratio + 
-          dunif(r0_dash, min = priors_list$unif_min, max = priors_list$unif_max, log = TRUE) - 
-          dunif(r0, min = priors_list$unif_min, max = priors_list$unif_max, log = TRUE)
-    }
+    #PRIORS
+    log_accept_ratio = log_accept_ratio + SET_BASELINE_PRIOR(r0, r0_dash, PRIORS_USED)
     
     #Metropolis Acceptance Step
     if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
@@ -269,5 +280,5 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   
   #Return a, acceptance rate
   return(list(r0_vec = r0_vec, log_like_vec = log_like_vec, sigma_vec = sigma_vec,
-              accept_rate = accept_rate))
+              accept_rate = accept_rate, r0_start = r0_start))
 }

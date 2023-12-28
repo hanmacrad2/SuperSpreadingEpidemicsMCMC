@@ -3,6 +3,16 @@
 # 1. PRIORS - DEFINE LISTS
 #*
 #*****************************************************************
+#BASELINE
+GET_LIST_PRIORS_BASELINE <- function() {
+  
+  LIST_PRIORS_BASELINE = list(exp = c(1,0), #exp
+                         gamma = c(1, 5),
+                         unif =  c(0,10)) #exp(1), exp(0.1)
+  
+  return(LIST_PRIORS_BASELINE)
+}
+
 #SSE
 GET_LIST_PRIORS_SSE <- function() {
   
@@ -48,7 +58,7 @@ GET_PRIORS_USED <- function(){
   
   PRIORS_USED = 
     list(BASELINE = 
-           list(r0 = list(EXP = TRUE, GAMMA = FALSE)),
+           list(r0 = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE)),
          SSE = 
            list(r0 = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE),
                 k =  list(EXP = TRUE, GAMMA = FALSE)),
