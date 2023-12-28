@@ -1,9 +1,9 @@
 #PLOT INFERENCE RESULTS
 'PLOT COMPUTED INFERENCE RESULTS FOR ALL MODELS '
 
-PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
+PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                               num_days = 50, cex = 1.25, 
-                              PDF = TRUE, GT_20 = TRUE, INCLUDE_INFS_5 = FALSE,
+                              PDF = TRUE, GT = FALSE, GT_VAL = 20, INCLUDE_INFS_5 = FALSE,
                               PRIORS = list(EXP = TRUE,
                                             GAMMA = FALSE, UNIF = FALSE),
                               FLAG_PARAM = list(r0 = FALSE, k = FALSE,
@@ -13,7 +13,6 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
                               FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
                                                 SSEB = FALSE, SSIB = FALSE)){
   
-  print(GT_20)
   #PARAMS 
   true_param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   true_total = unlist(df_results[paste0('true_', true_param)])
@@ -32,14 +31,14 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT_20 = GT_20)
+  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT = GT, GT_VAL = GT_VAL)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds 
   
   #PLOT
-  #y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
+  #y_lim = c(0,7) #c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
   
   #PRIORS
   prior_title = GET_PRIOR_TITLE(PRIORS)
@@ -117,11 +116,11 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER,fig_num = '1',
 }
 
 #SUBSET THE DATASET
-SUBSET_DFS <- function(df_results, filter_param, true_param, GT_20 = GT_20, num_conds = 4,
+SUBSET_DFS <- function(df_results, filter_param, true_param,
+                       GT=FALSE, GT_VAL = 20, num_conds = 4,
                        INCLUDE_INFS_5 = FALSE ){
   
   'SUBSET DATAFRAME OF RESULTS'
-  print(GT_20)
   #Setup
   viridis_palette <- viridis(10)
   
@@ -149,10 +148,10 @@ SUBSET_DFS <- function(df_results, filter_param, true_param, GT_20 = GT_20, num_
     num_conds = num_conds + 1
     selected_colors <- viridis_palette[c(9, 10, 8, 5)]
     
-  } else if(GT_20) {
+  } else if(GT) {
     
     legend_list <- c(paste0(true_param, " True "),
-                     paste0(true_param, " estimated mean, infections: [20,100]"), 
+                     paste0(true_param, " estimated mean, infections: [", GT_VAL, ",100]"), 
                      paste0(true_param, key, "[100, 1k]"),
                      paste0(true_param, key, "[1k, 10k]"),
                      paste0(true_param, key, "[10k, 100k]"))
@@ -214,13 +213,14 @@ SIM_PERFORMANCE <- function(df_results){
   #Bias, MAE
   df_results$MAE = abs(df_results$mean_r0 - df_results$true_r0)
   df_results$bias = df_results$mean_r0 - df_results$true_r0
+  num_runs = length(df_results$true_r0)
   
   #Results
   print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
   print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
   print(paste0('mean sd: ', round(mean(df_results$sd), 3)))
   print(paste0('coverage: ', sum(df_results$coverage)))
-  print(paste0('% coverage: ', sum(df_results$coverage)/1000))
+  print(paste0('% coverage: ', sum(df_results$coverage)/num_runs))
   
   #return(df_results)
   

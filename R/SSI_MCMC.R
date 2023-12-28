@@ -86,24 +86,31 @@ LOG_LIKE_SSI <- function(epi_data, infect_curve_ga,
 }
 
 #PRIOR
-SET_SSI_PRIOR <- function(params, params_dash){
+SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
   
   #PRIORS
   list_priors = GET_LIST_PRIORS_SSI() 
-  PRIORS_USED =  GET_PRIORS_USED() 
+  prior = 0 
+  #PRIORS_USED =  GET_PRIORS_USED() 
   
   r0 = params[1]; r0_dash = params_dash[1]
   k =  params[2]; k_dash = params_dash[2]
   
   if(PRIORS_USED$SSI$r0$EXP){
     
-    p = dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
+    prior = dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
       dexp(r0, rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSI$r0$GAMMA){
+    #print('Gamma prior used r0 sse')
+    
+    prior = dgamma(r0_dash, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) -
+      dgamma(r0, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) 
   }
   
   if (PRIORS_USED$SSI$k$EXP) {
     
-    p = p + dexp(k_dash, rate = list_priors$k[1], log = TRUE) -
+    prior = prior + dexp(k_dash, rate = list_priors$k[1], log = TRUE) -
       dexp(k, rate = list_priors$k[1], log = TRUE)
   }
   
@@ -115,11 +122,15 @@ SET_SSI_PRIOR <- function(params, params_dash){
 #1. MCMC INFERENCE FOR SSI MODEL - INDIVIDUAL r0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 40000,
-                              mcmc_inputs = list(mod_start_points = c(1.2, 0.16),
+MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED,
+                              mcmc_inputs = list(mod_start_points = c(1.2, 0.5),
                                                  dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(r0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10, burn_in_pc = 0.2),
                               FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE)) {    
+  
+  #MCMC INITIAL POINTS
+  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+  mod_start_points[1] = r0_start
   
   #MCMC PARAMS + VECTORS
   num_days = length(epidemic_data); 
@@ -189,7 +200,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc = 40000,
       logl_new = LOG_LIKE_SSI(epidemic_data, infect_curve_ga, ssi_params_dash, eta)
       log_accept_ratio = logl_new - log_like
       #PRIORS
-      log_accept_ratio = log_accept_ratio + SET_SSI_PRIOR(ssi_params, ssi_params_dash)
+      log_accept_ratio = log_accept_ratio + SET_SSI_PRIOR(ssi_params, ssi_params_dash, PRIORS_USED)
       
       #METROPOLIS ACCEPTANCE STEP
       if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {

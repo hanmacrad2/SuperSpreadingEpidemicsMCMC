@@ -1,23 +1,41 @@
 #COMPUTING FUNCTIONS - INFERENCE
 
-GET_INFERENCE_R0 <- function(true_r0, r0_vec){
+GET_INFER_R0_ROW <- function(r0_val, r0_vec, mcmc_output, epidemic_data){
+  
+  #Extract 
+  num_days = length(epidemic_data)
   
   row_r0 <- data.frame(
-  true_r0 = r0,
+  true_r0 = r0_val,
   mean_r0 = mean(r0_vec),
+  r0_start = mcmc_output$r0_start,
   sd_r0 = sd(r0_vec),
   lower_ci_r0 = get_lower_ci(r0_vec), # credible_intervals["lower"],
   upper_ci_r0 = get_upper_ci(r0_vec), #credible_intervals["upper"],
-  coverage_r0 = GET_COVERAGE(r0_vec),
-  es_r0 = effectiveSize(r0_vec)
-  )
+  coverage_r0 = GET_COVERAGE(r0_val, r0_vec),
+  tot_infs = sum(epidemic_data),
+  end_day = epidemic_data[num_days],
+  eff_size_r0 = unlist(effectiveSize(as.mcmc(r0_vec)))[[1]])
   
+  row_r0$sim_data = list(epidemic_data)
+    
   return(row_r0)
 }
 
-#ADD GELMAN.DIAG
-#gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))
-#df3 = cbind(df1, df2)
+GET_INFERENCE_ALPHA <- function(true_alpha, alpha_vec){
+  
+  row_alpha <- data.frame(
+    true_alpha = true_alpha,
+    mean_alpha = mean(alpha_vec),
+    sd_alpha = sd(alpha_vec),
+    lower_ci_alpha = get_lower_ci(alpha_vec), # credible_intervals["lower"],
+    upper_ci_alpha = get_upper_ci(alpha_vec), #credible_intervals["upper"],
+    coverage_alpha = GET_COVERAGE(alpha_vec),
+    esize_alpha = effectiveSize(alpha_vec)
+  )
+  
+  return(row_alpha)
+}
 
 GET_COVERAGE <- function(param_val, mcmc_vec){
   
@@ -33,6 +51,32 @@ GET_COVERAGE <- function(param_val, mcmc_vec){
   }
   
   return(coverage)
+}
+
+#ADD GELMAN.DIAG
+#gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))
+#df3 = cbind(df1, df2)
+
+
+#*********************
+#* . 1BASELINE MODEL
+#* *******************
+
+#MCMC FUNCTIONS
+#' @export 
+INFER_BASELINE  <- function(r0_val, PRIORS_USED = GET_PRIORS_USED(), n_mcmc = 40000) { #100  
+  
+  'Inference of baseline simulate data'
+  cat(r0_val)
+  epidemic_data = SIMULATE_EPI_BASELINE(r0 = r0_val)
+  
+  #MCMC
+  mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc, PRIORS_USED = PRIORS_USED)
+  r0_vec = mcmc_output$r0_vec
+  
+  result_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
+  
+  return(result_row)
 }
 
 #**********************
@@ -177,13 +221,10 @@ GET_SSEB_MCMC_ROW <- function(r0_val, alpha_val, beta_val, mcmc_output,
   alpha_vec = mcmc_output$alpha_vec
   gamma_vec = mcmc_output$gamma_vec
   
+  result_row_r0 = GET_INFER_R0_ROW(r0_val, r0_vec, data_sseb)
+  result_row_alpha = GET_INFERENCE_ALPHA(alpha_val, alpha_vec)
+  
   result_row <- data.frame(
-    true_r0 = r0,
-    mean_r0 = mean(r0_vec),
-    sd_r0 = sd(r0_vec),
-    lower_ci_r0 = get_lower_ci(r0_vec), # credible_intervals["lower"],
-    upper_ci_r0 = get_upper_ci(r0_vec), #credible_intervals["upper"],
-    coverage_r0 = GET_COVERAGE(r0_vec),
     true_alpha = alpha,
     mean_alpha = mean(alpha_vec),
     lower_ci_alpha = get_lower_ci(alpha_vec),
@@ -197,6 +238,8 @@ GET_SSEB_MCMC_ROW <- function(r0_val, alpha_val, beta_val, mcmc_output,
     end_day = data_sseb[num_days],
     row.names = NULL
   )
+  
+  result_row$data_sim = list(data_sseb)
   
   # Add the row to the results dataframe
   return(result_row)

@@ -110,7 +110,7 @@ SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
 #1. MCMC INFERENCE FOR SSE MODEL  #24/12/23 mod_start_points = c(1.2, 0.15), #= GET_PRIORS_USED(), 
 #********************************************************
 #' @export
-MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED, mod_start_points = c(1.0, 0.5), 
+MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), mod_start_points = c(1.0, 0.5), 
                            mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                               thinning_factor = 10, burn_in_pc = 0.2),
                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
