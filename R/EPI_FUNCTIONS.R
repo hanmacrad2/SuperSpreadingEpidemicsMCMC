@@ -18,6 +18,23 @@ GET_R0_INITIAL_MCMC <-function(epi_data){
   return(r0_start)
 }
 
+GET_BETA_INITIAL_MCMC <-function(epi_data){
+  
+  'INITIALSE R0 DEPENDING ON DATA'
+  
+  if(sum(epi_data)<=100){
+    beta_start = runif(1, 5, 15)
+  } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
+    beta_start = runif(1, 1, 3)
+  }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
+    beta_start = runif(1, 1.75, 4)
+  } else if (sum(epi_data) > 10000){
+    beta_start = runif(1, 2.5, 4)
+  }
+  
+  return(beta_start)
+}
+
 #LAMBDA FUNCTION -SUM OF INFECTIVITY
 #' @export
 get_lambda <- function(epidemic_data, shape_gamma = 6, scale_gamma = 1){

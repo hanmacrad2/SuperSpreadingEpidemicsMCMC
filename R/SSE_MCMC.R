@@ -107,10 +107,11 @@ SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
 }
 
 #********************************************************
-#1. MCMC INFERENCE FOR SSE MODEL  #24/12/23 mod_start_points = c(1.2, 0.15), #= GET_PRIORS_USED(), 
+#1. MCMC INFERENCE FOR SSE MODEL  #24/12/23 param_starts = c(1.2, 0.15), #= GET_PRIORS_USED(), 
 #********************************************************
 #' @export
-MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), mod_start_points = c(1.0, 0.5), 
+MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
+                           param_starts = c(1.0, 0.5), 
                            mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                               thinning_factor = 10, burn_in_pc = 0.2),
                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
@@ -118,10 +119,10 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
-  mod_start_points[1] = r0_start
+  param_starts[1] = r0_start
   
   #MCMC PARAMS + VECTORS
-  print(paste0('MOD STARTING POINTS;', mod_start_points))
+  print(paste0('PARAM STARTING POINTS;', param_starts))
   i_thin = 1
   num_days = length(epidemic_data)
   vec_min = rep(0, mcmc_inputs$dim)
@@ -145,7 +146,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   #MODEL PARAMETERS
   lambda_vec = get_lambda(epidemic_data)
   sse_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
-  sse_params_matrix[1,] <- mod_start_points; sse_params = sse_params_matrix[1,] #2x1 #as.matrix
+  sse_params_matrix[1,] <- param_starts; sse_params = sse_params_matrix[1,] #2x1 #as.matrix
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_params) #, FLAG_NEGBIN_PARAMATERISATION)

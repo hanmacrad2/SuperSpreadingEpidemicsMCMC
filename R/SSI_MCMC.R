@@ -114,7 +114,7 @@ SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
       dexp(k, rate = list_priors$k[1], log = TRUE)
   }
   
-  return(p) 
+  return(prior) 
 }
 
     
@@ -122,15 +122,15 @@ SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
 #1. MCMC INFERENCE FOR SSI MODEL - INDIVIDUAL r0  (INC. ADAPTIVE SCALING)                           
 #********************************************************
 #' @export
-MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED,
-                              mcmc_inputs = list(mod_start_points = c(1.2, 0.5),
-                                                 dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(r0_prior = c(1, 0), k_prior = c()),
+MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
+                              param_starts = c(1.2, 0.5),
+                              mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(r0_prior = c(1, 0), k_prior = c()),
                                                  thinning_factor = 10, burn_in_pc = 0.2),
                               FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE)) {    
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
-  mod_start_points[1] = r0_start
+  param_starts[1] = r0_start
   
   #MCMC PARAMS + VECTORS
   num_days = length(epidemic_data); 
@@ -165,7 +165,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED,
   eta_matrix = matrix(NA, mcmc_vec_size, eta_dim); 
   
   ssi_params_matrix = matrix(NA, mcmc_vec_size, mcmc_inputs$dim);   #Changed from 0 to NA (As should be overwriting all cases)
-  ssi_params_matrix[1,] <- mcmc_inputs$mod_start_points; ssi_params = ssi_params_matrix[1,] #2x1 #as.matrix
+  ssi_params_matrix[1,] <- param_starts; ssi_params = ssi_params_matrix[1,] #2x1 #as.matrix
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
@@ -276,5 +276,6 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED,
   return(list(ssi_params_matrix = ssi_params_matrix, eta_matrix = eta_matrix,
               sigma_eta_matrix = sigma_eta_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              accept_rate = accept_rate, vec_count_accept_da = vec_count_accept_da))
+              accept_rate = accept_rate, vec_count_accept_da = vec_count_accept_da,
+              r0_start = r0_start))
 } 
