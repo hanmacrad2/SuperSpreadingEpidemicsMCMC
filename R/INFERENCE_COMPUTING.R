@@ -39,13 +39,10 @@ GET_INFER_K_ROW <- function(k_val, k_vec){
 }
 
 #PARAMTER INFERENCE
-GET_PARAM_INFERENCE <- function(true_val, param_vec,
-                                FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE,
-                                                  alpha = FALSE, a = FALSE, 
-                                                  beta = FALSE, b = FALSE)){
+GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
   
   # Get names of true parameters
-  param_name <- names(FLAG_PARAM)[FLAG_PARAM]
+  param_name <- names(FLAG_PARAM)[unlist(FLAG_PARAM)]
   
   # Create a function to generate column names
   generate_column_names <- function(prefix, param_name) {
@@ -53,9 +50,7 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec,
     return(paste(prefix, param_name, sep = "_"))
   }
   
-  # Create column names for different statistics
-  mean_prefix <- "mean"
-  true_prefix <- "true"
+  #Names in dataframe - for different statistics
   col_names <- c(
     generate_column_names("true", param_name),
     generate_column_names("mean", param_name),
@@ -66,18 +61,19 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec,
     generate_column_names("esize_", param_name)
   )
   
-  # Create a data frame with new column names
-  row_result <- data.frame(
-    !!col_names[1] := true_val,
-    !!col_names[2] := mean(param_vec),
-    !!col_names[3] := sd(param_vec),
-    !!col_names[4] := get_lower_ci(param_vec),
-    !!col_names[5] := get_upper_ci(param_vec),
-    !!col_names[6] := GET_COVERAGE(param_vec),
-    !!col_names[7] := effectiveSize(param_vec)
+  #Values; dataframe
+  values_list <- list(
+    true_val,
+    mean(param_vec),
+    sd(param_vec),
+    get_lower_ci(param_vec),
+    get_upper_ci(param_vec),
+    GET_COVERAGE(true_val, param_vec),
+    effectiveSize(param_vec)
   )
   
-  colnames(row_result) <- col_names
+  row_result <- data.frame(matrix(unlist(values_list), nrow = 1))
+  names(row_result) <- col_names
   
   return(row_result)
 }
@@ -186,7 +182,6 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  n_mcmc = 100
   epidemic_data = SIMULATE_EPI_SSEB(num_days = num_days, r0 = r0_val,
                                 alpha = alpha_val, beta = beta_val)
   
@@ -207,6 +202,41 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
   row_beta = GET_PARAM_INFERENCE(beta_val, mcmc_output$beta_vec, FLAG_PARAM)
   
   result_row = cbind(row_r0, row_alpha, row_beta)
+  
+  return(result_row)
+}
+
+#**********************************************
+#* SSIB MODEL
+#* ********************************************
+INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
+                       num_days = 50, n_mcmc = 40000) {
+  
+  'Inference of baseline simulate data'
+  cat(r0_val)
+  n_mcmc = 50
+  epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+                                    alpha = alpha_val, b = b_val)
+  
+  #MCMC  
+  mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc, PRIORS_USED)
+
+  #browser()
+  #Row result - parameters
+  row_r0 = GET_INFER_R0_ROW(r0_val, mcmc_output$r0_vec, mcmc_output, epidemic_data)
+  
+  #alpha
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$alpha = TRUE
+  row_alpha = GET_PARAM_INFERENCE(alpha_val, mcmc_output$alpha_vec, FLAG_PARAM)
+  
+  #beta
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$b = TRUE
+  row_b = GET_PARAM_INFERENCE(b_val, mcmc_output$b_vec, FLAG_PARAM)
+  
+  #browser()
+  result_row = cbind(row_r0, row_alpha, row_b)
   
   return(result_row)
 }

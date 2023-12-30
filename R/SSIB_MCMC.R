@@ -4,12 +4,12 @@
 #'
 #' @export
 #' 
-SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
+SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
                                   shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
   #Params
-  b = (r0*(1 - alpha))/c #r0 = a_prop*r0 + b*c
+  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
   #alpha = alpha_prop*r0 
   
   #Set up
@@ -29,9 +29,9 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
   for (t in 2:num_days) {
     
     #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum((nss_infecteds[1:(t-1)] + c*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    lambda_t = sum((nss_infecteds[1:(t-1)] + b*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
     nss_infecteds[t] = rpois(1, alpha*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    ss_infecteds[t] = rpois(1, b*lambda_t)
+    ss_infecteds[t] = rpois(1, c*lambda_t)
     total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]
   }
   
@@ -56,11 +56,11 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, c = 10,
 #'
 #' @export
 
-LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c, 
+LOG_LIKE_SSIB <- function(epidemic_data, r0, alpha, b, 
                           shape_gamma = 6, scale_gamma = 1, temp = 1.2){
   
   #A = PROPORTION OF r0
-  b = (r0*(1 - alpha))/c #r0 = a_prop*r0 + b*c
+  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
   a = alpha*r0 
   
   non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
@@ -76,35 +76,21 @@ LOG_LIKE_SSIB <- function(epidemic_data, alpha, r0, c,
   for (t in 2:num_days) { 
     
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
-    lambda_t = sum((non_ss[1:(t-1)] + c*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    lambda_t = sum((non_ss[1:(t-1)] + b*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
     loglike = loglike + dpois(non_ss[t], a*lambda_t, log = TRUE) +
-      dpois(ss[t], b*lambda_t, log = TRUE) 
+      dpois(ss[t], c*lambda_t, log = TRUE) 
   }
-  
-  #Tempering
-  # if(loglike < 0){
-  #   loglike = abs(loglike)^temp
-  #   loglike = -loglike
-  # } else {
-  #   loglike = loglike^temp
-  # }
-  
   
   return(loglike)
 }
 
-#LOG-LIKELIHOOD
-# loglike = loglike - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
-#   ss[t]*(log(b) + log(lambda_t))  + 2*log(1) - lfactorial(non_ss[t]) - lfactorial(ss[t])
-
-#vec = c(2,1,3,2,1,0,0,1,100,200)
-#ll = LOG_LIKE_SSIB(vec, 0.1, 2, 10)
-
 #PRIOR
-SET_SSIB_PRIOR <- function(param, param_dash,
-                           list_priors, PRIORS_USED,
-                           alpha_flag = FALSE, r0_flag = FALSE, c_flag = FALSE){
+SET_SSIB_PRIOR <- function(param, param_dash, PRIORS_USED,
+                           alpha_flag = FALSE, r0_flag = FALSE, b_flag = FALSE){
+  
+  #PRIORS
+  list_priors = GET_LIST_PRIORS_SSIB(); 
   
   if(alpha_flag){
     
@@ -122,12 +108,12 @@ SET_SSIB_PRIOR <- function(param, param_dash,
       p = dexp(param_dash, log = TRUE) - dexp(param, log = TRUE) 
     }
     
-  } else if (c_flag) {
+  } else if (b_flag) {
     
     #GAMMA PRIOR ON c
-    if (PRIORS_USED$SSIB$c$GAMMA) {
-      shape = list_priors$c[1]
-      scale = list_priors$c[2]
+    if (PRIORS_USED$SSIB$b$GAMMA) {
+      shape = list_priors$b[1]
+      scale = list_priors$b[2]
       p = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
         dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
@@ -150,7 +136,7 @@ SET_SSIB_PRIOR <- function(param, param_dash,
 #' @param mcmc_inputs A list of mcmc specifications including
 #' \itemize{
 #'   \item \code{"n_mcmc"} - Number of iterations of the mcmc sampler
-#'   \item \code{"mod_start_points"} - Model parameter starting points; where the mcmc algorithm begins sampling from
+#'   \item \code{"param_starts"} - Model parameter starting points; where the mcmc algorithm begins sampling from
 #'   \item \code{"alpha_star"} - target acceptance rate; used in the adaptive algorithm
 #'   \item \code{"thinning_factor"}  - factor of total \code{"n_mcmc"} size of which samples are kept. Only if  \code{"FLAGS_LIST$THIN = TRUE"}, otherwise all samples are kept
 #' }
@@ -190,7 +176,7 @@ SET_SSIB_PRIOR <- function(param, param_dash,
 #'
 #' @examples
 #'
-#'mcmc_inputs = list(n_mcmc = 500000, mod_start_points = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
+#'mcmc_inputs = list(n_mcmc = 500000, param_starts = list(m1 = 0.72, m2 = 0.0038, m3 = 22),
 #' alpha_star = 0.4, thinning_factor = 10)
 #'
 #' #START MCMC
@@ -200,8 +186,8 @@ SET_SSIB_PRIOR <- function(param, param_dash,
 #************************************************************************
 #1. SSI MCMC                              (W/ DATA AUGMENTATION)
 #************************************************************************
-MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
-                            mod_start_points = list(m1 = 0.5, m2 = 0.1, m3 = 10, r0 = 2.0),
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRIORS_USED(),
+                            param_starts = list(alpha = 0.5, b = 10, r0_start = 2.0),
                             mcmc_inputs = list(alpha_star = 0.3, 
                                                burn_in_pc = 0.2, thinning_factor = 10),
                             FLAGS_LIST = list(THIN = TRUE, ADAPTIVE = TRUE)){
@@ -217,11 +203,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   #**********************************************
   #INITIALISE PARAMS
   #**********************************************
+  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+  param_starts$r0_start = r0_start
+  
   time = length(epidemic_data)
   print(paste0('num mcmc iters = ', n_mcmc))
-  
-  #PRIORS
-  list_priors = GET_LIST_PRIORS_SSIB(); PRIORS_USED = GET_PRIORS_USED() 
   
   #DATA: SUPERSPREADING INTIALISATION
   ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
@@ -252,21 +238,23 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   log_like_vec <- vector('numeric', mcmc_vec_size);
   
   #INITIALISE MCMC[1]
-  alpha_vec[1] <- mod_start_points$m1; 
-  c_vec[1] <- mod_start_points$m3; r0_vec[1] <- mod_start_points$r0
-  #b_vec[1] <- mod_start_points$m2
-  log_like_vec[1] <- LOG_LIKE_SSIB(data, alpha_vec[1], r0_vec[1], c_vec[1])
+  alpha_vec[1] <- param_starts$alpha; 
+  b_vec[1] <- param_starts$b; r0_vec[1] <- param_starts$r0_start
+  #b_vec[1] <- param_starts$m2
+  log_like_vec[1] <- LOG_LIKE_SSIB(data, r0_vec[1], alpha_vec[1], b_vec[1])
   
   #INITIALISE RUNNING PARAMS
-  alpha = alpha_vec[1]; b = b_vec[1]; c = c_vec[1]; log_like = log_like_vec[1]
   r0 = r0_vec[1]
+  alpha = alpha_vec[1]; b = b_vec[1];  
+  log_like = log_like_vec[1]
+  c = ((1 - alpha)*r0)/b; c_vec[1] = c
   print(paste0('loglike: ', log_like))
   
   #SIGMA
-  sigma1 =0.4 #mod_start_points$m1
+  sigma1 =0.4 #param_starts$m1
   sigma2 = 0.5 #0.4*r0
-  sigma3 = 0.5*mod_start_points$m3; 
-  #sigma4 = 0.85*mod_start_points$m3; sigma5 = 0.85*mod_start_points$m3
+  sigma3 = 0.5*param_starts$b; 
+  #sigma4 = 0.85*param_starts$m3; sigma5 = 0.85*param_starts$m3
   
   #SIGMA; INITIALISE FOR ADAPTIVE MCMC
   if (FLAGS_LIST$ADAPTIVE){
@@ -313,12 +301,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       alpha_dash = abs(alpha_dash) 
     }
     
-    logl_new = LOG_LIKE_SSIB(data, alpha_dash, r0, c) #RO 
+    logl_new = LOG_LIKE_SSIB(data, r0, alpha_dash, b) #RO 
     log_accept_ratio = logl_new - log_like  #+ prior1 - prior
     
     #PRIOR
-    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(alpha, alpha_dash,
-                                                         list_priors, PRIORS_USED, alpha_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(alpha, alpha_dash, PRIORS_USED, alpha_flag = TRUE)
     
     #Metropolis Acceptance Step
     if(log(runif(1)) < log_accept_ratio) {
@@ -338,12 +325,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     r0_dash <- abs(r0 + rnorm(1, sd = sigma2))
 
     #loglikelihood
-    logl_new = LOG_LIKE_SSIB(data, alpha, r0_dash, c)
+    logl_new = LOG_LIKE_SSIB(data, r0_dash, alpha, b)
     log_accept_ratio = logl_new - log_like
     
     #PRIOR
-    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, 
-                                                         list_priors, PRIORS_USED, r0_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(r0, r0_dash, PRIORS_USED, r0_flag = TRUE)
     #Metropolis Acceptance Step 
     if(log(runif(1)) < log_accept_ratio) {
       r0 <- r0_dash
@@ -358,24 +344,23 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     }
     
     #************************************************************************
-    #c
-    c_dash <- c + rnorm(1, sd = sigma3)
+    #b
+    b_dash <- b + rnorm(1, sd = sigma3)
     
-    if(c_dash < 1){
-      c_dash = 2 - c_dash #Prior on c: > 1
+    if(b_dash < 1){
+      b_dash = 2 - b_dash #Prior on b: > 1
     }
     #Acceptance Probability
-    logl_new = LOG_LIKE_SSIB(data, alpha, r0, c_dash)
+    logl_new = LOG_LIKE_SSIB(data, r0, alpha, b_dash)
     log_accept_ratio = logl_new - log_like
     
     #PRIOR
-    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(c, c_dash,
-                                                         list_priors, PRIORS_USED, c_flag = TRUE)
+    log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(b, b_dash, PRIORS_USED, b_flag = TRUE)
     
     #Metropolis Acceptance Step
     #if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
     if(log(runif(1)) < log_accept_ratio) {
-      c <- c_dash
+      b <- b_dash
       log_like <- logl_new
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
     }
@@ -413,7 +398,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
       if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
         log_accept_ratio = -Inf 
       } else {
-        logl_new = LOG_LIKE_SSIB(data_dash, alpha, r0, c) #+include alpha prior 
+        logl_new = LOG_LIKE_SSIB(data_dash, r0, alpha, b) #+include alpha prior 
         log_accept_ratio = logl_new - log_like
       }
 
@@ -437,7 +422,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
     if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin < mcmc_vec_size) {
       alpha_vec[i_thin] <- alpha; r0_vec[i_thin] <- r0
-      c_vec[i_thin] <- c; b_vec[i_thin] <- (r0*(1-alpha))/c     #(r0-a)/c #a + b*c
+      b_vec[i_thin] <- b; c_vec[i_thin] <- (r0*(1-alpha))/b     #(r0-a)/c #a + b*c
       log_like_vec[i_thin] <- log_like 
       sigma$sigma1[i_thin] = sigma1; sigma$sigma2[i_thin] = sigma2; sigma$sigma3[i_thin] = sigma3
       i_thin = i_thin + 1
@@ -463,6 +448,6 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000,
   return(list(alpha_vec = alpha_vec, b_vec = b_vec, c_vec = c_vec, r0_vec = r0_vec,
               log_like_vec = log_like_vec, sigma = sigma,
               list_accept_rates = list_accept_rates,
-              data = data, non_ss = non_ss, ss = ss))
+              data = data, non_ss = non_ss, ss = ss, r0_start = r0_start))
 }
 
