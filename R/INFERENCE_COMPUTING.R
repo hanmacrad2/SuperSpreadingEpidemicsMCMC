@@ -55,10 +55,10 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
     generate_column_names("true", param_name),
     generate_column_names("mean", param_name),
     generate_column_names("sd", param_name),
-    generate_column_names("lower_ci_", param_name),
-    generate_column_names("upper_ci_", param_name),
-    generate_column_names("coverage_", param_name),
-    generate_column_names("esize_", param_name)
+    generate_column_names("lower_ci", param_name),
+    generate_column_names("upper_ci", param_name),
+    generate_column_names("coverage", param_name),
+    generate_column_names("esize", param_name)
   )
   
   #Values; dataframe
@@ -214,14 +214,12 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  n_mcmc = 50
   epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
                                     alpha = alpha_val, b = b_val)
   
   #MCMC  
   mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc, PRIORS_USED)
 
-  #browser()
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, mcmc_output$r0_vec, mcmc_output, epidemic_data)
   

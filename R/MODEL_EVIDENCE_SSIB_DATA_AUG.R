@@ -21,7 +21,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
   lambda_vec = get_lambda(epidemic_data) 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
-  mcmc_param_samples = matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$c_vec), ncol = 3)
+  mcmc_param_samples = matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$b_vec), ncol = 3)
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
@@ -140,11 +140,11 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
 #*
 #***************************************************************************************
 
-LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, c,
+LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, b,
                                    shape_gamma = 6, scale_gamma = 1){
   
   #Params
-  b = (r0*(1 - alpha))/c #r0 = a_prop*r0 + b*c
+  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
   a = alpha*r0 
   
   #Data
@@ -167,14 +167,11 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, alpha, r0, c,
   for (t in 2:num_days) { 
     
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
-    lambda_t = sum((non_ss[1:(t-1)] + c*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    lambda_t = sum((non_ss[1:(t-1)] + b*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
     #LOG-LIKELIHOOD
     loglike_t = dpois(non_ss[t], a*lambda_t, log = TRUE) +
-      dpois(ss[t], b*lambda_t, log = TRUE)
-    
-    # loglike_t = - lambda_t*(a + b) + non_ss[t]*(log(a) + log(lambda_t)) +
-    #   ss[t]*(log(b) + log(lambda_t)) - lfactorial(non_ss[t]) - lfactorial(ss[t])
+      dpois(ss[t], c*lambda_t, log = TRUE)
     
     loglike = loglike + loglike_t
     

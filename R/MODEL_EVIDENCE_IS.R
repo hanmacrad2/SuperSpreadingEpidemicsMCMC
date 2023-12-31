@@ -28,7 +28,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                               n_samples, dof = 3, prob = 0.5) { #prob = 0.95 0.9999
+                               n_samples, dof = 3, prob = 0.95) { #0.5  #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -167,7 +167,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     for (i in start:n_repeats){
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$gamma_vec), ncol = 3)
+      mcmc_samples =  matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$beta_vec), ncol = 3)
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS = FLAGS_MODELS)
@@ -188,7 +188,7 @@ LOAD_MCMC_GET_MODEL_EVIDENCE <- function(epidemic_data, OUTER_FOLDER,
     for (i in start:n_repeats){
       
       mcmc_output = readRDS(file = paste0(CURRENT_FOLDER, 'mcmc_', model_type, '_', i ,'.rds'))
-      mcmc_samples =  mcmc_output$ssnb_params_matrix 
+      mcmc_samples =  mcmc_output$sse_params_matrix 
       
       #GET PHAT ESTIMATE OF MODEL EVIDENCE
       phat_estimate = GET_LOG_MODEL_EVIDENCE(mcmc_samples, epidemic_data, FLAGS_MODELS)

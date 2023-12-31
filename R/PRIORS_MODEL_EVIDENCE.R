@@ -27,9 +27,9 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   }
   
   #GAMMA
-  if (PRIORS_USED$SSEB$gamma$GAMMA) {
+  if (PRIORS_USED$SSEB$beta$GAMMA) {
     shape = list_priors$gamma[1]; scale = list_priors$gamma[2]
-    samps_prior_gamma = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
+    samps_prior_beta = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
   }
   
@@ -41,7 +41,7 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   # }
   
   #THETA_SAMPLES_PRIOR
-  theta_samples_prior_sseb = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_gamma), ncol = n_dim)
+  theta_samples_prior_sseb = matrix(c(samps_prior_alpha, samps_prior_r0, samps_prior_beta), ncol = n_dim)
   
   return(theta_samples_prior_sseb)  
 }
@@ -66,15 +66,15 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
   }
   
   #GAMMA
-  if (PRIORS_USED$SSIB$c$GAMMA) {
-    shape = list_priors$c[1]
-    scale = list_priors$c[2]
-    samps_prior_c = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
+  if (PRIORS_USED$SSIB$b$GAMMA) {
+    shape = list_priors$b[1]
+    scale = list_priors$b[2]
+    samps_prior_b = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
   }
   
   #THETA_SAMPLES_PRIOR
-  theta_samples_prior_ssib = matrix(c(samps_prior_a, samps_prior_r0, samps_prior_c),
+  theta_samples_prior_ssib = matrix(c(samps_prior_a, samps_prior_r0, samps_prior_b),
                                     ncol = n_dim)
   
   return(theta_samples_prior_ssib)  
@@ -153,10 +153,10 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
   }
   
   #GAMMA
-  if (PRIORS_USED$SSEB$gamma$GAMMA) {
-    shape = list_priors$gamma[1]
-    scale = list_priors$gamma[2]
-    log_prior_density_ga = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
+  if (PRIORS_USED$SSEB$beta$GAMMA) {
+    shape = list_priors$beta[1]
+    scale = list_priors$beta[2]
+    log_prior_density_beta = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
   }
   
@@ -167,7 +167,7 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
   # }
   
   #THETA_SAMPLES_PRIOR
-  log_prior_density = log_prior_density_alpha + log_prior_density_r0 + log_prior_density_ga
+  log_prior_density = log_prior_density_alpha + log_prior_density_r0 + log_prior_density_beta
   
   return(log_prior_density)  
 }
@@ -193,10 +193,10 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   }
   
   #GAMMA
-  if (PRIORS_USED$SSIB$c$GAMMA) {
-    shape = list_priors$c[1]
-    scale = list_priors$c[2]
-    log_prior_density_c = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
+  if (PRIORS_USED$SSIB$b$GAMMA) {
+    shape = list_priors$b[1]
+    scale = list_priors$b[2]
+    log_prior_density_b = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
   }
   
@@ -208,7 +208,7 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   # }
   # 
   #THETA_SAMPLES_PRIOR
-  log_prior_density = log_prior_density_a + log_prior_density_r0 + log_prior_density_c
+  log_prior_density = log_prior_density_a + log_prior_density_r0 + log_prior_density_b
   
   return(log_prior_density)  
 }

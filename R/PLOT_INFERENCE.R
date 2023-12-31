@@ -3,11 +3,12 @@
 
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                               num_days = 50, cex = 1.25, 
-                              PDF = TRUE, GT = FALSE, GT_VAL = 20, INCLUDE_INFS_5 = FALSE,
+                              PDF = TRUE, GT = FALSE, GT_VAL = 20, inset = 0.43, #0.46 for non r0 
+                              INCLUDE_INFS_5 = FALSE,
                               PRIORS = list(EXP = TRUE,
-                                            GAMMA = FALSE, UNIF = FALSE),
-                              FLAG_PARAM = list(r0 = FALSE, k = FALSE,
-                                                alpha = FALSE, gamma = FALSE),
+                                            GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
+                              FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE,
+                                                alpha = FALSE, beta = FALSE),
                               FLAG_FILTER = list(end_day = FALSE,
                                                  tot_infs = TRUE),
                               FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
@@ -27,7 +28,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
     pdf_file = paste0(model, '_', true_param, '_', fig_num, '.pdf') #'Fig_', 
     pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0)
   }
-  par(mar=c(4.9, 4.6, 3.0, 17.0), xpd=TRUE) #Margins; bottom, left, top, right
+  par(mar=c(4.9, 4.6, 3.0, 19.0), xpd=TRUE) #Margins; bottom, left, top, right
   
   
   #DATA SUBSETS
@@ -98,15 +99,15 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   lines(true_total, true_total, col = 'black', lwd = 3)
   
   #Legend
-  legend_list = c(legend_list, prior_title)
+  legend_list = c(legend_list, '', prior_title)
   pch_list = rep(19, num_conds)
   legend('bottomright', #x = "topleft", y = "topleft", #"center", legend_list,
          legend_list,
-         inset=c(-0.40,0),
-         col = c('black', selected_colors, 'grey'),
-         lwd = rep(1.8, num_conds+1),
-         lty = rep(1, num_conds+1), #c(1, 1),
-         pch = c(NA, pch_list, NA),
+         inset=c(-inset,0),
+         col = c('black', selected_colors, 'white', 'white'),
+         lwd = rep(1.8, num_conds+2),
+         lty = rep(1, num_conds+2), #c(1, 1),
+         pch = c(NA, pch_list, NA, NA),
          text.font = 1.2,
          bty = "n")
   
@@ -267,5 +268,9 @@ GET_PRIOR_TITLE <-function(PRIORS){
     prior_title =  'Gamma(1, 5) Prior used'
   } else if (PRIORS$UNIF){
     prior_title =  'Uniform(0, 10) Prior used'
+  } else if (PRIORS$BETA){
+    prior_title =  'Beta(2, 2) Prior used'
+  } else if (PRIORS$GAMMA_B){
+    prior_title =  '1 + Gamma(3, 3) Prior used' 
   }
 }
