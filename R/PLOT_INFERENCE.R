@@ -117,9 +117,9 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 }
 
 #SUBSET THE DATASET
-SUBSET_DFS <- function(df_results, filter_param, true_param,
+SUBSET_DFS <- function(df_results, filter_param, param,
                        GT=FALSE, GT_VAL = 20, num_conds = 4,
-                       INCLUDE_INFS_5 = FALSE ){
+                       INCLUDE_INFS_5 = FALSE, FIXED = FALSE){
   
   'SUBSET DATAFRAME OF RESULTS'
   #Setup
@@ -133,38 +133,38 @@ SUBSET_DFS <- function(df_results, filter_param, true_param,
     df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
   
   #Legend list
-  key = ' est mean, infs: '
+  key = ' estimated mean, infections: ' #est infs
   if (INCLUDE_INFS_5){
     
     #ADD TO 
     subset_df_list$df5 = df_results[(df_results[[filter_param]] > 4) & (df_results[[filter_param]] <= 10), ]
     
-    legend_list <- c(paste0(true_param, " True "),
-                     paste0(true_param, " estimated mean, infs: [5, 10]"),
-                     paste0(true_param, key, "[10, 100]"), 
-                     paste0(true_param, key, "[100, 1k]"),
-                     paste0(true_param, key, "[1k, 10k]"),
-                     paste0(true_param, key, "[10k, 100k]"))
+    legend_list <- c(paste0(param, " True "),
+                     paste0(param, " estimated mean, infections: [5, 10]"),
+                     paste0(param, key, "[10, 100]"), 
+                     paste0(param, key, "[100, 1k]"),
+                     paste0(param, key, "[1k, 10k]"),
+                     paste0(param, key, "[10k, 100k]"))
     
     num_conds = num_conds + 1
     selected_colors <- viridis_palette[c(9, 10, 8, 5)]
     
   } else if(GT) {
     
-    legend_list <- c(paste0(true_param, " True "),
-                     paste0(true_param, " estimated mean, infections: [", GT_VAL, ",100]"), 
-                     paste0(true_param, key, "[100, 1k]"),
-                     paste0(true_param, key, "[1k, 10k]"),
-                     paste0(true_param, key, "[10k, 100k]"))
+    legend_list <- c(paste0(param, " True "),
+                     paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
+                     paste0(param, key, "[100, 1k]"),
+                     paste0(param, key, "[1k, 10k]"),
+                     paste0(param, key, "[10k, 100k]"))
     
     selected_colors <- viridis_palette[c(10, 8, 5)] 
   } else {
     
-    legend_list <- c(paste0(true_param, " True "),
-                     paste0(true_param, " estimated mean, infections: [10, 100]"), 
-                     paste0(true_param, key, "[100, 1k]"),
-                     paste0(true_param, key, "[1k, 10k]"),
-                     paste0(true_param, key, "[10k, 100k]"))
+    legend_list <- c(paste0(param, " True "),
+                     paste0(param, " estimated mean, infections: [10, 100]"), 
+                     paste0(param, key, "[100, 1k]"),
+                     paste0(param, key, "[1k, 10k]"),
+                     paste0(param, key, "[10k, 100k]"))
     
     selected_colors <- viridis_palette[c(10, 8, 5)]
     
@@ -178,7 +178,7 @@ SUBSET_DFS <- function(df_results, filter_param, true_param,
   #Check for 100k
   if (!is.null(df_results[df_results[[filter_param]] > 100000, ])) {
     subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
-    legend_list = c(legend_list, paste0(true_param, " est mean, infs > 100k"))
+    legend_list = c(legend_list, paste0(param, " estimated mean, infections > 100k"))
     num_conds = num_conds + 1
   }
   
@@ -231,11 +231,12 @@ SIM_PERFORMANCE <- function(df_results){
 #*****************************
 #* PRIORS
 #*****************************
-PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE,
-                                          GAMMA = FALSE, UNIF = FALSE),
-                            x_min = 0, x_max = 25, cex = 1.6){
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FALSE,
+                                          BETA = FALSE, GAMMA_B = TRUE),
+                            x_min = 0, x_max = 30, cex = 1.6){
   
   #Setup
+  par(mfrow = c(2,3))
   x = seq(from = x_min, to = x_max, length = 500)
   #prior = names(PRIORS)[which(unlist(PRIORS))]
   
@@ -252,6 +253,12 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE,
   } else if (PRIORS$UNIF){
     prior_title =  paste0('Uniform(0, 10) Prior')
     y = dunif(x, 0, 10)
+  } else if (PRIORS$BETA){
+    prior_title =  paste0('Beta(2, 2) Prior')
+    y = dbeta(x, 2, 2)
+  } else if (PRIORS$GAMMA_B){
+    prior_title =  paste0('1 + Gamma(3, 3) Prior')
+    y = dgamma(x-1, shape = 3, scale = 3)
   }
   
   plot(x, y, type = 'l', lwd = 2, #col = 'orange',
