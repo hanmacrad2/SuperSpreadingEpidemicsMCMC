@@ -4,11 +4,14 @@
 GET_R0_INITIAL_MCMC <-function(epi_data){
   
   'INITIALSE R0 DEPENDING ON DATA'
-  
-  if(sum(epi_data)<=100){
-    r0_start = runif(1, 0.9, 2.5)
-  } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
+  if(sum(epi_data)<=10){
+    r0_start = runif(1, 0.95, 1.3)
+  } else if( sum(epi_data)> 10 && sum(epi_data)<= 30){
     r0_start = runif(1, 1, 3)
+  } else if( sum(epi_data)> 30 && sum(epi_data)<= 100){
+    r0_start = runif(1, 1.2, 3)  
+  } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
+    r0_start = runif(1, 1.5, 3.75)
   }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
     r0_start = runif(1, 1.75, 4)
   } else if (sum(epi_data) > 10000){
@@ -18,18 +21,18 @@ GET_R0_INITIAL_MCMC <-function(epi_data){
   return(r0_start)
 }
 
-GET_BETA_INITIAL_MCMC <-function(epi_data){
+GET_BETA_INITIAL_MCMC_IN_PROGRESS <-function(epi_data){
   
   'INITIALSE R0 DEPENDING ON DATA'
   
   if(sum(epi_data)<=100){
     beta_start = runif(1, 5, 15)
   } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
-    beta_start = runif(1, 1, 3)
+    
   }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
-    beta_start = runif(1, 1.75, 4)
+    
   } else if (sum(epi_data) > 10000){
-    beta_start = runif(1, 2.5, 4)
+    
   }
   
   return(beta_start)
