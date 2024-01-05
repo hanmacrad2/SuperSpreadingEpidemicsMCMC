@@ -83,19 +83,23 @@ SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
   r0 = sse_params[1]; r0_dash = sse_params_dash[1]
   k =  sse_params[2]; k_dash = sse_params_dash[2]
   list_priors = GET_LIST_PRIORS_SSE() 
-  #PRIORS_USED =  GET_PRIORS_USED() 
   prior = 0
   
   if (PRIORS_USED$SSE$r0$EXP) {
     
-    prior = prior + dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
+    prior = dexp(r0_dash, rate = list_priors$r0[1], log = TRUE) -
       dexp(r0, rate = list_priors$r0[1], log = TRUE) 
     
   } else if (PRIORS_USED$SSE$r0$GAMMA){
     #print('Gamma prior used r0 sse')
     
-    prior = prior + dgamma(r0_dash, shape = list_priors$r0_gamma[1], scale = list_priors$r0_gamma[2], log = TRUE) -
+    prior = dgamma(r0_dash, shape = list_priors$r0_gamma[1], scale = list_priors$r0_gamma[2], log = TRUE) -
       dgamma(r0, shape = list_priors$r0_gamma[1], scale = list_priors$r0_gamma[2], log = TRUE) 
+  
+    } else if (PRIORS_USED$SSE$r0$UNIF){
+    
+      prior = dunif(r0_dash, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) -
+        dunif(r0, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) 
   }
   
   if (PRIORS_USED$SSE$k$EXP) {
@@ -122,6 +126,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   param_starts[1] = r0_start
   
   #MCMC PARAMS + VECTORS
+  print(paste0('PRIORS USED;', PRIORS_USED))
   print(paste0('PARAM STARTING POINTS;', param_starts))
   i_thin = 1
   num_days = length(epidemic_data)
