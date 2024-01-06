@@ -55,7 +55,8 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Estimated posterior mean of ', true_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model Inference - " ~ .(true_param) ))) #~
+    titleX =  bquote(paste(.(true_param) ~ " - " ~ .(model)))
+    #titleX = bquote(bold(paste(.(model) ~ "Model Inference - " ~ .(true_param) ))) #~
     #"Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
@@ -110,7 +111,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
          lwd = rep(1.8, num_conds+2),
          lty = rep(1, num_conds+2), #c(1, 1),
          pch = c(NA, pch_list, NA, NA),
-         text.font = 1.2,
+         text.font = 1.45,
          bty = "n")
   
   if(PDF){
@@ -233,32 +234,41 @@ SIM_PERFORMANCE <- function(df_results){
 #*****************************
 #* PRIORS
 #*****************************
-PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FALSE,
-                                          BETA = FALSE, GAMMA_B = TRUE),
-                            x_min = 0, x_max = 30, cex = 1.6){
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE,
+                                          BETA = FALSE, GAMMA_B = TRUE), cex = 1.9){
   
   #Setup
   par(mfrow = c(2,3))
-  x = seq(from = x_min, to = x_max, length = 500)
+  
+  par(mar=c(5.2, 5.2, 5.2, 5.2), xpd=TRUE)
   #prior = names(PRIORS)[which(unlist(PRIORS))]
   
   #PRIORS
   if(PRIORS$EXP){
-    print('a')
+    x_min = 0; x_max = 25
+    x = seq(from = x_min, to = x_max, length = 500)
     y = dexp(x, 1)
     prior_title =  paste0('Exponential(1) Prior')
     
   } else if (PRIORS$GAMMA){
+    x_min = 0; x_max = 25
+    x = seq(from = x_min, to = x_max, length = 500)
     prior_title =  paste0('Gamma(1, 5) Prior')
     y = dgamma(x, shape = 1, scale = 5)
     
   } else if (PRIORS$UNIF){
+    x_min = 0; x_max = 25
+    x = seq(from = x_min, to = x_max, length = 500)
     prior_title =  paste0('Uniform(0, 10) Prior')
     y = dunif(x, 0, 10)
   } else if (PRIORS$BETA){
+    x_min = 0; x_max = 1
+    x = seq(from = x_min, to = x_max, length = 500)
     prior_title =  paste0('Beta(2, 2) Prior')
     y = dbeta(x, 2, 2)
   } else if (PRIORS$GAMMA_B){
+    x_min = 0; x_max = 30
+    x = seq(from = x_min, to = x_max, length = 500)
     prior_title =  paste0('1 + Gamma(3, 3) Prior')
     y = dgamma(x-1, shape = 3, scale = 3)
   }

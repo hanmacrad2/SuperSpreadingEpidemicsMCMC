@@ -222,6 +222,7 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
 
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, mcmc_output$r0_vec, mcmc_output, epidemic_data)
+  row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
   
   #alpha
   FLAG_PARAM = GET_FLAG_PARAM()
