@@ -34,17 +34,13 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #DATA SUBSETS
   list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT = GT, GT_VAL = GT_VAL)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
-  selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds 
-  
-  #PLOT
-  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
-  x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
-  #y_lim = c(0,7) #c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds
   
   #PRIORS
   prior_title = GET_PRIOR_TITLE(PRIORS)
   
   # LABELS
+  ylab = 'Estimated posterior mean of '
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
     ylab <- expression(paste('Estimated posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
@@ -52,14 +48,33 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
     #titleX = bquote(bold(paste(italic(R[0])))) #, " Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
     #titleX =  bquote(bold(paste(.(model) ~ "Model Inference - ", italic(R[0]))))
     
+  } else if (FLAG_PARAM$alpha){
+    titleX =  bquote(paste(italic(alpha) ~ " - " ~ .(model)))
+    xlab = bquote(paste("True " ~ italic(alpha)))
+    ylab = bquote(paste(.(ylab) ~ italic(alpha)))
+    
+  } else if (FLAG_PARAM$beta) {
+    titleX =  bquote(paste(italic(beta) ~ " - " ~ .(model)))
+    xlab = bquote(paste("True " ~ italic(beta)))
+    ylab = bquote(paste(.(ylab) ~ italic(beta)))
+    
   } else {
     xlab <- paste0('True ', true_param)
     ylab <- paste0('Estimated posterior mean of ', true_param)
-    titleX =  bquote(paste(.(true_param) ~ " - " ~ .(model)))
+    titleX =  bquote(paste(.(true_param) ~ " - " ~ .(model))) #.(true_param)
     #titleX = bquote(bold(paste(.(model) ~ "Model Inference - " ~ .(true_param) ))) #~
     #"Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
   }
   
+  #LIMITS
+  x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
+  
+  if(FLAG_PARAM$k){
+    y_lim = c(0, 2.0) #1.0; if 0.01-> 0.2s
+  } else {
+    y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  }
+
   # Create the plot for each subset
   for (i in 1:length(subset_df_list)) {
     
@@ -121,7 +136,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #SUBSET THE DATASET
 SUBSET_DFS <- function(df_results, filter_param, param,
-                       GT=FALSE, GT_VAL = 20, num_conds = 4,
+                       GT=FALSE, GT_VAL = 20, num_conds = 4, 
                        INCLUDE_INFS_5 = FALSE, FIXED = FALSE){
   
   'SUBSET DATAFRAME OF RESULTS'
@@ -161,7 +176,7 @@ SUBSET_DFS <- function(df_results, filter_param, param,
                      paste0(param, key, "[10k, 100k]"))
     
     selected_colors <- viridis_palette[c(10, 8, 5)] 
-  } else {
+  }  else {
     
     legend_list <- c(paste0(param, " True "),
                      paste0(param, " estimated mean, infections: [10, 100]"), 
@@ -172,6 +187,24 @@ SUBSET_DFS <- function(df_results, filter_param, param,
     selected_colors <- viridis_palette[c(10, 8, 5)]
     
   }
+  #expression(paste(alpha))
+  
+  legend_list <- c(expression(paste(alpha, "True ")),
+                    expression(paste(alpha, " estimated mean, infections")), #: [" ~ .(GT_VAL) ~ ",100]")),
+                      expression(paste(alpha, key, "[100, 1k]")),
+                    expression(paste(alpha, key, "[1k, 10k]")),
+                    expression(paste(alpha, key, "[10k, 100k]")))
+                   
+  # legend_list <- c(bquote(paste(italic(alpha) ~ "True ")),
+  #                               bquote(paste(italic(alpha) ~ " estimated mean, infections: [" ~ .(GT_VAL) ~ ",100]")),
+  #                               bquote(paste(italic(alpha) ~ "[100, 1k]")),
+  #                               bquote(paste(italic(alpha) ~ "[1k, 10k]")),
+  #                               bquote(paste(italic(alpha) ~ "[10k, 100k]")))
+  
+  #legend_list <- sapply(legend_list, as.character) # Convert expressions to character strings
+  
+  #
+  selected_colors <- viridis_palette[c(10, 8, 5)]
   
   #ADD MAGMA COLOURS 
   mag_cols = magma(5)
