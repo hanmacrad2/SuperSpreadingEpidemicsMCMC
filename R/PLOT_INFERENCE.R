@@ -32,7 +32,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT = GT, GT_VAL = GT_VAL)
+  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT = GT, GT_VAL = GT_VAL, FLAG_PARAM = FLAG_PARAM)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds
   
@@ -136,8 +136,8 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #SUBSET THE DATASET
 SUBSET_DFS <- function(df_results, filter_param, param,
-                       GT=FALSE, GT_VAL = 20, num_conds = 4, 
-                       INCLUDE_INFS_5 = FALSE, FIXED = FALSE){
+                       GT=FALSE, GT_VAL = 10, num_conds = 5, 
+                       INCLUDE_INFS_5 = FALSE, FIXED = FALSE, FLAG_PARAM){
   
   'SUBSET DATAFRAME OF RESULTS'
   #Setup
@@ -151,7 +151,7 @@ SUBSET_DFS <- function(df_results, filter_param, param,
     df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
   
   #Legend list
-  key = ' estimated mean, infections: ' #est infs
+  key = 'estimated mean, infections: ' #est infs
   if (INCLUDE_INFS_5){
     
     #ADD TO 
@@ -187,36 +187,39 @@ SUBSET_DFS <- function(df_results, filter_param, param,
     selected_colors <- viridis_palette[c(10, 8, 5)]
     
   }
-  #expression(paste(alpha))
   
-  legend_list <- c(expression(paste(alpha, "True ")),
-                    expression(paste(alpha, " estimated mean, infections")), #: [" ~ .(GT_VAL) ~ ",100]")),
-                      expression(paste(alpha, key, "[100, 1k]")),
-                    expression(paste(alpha, key, "[1k, 10k]")),
-                    expression(paste(alpha, key, "[10k, 100k]")))
-                   
-  # legend_list <- c(bquote(paste(italic(alpha) ~ "True ")),
-  #                               bquote(paste(italic(alpha) ~ " estimated mean, infections: [" ~ .(GT_VAL) ~ ",100]")),
-  #                               bquote(paste(italic(alpha) ~ "[100, 1k]")),
-  #                               bquote(paste(italic(alpha) ~ "[1k, 10k]")),
-  #                               bquote(paste(italic(alpha) ~ "[10k, 100k]")))
-  
-  #legend_list <- sapply(legend_list, as.character) # Convert expressions to character strings
-  
-  #
-  selected_colors <- viridis_palette[c(10, 8, 5)]
-  
+  #ALPHA OR BETA
+  if(FLAG_PARAM$alpha){
+    legend_list <- c(expression(paste(alpha, " True ")),
+                     bquote(alpha ~ "estimated mean, infections: ["~.(GT_VAL) ~ ",100]"),
+                     bquote(alpha~.(key)~"[100, 1k]"),
+                     bquote(alpha~.(key)~"[1k, 10k]"),
+                     bquote(alpha~.(key)~"[10k, 100k]"),
+                     bquote(alpha~"estimated mean, infections > 100k")) 
+    selected_colors <- viridis_palette[c(10, 8, 5)]
+    
+  } else if (FLAG_PARAM$beta){
+    legend_list <- c(expression(paste(beta, " True ")),
+                     bquote(beta~.(key)~"["~.(GT_VAL)~",100]"),
+                     bquote(beta~.(key)~"[100, 1k]"),
+                     bquote(beta~.(key)~"[1k, 10k]"),
+                     bquote(beta~.(key)~"[10k, 100k]"),
+                     bquote(beta~"estimated mean, infections > 100k")) 
+    selected_colors <- viridis_palette[c(10, 8, 5)]
+  }
+
   #ADD MAGMA COLOURS 
   mag_cols = magma(5)
   colors_magma <- mag_cols[c(3, 4)]
   selected_colors = c(selected_colors, colors_magma)
   
   #Check for 100k
-  if (!is.null(df_results[df_results[[filter_param]] > 100000, ])) {
-    subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
-    legend_list = c(legend_list, paste0(param, " estimated mean, infections > 100k"))
-    num_conds = num_conds + 1
-  }
+  subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
+  # if (!is.null(df_results[df_results[[filter_param]] > 100000, ])) {
+  #   subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
+  #   legend_list = c(legend_list, paste0(param, " estimated mean, infections > 100k"))
+  #   num_conds = num_conds + 1
+  # }
   
   return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
               selected_colors = selected_colors, num_conds = num_conds))
@@ -267,8 +270,8 @@ SIM_PERFORMANCE <- function(df_results){
 #*****************************
 #* PRIORS
 #*****************************
-PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE,
-                                          BETA = FALSE, GAMMA_B = TRUE), cex = 1.9){
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FALSE,
+                                          BETA = TRUE, GAMMA_B = FALSE), cex = 1.9){
   
   #Setup
   par(mfrow = c(2,3))
