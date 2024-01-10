@@ -3,10 +3,8 @@
 
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                               num_days = 50, cex = 1.75, #1.25 
-                              PDF = TRUE, GT = FALSE, GT_VAL = 20, inset = 0.46, #0.46 for non r0 
-                              INCLUDE_INFS_5 = FALSE,
-                              PRIORS = list(EXP = TRUE,
-                                            GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
+                              PDF = TRUE, GT_VAL = 20, inset = 0.486, #0.46 for non r0 
+                              PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
                               FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE,
                                                 alpha = FALSE, beta = FALSE),
                               FLAG_FILTER = list(end_day = FALSE,
@@ -26,13 +24,13 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   if(PDF){
     pdf_file = paste0(model, '_', true_param, '_', fig_num, '.pdf') #'Fig_', 
-    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0)
+    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
   }
-  par(mar=c(5.2, 4.8, 3.0, 19.0), xpd=TRUE) #Margins; bottom, left, top, right
+  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT = GT, GT_VAL = GT_VAL, FLAG_PARAM = FLAG_PARAM)
+  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT_VAL = GT_VAL, FLAG_PARAM = FLAG_PARAM)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds
   
@@ -92,7 +90,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
            main = "", xlab = xlab, ylab = ylab,
            xlim = x_lim, ylim = y_lim,
            col = colour, pch = 16, 
-           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex) #cex = cex text.font = 4.0,
+           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
       title(main = list(titleX, cex = 2.5, font = 3.0))
       
     } else {
@@ -121,12 +119,13 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   pch_list = rep(19, num_conds)
   legend('bottomright', #x = "topleft", y = "topleft", #"center", legend_list,
          legend_list,
+         cex = 1.1,
          inset=c(-inset,0),
          col = c('black', selected_colors, 'white', 'white'),
          lwd = rep(1.8, num_conds+2),
          lty = rep(1, num_conds+2), #c(1, 1),
          pch = c(NA, pch_list, NA, NA),
-         text.font = 1.45,
+         #text.font = 1.8, #1.45
          bty = "n")
   
   if(PDF){
@@ -136,8 +135,8 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #SUBSET THE DATASET
 SUBSET_DFS <- function(df_results, filter_param, param,
-                       GT=FALSE, GT_VAL = 10, num_conds = 5, 
-                       INCLUDE_INFS_5 = FALSE, FIXED = FALSE, FLAG_PARAM){
+                       GT=TRUE, GT_VAL = 10, num_conds = 5, 
+                       FIXED = FALSE, FLAG_PARAM = FLAG_PARAM) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
   
   'SUBSET DATAFRAME OF RESULTS'
   #Setup
@@ -151,61 +150,42 @@ SUBSET_DFS <- function(df_results, filter_param, param,
     df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
   
   #Legend list
-  key = 'estimated mean, infections: ' #est infs
-  if (INCLUDE_INFS_5){
-    
-    #ADD TO 
-    subset_df_list$df5 = df_results[(df_results[[filter_param]] > 4) & (df_results[[filter_param]] <= 10), ]
-    
-    legend_list <- c(paste0(param, " True "),
-                     paste0(param, " estimated mean, infections: [5, 10]"),
-                     paste0(param, key, "[10, 100]"), 
-                     paste0(param, key, "[100, 1k]"),
-                     paste0(param, key, "[1k, 10k]"),
-                     paste0(param, key, "[10k, 100k]"))
-    
-    num_conds = num_conds + 1
-    selected_colors <- viridis_palette[c(9, 10, 8, 5)]
-    
-  } else if(GT) {
-    
-    legend_list <- c(paste0(param, " True "),
-                     paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
-                     paste0(param, key, "[100, 1k]"),
-                     paste0(param, key, "[1k, 10k]"),
-                     paste0(param, key, "[10k, 100k]"))
-    
-    selected_colors <- viridis_palette[c(10, 8, 5)] 
-  }  else {
-    
-    legend_list <- c(paste0(param, " True "),
-                     paste0(param, " estimated mean, infections: [10, 100]"), 
-                     paste0(param, key, "[100, 1k]"),
-                     paste0(param, key, "[1k, 10k]"),
-                     paste0(param, key, "[10k, 100k]"))
-    
-    selected_colors <- viridis_palette[c(10, 8, 5)]
-    
-  }
+  key = 'estimated mean, infections:' #est infs
   
-  #ALPHA OR BETA
-  if(FLAG_PARAM$alpha){
+  #LEGEND LIST - DEFAULT 
+  legend_list <- c(paste0(param, " True "),
+                   paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
+                   paste0(param, key, "[100, 1k]"),
+                   paste0(param, key, "[1k, 10k]"),
+                   paste0(param, key, "[10k, 100k]"))
+  
+  selected_colors <- viridis_palette[c(10, 8, 5)] 
+  
+  #R0 ALPHA OR BETA: EXPRESSIONS 
+  if(FLAG_PARAM$r0) {
+    legend_list <- c(expression(paste(R[0], " True ")),
+                     bquote(R[0] ~ .(key) ~ "[" * .(GT_VAL) * ",100]"),
+                     #bquote(R[0]~.(key)~"["~.(GT_VAL)~",100]"),
+                     bquote(R[0]~.(key)~"[100,1k]"),
+                     bquote(R[0]~.(key)~"[1k,10k]"),
+                     bquote(R[0]~.(key)~"[10k,100k]"),
+                     bquote(R[0]~"estimated mean, infections > 100k")) 
+    
+  } else if(FLAG_PARAM$alpha){
     legend_list <- c(expression(paste(alpha, " True ")),
-                     bquote(alpha ~ "estimated mean, infections: ["~.(GT_VAL) ~ ",100]"),
+                     bquote(alpha~.(key)~"["~.(GT_VAL) ~ ",100]"),
                      bquote(alpha~.(key)~"[100, 1k]"),
                      bquote(alpha~.(key)~"[1k, 10k]"),
                      bquote(alpha~.(key)~"[10k, 100k]"),
                      bquote(alpha~"estimated mean, infections > 100k")) 
-    selected_colors <- viridis_palette[c(10, 8, 5)]
     
   } else if (FLAG_PARAM$beta){
     legend_list <- c(expression(paste(beta, " True ")),
                      bquote(beta~.(key)~"["~.(GT_VAL)~",100]"),
-                     bquote(beta~.(key)~"[100, 1k]"),
-                     bquote(beta~.(key)~"[1k, 10k]"),
-                     bquote(beta~.(key)~"[10k, 100k]"),
+                     bquote(beta~.(key)~"[100,1k]"),
+                     bquote(beta~.(key)~"[1k,10k]"),
+                     bquote(beta~.(key)~"[10k,100k]"),
                      bquote(beta~"estimated mean, infections > 100k")) 
-    selected_colors <- viridis_palette[c(10, 8, 5)]
   }
 
   #ADD MAGMA COLOURS 
@@ -268,10 +248,10 @@ SIM_PERFORMANCE <- function(df_results){
 
 
 #*****************************
-#* PRIORS
+#* PRIORS                       #FLAG_PARAM = list(r0 = TRUE, k = FALSE)
 #*****************************
-PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FALSE,
-                                          BETA = TRUE, GAMMA_B = FALSE), cex = 1.9){
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE,
+                                          BETA = FALSE, GAMMA_B = FALSE), cex = 2.65){
   
   #Setup
   par(mfrow = c(2,3))
@@ -284,7 +264,9 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FAL
     x_min = 0; x_max = 25
     x = seq(from = x_min, to = x_max, length = 500)
     y = dexp(x, 1)
-    prior_title =  paste0('Exponential(1) Prior')
+    x_label = expression(R[0])
+    prior_title =  bquote("Prior; " ~ p[R[0]] ~ "= Exponential(1)")
+    #prior_title =  paste0('Exponential(1) Prior')
     
   } else if (PRIORS$GAMMA){
     x_min = 0; x_max = 25
@@ -298,20 +280,28 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, GAMMA = FALSE, UNIF = FAL
     prior_title =  paste0('Uniform(0, 10) Prior')
     y = dunif(x, 0, 10)
   } else if (PRIORS$BETA){
+    
     x_min = 0; x_max = 1
     x = seq(from = x_min, to = x_max, length = 500)
-    prior_title =  paste0('Beta(2, 2) Prior')
+    #prior_title =  paste0('Beta(2, 2) Prior')
+    #x_label = expression(beta)
+    prior_title =  bquote("Prior; " ~ p[alpha] ~ "= Beta(2, 2)")
     y = dbeta(x, 2, 2)
+    
   } else if (PRIORS$GAMMA_B){
     x_min = 0; x_max = 30
     x = seq(from = x_min, to = x_max, length = 500)
-    prior_title =  paste0('1 + Gamma(3, 3) Prior')
+    x_label = expression(beta)
+    prior_title =  bquote("Prior; " ~ p[beta] ~ "= 1 + Gamma(3, 3)")
     y = dgamma(x-1, shape = 3, scale = 3)
+    #prior_title =  paste0('1 + Gamma(3, 3) Prior')
   }
   
   plot(x, y, type = 'l', lwd = 2, #col = 'orange',
-       main = prior_title, ylab = 'Density',
-       cex.lab=cex, cex.axis=cex, cex.main= cex, cex.sub=cex)
+       main = prior_title, 
+       #xlab = x_label, 
+       ylab = 'Density',
+       cex.lab=cex, cex.axis=cex-0.3, cex.main= cex, cex.sub=cex-0.3)
 }
 
 GET_PRIOR_TITLE <-function(PRIORS){
