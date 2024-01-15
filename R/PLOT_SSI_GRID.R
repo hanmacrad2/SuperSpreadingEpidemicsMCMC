@@ -116,8 +116,8 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
                                                  burn_in_pc = 0.2,
                                                  eta_time_point = 1), #80 28
                                priors_list = list(k_prior = c(1,0), alpha_prior = c(1,0)),
-                               FLAGS_LIST = list(PRIOR = TRUE,ADAPTIVE = FALSE, MULTI_ALG = TRUE,
-                                                 MARGINALS = FALSE)){
+                               FLAGS_LIST = list(PRIOR = TRUE, ADAPTIVE = FALSE, MULTI_ALG = TRUE,
+                                                 MARGINALS = TRUE)){
   
   #FIX
   print(sim_vals)
@@ -230,7 +230,7 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   #alpha_title = bquote(bold(alpha ~ "; Mean of" ~ eta ~ "~ Ga(). Simulated: " ~ .(sim_vals$m1)))
   
   if (!FLAGS_LIST$ADAPTIVE){
-    plot.ts(m1_mcmc, ylab = mod_par_names[1], ylim= m1_lim, #bquote("Hello" ~ r[xy] == .(cor) ~ "and" ~ B^2)
+    plot.ts(m1_mcmc, ylab = mod_par_names[1], #ylim= m1_lim, #bquote("Hello" ~ r[xy] == .(cor) ~ "and" ~ B^2)
             main = paste(mod_par_names[1], "MCMC",
                          "Simulated: ", sim_vals$m1),
             cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
@@ -293,7 +293,7 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
   hist(m1_mcmc, freq = FALSE, breaks = 100,
        xlab = mod_par_names[1], #ylab = 'Density',
        main = paste("R0, prior:", mr0_prior),
-       xlim = m1_lim,
+       #xlim = m1_lim,
        cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
   abline(v = sim_vals$m1, col = 'red', lwd = 2)
   
@@ -387,7 +387,7 @@ PLOT_SSI_MCMC_GRID <- function(epidemic_data, mcmc_output, eta_sim, seed_count,
     #eta_mean_mcmc = round(mean(m3_mcmc, na.rm = TRUE), 2),
     #log_like_sim = round(log_like_sim, 2),
     accept_rate = round(mcmc_output$accept_rate, 2),
-    a_rte_d_aug = round(mcmc_output$accept_rate_da, 2),
+    #a_rte_d_aug = round(mcmc_output$accept_rate_da, 2),
     #alpha_es = round(effectiveSize(as.mcmc(m1_mcmc))[[1]], 2),
     #k_es = round(effectiveSize(as.mcmc(m2_mcmc))[[1]], 2),
     #eta_es = round(effectiveSize(as.mcmc(m3_mcmc))[[1]], 2),

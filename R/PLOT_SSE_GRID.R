@@ -1,209 +1,134 @@
 #PLOT SSE MCMC GRID
-PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output, n_mcmc, sim_vals = list(m1 = 0, m2 = 0),
-                                mod_par_names = c('R0', 'k'),
-                                mcmc_specs = list(model_type = 'Simulated',
-                                                  burn_in_pc = 0.2, thinning_factor = 10),
-                                FLAGS_LIST = list(PRIOR = TRUE, MULTI_ALG = TRUE, 
-                                                  PLOT_ADAPTIVE = FALSE)){
+PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output,
+                               n_mcmc, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSE/',
+                               PRIOR = TRUE, PDF = FALSE,
+                               sim_vals = list(r0 = 2, k = 0.16), 
+                               mcmc_specs = list(burn_in_pc = 0.2,
+                                                 thinning_factor = 10)){
   
   #PLOT
-  plot.new(); par(mfrow=c(4,3))
+  par(mfrow=c(4,2))
+  par(mar = rep(4.5, 4), xpd = TRUE)
+
+  #MODEL
+  FLAGS_MODELS = GET_FLAGS_MODELS(SSE = TRUE)
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  MODEL_COLORS = GET_MODEL_COLORS(); MODEL_COLOR = MODEL_COLORS[2]
+  
+  #PARAMS
+  FLAG_PARAM1 = GET_PARAM(r0 = TRUE); list_labels1 = GET_PARAM_LABEL(FLAG_PARAM1, model)
+  FLAG_PARAM2 = GET_PARAM(k = TRUE); list_labels2 = GET_PARAM_LABEL(FLAG_PARAM2, model)
   
   #PRIORS 
   PRIORS_USED =  GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE() 
   
-  #PRIOR R0
-  if(PRIORS_USED$SSE$r0$EXP){
-    mr0_prior = paste0('exp(', list_priors$r0[1], ')')
-    xseq_r0 = seq(0, 10, length.out = 500)
-    dr0e = dexp(xseq_r0, rate = list_priors$r0[1])
-  }
+  #MCMC
+  r0_mcmc = mcmc_output$sse_params_matrix[,1]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
+  k_mcmc = mcmc_output$sse_params_matrix[,2]; k_mcmc = unlist(k_mcmc); k_mcmc = k_mcmc[!is.na(k_mcmc)]
   
-  #PRIOR k 
-  if(PRIORS_USED$SSE$k$EXP){
-    m2_prior = paste0('exp(', list_priors$k[1], ')')
-    x2 = seq(0, 50, length.out = 1000)
-    d2 = dexp(x2, rate = list_priors$k[1])
-  }
-  
-  #MCMC + LIKELIHOOD SAMPLES EXTRACT 
-  sse_sim_params = c(sim_vals$m1, sim_vals$m2)
-  lambda_vec =  get_lambda(epidemic_data); 
-  log_like_sim = LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_sim_params) 
-  log_like_mcmc = mcmc_output$log_like_vec; log_like_mcmc = unlist(log_like_mcmc)
-  
-  if (FLAGS_LIST$MULTI_ALG){
-    m1_mcmc = mcmc_output$sse_params_matrix[,1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m2_mcmc = mcmc_output$sse_params_matrix[,2]; m2_mcmc = unlist(m2_mcmc); m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
+  if(PDF){
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_mcmc_', time_stamp, '.pdf') 
+    create_folder(RESULTS_FOLDER)
+    pdf(paste0(RESULTS_FOLDER, pdf_file), width = 14.0, height = 11.0)
     
-  } else {
-    m1_mcmc = mcmc_output[1]; m1_mcmc = unlist(m1_mcmc); m1_mcmc = m1_mcmc[!is.na(m1_mcmc)]
-    m2_mcmc = mcmc_output[2]; m2_mcmc = unlist(m2_mcmc);  m2_mcmc = m2_mcmc[!is.na(m2_mcmc)]
+    #MARGIN
+    par(mfrow=c(4,2))
+    par(mar = rep(5, 4), xpd = TRUE)
+  }
+  
+  #LIMITS
+  r0_lim = c(1.7, 2.3)
+  k_lim = c(0.075, 0.25)
+  
+  #PRIOR LABELS R0
+  if(PRIORS_USED$SSE$r0$EXP){
+    prior_r0 = paste0('exp(', list_priors$r0[1], ')')
+    x1 = seq(r0_lim[1], r0_lim[2], length.out = 1000)
+    dr0e = dexp(x1, rate = list_priors$r0[1])
+  }
+  
+  #PRIOR LABELS k 
+  if(PRIORS_USED$SSE$k$EXP){
+    k_prior = paste0('exp(', list_priors$k[1], ')')
+    x2 = seq(k_lim[1], k_lim[2], length.out = 1000)
+    d2 = dexp(x2, rate = list_priors$k[1])
   }
 
   #LIMITS
-  m1_min =  min(sim_vals$m1, min(m1_mcmc, na.rm = TRUE));  m1_max =  max(sim_vals$m1, max(m1_mcmc, na.rm = TRUE))
-  m2_min = min(sim_vals$m2, min(m2_mcmc, na.rm = TRUE)); m2_max = max(sim_vals$m2, max(m2_mcmc, na.rm = TRUE))
-  minll = min(min(log_like_mcmc, na.rm = TRUE), log_like_sim); maxll = max(max(log_like_mcmc,  na.rm = TRUE), log_like_sim)
-  m1_lim = c(m1_min, m1_max);  m2_lim = c(m2_min, m2_max); lim_ll = c(minll, maxll)
+  # r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
+  # k_min = min(sim_vals$k, min(k_mcmc, na.rm = TRUE)); k_max = max(sim_vals$k, max(k_mcmc, na.rm = TRUE))
+  # r0_lim = c(r0_min, r0_max);  k_lim = c(k_min, k_max)
   
   #******************************************************************
   #* PLOTS *
   #******************************************************************
   
-  #***********************************
-  #ROW 1: DATA INFECTIONS + MARGINALS
-  #***********************************
+  #i. EPIDEMIC DATA
+  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
   
-  #i. TOTAL INFECTIONS
-  inf_tite = paste0(mcmc_specs$model_type, " Data. R0: ",
-                    sim_vals$m1, ', k: ', sim_vals$m2) 
-  plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count',
-          main = inf_tite,
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
+  #ib. MARGINALS
+  plot(r0_mcmc, k_mcmc,
+       xlab = list_labels1$lab, ylab = list_labels2$lab,
+       main = bquote(paste(italic(R[0]), ' vs ', .(list_labels2$lab))),
+       col = MODEL_COLOR,
+       cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
   
-  #r0 VS K
-  plot(m1_mcmc, m2_mcmc,
-       xlab = mod_par_names[1], ylab = mod_par_names[2],
-       main = paste0(mod_par_names[1], ' vs ', mod_par_names[2]),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5,
-       cex = 0.5)
+  #ii. TRACES 
+  PLOT_MCMC_TRACE(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  segments(0, sim_vals$r0, length(r0_mcmc), sim_vals$r0, col = 'black', lwd = 2)
   
-  #Empty
-  plot.ts(0, xlab = '', ylab = '')
+  PLOT_MCMC_TRACE(k_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex)
+  segments(0, sim_vals$k, length(k_mcmc), sim_vals$k, col = 'black', lwd = 2)
   
-  #************************
-  #ROW 2: MCMC TRACE PLOTS
-  #************************
+  #iii. HISTOGRAMS
+  r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
+  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  segments(sim_vals$r0, 0, sim_vals$r0, 4, col = 'black', lwd = 2)
   
-  #R0
-  r0_title = bquote(bold(R[0] ~ "MCMC, sim: " ~ .(sim_vals$m1)))
-  plot.ts(m1_mcmc, ylab = mod_par_names[1], ylim = m1_lim, #bquote("Hello" ~ r[xy] == .(cor) ~ "and" ~ B^2)
-          main = r0_title,
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m1, col = 'red', lwd = 2) #True = green
-  
-  if (FLAGS_LIST$PLOT_ADAPTIVE){
-    sig1 = mcmc_output$sigma$sigma1_vec
-    plot.ts(m1_mcmc, ylab = paste0(mod_par_names[1], ",sigma"), #ylim=c(min(min(sig1),min(m1_mcmc)), max(m1_mcmc)),
-            main = paste(mod_par_names[1], "MCMC",
-                         "Sim: ", sim_vals$m1, ', Sigma (red)'), #'Start'
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma1_vec, col = 'red')
+  #PRIOR
+  if(PRIOR) {
+    lines(x1, dr0e, type = 'l', lwd = 2) 
   }
   
-  #***************
-  #k
-  plot.ts(m2_mcmc, ylab = mod_par_names[2], ylim= m2_lim,
-          main = paste(mod_par_names[2],
-                       "MCMC, sim: ", sim_vals$m2),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = sim_vals$m2, col = 'blue', lwd = 2) #True = green
+  #HIST K
+  k_mcmc_hist = subset(k_mcmc, k_mcmc > k_lim[1])
+  PLOT_MCMC_HIST(k_mcmc_hist, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = k_lim)
+  segments(sim_vals$k, 0, sim_vals$k, 10, col = 'black', lwd = 2)
   
-  if (FLAGS_LIST$PLOT_ADAPTIVE){
-    plot.ts(m2_mcmc, ylab = paste0(mod_par_names[2], ",sigma"), #ylim=c(0, m2_lim),
-            main = paste(mod_par_names[2], "MCMC",
-                         "Sim: ", sim_vals$m2, ', Sigma (blue)'), #Start
-            cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-    lines(mcmc_output$sigma$sigma2_vec, col = 'blue')
-  }
-  
-  #***************
-  #LOG LIKELIHOOD
-  plot.ts(log_like_mcmc, ylab = "log likelihood", ylim= lim_ll,
-          main = paste("Log Likelihood. N MCMC:", n_mcmc, ". Burn-in:", mcmc_specs$burn_in_pc),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = log_like_sim, col = 'orange', lwd = 2) 
-  
-  #**********************************************************
-  #ROW 2:  HISTOGRAMS OF PARARMS (r0, k, loglike)
-  #************************************************************
-  
-  #***********
-  #HIST m1
-  r0_titleII = bquote(bold(R[0])) # ~ "Prior: exp("~.(priors_list$r0_prior[1])~")"))
-  hist(m1_mcmc, freq = FALSE, breaks = 100,
-       xlab = mod_par_names[1], #ylab = 'Density',
-       main = paste("R0, prior:", mr0_prior),
-       xlim = m1_lim,
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = sim_vals$m1, col = 'red', lwd = 2)
-  
-  #PRIOR PLOT 
-  if(FLAGS_LIST$PRIOR) {
-    lines(xseq_r0, dr0e, type = 'l', lwd = 2) 
-  }
- 
-  #***********
-  #HIST m2
-  ktitle = bquote(bold(k)) # ~ "Prior: exp("~.(priors_list$k_prior[1])~")"))
-  hist(m2_mcmc, freq = FALSE, breaks = 100,
-       xlab = mod_par_names[2], #ylab = 'Density',
-       main = paste(mod_par_names[2],
-                    " prior:", m2_prior),
-       xlim= m2_lim,
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = sim_vals$m2, col = 'blue', lwd = 2)
-  
-  #PRIOR PLOT 
-  if(FLAGS_LIST$PRIOR){
+  #PRIOR
+  if(PRIOR){
     lines(x2, d2, type = 'l', lwd = 2) 
   }
   
-  #***********
-  #HIST LOG_LIKE_VEC
-  hist(log_like_mcmc, freq = FALSE, breaks = 100, xlim= lim_ll,
-       xlab = 'Log likelihood', #ylab = 'Density',
-       main = 'Log likelihood',
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = log_like_sim, col = 'orange', lwd = 2)
+  #iv. CUMULATIVE MEANS 
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  segments(0, sim_vals$r0, length(r0_mcmc), sim_vals$r0, col = 'black', lwd = 2)
   
-  #************************************************
-  #ROW 3: CUMULATIVE MEAN PLOTS
-  #************************************************
+  PLOT_CUMULATIVE_MEAN(k_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, ylim = k_lim)
+  segments(0, sim_vals$k, length(k_mcmc), sim_vals$k, col = 'black', lwd = 2)
   
-  #m1 mean
-  titleX = bquote(R[0] ~ "MCMC mean, Start:" ~ .(sim_vals$m1))
-  PLOT_CUM_MEAN_MCMC(m1_mcmc, titleX = titleX, ylabX =  mod_par_names[1],
-                     ylim = c(m1_min, m1_max))
-  abline(h = sim_vals$m1, col = 'blue', lwd = 2)
-  
-  #m2 mean
-  titleX = paste(mod_par_names[2], "MCMC mean, Start:", sim_vals$m2)
-  PLOT_CUM_MEAN_MCMC(m2_mcmc, title = titleX, ylabX =  mod_par_names[2],
-                     ylim = c(m2_min, m2_max))
-  abline(h = sim_vals$m2, col = 'red', lwd = 2)
-  
-  #SCALING VEC
-  plot.ts(mcmc_output$scaling_vec,  ylab = paste0('adaptive scaling vec'), 
-          main = paste0('Adaptive scaling vec'),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  
-  #********************
-  #v. DATAFRAME: RESULTS
-  #********************
+  if(PDF){
+    dev.off()
+  }
   
   df_results <- data.frame(
-    #rep = seed_count,
     n_mcmc = n_mcmc,
-    #n_thin_samps = n_samples,
-    r0_sim = sim_vals$m1[1],
-    r0_mean_mcmc = round(mean(m1_mcmc), 2), 
-    r0_lo_95_cred_int = round(get_lower_ci(m1_mcmc), 2), 
-    r0_up_95_cred_int = round(get_upper_ci(m1_mcmc), 2), 
-    k_sim = sim_vals$m2, 
-    k_mean_mcmc = round(mean(m2_mcmc), 2),
-    k_lo_95_cred_int = round(get_lower_ci(m2_mcmc), 2),
-    k_up_95_cred_int = round(get_upper_ci(m2_mcmc), 2), 
-    log_like_sim = round(log_like_sim, 2),
+    r0_sim = sim_vals$r0[1],
+    r0_mean_mcmc = round(mean(r0_mcmc), 2), 
+    r0_lo_95_cred_int = round(get_lower_ci(r0_mcmc), 2), 
+    r0_up_95_cred_int = round(get_upper_ci(r0_mcmc), 2), 
+    k_sim = sim_vals$k, 
+    k_mean_mcmc = round(mean(k_mcmc), 2),
+    k_lo_95_cred_int = round(get_lower_ci(k_mcmc), 2),
+    k_up_95_cred_int = round(get_upper_ci(k_mcmc), 2), 
     accept_rate = round(mcmc_output$accept_rate, 2),
-    r0_es = round(effectiveSize(as.mcmc(m1_mcmc))[[1]], 2),
-    k_es = round(effectiveSize(as.mcmc(m2_mcmc))[[1]], 2),
+    r0_es = round(effectiveSize(as.mcmc(r0_mcmc))[[1]], 2),
+    k_es = round(effectiveSize(as.mcmc(k_mcmc))[[1]], 2),
     time_elap = mcmc_output$time_elap) #format(mcmc_output$time_elap, format = "%H:%M:%S")[1])
   
   #print(df_results)
   
   return(df_results)
-  
 }

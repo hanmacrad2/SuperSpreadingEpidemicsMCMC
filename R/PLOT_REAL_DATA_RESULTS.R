@@ -17,7 +17,7 @@ PLOT_TRACE <-function(mcmc_vec, model_name, color_model){
 }
 
 #PLOT SAMPLES
-PLOT_SAMPLES <-function(mcmc_vec, model_name, color_model){
+PLOT_HIST <-function(mcmc_vec, model_name, color_model){
   
   #TITLE
   trace_title = bquote(bold(paste(italic(R[0]),
@@ -118,7 +118,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = 
     
     model = names(list_mcmc[i]) 
     #HIST SAMPLES
-    PLOT_SAMPLES(list_r0_vec[[model]], model, list_colors[i])
+    PLOT_HIST(list_r0_vec[[model]], model, list_colors[i])
   }
   
   #MEAN

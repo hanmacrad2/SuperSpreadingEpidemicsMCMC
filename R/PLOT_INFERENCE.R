@@ -3,10 +3,10 @@
 
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                               num_days = 50, cex = 1.75, #1.25 
-                              PDF = TRUE, GT_VAL = 20, inset = 0.486, #0.46 for non r0 
+                              PDF = TRUE, GT_VAL = 10, inset = 0.49, #0.486, #0.46 for non r0 
                               PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
-                              FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE,
-                                                alpha = FALSE, beta = FALSE),
+                              FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
+                                                beta = FALSE, a = FALSE, b = FALSE),
                               FLAG_FILTER = list(end_day = FALSE,
                                                  tot_infs = TRUE),
                               FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
@@ -39,12 +39,11 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   # LABELS
   ylab = 'Estimated posterior mean of '
+  
   if (FLAG_PARAM$r0) {
-    xlab <- expression(paste('True R'[0])) #paste0(expression(paste('true R'[0])))  #
-    ylab <- expression(paste('Estimated posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
+    xlab <- expression(paste('True R'[0])) 
+    ylab <- expression(paste('Estimated posterior mean of R'[0])) ) 
     titleX =  bquote(paste(italic(R[0]) ~ " - " ~ .(model)))
-    #titleX = bquote(bold(paste(italic(R[0])))) #, " Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
-    #titleX =  bquote(bold(paste(.(model) ~ "Model Inference - ", italic(R[0]))))
     
   } else if (FLAG_PARAM$alpha){
     titleX =  bquote(paste(italic(alpha) ~ " - " ~ .(model)))
@@ -150,14 +149,15 @@ SUBSET_DFS <- function(df_results, filter_param, param,
     df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
   
   #Legend list
-  key = 'estimated mean, infections:' #est infs
+  key = ' estimated mean, infections:' #est infs
   
   #LEGEND LIST - DEFAULT 
   legend_list <- c(paste0(param, " True "),
                    paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
                    paste0(param, key, "[100, 1k]"),
                    paste0(param, key, "[1k, 10k]"),
-                   paste0(param, key, "[10k, 100k]"))
+                   paste0(param, key, "[10k, 100k]"),
+                   paste0(param, " estimated mean, infections > 100k")) 
   
   selected_colors <- viridis_palette[c(10, 8, 5)] 
   
@@ -200,7 +200,7 @@ SUBSET_DFS <- function(df_results, filter_param, param,
   #   legend_list = c(legend_list, paste0(param, " estimated mean, infections > 100k"))
   #   num_conds = num_conds + 1
   # }
-  
+
   return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
               selected_colors = selected_colors, num_conds = num_conds))
 }
@@ -250,8 +250,10 @@ SIM_PERFORMANCE <- function(df_results){
 #*****************************
 #* PRIORS                       #FLAG_PARAM = list(r0 = TRUE, k = FALSE)
 #*****************************
-PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE,
-                                          BETA = FALSE, GAMMA_B = FALSE), cex = 2.65){
+PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = FALSE, EXP_K = FALSE,
+                                          GAMMA = FALSE, UNIF = FALSE, BETA_ALPHA = FALSE, BETA_A = TRUE,
+                                          GAMMA_B = FALSE, GAMMA_BETA = FALSE),
+                            cex = 2.65){
   
   #Setup
   par(mfrow = c(2,3))
@@ -268,6 +270,13 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALS
     prior_title =  bquote("Prior; " ~ p[R[0]] ~ "= Exponential(1)")
     #prior_title =  paste0('Exponential(1) Prior')
     
+  } else if (PRIORS$EXP_K){
+    x_min = 0; x_max = 5
+    x = seq(from = x_min, to = x_max, length = 500)
+    y = dexp(x, 1)
+    x_label = expression(k)
+    prior_title =  bquote("Prior; " ~ p[k] ~ "= Exponential(1)")
+    
   } else if (PRIORS$GAMMA){
     x_min = 0; x_max = 25
     x = seq(from = x_min, to = x_max, length = 500)
@@ -279,7 +288,8 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALS
     x = seq(from = x_min, to = x_max, length = 500)
     prior_title =  paste0('Uniform(0, 10) Prior')
     y = dunif(x, 0, 10)
-  } else if (PRIORS$BETA){
+    
+  } else if (PRIORS$BETA_ALPHA){
     
     x_min = 0; x_max = 1
     x = seq(from = x_min, to = x_max, length = 500)
@@ -288,13 +298,28 @@ PLOT_PRIOR_DIST <- function(PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALS
     prior_title =  bquote("Prior; " ~ p[alpha] ~ "= Beta(2, 2)")
     y = dbeta(x, 2, 2)
     
-  } else if (PRIORS$GAMMA_B){
+  } else if (PRIORS$BETA_A) {
+    
+    x_min = 0; x_max = 1
+    x = seq(from = x_min, to = x_max, length = 500)
+    prior_title =  bquote("Prior; " ~ p[a] ~ "= Beta(2, 2)")
+    y = dbeta(x, 2, 2)
+    
+  } else if (PRIORS$GAMMA_BETA){
     x_min = 0; x_max = 30
     x = seq(from = x_min, to = x_max, length = 500)
     x_label = expression(beta)
     prior_title =  bquote("Prior; " ~ p[beta] ~ "= 1 + Gamma(3, 3)")
     y = dgamma(x-1, shape = 3, scale = 3)
     #prior_title =  paste0('1 + Gamma(3, 3) Prior')
+    
+  } else if (PRIORS$GAMMA_B){
+    
+    x_min = 0; x_max = 25
+    x = seq(from = x_min, to = x_max, length = 500)
+    x_label = expression(b)
+    prior_title =  bquote("Prior; " ~ p[b] ~ "= 1 + Gamma(3, 3)")
+    y = dgamma(x-1, shape = 3, scale = 3)
   }
   
   plot(x, y, type = 'l', lwd = 2, #col = 'orange',

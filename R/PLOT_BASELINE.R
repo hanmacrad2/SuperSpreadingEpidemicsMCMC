@@ -6,12 +6,30 @@
 #' @param epidemic_data data from the epidemic, namely daily infection counts
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
 #' 
-PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
-                                  true_loglike = 0, data_type = 'Baseline', ADAPTIVE = TRUE,
+PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
+                               r0_sim = 2.0, true_loglike = 0, cex = 1.6,
+                                  PDF = TRUE, ADAPTIVE = TRUE,
                                   PRIORS = list(EXP = FALSE, UNIF = FALSE, GAMMA = FALSE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
   
   #PLOT
-  plot.new(); par(mfrow=c(2,3))
+  #plot.new()
+  #MODEL
+  FLAGS_MODELS = GET_FLAGS_MODELS(BASELINE = TRUE)
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  MODEL_COLORS = GET_MODEL_COLORS(); MODEL_COLOR = MODEL_COLORS[1]
+  
+  if(PDF){
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_mcmc_', time_stamp, '.pdf') 
+    RESULTS_FOLDER = '~/Github/Results/MCMC/Baseline/'
+    pdf(paste0(RESULTS_FOLDER, pdf_file), width = 12.0, height = 8.0)
+    
+    #MARGIN
+    par(mfrow=c(3,2))
+    par(mar = rep(5, 4), xpd = TRUE)
+    #par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
+    #par(mar= rep(5.0, 4), xpd=TRUE) 
+  }
   
   #MCMC OUTPUT
   r0_mcmc = mcmc_output$r0_vec; r0_mcmc = unlist(r0_mcmc)
@@ -19,38 +37,43 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
   ll_lim_min = min(true_loglike, min(mcmc_output$log_like_vec, na.rm = TRUE))
   ll_lim_max = max(true_loglike, max(mcmc_output$log_like_vec, na.rm = TRUE))
   
-  #priors
+  #***********
+  #* PLOTS *
+  
+  #i. EPIDEMIC DATAs
+  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
+  
+  #i. MCMC TRACE PLOTS
+  PLOT_R0_TRACE(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
+  segments(0, r0_sim, length(r0_mcmc), r0_sim, col = 'black', lwd = 2)
+  #abline(h = r0_sim, col = 'black', lwd = 2, xlim = c(0, max(r0_mcmc)))
+  
+  #iv. Cumulative Mean
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
+  segments(0, r0_sim, length(r0_mcmc), r0_sim, col = 'black', lwd = 2)
+  
+  #iii. RO SAMPLES - HISTOGRAM
+  PLOT_HISTOGRAM(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
+  segments(r0_sim, 0, r0_sim, 10, col = 'black', lwd = 2)
+  #lines(c(0, 9), ylim = c(0, 9), col = 'black', lwd = 2)
+  #abline(v = r0_sim, col = 'black', lwd = 2, ylim = c(0, 9))
+  
+  #v. PLOT LOG-LIKE
+  PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS)
+  
+  #vi. PLOT SIGMA
+  PLOT_SIGMA(mcmc_output$sigma_vec)
+  
+  #PRIOR TITLES
   if(PRIORS$EXP){
-   prior_title = 'Exponential(1)' 
+    prior_title = 'Exponential(1)' 
   } else if (PRIORS$UNIF){
     prior_title = 'Uniform(0,10)' 
   } else if (PRIORS$GAMMA){
     prior_title = 'Gamma(1,5)' 
   }
   
-  #***********
-  #* PLOTS *
-  
-  #i. EPIDEMIC DATA
-  plot.ts(epidemic_data, xlab = 'Time', ylab = 'Daily Infections count', 
-          main = paste0(data_type, " data. Sim R0:, ", r0_sim), 
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  
-  #iv. MCMC TRACE PLOTS
-  plot.ts(r0_mcmc, ylab = 'R0', 
-          main = paste('R0 MCMC Baseline Model'),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = r0_sim, col = 'orange', lwd = 2)
-  
-  
-  #iii. RO SAMPLES - HISTOGRAM
-  hist(r0_mcmc, freq = FALSE, breaks = 100,
-       xlab = 'R0 total', 
-       main = paste0('R0, Prior = ', prior_title), 
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(v = r0_sim, col = 'orange', lwd = 2)
-  
-  #PRIOR
+  #PRIORS
   if(PRIORS$EXP){
     mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
     xseq_r0 = seq(0, 3, length.out = 500)
@@ -63,34 +86,15 @@ PLOT_BASELINE_R0_MCMC <- function(epidemic_data, mcmc_output, r0_sim = 1.6,
     dr0e = dunif(xseq_r0, min = 0, max = 10) #list_priors$r0[1])
     lines(xseq_r0, dr0e, type = 'l', lwd = 2)
   }
-
-  
-  #ii. MEAN PLOTS
-  r0_mean = cumsum(r0_mcmc)/seq_along(r0_mcmc)
-  plot(seq_along(r0_mean), r0_mean,
-       xlab = 'Time', ylab = 'R0', main = paste('R0 MCMC Mean. R0 Sim:', r0_sim),
-       cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  abline(h = r0_sim, col = 'orange', lwd = 2)
-
-  #PLOT LOG-LIKE
-  plot.ts(mcmc_output$log_like_vec, ylab = 'Log-likelihood', 
-          main = paste('Log-likelihood MCMC'),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5) #,
-         # ylim = c(ll_lim_min, ll_lim_max))
-  #abline(h = true_loglike, col = 'orange', lwd = 2)
-
-  plot.ts(mcmc_output$sigma_vec, ylab = 'R0', 
-          main = paste('Sigma Adaptive MCMC'),
-          cex.lab=1.5, cex.axis=1.5, cex.main=1.5, cex.sub=1.5)
-  
-  #FINAL MEAN STATS 
-  r0_mcmc_mean = round(mean(r0_mcmc[length(r0_mcmc)/2:length(r0_mcmc)]), 2)
   
   #Results
   df_results <- data.frame(
-    R0_mean_mc = r0_mcmc_mean,
+    R0_mean_mc = round(mean(r0_mcmc[length(r0_mcmc)/2:length(r0_mcmc)]), 2),
     accept_rate_r0 = round(mcmc_output[[4]],2)) #time_elap = round(time_elap,2)) 
   
+  if(PDF){
+    dev.off()
+  }
   return(df_results)
   
 }

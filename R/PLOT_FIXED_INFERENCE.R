@@ -3,8 +3,8 @@
 #********************************************************
 
 PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                   num_days = 50, cex = 1.25, 
-                                   PDF = TRUE, GT = FALSE, GT_VAL = 20, inset = 0.43, #0.46 for non r0 
+                                   num_days = 50, cex = 1.75, 
+                                   PDF = TRUE, GT = FALSE, GT_VAL = 10, inset = 0.46, #0.46 for non r0 
                                    INCLUDE_INFS_5 = FALSE,
                                    PRIORS = list(EXP = TRUE,
                                                  GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
@@ -37,7 +37,7 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, fixed_param, GT = GT, GT_VAL = GT_VAL)
+  list_subset_data = SUBSET_DFS(df_results, filter_param, fixed_param, GT_VAL = GT_VAL, FLAG_PARAM = FIXED_PARAM)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds 
   
@@ -49,12 +49,24 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
   prior_title = GET_PRIOR_TITLE(PRIORS)
   
   # LABELS
+  ylab = 'Estimated posterior mean of '
+  
   if (FIXED_PARAM$r0){
     ylab <- expression(paste('Estimated posterior mean of R'[0])) #paste0(expression(paste('mean R'[0]))) 
-    titleX = bquote(bold(paste(.(model) ~ "Model Inference - ", italic(R[0]))))
+    titleX =  bquote(paste(italic(R[0]) ~ " - " ~ .(model)))
+    
+  } else if (FIXED_PARAM$alpha){
+    titleX =  bquote(paste(italic(alpha) ~ " - " ~ .(model)))
+    ylab = bquote(paste(.(ylab) ~ italic(alpha)))
+    
+  } else if (FIXED_PARAM$beta) {
+    titleX =  bquote(paste(italic(beta) ~ " - " ~ .(model)))
+    ylab = bquote(paste(.(ylab) ~ italic(beta)))
+    
   } else {
+
     ylab <- paste0('Estimated posterior mean of ', fixed_param)
-    titleX = bquote(bold(paste(.(model) ~ "Model Inference - " ~ .(fixed_param) )))
+    titleX =  bquote(paste(.(fixed_param) ~ " - " ~ .(model)))
   }
   
   #x label
@@ -81,8 +93,8 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
            main = "", xlab = xlab, ylab = ylab,
            xlim = x_lim, ylim = y_lim,
            col = colour, pch = 16, 
-           cex.lab=cex, cex.axis=cex, cex.sub=cex) #cex = cex text.font = 4.0,
-      title(main = list(titleX, cex = 1.8, font = 2.0))
+           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
+      title(main = list(titleX, cex = 2.5, font = 3.0))
       
     } else {
       

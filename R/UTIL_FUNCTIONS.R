@@ -221,6 +221,7 @@ GET_FOLDER_TIME_STAMP <- function(folder_type){
   return(CURRENT_FOLDER)
 }
 
+
 # current_time <- Sys.time()
 # 
 # # Format the current time into a string
