@@ -22,20 +22,20 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '',
                                    " = 2.0"))
   } else if (FLAGS_MODELS$SSE){
     
-    data_title = bquote(paste(.(model), " simulated data. ", italic(R[0]),
+    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
                                    " = 2.0, ", italic(k), " = 0.16"))
   } else if (FLAGS_MODELS$SSI){
     
-    data_title = bquote(bold(paste(.(model), " sim data. ", italic(R[0]),
-                                   " = 2.0, ", k, " = 0.15")))
+    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
+                                   " = 2.0, ", k, " = 0.16"))
   } else if (FLAGS_MODELS$SSEB){
-    data_title = bquote(bold(paste(.(model), " sim data. ", italic(R[0]),
-                                   " = 2.0, ", alpha, " = 0.5, ", beta, " = 10")))
+    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
+                                   " = 2.0, ", alpha, " = 0.5, ", beta, " = 10"))
     main_font = 2.7
     
   } else if (FLAGS_MODELS$SSIB){
-    data_title = bquote(bold(paste(.(model), "sim data. ", italic(R[0]),
-                                   " = 2.0, ", a, " = 0.5, ", b, " = 10")))
+    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
+                                   " = 2.0, ", a, " = 0.5, ", b, " = 10"))
     main_font = 2.7
   }
   
@@ -207,6 +207,21 @@ GET_FLAGS_MODELS <-function(BASELINE = FALSE, SSE = FALSE, SSI = FALSE , SSEB = 
   } else if (SSE){
     FLAGS_MODELS = list(Baseline = FALSE, SSE = TRUE, SSI = FALSE,
                         SSEB = FALSE, SSIB = FALSE) 
+  } else if (SSI) {
+    
+    FLAGS_MODELS = list(Baseline = FALSE, SSE = FALSE, SSI = TRUE,
+                        SSEB = FALSE, SSIB = FALSE) 
+    
+  } else if (SSEB) {
+    
+    FLAGS_MODELS = list(Baseline = FALSE, SSE = FALSE, SSI = FALSE,
+                        SSEB = TRUE, SSIB = FALSE) 
+    
+  } else if (SSIB) {
+    
+    FLAGS_MODELS = list(Baseline = FALSE, SSE = FALSE, SSI = FALSE,
+                        SSEB = FALSE, SSIB = TRUE) 
+    
   }
   
   return(FLAGS_MODELS)
