@@ -184,7 +184,7 @@ SET_SSIB_PRIOR <- function(param, param_dash, PRIORS_USED,
 #'
 #' @export
 #************************************************************************
-#1. SSI MCMC                              (W/ DATA AUGMENTATION)
+#1. SSIB MCMC                              (W/ DATA AUGMENTATION)
 #************************************************************************
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRIORS_USED(),
                             param_starts = list(alpha = 0.5, b = 10, r0_start = 2.0),

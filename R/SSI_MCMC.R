@@ -37,13 +37,28 @@ SIMULATE_EPI_SSI <- function(num_days = 50, r0 = 2.0, k = 0.8,
     infectivity = rev(prob_infect[1:t-1]) 
     
     #POISSON; OFFSPRING DISTRIBUTION
-    #browser()
     total_rate = sum(eta_vec[1:t-1]*infectivity) 
     
     x[t] = rpois(1, total_rate)
-    #print(paste0('total_rate', total_rate))
+
   }
   return(list(epidemic_data = x, eta_vec = eta_vec))
+}
+
+#**********
+GET_ETA <- function(epidemic_data, r0, k){
+  
+  #SETUP
+  num_days = length(epidemic_data)
+  eta_vec = vector('numeric', num_days); 
+  
+  for (t in 2:num_days) {
+    
+    #ETA (t-1)
+    eta_vec[t-1] <- rgamma(1, shape = epidemic_data[t-1]*k, scale = r0/k) #Draw eta from previous time step
+  }
+  
+  return(eta_vec)
 }
 
 #**********************************************
