@@ -76,6 +76,9 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, beta){
 PROBABILITY_XT <- function(xt, lambda_t, gamma, beta, alpha, r0, max_et = 100) {
   
   'Compound Poisson Prob for SSEB model'
+  
+  #MAX EVENTS (ADD)
+  max_et = GET_MAX_SS_EVENTS(xt) #ADDED 12/01/24
   prob_xt = 0
   vec_prob_xt = vector('numeric', length = max_et + 1)
   
@@ -109,6 +112,17 @@ PROBABILITY_XT_V0 <- function(xt, lambda_t, beta, gamma, alpha, r0, max_et = 100
   return(prob_xt)
 }
 
+#GET MAXIMUM POSSIBLE NUMBER OF SSE EVENTS
+GET_MAX_SS_EVENTS <- function(data_t) {
+  
+  if(data_t <= 1000){
+    max_et = 100
+  } else if (data_t > 1000 & data_t < 10000){
+    max_et = 1000
+  } else if (data_t > 10000){
+    max_et = 10000
+  }
+}
 
 #PRIOR
 SET_SSEB_PRIOR <- function(param, param_dash,
