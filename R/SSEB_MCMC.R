@@ -351,13 +351,13 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
   }
   
   #Final stats
-  accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
+  accept_rate_alpha = 100*list_accept_counts$count_accept1/(n_mcmc-1)
   accept_rate_r0 = 100*list_accept_counts$count_accept_r0/(n_mcmc-1) #(list_accept_counts$count_accept_beta + list_reject_counts$count_accept_beta)
-  accept_rate3 = 100*list_accept_counts$count_accept3/(n_mcmc-1)
+  accept_rate_beta = 100*list_accept_counts$count_accept3/(n_mcmc-1)
   
   #Acceptance rates
-  list_accept_rates = list(accept_rate1 = accept_rate1,
-                           accept_rate_r0 = accept_rate_r0, accept_rate3 = accept_rate3)
+  list_accept_rates = list(accept_rate_alpha = accept_rate_alpha,
+                           accept_rate_r0 = accept_rate_r0, accept_rate_beta = accept_rate_beta)
   print(list_accept_rates)
   
   #OUTPUT

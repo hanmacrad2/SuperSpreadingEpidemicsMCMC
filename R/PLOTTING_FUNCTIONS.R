@@ -75,13 +75,14 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR,
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
+  prior = GET_PRIOR_TITLE(FLAG_PARAM)
   
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = list_labels$lab,
-       xlim = xlim,
+       #xlim = xlim,
        border = MODEL_COLOR,
        col = MODEL_COLOR, 
-       main = list_labels$main_hist,
+       main = bquote(paste(list_labels$main_hist, prior)),
        cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
 }
 
@@ -110,7 +111,7 @@ PLOT_HISTOGRAM <-function(mcmc_vec, FLAGS_MODELS, MODEL_COLOR, cex = 1.6){
   xlab =  bquote(paste(italic(R[0])))
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = xlab,
-       xlim = c(1.8, 2.2),
+       #xlim = c(1.8, 2.2),
        border = MODEL_COLOR,
        col = MODEL_COLOR, 
        main = title,
@@ -128,31 +129,13 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
   cum_mean = cumsum(mcmc_vec)/seq_along(mcmc_vec)
   
   plot(seq_along(cum_mean), cum_mean, 
-       ylim = ylim,
+       #ylim = ylim,
        col = MODEL_COLOR,
        xlab = 'Time', ylab = list_labels$lab,
        main =  list_labels$main_mean,
        cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
 }
 
-PLOT_CUMULATIVE_MEAN0 <-function(mcmc_vec, FLAGS_MODELS, MODEL_COLOR, cex = 1.6){
-  
-  'Cumulative mean'
-  
-  #PARAMS
-  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  
-  ylab =  bquote(paste(italic(R[0])))
-  cum_mean = cumsum(mcmc_vec)/seq_along(mcmc_vec)
-  ylimits = c(1.8, 2.2) 
-  
-  plot(seq_along(cum_mean), cum_mean, 
-       ylim = ylimits,
-       col = MODEL_COLOR,
-       xlab = 'Time', ylab = ylab,
-       main =  bquote(paste(italic(R[0]) ~ " Cumulative mean ")),
-       cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
-}
 
 PLOT_CUMULATIVE_MEAN_K <-function(mcmc_vec, FLAGS_MODELS, MODEL_COLOR, cex = 1.6){
   
@@ -272,13 +255,14 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
   if(FLAG_PARAM$r0){
     list_labels = list(lab = expression(paste('R'[0])), 
                        main_trace =  bquote(paste(italic(R[0]), " MCMC Trace - ", .(model)~ "model")),
-                       main_hist = bquote(paste(italic(R[0]), " Posterior - ", .(model)~ "model")),
+                       main_hist = bquote(paste(italic(R[0]), " Posterior. ")),
+                       #main_hist = bquote(paste(italic(R[0]), " Posterior - ", .(model)~ "model")),
                        main_mean = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 
                                          main_trace =  bquote(paste(italic(alpha), " MCMC Trace - ", .(model)~ "model")),
-                       main_hist = bquote(paste(italic(alpha), " Posterior - ", .(model)~ "model")),
+                       main_hist = bquote(paste(italic(alpha), " Posterior. ", .(model)~ "model")),
                        main_mean = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$beta){
