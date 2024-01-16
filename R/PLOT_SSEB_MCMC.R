@@ -39,9 +39,7 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   }
   
   #LIMITS
-  #r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
-  #k_min = min(sim_vals$k, min(k_mcmc, na.rm = TRUE)); k_max = max(sim_vals$k, max(k_mcmc, na.rm = TRUE))
-  #r0_lim = c(r0_min, r0_max);  k_lim = c(k_min, k_max)
+  r0_lim = c(0.9, 3.0); alpha_lim = c(0,1); beta_lim = c(5, 15)
   
   #******************************************************************
   #* PLOTS *
@@ -64,41 +62,32 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   segments(0, sim_vals$beta, length(beta_mcmc), sim_vals$beta, col = 'black', lwd = 2)
   
   #iii. HISTOGRAMS
-  PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
-  PLOT_PRIOR_DIST(FLAG_PARAM1)
-  segments(sim_vals$r0, 0, sim_vals$r0, 2.0, col = 'black', lwd = 2)
   
-  #PRIOR
-  if(PRIOR) {
-    lines(x1, dr0e, type = 'l', lwd = 2) 
-  }
+  #HIST R0
+  r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > 0.95)
+  PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, xlim = r0_lim)
+  PLOT_PRIOR_DIST(FLAG_PARAM1, r0_mcmc, r0_lim)
+  segments(sim_vals$r0, 0, sim_vals$r0, 1.0, col = 'black', lwd = 2)
   
   #HIST ALPHA
-  PLOT_MCMC_HIST(alpha_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex)
+  PLOT_MCMC_HIST(alpha_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = alpha_lim)
+  PLOT_PRIOR_DIST(FLAG_PARAM2, alpha_mcmc, alpha_lim)
   segments(sim_vals$alpha, 0, sim_vals$alpha, 4, col = 'black', lwd = 2)
-  
-  #PRIOR
-  if(PRIOR){
-    lines(x2, d2, type = 'l', lwd = 2) 
-  }
-  
-  #HIST ALPHA
-  PLOT_MCMC_HIST(beta_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex) #, xlim = k_lim)
+
+  #HIST BETA
+  beta_mcmc_hist = subset(beta_mcmc, beta_mcmc > 5)
+  PLOT_MCMC_HIST(beta_mcmc_hist, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex, xlim = beta_lim)
+  PLOT_PRIOR_DIST(FLAG_PARAM3, beta_mcmc, beta_lim)
   segments(sim_vals$beta, 0, sim_vals$beta, 0.25, col = 'black', lwd = 2)
-  
-  #PRIOR
-  if(PRIOR){
-    lines(x2, d2, type = 'l', lwd = 2) 
-  }
-  
+
   #iv. CUMULATIVE MEANS 
-  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, ylim = r0_lim)
   segments(0, sim_vals$r0, length(r0_mcmc), sim_vals$r0, col = 'black', lwd = 2)
   
-  PLOT_CUMULATIVE_MEAN(alpha_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex) #, ylim = k_lim)
-  segments(0, sim_vals$alpha, length(alpha_mcmc), sim_vals$alpha, col = 'black', lwd = 2)
+  PLOT_CUMULATIVE_MEAN(alpha_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, ylim = alpha_lim)
+  segments(0, sim_vals$alpha, length(alpha_mcmc), sim_vals$alpha, col = 'black', lwd = 2, ylim = alpha_lim)
   
-  PLOT_CUMULATIVE_MEAN(beta_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex) #, ylim = k_lim)
+  PLOT_CUMULATIVE_MEAN(beta_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex, ylim = beta_lim)
   segments(0, sim_vals$beta, length(beta_mcmc), sim_vals$beta, col = 'black', lwd = 2)
   
   if(PDF){

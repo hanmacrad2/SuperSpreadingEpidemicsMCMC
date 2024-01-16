@@ -70,7 +70,7 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 
 #MCMC HISTOGRAM
 PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR,
-                            cex = 1.6, xlim = c(1.7, 2.3)){
+                            cex = 1.6, xlim = c(1.0, 3.0)){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -79,7 +79,7 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR,
   
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = list_labels$lab,
-       #xlim = xlim,
+       xlim = xlim,
        border = MODEL_COLOR,
        col = MODEL_COLOR, 
        main = list_labels$main_hist_prior,
@@ -109,10 +109,10 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
   cum_mean = cumsum(mcmc_vec)/seq_along(mcmc_vec)
   
   plot(seq_along(cum_mean), cum_mean, 
-       #ylim = ylim,
+       ylim = ylim,
        col = MODEL_COLOR,
        xlab = 'Time', ylab = list_labels$lab,
-       main =  list_labels$main_mean,
+       main =  list_labels$main_mean_sim,
        cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
 }
 
@@ -217,49 +217,58 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_trace =  bquote(paste(italic(R[0]), " MCMC Trace - ", .(model)~ "model")),
                        main_hist = bquote(paste(italic(R[0]), " Posterior. ")),
                        main_hist_prior = bquote(paste(italic(R[0]), " Posterior. Prior: Exponential(1)")),
-                       main_mean = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")))
+                       main_mean_sim = bquote(paste(italic(R[0]), " Cumulative mean. Simulated value = 2.0")),
+                       main_mean0 = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 
                                          main_trace =  bquote(paste(italic(alpha), " MCMC Trace - ", .(model)~ "model")),
                        main_hist = bquote(paste(italic(alpha), " Posterior. ", .(model)~ "model")),
                        main_hist_prior = bquote(paste(italic(alpha), " Posterior. Prior: Beta(2,2)")),
-                       main_mean = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")))
+                       main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated value = 0.5")),
+                       main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$beta){
     list_labels = list(lab = expression(paste(italic(beta))), 
                                          main_trace =  bquote(paste(italic(beta), " MCMC Trace - ", .(model)~ "model")),
                        main_hist = bquote(paste(italic(beta), " Posterior - ", .(model)~ "model")),
                        main_hist_prior = bquote(paste(italic(beta), " Posterior. Prior: 1 + Gamma(3,3)")),
-                       main_mean = bquote(paste(italic(beta), " Cumulative mean - ", .(model)~ "model")))
+                       main_mean_sim = bquote(paste(italic(beta), " Cumulative mean. Simulated value = 10")),
+                       main_mean2 = bquote(paste(italic(beta), " Cumulative mean - ", .(model)~ "model")))
   } else {
     
     list_labels = list(lab = bquote(paste(.(param))), 
                                          main_trace =  bquote(paste(.(param), " Trace - ", .(model)~ "model")),
                        main_hist =  bquote(paste(.(param), " Posterior - ", .(model)~ "model")),
-                       main_mean =  bquote(paste(.(param), " Cumulative mean - ", .(model)~ "model")))
+                       main_mean2 =  bquote(paste(.(param), " Cumulative mean - ", .(model)~ "model")))
     
-    list_labels = GET_ADDITIONAL_PRIOR(FLAG_PARAM, list_labels)
+    list_labels = GET_ADDITIONAL_TITLES(FLAG_PARAM, list_labels)
   } 
   
   return(list_labels)
 }
 
 #PRIOR TITLE FOR OTHER PARAMS
-GET_ADDITIONAL_PRIOR <- function(FLAG_PARAM, list_labels){
+GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
+  
+  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   
   if(FLAG_PARAM$k){
     
   list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Exponential(1)"))
+  list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 0.1"))
   
   } else if (FLAG_PARAM$a) {
   
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Beta(2,2)"))
+    list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 0.5"))
     
   } else if (FLAG_PARAM$b) {
     
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: 1 + Gamma(3,3)"))
+    list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 10"))
   }
   
   return(list_labels)
 }
+

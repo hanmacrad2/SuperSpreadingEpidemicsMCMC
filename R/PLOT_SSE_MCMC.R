@@ -1,14 +1,14 @@
 #PLOT SSE MCMC GRID
-PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output,
+PLOT_SSE_MCMC <- function(epidemic_data, mcmc_output,
                                n_mcmc, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSE/',
                                PRIOR = TRUE, PDF = FALSE,
-                               sim_vals = list(r0 = 2, k = 0.16), 
+                               sim_vals = list(r0 = 2, k = 0.1), 
                                mcmc_specs = list(burn_in_pc = 0.2,
                                                  thinning_factor = 10)){
   
   #PLOT
   par(mfrow=c(4,2))
-  par(mar = rep(4.5, 4), xpd = TRUE)
+  par(mar = rep(5, 4), xpd = TRUE)
 
   #MODEL
   FLAGS_MODELS = GET_FLAGS_MODELS(SSE = TRUE)
@@ -39,27 +39,13 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output,
   }
   
   #LIMITS
-  r0_lim = c(1.7, 2.3)
-  k_lim = c(0.075, 0.25)
-  
-  #PRIOR LABELS R0
-  if(PRIORS_USED$SSE$r0$EXP){
-    prior_r0 = paste0('exp(', list_priors$r0[1], ')')
-    x1 = seq(r0_lim[1], r0_lim[2], length.out = 1000)
-    dr0e = dexp(x1, rate = list_priors$r0[1])
-  }
-  
-  #PRIOR LABELS k 
-  if(PRIORS_USED$SSE$k$EXP){
-    k_prior = paste0('exp(', list_priors$k[1], ')')
-    x2 = seq(k_lim[1], k_lim[2], length.out = 1000)
-    d2 = dexp(x2, rate = list_priors$k[1])
-  }
+  r0_lim = c(1.4, 2.6)
+  k_lim = c(0, 0.205)
 
   #LIMITS
-  # r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
-  # k_min = min(sim_vals$k, min(k_mcmc, na.rm = TRUE)); k_max = max(sim_vals$k, max(k_mcmc, na.rm = TRUE))
-  # r0_lim = c(r0_min, r0_max);  k_lim = c(k_min, k_max)
+  #r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
+  #k_min = min(sim_vals$k, min(k_mcmc, na.rm = TRUE)); k_max = max(sim_vals$k, max(k_mcmc, na.rm = TRUE))
+  #r0_lim = c(r0_min, r0_max);  k_lim = c(k_min, k_max)
   
   #******************************************************************
   #* PLOTS *
@@ -84,26 +70,19 @@ PLOT_SSE_MCMC_GRID <- function(epidemic_data, mcmc_output,
   
   #iii. HISTOGRAMS
   r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
-  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
-  segments(sim_vals$r0, 0, sim_vals$r0, 4, col = 'black', lwd = 2)
-  
-  #PRIOR
-  if(PRIOR) {
-    lines(x1, dr0e, type = 'l', lwd = 2) 
-  }
-  
+  r0_mcmc_hist = subset(r0_mcmc_hist, r0_mcmc_hist < r0_lim[2])
+  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex,  xlim = r0_lim)
+  PLOT_PRIOR_DIST(FLAG_PARAM1, r0_mcmc, r0_lim)
+  segments(sim_vals$r0, 0, sim_vals$r0, 2, col = 'black', lwd = 2)
+
   #HIST K
   k_mcmc_hist = subset(k_mcmc, k_mcmc > k_lim[1])
   PLOT_MCMC_HIST(k_mcmc_hist, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = k_lim)
-  segments(sim_vals$k, 0, sim_vals$k, 10, col = 'black', lwd = 2)
-  
-  #PRIOR
-  if(PRIOR){
-    lines(x2, d2, type = 'l', lwd = 2) 
-  }
+  PLOT_PRIOR_DIST(FLAG_PARAM2, k_mcmc, k_lim)
+  segments(sim_vals$k, 0, sim_vals$k, 15, col = 'black', lwd = 2)
   
   #iv. CUMULATIVE MEANS 
-  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, ylim = r0_lim)
   segments(0, sim_vals$r0, length(r0_mcmc), sim_vals$r0, col = 'black', lwd = 2)
   
   PLOT_CUMULATIVE_MEAN(k_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, ylim = k_lim)
