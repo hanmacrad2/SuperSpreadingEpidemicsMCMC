@@ -39,24 +39,6 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   }
   
   #LIMITS
-  #r0_lim = c(1.7, 2.3) k_lim = c(0.075, 0.25)
-  
-  #PRIOR TITLE
-  #PRIOR LABELS R0
-  # if(PRIORS_USED$SSI$r0$EXP){
-  #   prior_r0 = paste0('exp(', list_priors$r0[1], ')')
-  #   x1 = seq(r0_lim[1], r0_lim[2], length.out = 1000)
-  #   dr0e = dexp(x1, rate = list_priors$r0[1])
-  # }
-  # 
-  # #PRIOR LABELS k 
-  # if(PRIORS_USED$SSI$k$EXP){
-  #   k_prior = paste0('exp(', list_priors$k[1], ')')
-  #   x2 = seq(k_lim[1], k_lim[2], length.out = 1000)
-  #   d2 = dexp(x2, rate = list_priors$k[1])
-  # }
-  
-  #LIMITS
   #r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
   #k_min = min(sim_vals$k, min(k_mcmc, na.rm = TRUE)); k_max = max(sim_vals$k, max(k_mcmc, na.rm = TRUE))
   #r0_lim = c(r0_min, r0_max);  k_lim = c(k_min, k_max)
@@ -82,9 +64,9 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   segments(0, sim_vals$beta, length(beta_mcmc), sim_vals$beta, col = 'black', lwd = 2)
   
   #iii. HISTOGRAMS
-  #r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
   PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
-  segments(sim_vals$r0, 0, sim_vals$r0, 4, col = 'black', lwd = 2)
+  PLOT_PRIOR_DIST(FLAG_PARAM1)
+  segments(sim_vals$r0, 0, sim_vals$r0, 2.0, col = 'black', lwd = 2)
   
   #PRIOR
   if(PRIOR) {
@@ -93,7 +75,7 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   
   #HIST ALPHA
   PLOT_MCMC_HIST(alpha_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex)
-  segments(sim_vals$alpha, 0, sim_vals$alpha, 5, col = 'black', lwd = 2)
+  segments(sim_vals$alpha, 0, sim_vals$alpha, 4, col = 'black', lwd = 2)
   
   #PRIOR
   if(PRIOR){
@@ -102,7 +84,7 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   
   #HIST ALPHA
   PLOT_MCMC_HIST(beta_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex) #, xlim = k_lim)
-  segments(sim_vals$beta, 0, sim_vals$beta, 10, col = 'black', lwd = 2)
+  segments(sim_vals$beta, 0, sim_vals$beta, 0.25, col = 'black', lwd = 2)
   
   #PRIOR
   if(PRIOR){
