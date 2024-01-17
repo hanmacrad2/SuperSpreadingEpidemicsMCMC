@@ -1,6 +1,6 @@
-#' Simulation function for the Super-Spreading Individuals (SSI) epidemic model
+#' Simulation function for the Super-Spreading Individuals bimodal (SSIB) epidemic model
 #'
-#' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+#' Returns a time series of data of the super-spreading individuals (SSIB) epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
 #'
 #' @export
 #' 
@@ -13,12 +13,12 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
   #alpha = alpha_prop*r0 
   
   #Set up
-  total_infecteds = vector('numeric', num_days)
-  nss_infecteds = vector('numeric', num_days)
-  ss_infecteds = vector('numeric', num_days)
-  total_infecteds[1] = 3
-  nss_infecteds[1] = 2
-  ss_infecteds[1] = 1 
+  total_infections = vector('numeric', num_days)
+  nssi_infections = vector('numeric', num_days)
+  ssi_infections = vector('numeric', num_days)
+  total_infections[1] = 3
+  nssi_infections[1] = 2
+  ssi_infections[1] = 1 
   
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
@@ -29,14 +29,58 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
   for (t in 2:num_days) {
     
     #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum((nss_infecteds[1:(t-1)] + b*ss_infecteds[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nss_infecteds[t] = rpois(1, alpha*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
-    ss_infecteds[t] = rpois(1, c*lambda_t)
-    total_infecteds[t] = nss_infecteds[t] + ss_infecteds[t]
+    lambda_t = sum((nssi_infections[1:(t-1)] + b*ssi_infections[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    nssi_infections[t] = rpois(1, alpha*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    ssi_infections[t] = rpois(1, c*lambda_t)
+    total_infections[t] = nssi_infections[t] + ssi_infections[t]
   }
   
-  total_infecteds
+  total_infections
 }
+
+#' Simulation function for the Super-Spreading Individuals (SSI) epidemic model
+#'
+#' Returns a time series of data of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and
+#'
+#' @export
+#' 
+SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
+                             shape_gamma = 6, scale_gamma = 1) {
+  'Simulate an epidemic with Superspreading individuals'
+  
+  #Params
+  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
+  #alpha = alpha_prop*r0 
+  
+  #Set up
+  total_infections = vector('numeric', num_days)
+  nssi_infections = vector('numeric', num_days)
+  ssi_infections = vector('numeric', num_days)
+  total_infections[1] = 3
+  nssi_infections[1] = 2
+  ssi_infections[1] = 1 
+  
+  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
+  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - 
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  #Days of Infection Spreading
+  for (t in 2:num_days) {
+    
+    #Regular infecteds (tot_rate = lambda) fix notation
+    lambda_t = sum((nssi_infections[1:(t-1)] + b*ssi_infections[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    nssi_infections[t] = rpois(1, alpha*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    ssi_infections[t] = rpois(1, c*lambda_t)
+    total_infections[t] = nssi_infections[t] + ssi_infections[t]
+  }
+  
+  list_ssib_data = list(total_infections = total_infections, nssi_infections = nssi_infections,
+                        ssi_infections = ssi_infections)
+                        
+  return(list_ssib_data)
+}
+
 #' Log likelihood of the Super-Spreading Individuals (SSI) epidemic model
 #'
 #' Returns the Log likelihood of the super-spreading individuals (SSI)epidemic model for given epidemic \code{"data"} and set of model parameters \code{"a, b"} and \code{"c"} and

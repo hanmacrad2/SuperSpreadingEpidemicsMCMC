@@ -3,13 +3,14 @@ PLOT_SSI_MCMC <- function(epidemic_data, mcmc_output,
                                n_mcmc, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSI/',
                                PRIOR = TRUE, PDF = FALSE,
                                sim_vals = list(r0 = 2, k = 0.16), 
+                               limits = list(r0 =  c(1.7, 2.3), k = c(0.075, 0.25)),
                                mcmc_specs = list(burn_in_pc = 0.2,
                                                  thinning_factor = 10)){
   
   #PLOT
   par(mfrow=c(4,2))
   par(mar = rep(4.5, 4), xpd = TRUE)
-  
+
   #MODEL
   FLAGS_MODELS = GET_FLAGS_MODELS(SSI = TRUE)
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
@@ -39,8 +40,6 @@ PLOT_SSI_MCMC <- function(epidemic_data, mcmc_output,
   }
   
   #LIMITS
-  r0_lim = c(1.7, 2.3)
-  k_lim = c(0.075, 0.25)
   
   #LIMITS
   #r0_min =  min(sim_vals$r0, min(r0_mcmc, na.rm = TRUE));  r0_max =  max(sim_vals$r0, max(r0_mcmc, na.rm = TRUE))
@@ -69,30 +68,24 @@ PLOT_SSI_MCMC <- function(epidemic_data, mcmc_output,
   segments(0, sim_vals$k, length(k_mcmc), sim_vals$k, col = 'black', lwd = 2)
   
   #iii. HISTOGRAMS
-  r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
-  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
-  segments(sim_vals$r0, 0, sim_vals$r0, 4, col = 'black', lwd = 2)
   
-  #PRIOR
-  if(PRIOR) {
-    lines(x1, dr0e, type = 'l', lwd = 2) 
-  }
-  
+  #HIST R0
+  r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > limits$r0[1])
+  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, xlim = limits$r0)
+  PLOT_PRIOR_DIST(FLAG_PARAM1, r0_mcmc, limits$r0)
+  segments(sim_vals$r0, 0, sim_vals$r0, 15, col = 'black', lwd = 2)
+
   #HIST K
-  k_mcmc_hist = subset(k_mcmc, k_mcmc > k_lim[1])
-  PLOT_MCMC_HIST(k_mcmc_hist, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = k_lim)
-  segments(sim_vals$k, 0, sim_vals$k, 10, col = 'black', lwd = 2)
-  
-  #PRIOR
-  if(PRIOR){
-    lines(x2, d2, type = 'l', lwd = 2) 
-  }
-  
+  k_mcmc_hist = subset(k_mcmc, k_mcmc > limits$k[1])
+  PLOT_MCMC_HIST(k_mcmc_hist, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = limits$k)
+  PLOT_PRIOR_DIST(FLAG_PARAM2, k_mcmc, limits$k)
+  segments(sim_vals$k, 0, sim_vals$k, 1.5, col = 'black', lwd = 2)
+
   #iv. CUMULATIVE MEANS 
-  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, ylim = limits$r0)
   segments(0, sim_vals$r0, length(r0_mcmc), sim_vals$r0, col = 'black', lwd = 2)
   
-  PLOT_CUMULATIVE_MEAN(k_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, ylim = k_lim)
+  PLOT_CUMULATIVE_MEAN(k_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, ylim = limits$k)
   segments(0, sim_vals$k, length(k_mcmc), sim_vals$k, col = 'black', lwd = 2)
   
   if(PDF){

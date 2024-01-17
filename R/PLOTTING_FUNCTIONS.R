@@ -117,15 +117,31 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 }
 
 #PLOT LOG-LIKE
-PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, cex = 1.6){
+PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.5, PLOT_LOGLIKE_MEAN = FALSE){
   
+  'PLOT LOG LIKELIHOOD'
   #PARAMS
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   
+  #1. TRACE
   plot(seq_along(loglike_vec), loglike_vec, type = 'l',
           xlab = 'Time', ylab = 'Log likelihood', 
-          main = bquote(paste("Log likelihood - ", .(model), " model")),
-          cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+          main = bquote(paste("Log likelihood - ", .(model), " model. N mcmc: ", .(n_mcmc))),
+          cex.lab=cex, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+  
+  if(PLOT_LOGLIKE_MEAN){
+    
+    #2. CUMULATIVE MEAN
+    cum_mean = cumsum(loglike_vec)/seq_along(loglike_vec)
+    
+    plot(seq_along(cum_mean), cum_mean, 
+         #ylim = ylim,
+         col = 'black',
+         xlab = 'Time', ylab = 'Log likelihood',
+         main = bquote(paste("Log likelihood - ", .(model), " model")),
+         cex.lab=cex+0.1, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+  }
+
 }
 
 #PLOT SIGMA
