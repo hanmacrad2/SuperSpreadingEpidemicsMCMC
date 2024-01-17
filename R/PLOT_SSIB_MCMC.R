@@ -21,7 +21,12 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   FLAG_PARAM3 = GET_PARAM(b = TRUE); list_labels3 = GET_PARAM_LABEL(FLAG_PARAM3, model)
   
   #MCMC
-  r0_mcmc = mcmc_output$r0_vec; a_mcmc = mcmc_output$alpha_vec; b_mcmc = mcmc_output$b_vec 
+  #r0_mcmc = mcmc_output$r0_vec; a_mcmc = mcmc_output$alpha_vec; b_mcmc = mcmc_output$b_vec 
+  
+  #MCMC
+  r0_mcmc = mcmc_output$ssib_params_matrix[,1]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
+  a_mcmc = mcmc_output$ssib_params_matrix[,2]; a_mcmc = unlist(a_mcmc); a_mcmc = a_mcmc[!is.na(a_mcmc)]
+  b_mcmc = mcmc_output$ssib_params_matrix[,3]; b_mcmc = unlist(b_mcmc); b_mcmc = b_mcmc[!is.na(b_mcmc)]
   
   if(PDF){
     time_stamp = GET_CURRENT_TIME_STAMP()
@@ -106,9 +111,9 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
     b_mean_mcmc = round(mean(b_mcmc), 2),
     b_lo_95_cred_int = round(get_lower_ci(b_mcmc), 2),
     b_up_95_cred_int = round(get_upper_ci(b_mcmc), 2), 
-    accept_rate_r0 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
-    accept_rate_a = round(mcmc_output$list_accept_rates$accept_rate1, 2),
-    accept_rate_b = round(mcmc_output$list_accept_rates$accept_rate3, 2),
+    #accept_rate_r0 = round(mcmc_output$list_accept_rates$accept_rate2, 2),
+    #accept_rate_a = round(mcmc_output$list_accept_rates$accept_rate1, 2),
+    #saccept_rate_b = round(mcmc_output$list_accept_rates$accept_rate3, 2),
     r0_es = round(effectiveSize(as.mcmc(r0_mcmc))[[1]], 2),
     a_es = round(effectiveSize(as.mcmc(a_mcmc))[[1]], 2),
     b_es = round(effectiveSize(as.mcmc(b_mcmc))[[1]], 2),
