@@ -101,7 +101,7 @@ SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
 #' @export
 
 LOG_LIKE_SSIB <- function(epidemic_data, r0, alpha, b, 
-                          shape_gamma = 6, scale_gamma = 1, temp = 1.2){
+                          shape_gamma = 6, scale_gamma = 1){
   
   #A = PROPORTION OF r0
   c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
@@ -133,6 +133,7 @@ LOG_LIKE_SSIB <- function(epidemic_data, r0, alpha, b,
 SET_SSIB_PRIOR <- function(param, param_dash, PRIORS_USED,
                            alpha_flag = FALSE, r0_flag = FALSE, b_flag = FALSE){
   
+  return(0)
   #PRIORS
   list_priors = GET_LIST_PRIORS_SSIB(); 
   
@@ -254,7 +255,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
   print(paste0('num mcmc iters = ', n_mcmc))
   
   #DATA: SUPERSPREADING INTIALISATION
-  ss = ifelse(epidemic_data > 1, 1, 0) #Initialising ss to be 1 if epi_data > 1. 0 otherwise
+  ss = ifelse(epidemic_data > 1, 1, 0)
   print('ss: '); print(ss)
   non_ss = epidemic_data - ss 
   print('non_ss: '); print(non_ss)
@@ -322,6 +323,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
   #mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
   non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
   ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  vec_accept_da = vector('numeric', length = time)
   
   #******************************
   #MCMC CHAIN
@@ -345,8 +347,12 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
       alpha_dash = abs(alpha_dash) 
     }
     
+    if(log_like != LOG_LIKE_SSIB(data, r0, alpha, b)){
+      print(paste0('log_like: ', log_like, ' LOG_CALC: ', LOG_LIKE_SSIB(data, r0, alpha, b)))
+    }
+    
     logl_new = LOG_LIKE_SSIB(data, r0, alpha_dash, b) #RO 
-    log_accept_ratio = logl_new - log_like  #+ prior1 - prior
+    log_accept_ratio = logl_new - log_like  
     
     #PRIOR
     log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR(alpha, alpha_dash, PRIORS_USED, alpha_flag = TRUE)
@@ -357,6 +363,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
     } 
+   
     
     #Sigma (Adaptive)
     if (FLAGS_LIST$ADAPTIVE){
@@ -425,7 +432,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
       
       #Propose
       x = data[[1]][t] + data[[2]][t]
-      d = round(runif(1, min = 0, max = x/2))
+      d = max(1, round(runif(1, min = 0, max = x/2)))
       
       #STOCHASTIC PROPOSAL for s
       if (runif(1) < 0.5) {
@@ -450,6 +457,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
       if(log(runif(1)) < log_accept_ratio) {
         data <- data_dash
         log_like <- logl_new
+        vec_accept_da[t] =  vec_accept_da[t] + 1
       }
       
       #Store
@@ -485,7 +493,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc = 40000, PRIORS_USED = GET_PRI
   
   #Acceptance rates
   list_accept_rates = list(accept_rate1 = accept_rate1,
-                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3)
+                           accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
+                           vec_accept_da = vec_accept_da)
   print(list_accept_rates)
   
   #Return a, acceptance rate
