@@ -195,29 +195,32 @@ GET_MODEL_COLORS <- function(){
 
 #PARAMS
 GET_PARAM <- function(r0 = FALSE, k = FALSE, alpha = FALSE,
-                            beta = FALSE, a = FALSE, b = FALSE) {
+                            beta = FALSE, a = FALSE, b = FALSE, c = FALSE) {
   
   if(r0){
     FLAG_PARAM = list(r0 = TRUE, k = FALSE, alpha = FALSE,
-                      beta = FALSE, a = FALSE, b = FALSE)
+                      beta = FALSE, a = FALSE, b = FALSE, c = FALSE)
     
   } else if (k){
     FLAG_PARAM = list(r0 = FALSE, k = TRUE, alpha = FALSE,
-                      beta = FALSE, a = FALSE, b = FALSE)
+                      beta = FALSE, a = FALSE, b = FALSE, c = FALSE)
     
   } else if (alpha) {
     FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = TRUE,
-                      beta = FALSE, a = FALSE, b = FALSE)
+                      beta = FALSE, a = FALSE, b = FALSE, c = FALSE)
     
   } else if (beta){
     FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
                       beta = TRUE, a = FALSE, b = FALSE)
   } else if (a){
     FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
-                      beta = FALSE, a = TRUE, b = FALSE)
+                      beta = FALSE, a = TRUE, b = FALSE, c = FALSE)
   } else if (b){
     FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
-                      beta = FALSE, a = FALSE, b = TRUE)
+                      beta = FALSE, a = FALSE, b = TRUE, c = FALSE)
+  } else if (c) {
+    FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
+                      beta = FALSE, a = FALSE, b = FALSE, c = TRUE)
   }
   
   return(FLAG_PARAM)
@@ -283,6 +286,11 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
     
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: 1 + Gamma(3,3)"))
     list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 10"))
+  
+    } else if (FLAG_PARAM$c){
+      
+      list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: 1 + Gamma(3,3)"))
+      list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 10"))
   }
   
   return(list_labels)

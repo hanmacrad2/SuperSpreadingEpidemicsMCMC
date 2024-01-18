@@ -24,7 +24,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, mcmc_vec, limits){
     #x = seq(from = x_min, to = x_max, length = 5000)
     y = dbeta(x, shape1 = 2, shape2 = 2)
     
-  } else if (FLAG_PARAM$beta | FLAG_PARAM$b){
+  } else if (FLAG_PARAM$beta | FLAG_PARAM$b){ 
     
     x_min = 0 #min(mcmc_vec) 
     x_max = 20 # max(mcmc_vec)

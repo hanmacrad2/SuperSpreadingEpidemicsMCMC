@@ -1,7 +1,7 @@
 #PLOT SSI MCMC GRID
 PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
                            n_mcmc, list_epi_data, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSIB/',
-                           PRIOR = FALSE, PDF = FALSE,
+                           PDF = FALSE, JOINT = FALSE, PARAM_I = TRUE,
                            sim_vals = list(r0 = 2, a= 0.5, b = 10), 
                            mcmc_specs = list(burn_in_pc = 0.2,
                                              thinning_factor = 10)){
@@ -21,12 +21,22 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   FLAG_PARAM3 = GET_PARAM(b = TRUE); list_labels3 = GET_PARAM_LABEL(FLAG_PARAM3, model)
   
   #MCMC
-  #r0_mcmc = mcmc_output$r0_vec; a_mcmc = mcmc_output$alpha_vec; b_mcmc = mcmc_output$b_vec 
+  r0_mcmc = mcmc_output$r0_vec; a_mcmc = mcmc_output$alpha_vec; b_mcmc = mcmc_output$b_vec 
   
   #MCMC
-  r0_mcmc = mcmc_output$ssib_params_matrix[,1]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
-  a_mcmc = mcmc_output$ssib_params_matrix[,2]; a_mcmc = unlist(a_mcmc); a_mcmc = a_mcmc[!is.na(a_mcmc)]
-  b_mcmc = mcmc_output$ssib_params_matrix[,3]; b_mcmc = unlist(b_mcmc); b_mcmc = b_mcmc[!is.na(b_mcmc)]
+  if(JOINT){
+    r0_mcmc = mcmc_output$ssib_params_matrix[,1]; r0_mcmc = unlist(r0_mcmc); r0_mcmc = r0_mcmc[!is.na(r0_mcmc)]
+    a_mcmc = mcmc_output$ssib_params_matrix[,2]; a_mcmc = unlist(a_mcmc); a_mcmc = a_mcmc[!is.na(a_mcmc)]
+    b_mcmc = mcmc_output$ssib_params_matrix[,3]; b_mcmc = unlist(b_mcmc); b_mcmc = b_mcmc[!is.na(b_mcmc)]
+    
+  } else if (PARAM_I){
+    r0_mcmc = mcmc_output$a_vec; a_mcmc = mcmc_output$b_vec; b_mcmc = mcmc_output$c_vec  
+    
+    #PARAMS
+    FLAG_PARAM1 = GET_PARAM(a = TRUE); list_labels1 = GET_PARAM_LABEL(FLAG_PARAM1, model)
+    FLAG_PARAM2 = GET_PARAM(b = TRUE); list_labels2 = GET_PARAM_LABEL(FLAG_PARAM2, model)
+    FLAG_PARAM3 = GET_PARAM(c = TRUE); list_labels3 = GET_PARAM_LABEL(FLAG_PARAM3, model)
+  }
   
   if(PDF){
     time_stamp = GET_CURRENT_TIME_STAMP()

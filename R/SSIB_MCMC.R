@@ -96,7 +96,7 @@ SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
 #'
 #' @examples
 #'
-#' log_like = LOG_LIKE_SSIB(epidemic_data, 0.8, 0.02, 20)
+#' log_like = LOG_LIKE_SSIB(, 0.8, 0.02, 20)
 #'
 #' @export
 
