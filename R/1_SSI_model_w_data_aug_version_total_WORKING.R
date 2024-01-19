@@ -325,6 +325,7 @@ MCMC_SSI <- function(data,
   print(list_accept_rates)
   #Return a, acceptance rate
   return(list(a_vec = a_vec, b_vec = b_vec, c_vec = c_vec, r0_vec = r0_vec,
+              log_like_vec = log_like_vec,
               list_accept_rates = list_accept_rates, 
               data = data, mat_count_da = mat_count_da, #13, 14
               n_non_super_spreaders = n_non_super_spreaders, #15
@@ -353,7 +354,7 @@ plot.ts(sim_dataX, ylab = 'Daily Infections count', main = 'Total - Super Spread
 #****************************************************************
 # APPLY MCMC SSI MODEL   
 #***************************************************************
-n_mcmc = 1000 #100000 #100000 
+n_mcmc = 100000 #100000 
 mcmc_inputs = list(n_mcmc = n_mcmc, sigma = sigma, 
                    model_params = model_params, x0 = 1)
 
@@ -393,18 +394,18 @@ PLOT_MCMC_GRID(sim_dataX, mcmc_params_da1,
 #START MCMC
 start_time = Sys.time()
 print(paste0('start_time:', start_time))
-mcmc_ssib2_da = MCMC_SSI(sim_data, mcmc_inputs = mcmc_inputs)
+mcmc_ssib2_da2 = MCMC_SSI(sim_data, mcmc_inputs = mcmc_inputs)
 
 end_time = Sys.time()
 time_elap = get_time(start_time, end_time)
-mcmc_ssib2_da$time_elap = time_elap
+mcmc_ssib2_da2$time_elap = time_elap
 
 #PLOT RESULTS
 model_typeX = 'SSI'; 
 mod_start_points = list(m1 = aX, m2 = bX, m3 = cX)
 model_params_true = mod_start_points
   
-PLOT_MCMC_GRID(sim_dataX, mcmc_ssib2_da, n_mcmc, mod_start_points, model_params_true)
+PLOT_MCMC_GRID(sim_dataX, mcmc_ssib2_da2, n_mcmc, mod_start_points, model_params_true)
                # FLAGS_LIST = list(DATA_AUG = TRUE, BC_TRANSFORM = TRUE,
                #                   PRIOR = TRUE, JOINT = TRUE,
                #                   B_PRIOR_GAMMA = TRUE, C_PRIOR_GAMMA = TRUE,
