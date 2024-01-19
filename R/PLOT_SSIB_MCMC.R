@@ -61,7 +61,7 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   #i. EPIDEMIC DATA
   PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
   PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS, n_mcmc) # cex = cex)
-  PLOT_SSI_DATA(mcmc_output, list_epi_data, cex)
+  PLOT_SSIB_DATA(mcmc_output, list_epi_data, cex)
   #plot.ts(0, xlab = '', ylab = '',  xaxt = "n", yaxt = "n")
   
   #ii. TRACES 
@@ -136,8 +136,8 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
 
 
 #PLOT
-PLOT_SSI_DATA <- function(mcmc_ssib, list_ssib_data, cex, lwd = 2.0,
-                          col_nssi = 'aquamarine', col_ssi = 'orange'){
+PLOT_SSIB_DATA <- function(mcmc_ssib, list_ssib_data, cex, lwd = 2.0,
+                           col_nssi = 'aquamarine', col_ssi = 'orange'){
   
   #Plot TRUE
   nssi_data = list_ssib_data$nssi_infections
@@ -162,5 +162,5 @@ PLOT_SSI_DATA <- function(mcmc_ssib, list_ssib_data, cex, lwd = 2.0,
   
   #SSI INFERRED (dashed)
   lines(seq_along(ssi_inf), ssi_inf, lty = 2, col = col_ssi, lwd = lwd)
- 
+  
 }
