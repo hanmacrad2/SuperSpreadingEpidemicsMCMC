@@ -414,10 +414,39 @@ PLOT_MCMC_GRID(sim_dataX, mcmc_ssib2_da2, n_mcmc, mod_start_points, model_params
 #WORKING!! :D
 RESULTS_FOLDER = '~/Github/computing/mcmc/SSIB/SSIB_parameterisation_I/'
 create_folder(RESULTS_FOLDER)
-file_name = 'MCMC_SSIB2_da_orig_working.rds'
-saveRDS(mcmc_ssib2_da, paste0(RESULTS_FOLDER, file_name))
+file_name = 'MCMC_SSIB2_da_orig_working_100k.rds'
+saveRDS(mcmc_ssib2_da2, paste0(RESULTS_FOLDER, file_name))
 
 file_name = 'DATA_ssib2_da_orig_seed3_working.rds'
+saveRDS(sim_data, paste0(RESULTS_FOLDER, file_name))
+
+#THINNED MCMC 
+mcmc_thin2 = list()
+#mcmc_thin2$a_vec = mcmc_ssib2_da2$a_vec[seq(10, length(mcmc_ssib2_da2$a_vec), by = 10)]
+mcmc_thin2$a_vec = THIN_FUNCTION(mcmc_ssib2_da2$a_vec)
+mcmc_thin2$b_vec = THIN_FUNCTION(mcmc_ssib2_da2$b_vec)
+mcmc_thin2$c_vec = THIN_FUNCTION(mcmc_ssib2_da2$c_vec)
+mcmc_thin2$r0_vec = THIN_FUNCTION(mcmc_ssib2_da2$r0_vec)
+mcmc_thin2$log_like_vec = THIN_FUNCTION(mcmc_ssib2_da2$log_like_vec)
+#OTHER PARAMS
+mcmc_thin2$list_accept_rates = mcmc_ssib2_da2$list_accept_rates
+mcmc_thin2$data = mcmc_ssib2_da2$data
+mcmc_thin2$mat_count_da = mcmc_ssib2_da2$mat_count_da
+mcmc_thin2$non_ss = mcmc_ssib2_da2$n_non_super_spreaders
+mcmc_thin2$ss = mcmc_ssib2_da2$s_super_spreaders
+mcmc_thin2$time_elap = mcmc_ssib2_da2$time_elap
+
+#PLOT
+PLOT_MCMC_GRID(sim_dataX, mcmc_thin2, 10000, mod_start_points, model_params_true)
+
+#PLOT
+PLOT_SSIB_DATA_ORIG(mcmc_thin2, sim_data)
+
+#SAVE
+file_name = 'MCMC_SSIB2_da_working_thinned_20_01_24.rds'
+saveRDS(mcmc_thin2, paste0(RESULTS_FOLDER, file_name))
+
+file_name = 'Data_SSIB2_da_working_thinned_20_01_24.rds'
 saveRDS(sim_data, paste0(RESULTS_FOLDER, file_name))
 
 #****************************************************************
