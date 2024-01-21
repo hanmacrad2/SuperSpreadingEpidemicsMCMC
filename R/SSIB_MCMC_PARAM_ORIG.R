@@ -88,10 +88,16 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
   #**********************************************
   #INITIALISE PARAMS (THINK ABOUT STARTING POINTS)
   #**********************************************
-  time = length(data[[1]]); 
-  a_vec <- vector('numeric', n_mcmc); b_vec <- vector('numeric', n_mcmc)
-  c_vec <- vector('numeric', n_mcmc); r0_vec <- vector('numeric', n_mcmc)
-  log_like_vec <- vector('numeric', n_mcmc)
+  time = length(data[[1]]); i_thin = 1
+  mcmc_vec_size = n_mcmc/thinning_factor #Eg 125k/10 = 12.5k
+  mcmc_vec_size = mcmc_vec_size - burn_in_pc*mcmc_vec_size #12.5k-2.5k = 10k :)
+  mcmc_vec_size = mcmc_vec_size + 1
+  burn_in_start = burn_in_pc*n_mcmc
+  print(paste0('mcmc_vec_size: ', mcmc_vec_size))
+  #MCMC VECTORS
+  a_vec <- vector('numeric', mcmc_vec_size); b_vec <- vector('numeric', mcmc_vec_size)
+  c_vec <- vector('numeric', mcmc_vec_size); r0_vec <- vector('numeric', mcmc_vec_size)
+  log_like_vec <- vector('numeric', mcmc_vec_size)
   
   #INITIALISE: RUNNING PARAMS
   a = model_params[1]; b =  model_params[2]; 
@@ -102,9 +108,9 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
   c_vec[1] <- c; r0_vec[1] <- a + b*c
   log_like_vec[1] <- log_like
   
-  #SIGMA
-  sigma_a = 0.4*a; sigma_b = 1.0*b    
-  sigma_c = 0.85*c; sigma_bc = 1.5*c
+  #SIGMA (NOT ADAPTIVE)
+  sigma_a = 0.25*a; sigma_b = 0.25*b    
+  sigma_c = 0.05*c; sigma_bc = 0.05*c
   sigma = list(sigma_a = sigma_a, sigma_b = sigma_b, #Acc rate too big -> Make sigma bigger. 
                sigma_c = sigma_c, sigma_bc = sigma_bc) #Acc rate too small -> make sigma smaller
   
@@ -114,9 +120,10 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
   list_reject_counts = list(count_reject2 = 0, count_reject3 = 0,
                             count_reject4 = 0)
   
-  mat_count_da = matrix(0, n_mcmc, time) #i x t
-  non_ss = matrix(0, n_mcmc, time) #USE THINNING FACTOR
-  ss = matrix(0, n_mcmc, time) #USE THINNING FACTOR
+  mat_count_da = matrix(0, mcmc_vec_size, time) #i x t
+  non_ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  ss = matrix(0, mcmc_vec_size, time) #USE THINNING FACTOR
+  vec_accept_da = vector('numeric', length = time)
   
   #******************************
   #MCMC CHAIN
@@ -140,7 +147,7 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
+    if(log(runif(1)) < log_accept_prob) {
       a <- a_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
@@ -166,7 +173,7 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
+    if(log(runif(1)) < log_accept_prob) {
       b <- b_dash
       log_like = logl_new
       list_accept_counts$count_accept2 = list_accept_counts$count_accept2 + 1
@@ -191,7 +198,7 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
     }
     
     #Metropolis Acceptance Step
-    if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
+    if(log(runif(1)) < log_accept_prob) {
       c <- c_dash
       log_like <- logl_new
       list_accept_counts$count_accept3 =  list_accept_counts$count_accept3 + 1
@@ -235,7 +242,7 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
         log_accept_prob = log_accept_prob + tot_b_prior + tot_c_prior 
         
         #Metropolis Step
-        if (!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
+        if (log(runif(1)) < log_accept_prob) {
           b <- b_transform
           c <- c_dash
           log_like <- logl_new
@@ -269,28 +276,26 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
         data_dash[[2]][t] = st_dash #s_t = st_dash 
         data_dash[[1]][t] =  data[[1]][t] + data[[2]][t] - st_dash #n_t = x_t - s_t
         
-        #CRITERIA FOR S_T & N_T  
+        #CRITERIA FOR S_T & N_T
         if((data_dash[[2]][t] < 0) || (data_dash[[1]][t] < 0)){
-          
-          #Store
-          non_ss[i, t] = data[[1]][t]
-          ss[i, t] = data[[2]][t]
-          next  
-        } 
-        
-        logl_new = LOG_LIKE_SSI_ORIG(data_dash, a, b, c)
-        log_accept_prob = logl_new - log_like  
-        
-        #METROPOLIS ACCEPTANCE STEP
-        if(!(is.na(log_accept_prob)) && log(runif(1)) < log_accept_prob) {
-          
-          #ACCEPT
-          data <- data_dash
-          log_like <- logl_new
-          mat_count_da[i, t] = mat_count_da[i, t] + 1
-          list_accept_counts$count_accept5 = list_accept_counts$count_accept5 + 1
+          log_accept_ratio = -Inf 
+        } else {
+          logl_new = LOG_LIKE_SSI_ORIG(data_dash, a, b, c) 
+          log_accept_ratio = logl_new - log_like
         }
         
+        #METROPOLIS ACCEPTANCE STEP
+        if(log(runif(1)) < log_accept_ratio) {
+          data <- data_dash
+          log_like <- logl_new
+          list_accept_counts$count_accept5 = list_accept_counts$count_accept5 + 1
+          vec_accept_da[t] =  vec_accept_da[t] + 1
+        }
+        
+        if(i%%thinning_factor == 0 && i >= burn_in_start){
+          non_ss[i_thin, t] = data[[1]][t]
+          ss[i_thin, t] = data[[2]][t]
+        }
       }
     }
     
@@ -299,27 +304,24 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
       print(paste0('log_like: ', log_like, 'LOG_LIKE_CALC(): LOG_LIKE_SSI_ORIG(data, a, b, c)', LOG_LIKE_SSI_ORIG(data, a, b, c)))
     } 
     
-    if(i%%thinning_factor == 0){
-      
+    if(i%%thinning_factor == 0 && i >= burn_in_start){
       #POPPULATE MODEL PARAMETERS W/ CURRENT VALUES
-      a_vec[i] <- a; b_vec[i] <- b
-      c_vec[i] <- c; r0_vec[i] <- a + b*c
-      log_like_vec[i] <- log_like
-      non_ss[i, t] = data[[1]][t]
-      ss[i, t] = data[[2]][t]
-      
+      a_vec[i_thin] <- a; b_vec[i_thin] <- b
+      c_vec[i_thin] <- c; r0_vec[i_thin] <- a + b*c
+      log_like_vec[i_thin] <- log_like
+      i_thin = i_thin + 1
     }
     
   }
   
   #BURN IN
-  burn_in_start = burn_in_pc*length(a_vec)
-  a_vec = a_vec[burn_in_start:length(a_vec)]
-  b_vec = b_vec[burn_in_start:length(b_vec)]
-  c_vec = c_vec[burn_in_start:length(c_vec)]
-  log_like_vec = log_like_vec[burn_in_start:length(log_like_vec)]
-  non_ss = non_ss[burn_in_start:nrow(non_ss),]
-  ss = ss[burn_in_start:nrow(ss),]
+  # burn_in_start = burn_in_pc*length(a_vec)
+  # a_vec = a_vec[burn_in_start:length(a_vec)]
+  # b_vec = b_vec[burn_in_start:length(b_vec)]
+  # c_vec = c_vec[burn_in_start:length(c_vec)]
+  # log_like_vec = log_like_vec[burn_in_start:length(log_like_vec)]
+  # non_ss = non_ss[burn_in_start:nrow(non_ss),]
+  # ss = ss[burn_in_start:nrow(ss),]
   
   #Final stats
   accept_rate1 = 100*list_accept_counts$count_accept1/(n_mcmc-1)
@@ -331,7 +333,8 @@ MCMC_SSIB_ORIG <- function(data, n_mcmc,
   #Acceptance rates 
   list_accept_rates = list(accept_rate1 = accept_rate1,
                            accept_rate2 = accept_rate2, accept_rate3 = accept_rate3,
-                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5)
+                           accept_rate4 = accept_rate4, accept_rate5 = accept_rate5,
+                           vec_accept_da = vec_accept_da)
   print(list_accept_rates)
   
   
