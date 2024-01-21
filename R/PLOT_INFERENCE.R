@@ -42,7 +42,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) 
-    ylab <- expression(paste('Estimated posterior mean of R'[0])) ) 
+    ylab <- expression(paste('Estimated posterior mean of R'[0])) 
     titleX =  bquote(paste(italic(R[0]) ~ " - " ~ .(model)))
     
   } else if (FLAG_PARAM$alpha){

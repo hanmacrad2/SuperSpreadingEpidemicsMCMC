@@ -82,7 +82,7 @@ GET_FLAG_PARAM <- function(){
   
   FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE,
                     alpha = FALSE, a = FALSE, 
-                    beta = FALSE, b = FALSE)
+                    beta = FALSE, b = FALSE, c = FALSE)
   
   return(FLAG_PARAM)
 }
@@ -240,8 +240,43 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
   return(result_row)
 }
 
+#**********************************************
+#* SSIB MODEL
+#* ********************************************
+INFER_SSIB_ORIG <- function(a_val, b_val, c_val, seed_val, 
+                       num_days = 50, n_mcmc = 50000) {
+  
+  'Inference of baseline simulate data'
+  cat(a_val)
+  epidemic_data = simulation_super_spreaders(num_days = num_days, a = a_val,
+                                    b = b_val, c = c_val)
+  
+  #MCMC  
+  mcmc_output = MCMC_SSIB_ORIG(epidemic_data, n_mcmc)
+  
+  #a
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$a = TRUE
+  row_a = GET_PARAM_INFERENCE(a_val, mcmc_output$a_vec, FLAG_PARAM)
+  
+  #b
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$b = TRUE
+  row_b = GET_PARAM_INFERENCE(b_val, mcmc_output$b_vec, FLAG_PARAM)
+  
+  #c
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$c = TRUE
+  row_c = GET_PARAM_INFERENCE(c_val, mcmc_output$c_vec, FLAG_PARAM)
+  
+  #browser()
+  result_row = cbind(row_a, row_b, row_c)
+  result_row$seed_val = seed_val
+  
+  return(result_row)
+}
 
-#
+
 #ADD GELMAN.DIAG
 #gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))
 #df3 = cbind(df1, df2)

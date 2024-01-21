@@ -2,8 +2,8 @@
 
 #*******************************************************
 #I SUPER-SRPEADING INDIVIDUALS (SUPER-SPREADERS) SIMULATION 
-simulation_super_spreaders = function(a = 0.8, b = 0.1, c = 10, 
-                                      num_days = 50, shape_gamma = 6, scale_gamma = 1) {
+simulation_super_spreaders = function(num_days = 50, a = 0.8, b = 0.1, c = 10, 
+                                      shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
   #Set up
