@@ -296,3 +296,20 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
   return(list_labels)
 }
 
+#*************************
+#PLOT CREDIBLE INTERVALS Nice shaded plot :) 
+#*************************
+# Plotting
+# x = seq_along(mean_ss)
+# mean_ss = unlist(as.vector(as.matrix(df_ss["mean_ss", , drop = TRUE])))
+# lower_ss = unlist(as.vector(as.matrix(df_ss["lower_ci_ss", , drop = TRUE])))
+# upper_ss = unlist(as.vector(as.matrix(df_ss["upper_ci_ss", , drop = TRUE])))
+# 
+# plot(seq_along(mean_ss), mean_ss,  pch = 16, col = "blue",
+#      #ylim = range(c(df_ss$credible_lower, df_ss$credible_upper)),
+#      xlab = "Time", ylab = "Values", main = "Quantile/Polygon Plot with Credible Intervals")
+# 
+# # Draw shaded region for credible intervals
+# polygon(c(x, rev(x)),
+#         c(upper_ss, rev(lower_ss)),
+#         col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)

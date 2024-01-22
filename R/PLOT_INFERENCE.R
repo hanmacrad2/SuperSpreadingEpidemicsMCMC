@@ -11,13 +11,13 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                                                  tot_infs = TRUE),
                               FLAG_MODEL = list(BASELINE = FALSE, SSE = FALSE, SSI = FALSE,
                                                 SSEB = FALSE, SSIB = FALSE)){
-  
+
   #PARAMS 
   true_param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   true_total = unlist(df_results[paste0('true_', true_param)])
   filter_param = names(FLAG_FILTER)[which(unlist(FLAG_FILTER))]
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
-  
+
   #PLOT
   plot_folder = paste0(COMP_FOLDER, '/plots/')
   create_folder(plot_folder)
@@ -30,16 +30,15 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, GT_VAL = GT_VAL, FLAG_PARAM = FLAG_PARAM)
+  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, FLAG_PARAM, GT_VAL = GT_VAL)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds
   
   #PRIORS
-  prior_title = GET_PRIOR_TITLE(PRIORS)
+  prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
   
   # LABELS
   ylab = 'Estimated posterior mean of '
-  
   if (FLAG_PARAM$r0) {
     xlab <- expression(paste('True R'[0])) 
     ylab <- expression(paste('Estimated posterior mean of R'[0])) 
@@ -133,9 +132,9 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 }
 
 #SUBSET THE DATASET
-SUBSET_DFS <- function(df_results, filter_param, param,
+SUBSET_DFS <- function(df_results, filter_param, param, FLAG_PARAM,
                        GT=TRUE, GT_VAL = 10, num_conds = 5, 
-                       FIXED = FALSE, FLAG_PARAM = FLAG_PARAM) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
+                       FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
   
   'SUBSET DATAFRAME OF RESULTS'
   #Setup
@@ -203,6 +202,108 @@ SUBSET_DFS <- function(df_results, filter_param, param,
 
   return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
               selected_colors = selected_colors, num_conds = num_conds))
+}
+
+#*******************
+#* PLOT INFERNCE OF ALL DATA (NO SUBSETS)
+PLOT_INFERENCE_INDIVID <- function(df_results, true_param, model, RESULTS_FOLDER, 
+                                   fig_num = 'I', cex = 1.75, PDF = TRUE){
+  
+  #PLOT
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    pdf_file = paste0(model, '_', true_param, '_', fig_num, '.pdf') #'Fig_', 
+    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
+  }
+  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
+  
+  #PLOT Details
+  titleX =  bquote(paste(.(true_param) ~ " - " ~ .(model)))
+  ylab = paste0('Estimated posterior mean of ', true_param)
+  colour <- MODEL_COLORS[2]
+  
+  #DATA
+  true_subset <- unlist(df_results[paste0('true_', true_param)])
+  true_total = unlist(df_results[paste0('true_', true_param)])
+  mean_subset <- unlist(df_results[paste0('mean_', true_param)])
+  upper_ci_subset <- unlist(df_results[paste0('upper_ci_', true_param)])
+  lower_ci_subset <- unlist(df_results[paste0('lower_ci_', true_param)])
+  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  
+  #PLOT
+  plot(true_subset, mean_subset, type = "p",
+       main = "", xlab = true_param, ylab = ylab,
+       ylim = y_lim, #ylim = y_lim,
+       col = colour, pch = 16, 
+       cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
+  title(main = list(titleX, cex = 2.5, font = 3.0))
+  
+  #CREDIBLE INTERVALS
+  segments(true_subset, upper_ci_subset, true_subset,
+           lower_ci_subset, lwd = 0.5, col = colour)
+  
+  #TRUE VALUE
+  lines(true_total, true_total, col = 'black', lwd = 4)
+  
+  if(PDF){
+    dev.off()
+  }
+}
+#***********************
+#* PLOT INFERENCE RESULTS - FIXED
+#***********************
+
+PLOT_INFERENCE_INDIVID_FIXED <- function(df_results, fixed_param, var_param,
+                                         model, RESULTS_FOLDER, fig_num = 'I',
+                                         cex = 1.75, PDF = TRUE){
+  
+  #PLOT
+  print(paste0('var_param: ', var_param))
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    pdf_file = paste0(model, '_', fixed_param, '_fixed_', fig_num, '.pdf') #'Fig_', 
+    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
+  }
+  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
+  
+  #PLOT Details
+  titleX =  bquote(paste(.(fixed_param) ~ " - " ~ .(model)))
+  xlab = var_param
+  ylab = paste0('Estimated posterior mean of ', fixed_param)
+  colour <- MODEL_COLORS[2]
+  
+  #DATA
+  true_subset <- unlist(df_results[paste0('true_', fixed_param)])
+  true_total = unlist(df_results[paste0('true_', fixed_param)])
+  var_total = unlist(df_results[paste0('true_', var_param)])
+  
+  var_subset <- unlist(df_results[paste0('true_', var_param)])
+  mean_subset <- unlist(df_results[paste0('mean_', fixed_param)])
+  
+  upper_ci_subset <- unlist(df_results[paste0('upper_ci_', fixed_param)])
+  lower_ci_subset <- unlist(df_results[paste0('lower_ci_', fixed_param)])
+  y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', fixed_param)]))) 
+  
+  
+  #PLOT
+  plot(var_total, mean_subset, type = "p",
+       main = "", xlab = xlab, ylab = ylab,
+       ylim = y_lim, #ylim = y_lim,
+       col = colour, pch = 16, 
+       cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
+  title(main = list(titleX, cex = 2.5, font = 3.0))
+  
+  #CREDIBLE INTERVALS
+  segments(var_subset, upper_ci_subset, var_subset,
+           lower_ci_subset, lwd = 0.5, col = colour)
+  
+  #TRUE VALUE
+  lines(var_total, true_total, col = 'black', lwd = 4)
+  
+  if(PDF){
+    dev.off()
+  }
 }
 
 #***********************

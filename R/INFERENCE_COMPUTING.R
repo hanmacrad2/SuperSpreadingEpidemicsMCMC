@@ -241,6 +241,50 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
 }
 
 #**********************************************
+#* SSIB MODEL -- JOINT UPDATE
+#* ********************************************
+INFER_SSIB_JOINT <- function(r0_val, a_val, b_val, PRIORS_USED,
+                       num_days = 50, n_mcmc = 50000) {
+  
+  'Inference of baseline simulate data'
+  cat(r0_val)
+  epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+                                    a = a_val, b = b_val)
+  
+  #MCMC  
+  mcmc_output = MCMC_INFER_SSIB_JOINT(epidemic_data, n_mcmc, PRIORS_USED)
+  
+  #PARAMS
+  ssib_params_matrix = mcmc_output$ssib_params_matrix
+  r0_vec = ssib_params_matrix[,1]
+  a_vec = ssib_params_matrix[,2]
+  b_vec = ssib_params_matrix[,3]
+  
+  #Row result - parameters
+  row_r0 = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
+  row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
+  
+  #alpha
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$a = TRUE
+  row_a = GET_PARAM_INFERENCE(a_val, a_vec, FLAG_PARAM)
+  
+  #beta
+  FLAG_PARAM = GET_FLAG_PARAM()
+  FLAG_PARAM$b = TRUE
+  row_b = GET_PARAM_INFERENCE(b_val, b_vec, FLAG_PARAM)
+  
+  #browser()
+  result_row = cbind(row_r0, row_a, row_b)
+  
+  #SS Data
+  result_row$ss_data = list(mcmc_output$ss_inf)
+  result_row$ns_data = list(mcmc_output$ns_inf)
+  
+  return(result_row)
+}
+
+#**********************************************
 #* SSIB MODEL
 #* ********************************************
 INFER_SSIB_ORIG <- function(a_val, b_val, c_val, seed_val, 

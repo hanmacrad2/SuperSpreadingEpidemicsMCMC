@@ -4,12 +4,12 @@
 #'
 #' @export
 #' 
-SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
+SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
                                   shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
   #Params
-  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
+  c = (r0*(1 - a))/b #r0 = a_prop*r0 + b*c
   #alpha = alpha_prop*r0 
   
   #Set up
@@ -30,7 +30,7 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
     
     #Regular infecteds (tot_rate = lambda) fix notation
     lambda_t = sum((nssi_infections[1:(t-1)] + b*ssi_infections[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nssi_infections[t] = rpois(1, alpha*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    nssi_infections[t] = rpois(1, a*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
     ssi_infections[t] = rpois(1, c*lambda_t)
     total_infections[t] = nssi_infections[t] + ssi_infections[t]
   }
