@@ -209,13 +209,13 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
 #**********************************************
 #* SSIB MODEL
 #* ********************************************
-INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
+INFER_SSIB <- function(r0_val, a_val, b_val, PRIORS_USED,
                        num_days = 50, n_mcmc = 40000) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
   epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
-                                    alpha = alpha_val, b = b_val)
+                                    a = a_val, b = b_val)
   
   #MCMC  
   mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc, PRIORS_USED)
@@ -227,7 +227,7 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
   #alpha
   FLAG_PARAM = GET_FLAG_PARAM()
   FLAG_PARAM$alpha = TRUE
-  row_alpha = GET_PARAM_INFERENCE(alpha_val, mcmc_output$alpha_vec, FLAG_PARAM)
+  row_a = GET_PARAM_INFERENCE(a_val, mcmc_output$a_vec, FLAG_PARAM)
   
   #beta
   FLAG_PARAM = GET_FLAG_PARAM()
@@ -235,7 +235,7 @@ INFER_SSIB <- function(r0_val, alpha_val, b_val, PRIORS_USED,
   row_b = GET_PARAM_INFERENCE(b_val, mcmc_output$b_vec, FLAG_PARAM)
   
   #browser()
-  result_row = cbind(row_r0, row_alpha, row_b)
+  result_row = cbind(row_r0, row_a, row_b)
   
   return(result_row)
 }

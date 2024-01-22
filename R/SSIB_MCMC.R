@@ -100,12 +100,11 @@ SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0, alpha = 0.5, b = 10,
 #'
 #' @export
 
-LOG_LIKE_SSIB <- function(epidemic_data, r0, alpha, b, 
+LOG_LIKE_SSIB <- function(epidemic_data, r0, a, b, 
                           shape_gamma = 6, scale_gamma = 1){
   
   #A = PROPORTION OF r0
-  c = (r0*(1 - alpha))/b #r0 = a_prop*r0 + b*c
-  a = alpha*r0 
+  c = (r0*(1 - a))/b #r0 = a_prop*r0 + b*c
   
   non_ss = epidemic_data[[1]]; ss = epidemic_data[[2]]
   
@@ -122,7 +121,7 @@ LOG_LIKE_SSIB <- function(epidemic_data, r0, alpha, b,
     #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
     lambda_t = sum((non_ss[1:(t-1)] + b*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
     
-    loglike = loglike + dpois(non_ss[t], a*lambda_t, log = TRUE) +
+    loglike = loglike + dpois(non_ss[t], a*r0*lambda_t, log = TRUE) +
       dpois(ss[t], c*lambda_t, log = TRUE) 
   }
   
