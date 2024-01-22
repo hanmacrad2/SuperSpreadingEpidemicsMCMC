@@ -81,7 +81,7 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIOR
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
   param_starts[1] = r0_start
   time = length(epidemic_data) 
-  vec_min = rep(0, mcmc_inputs$dim); count_accept = 0; 
+  vec_min = c(0, 0, 1); count_accept = 0; 
   
   #THINNING FACTOR + BURN-IN
     thinning_factor = mcmc_inputs$thinning_factor;  i_thin = 1
@@ -129,19 +129,9 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIOR
     
     #PROPOSAL
     ssib_params_dash = c(ssib_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
-    
-    #CONSTRAIN A
-    while(ssib_params_dash[2] < 0 || ssib_params_dash[2] > 1){
-      
-      if (ssib_params_dash[2] > 1){  
-        ssib_params_dash[2] = 2 - ssib_params_dash[2]
-      }
-      ssib_params_dash[2] = abs(ssib_params_dash[2]) 
-    }
-    
-    
+
     #POSTIVE ONLY
-    if (min(ssib_params_dash - vec_min) >= 0){ 
+    if (min(ssib_params_dash - vec_min) >= 0 && ssib_params_dash[2] < 1){ 
       
       #LOG LIKELIHOOD
       logl_new = LOG_LIKE_SSIB_JOINT(data, ssib_params_dash) 
@@ -237,6 +227,7 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIOR
   return(list(ssib_params_matrix = ssib_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate, vec_accept_da = vec_accept_da,
-              data = data, non_ss = non_ss, ss = ss,
+              data = data, ss_inf = data[[1]], ns_inf = data[[2]],
+              non_ss_tot = non_ss, ss_tot = ss,
               r0_start = r0_start))
 } 
