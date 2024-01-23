@@ -25,11 +25,9 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
   filter_param = names(FLAG_FILTER)[which(unlist(FLAG_FILTER))]
   model =  names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
   
-  #PLOT
-  plot_folder = paste0(COMP_FOLDER, '/plots/')
-  create_folder(plot_folder)
-  
   if(PDF){
+    plot_folder = paste0(COMP_FOLDER, '/plots/')
+    create_folder(plot_folder)
     pdf_file = paste0(model, '_var_', var_param, '_fixed_', fixed_param, '_', fig_num, '.pdf') #'Fig_', 
     pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0)
   }
@@ -46,7 +44,7 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
   x_lim = c(min(df_results[paste0('true_', var_param)]), max(df_results[paste0('true_', var_param)]))
   
   #PRIORS
-  prior_title = GET_PRIOR_TITLE(PRIORS)
+  prior_title = GET_PRIOR_TITLE(FIXED_PARAM)
   
   # LABELS
   ylab = 'Estimated posterior mean of '
