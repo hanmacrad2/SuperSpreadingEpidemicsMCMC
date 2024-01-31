@@ -40,7 +40,8 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds 
   
   #PLOT
-  y_lim = c(0, max(fixed_total, max(df_results[paste0('upper_ci_', fixed_param)]))) 
+  y_lim = c(min(fixed_total, min(df_results[paste0('lower_ci_', fixed_param)])) ,
+            max(fixed_total, max(df_results[paste0('upper_ci_', fixed_param)])) ) 
   x_lim = c(min(df_results[paste0('true_', var_param)]), max(df_results[paste0('true_', var_param)]))
   
   #PRIORS

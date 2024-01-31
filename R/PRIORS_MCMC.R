@@ -19,7 +19,7 @@ GET_LIST_PRIORS_SSE <- function() {
   LIST_PRIORS_SSE = list(r0 = c(1,0), #exp
                          r0_gamma = c(1, 5),
                          r0_unif = c(0,10),
-                    k =  c(1,0)) #exp(1), exp(0.1)
+                    k =  c(5,0)) #c(1,0) #exp(1), exp(0.1)
   
   return(LIST_PRIORS_SSE)
 }
@@ -29,7 +29,7 @@ GET_LIST_PRIORS_SSI <- function(){
   
   LIST_PRIORS_SSI = list(r0 = c(1,0), #r0 = list(exp = c(1,0), gamma = c(1,5))
                          gamma = c(1,5),
-                    k =  c(1,0)) #exp
+                    k =  c(5,0)) #c(1,0) exp
   
   return(LIST_PRIORS_SSI)
 }

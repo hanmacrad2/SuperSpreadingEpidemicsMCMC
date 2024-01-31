@@ -3,7 +3,7 @@
 
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                               num_days = 50, cex = 1.75, #1.25 
-                              PDF = TRUE, GT_VAL = 10, inset = 0.49, #0.486, #0.46 for non r0 
+                              PDF = TRUE, GT_VAL = 10, inset = 0.485, #0.486, #0.46 for non r0 
                               PRIORS = list(EXP = TRUE, GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
                               FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
                                                 beta = FALSE, a = FALSE, b = FALSE),
@@ -33,6 +33,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, FLAG_PARAM, GT_VAL = GT_VAL)
   subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
   selected_colors = list_subset_data$selected_colors; num_conds = list_subset_data$num_conds
+  df_results = subset(df_results, tot_infs > GT_VAL)
   
   #PRIORS
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
@@ -65,11 +66,14 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #LIMITS
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   
-  if(FLAG_PARAM$k){
-    y_lim = c(0, 2.0) #1.0; if 0.01-> 0.2s
-  } else {
-    y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
-  }
+  # if(FLAG_PARAM$k){
+  #   y_lim = c(0, 1.0)
+  #   } 
+  # } else {
+  #   y_lim = c(0, max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  # }
+  y_lim = c(min(true_total, min(df_results[paste0('lower_ci_', true_param)])),
+            max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
 
   # Create the plot for each subset
   for (i in 1:length(subset_df_list)) {
@@ -122,7 +126,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
          col = c('black', selected_colors, 'white', 'white'),
          lwd = rep(1.8, num_conds+2),
          lty = rep(1, num_conds+2), #c(1, 1),
-         pch = c(NA, pch_list, NA, NA),
+         pch = c(NA, pch_list, NA, NA, NA),
          #text.font = 1.8, #1.45
          bty = "n")
   
@@ -133,7 +137,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #SUBSET THE DATASET
 SUBSET_DFS <- function(df_results, filter_param, param, FLAG_PARAM,
-                       GT=TRUE, GT_VAL = 10, num_conds = 5, 
+                       GT=TRUE, GT_VAL = 10, num_conds = 5, #5
                        FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
   
   'SUBSET DATAFRAME OF RESULTS'
@@ -199,6 +203,10 @@ SUBSET_DFS <- function(df_results, filter_param, param, FLAG_PARAM,
   #   legend_list = c(legend_list, paste0(param, " estimated mean, infections > 100k"))
   #   num_conds = num_conds + 1
   # }
+  
+  #Add
+  #subset_df_list$df1k2 = df_results[(df_results[[filter_param]] > 1000) & (df_results[[filter_param]] <= 10000), ]
+  #selected_colors = c(selected_colors, viridis_palette[5])
 
   return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
               selected_colors = selected_colors, num_conds = num_conds))
@@ -350,7 +358,7 @@ SIM_PERFORMANCE <- function(df_results){
 #*****************************
 #* PLOT PRIORS                       
 #*****************************
-PRIOR_DIST_FIGURE <- function(PRIORS = list(EXP = FALSE, EXP_K = FALSE,
+PRIOR_DIST_FIGURE <- function(PRIORS = list(EXP = FALSE, EXP_K = FALSE, EXP_K_5 = TRUE,
                                             GAMMA = FALSE, UNIF = FALSE, BETA_ALPHA = FALSE, BETA_A = TRUE,
                                             GAMMA_B = FALSE, GAMMA_BETA = FALSE),
                               PLOT_OVERLAP = TRUE, cex = 2.65){
@@ -365,10 +373,19 @@ PRIOR_DIST_FIGURE <- function(PRIORS = list(EXP = FALSE, EXP_K = FALSE,
     prior_title =  bquote("Prior; " ~ p[R[0]] ~ "= Exponential(1)")
     #prior_title =  paste0('Exponential(1) Prior')
     
+  } else if (PRIORS$EXP_K_5) {
+    rate = 5
+    x_min = 0; x_max = 1.5
+    x = seq(from = x_min, to = x_max, length = 500)
+    y = dexp(x, rate)
+    x_label = expression(k)
+    prior_title =  bquote("Prior; " ~ p[k] ~ "= Exponential(5)")
+    
   } else if (PRIORS$EXP_K){
+    rate = 1
     x_min = 0; x_max = 5
     x = seq(from = x_min, to = x_max, length = 500)
-    y = dexp(x, 1)
+    y = dexp(x, rate)
     x_label = expression(k)
     prior_title =  bquote("Prior; " ~ p[k] ~ "= Exponential(1)")
     
