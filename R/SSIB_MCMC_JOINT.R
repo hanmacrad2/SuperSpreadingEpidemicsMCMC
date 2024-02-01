@@ -183,14 +183,14 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, data, n_mcmc, PRIORS_USED = GET
       data_dash = data
       
       #Propose
-      #x = data[[1]][t] + data[[2]][t]
-      #d = max(1, round(runif(1, min = 0, max = x/2)))
+      x = data[[1]][t] + data[[2]][t]
+      d = max(1, round(runif(1, min = 0, max = x/10)))
       
       #STOCHASTIC PROPOSAL for s
       if (runif(1) < 0.5) {
-        st_dash = data[[2]][t] + 1 #+ d #1 
+        st_dash = data[[2]][t] + d #1 #+ d #1 
       } else {
-        st_dash = data[[2]][t] -1 #- d #1 
+        st_dash = data[[2]][t] - d #1 #- d #1 
       }
       
       #ACCEPTANCE PROBABILITY
