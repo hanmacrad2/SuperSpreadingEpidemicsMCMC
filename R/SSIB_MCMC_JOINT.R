@@ -72,7 +72,7 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 }
 
 #' @export
-MCMC_INFER_SSIB_JOINT <- function(epidemic_data, data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
+MCMC_INFER_SSIB_JOINT <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
                            param_starts = c(1.5, 0.5, 10),
                            mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                               thinning_factor = 10, burn_in_pc = 0.2)){    
@@ -95,12 +95,13 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, data, n_mcmc, PRIORS_USED = GET
   print(paste0('ssib_params', ssib_params))
   
   #SSI - DATA AUGMENTATION PARAMS
-  # ss = ifelse(epidemic_data > 1, 1, 0)
-  # non_ss = epidemic_data - ss 
-  # 
-  # #DATA USED!!
-  # data = list(non_ss, ss) 
-  #print('ss: '); print(ss); print('non_ss: '); print(non_ss)
+  ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0)
+  non_ss = epidemic_data - ss
+  ss_start = ss; ns_start = non_ss
+
+  #DATA USED!!
+  data = list(non_ss, ss)
+  print('ss: '); print(ss); print('non_ss: '); print(non_ss)
   
   #SSI - DATA AUGMENTATION STORE
   non_ss = matrix(0, mcmc_vec_size, time)
@@ -183,14 +184,14 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, data, n_mcmc, PRIORS_USED = GET
       data_dash = data
       
       #Propose
-      x = data[[1]][t] + data[[2]][t]
-      d = max(1, round(runif(1, min = 0, max = x/10)))
+      #x = data[[1]][t] + data[[2]][t]
+      #d = max(1, round(runif(1, min = 0, max = x/10)))
       
       #STOCHASTIC PROPOSAL for s
       if (runif(1) < 0.5) {
-        st_dash = data[[2]][t] + d #1 #+ d #1 
+        st_dash = data[[2]][t] + 1 #d #1 #+ d #1 
       } else {
-        st_dash = data[[2]][t] - d #1 #- d #1 
+        st_dash = data[[2]][t] - 1 #d #1 #- d #1 
       }
       
       #ACCEPTANCE PROBABILITY
@@ -228,6 +229,7 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, data, n_mcmc, PRIORS_USED = GET
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate, vec_accept_da = vec_accept_da,
               data = data, ss_inf = data[[1]], ns_inf = data[[2]],
+              ss_start = ss_start, ns_start = ns_start,
               non_ss_tot = non_ss, ss_tot = ss,
               r0_start = r0_start))
 } 

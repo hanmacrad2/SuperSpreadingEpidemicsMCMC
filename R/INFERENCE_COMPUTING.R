@@ -248,17 +248,18 @@ INFER_SSIB_JOINT <- function(r0_val, a_val, b_val, PRIORS_USED,
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  # epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
-  #                                   a = a_val, b = b_val)
+  epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+                                    a = a_val, b = b_val)
   
-  list_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
-                                     a = a_val, b = b_val)
-  
-  data = list(non_ss = list_data$non_ss, ss = list_data$ss)
-  epidemic_data = as.vector(unlist(list_data$total_infections))
+  #SSIB; pass in data
+  # list_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
+  #                                    a = a_val, b = b_val)
+  # 
+  # data = list(non_ss = list_data$non_ss, ss = list_data$ss)
+  # epidemic_data = as.vector(unlist(list_data$total_infections))
   
   #MCMC  
-  mcmc_output = MCMC_INFER_SSIB_JOINT(epidemic_data, data, n_mcmc, PRIORS_USED)
+  mcmc_output = MCMC_INFER_SSIB_JOINT(epidemic_data, n_mcmc, PRIORS_USED)
   
   #PARAMS
   ssib_params_matrix = mcmc_output$ssib_params_matrix
