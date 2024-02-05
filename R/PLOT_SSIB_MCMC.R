@@ -136,12 +136,12 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
 
 
 #PLOT
-PLOT_SSIB_DATA <- function(mcmc_ssib, list_ssib_data, cex, lwd = 2.0,
+PLOT_SSIB_DATA <- function(mcmc_ssib, list_data_ssib, cex, lwd = 2.0, 
                            col_nssi = 'aquamarine', col_ssi = 'orange'){
   
   #Plot TRUE
-  nssi_data = list_ssib_data$nssi_infections
-  ssi_data = list_ssib_data$ssi_infections
+  nssi_data = list_data_ssib$nssi_infections
+  ssi_data = list_data_ssib$ssi_infections
   nssi_inf = mcmc_ssib$data[[1]]
   ssi_inf = mcmc_ssib$data[[2]]
   title = bquote('True vs Inferred: Non SSIs (aqua), SSI (or)')
@@ -163,4 +163,74 @@ PLOT_SSIB_DATA <- function(mcmc_ssib, list_ssib_data, cex, lwd = 2.0,
   #SSI INFERRED (dashed)
   lines(seq_along(ssi_inf), ssi_inf, lty = 2, col = col_ssi, lwd = lwd)
   
+}
+
+PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
+                              cex = 1.7, lwd = 2.0, 
+                           col_ssi = 'aquamarine', col_nssi = 'orange'){
+  
+  #TRUE VALUES
+  par(mfrow = c(1,1))
+  nssi_data = list_data_ssib$nssi_infections
+  ssi_data = list_data_ssib$ssi_infections
+  
+  #MCMC INFERRED
+  nssi_inf = mcmc_ssib$data[[1]]
+  ssi_inf = mcmc_ssib$data[[2]]
+  lower_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_lower_ci)
+  lower_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_lower_ci)
+  upper_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_upper_ci)
+  upper_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_upper_ci)
+  mean_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, mean)
+  mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, mean)
+  
+  #************
+  #NSSI TRUE
+  title = bquote('Non Super-Spreading Infections - True vs Inferred')
+  y_lim = c(0, max(nssi_data, upper_ci_ns))
+  plot(seq_along(nssi_data), nssi_data,  type = 'l',
+       xlab = 'Time', ylab = 'Daily infection count',
+       main = title, ylim = y_lim, lwd = lwd + 1.5)
+       #col = col_nssi, lwd = lwd)
+       #cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
+  
+  #NSSI INFERRED (dashed)
+  #Mean
+  lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_nssi, lwd = lwd)
+  #Final
+  lines(seq_along(nssi_inf), nssi_inf, lty = 2, col = col_nssi, lwd = lwd)
+  
+  #CIs
+  x = seq_along(upper_ci_ns)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ns, rev(lower_ci_ns)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  legend('topleft', c('True', 'Mean inferred', 'Final inferred','95% CIs'),
+         col = c('black', col_nssi, col_nssi, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+
+  #************
+  #SSI TRUE
+  title = bquote('Super-Spreading Infections - True vs Inferred')
+  y_lim = c(0, max(ssi_data, upper_ci_ss))
+  plot(seq_along(ssi_data), ssi_data,  type = 'l',
+       xlab = 'Time', ylab = 'Daily infection count',
+       main = title, ylim = y_lim, lwd = lwd + 1.5) 
+       #col = col_ssi
+       #cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
+  
+  #SSI INFERRED (dashed)
+  #Mean
+  lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ssi, lwd = lwd)
+  #Final
+  lines(seq_along(ssi_inf), ssi_inf, lty = 2, col = col_ssi, lwd = lwd)
+
+  #CIs
+  x = seq_along(upper_ci_ss)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ss, rev(lower_ci_ss)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  legend('topleft', c('True', 'Mean', 'Final', '95% CIs'),
+         col = c('black', col_ssi, col_ssi, 'gray'), lwd = c(3, 2, 2, 2), lty = c(1,1,2,1))
 }
