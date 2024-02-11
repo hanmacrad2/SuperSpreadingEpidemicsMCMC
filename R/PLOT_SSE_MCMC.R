@@ -1,7 +1,7 @@
 #PLOT SSE MCMC GRID
 PLOT_SSE_MCMC <- function(epidemic_data, mcmc_output,
-                               n_mcmc, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSE/',
-                               PRIOR = TRUE, PDF = FALSE,
+                               n_mcmc = 128000, cex = 2.0, RESULTS_FOLDER = '~/Github/computing/mcmc/SSE/',
+                               PRIOR = TRUE, PDF = TRUE,
                                sim_vals = list(r0 = 2, k = 0.1), 
                                mcmc_specs = list(burn_in_pc = 0.2,
                                                  thinning_factor = 10)){
@@ -52,14 +52,17 @@ PLOT_SSE_MCMC <- function(epidemic_data, mcmc_output,
   #******************************************************************
   
   #i. EPIDEMIC DATA
-  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
+  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS, cex = cex)
+  
+  #ii. LOG LIKELIHOOD 
+  PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS, n_mcmc, cex = cex)
   
   #ib. MARGINALS
-  plot(r0_mcmc, k_mcmc,
-       xlab = list_labels1$lab, ylab = list_labels2$lab,
-       main = bquote(paste(italic(R[0]), ' vs ', .(list_labels2$lab))),
-       col = MODEL_COLOR,
-       cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+  # plot(r0_mcmc, k_mcmc,
+  #      xlab = list_labels1$lab, ylab = list_labels2$lab,
+  #      main = bquote(paste(italic(R[0]), ' vs ', .(list_labels2$lab))),
+  #      col = MODEL_COLOR,
+  #      cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
   
   #ii. TRACES 
   PLOT_MCMC_TRACE(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)

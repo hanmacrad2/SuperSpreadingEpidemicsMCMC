@@ -1,7 +1,7 @@
 #PLOT SSI MCMC GRID
 PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
-                               n_mcmc, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSEB/',
-                               PRIOR = FALSE, PDF = FALSE,
+                               n_mcmc = 128000, cex = 2.0, RESULTS_FOLDER = '~/Github/computing/mcmc/SSEB/',
+                               PRIOR = FALSE, PDF = TRUE,
                                sim_vals = list(r0 = 2, alpha= 0.5, beta = 10), 
                                mcmc_specs = list(burn_in_pc = 0.2,
                                                  thinning_factor = 10)){
@@ -39,7 +39,9 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   }
   
   #LIMITS
-  r0_lim = c(0.9, 3.0); alpha_lim = c(0,1); beta_lim = c(5, 15)
+  r0_lim = c(0.9, 3.0); 
+  alpha_lim = c(0,1); 
+  beta_lim = c(5, 15)
   
   #******************************************************************
   #* PLOTS *
@@ -47,9 +49,12 @@ PLOT_SSEB_MCMC <- function(epidemic_data, mcmc_output,
   
   #i. EPIDEMIC DATA
   plot.ts(0, xlab = '', ylab = '',  xaxt = "n", yaxt = "n")
+  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS, cex = cex)
   
-  PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
-  plot.ts(0, xlab = '', ylab = '',  xaxt = "n", yaxt = "n")
+  #ii. LOG LIKELIHOOD 
+  PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS, n_mcmc, cex = cex)
+  
+  #plot.ts(0, xlab = '', ylab = '',  xaxt = "n", yaxt = "n")
 
   #ii. TRACES 
   PLOT_MCMC_TRACE(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex)

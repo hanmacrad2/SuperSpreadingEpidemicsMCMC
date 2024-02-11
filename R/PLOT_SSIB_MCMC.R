@@ -1,8 +1,8 @@
 #PLOT SSI MCMC GRID
 PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
                            n_mcmc, list_epi_data, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSIB/',
-                           PDF = FALSE, JOINT = FALSE, PARAM_I = TRUE,
-                           sim_vals = list(r0 = 2, a= 0.5, b = 10), 
+                           PDF = TRUE, JOINT = TRUE, PARAM_I = FALSE,
+                           sim_vals = list(r0 = 2, a= 0.85, b = 10), 
                            mcmc_specs = list(burn_in_pc = 0.2,
                                              thinning_factor = 10)){
   
@@ -41,6 +41,7 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   if(PDF){
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_mcmc_', time_stamp, '.pdf') 
+    RESULTS_FOLDER = paste0(RESULTS_FOLDER, 'plots/')
     create_folder(RESULTS_FOLDER)
     pdf(paste0(RESULTS_FOLDER, pdf_file), width = 14.0, height = 11.0)
     
@@ -78,18 +79,18 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   
   #HIST R0
   r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
-  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, xlim = r0_lim)
+  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex) #, xlim = r0_lim)
   PLOT_PRIOR_DIST(FLAG_PARAM1, r0_mcmc, r0_lim)
   segments(sim_vals$r0, 0, sim_vals$r0, 5.0, col = 'black', lwd = 2)
   
   #HIST a
-  PLOT_MCMC_HIST(a_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex, xlim = a_lim)
+  PLOT_MCMC_HIST(a_mcmc, FLAGS_MODELS, FLAG_PARAM2, MODEL_COLOR, cex = cex) #, xlim = a_lim)
   PLOT_PRIOR_DIST(FLAG_PARAM2, a_mcmc, a_lim)
   segments(sim_vals$a, 0, sim_vals$a, 2, col = 'black', lwd = 2)
   
   #HIST b
   #b_mcmc_hist = subset(b_mcmc, b_mcmc > 5)
-  PLOT_MCMC_HIST(b_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex, xlim = b_lim)
+  PLOT_MCMC_HIST(b_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex) #, xlim = b_lim)
   PLOT_PRIOR_DIST(FLAG_PARAM3, b_mcmc, b_lim)
   segments(sim_vals$b, 0, sim_vals$b, 0.12, col = 'black', lwd = 2)
   
@@ -137,46 +138,46 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
 
 #PLOT
 PLOT_SSIB_DATA <- function(mcmc_ssib, list_data_ssib, cex, lwd = 2.0, 
-                           col_nssi = 'aquamarine', col_ssi = 'orange'){
+                           col_ns = 'aquamarine', col_ss = 'orange'){
   
   #Plot TRUE
-  nssi_data = list_data_ssib$nssi_infections
-  ssi_data = list_data_ssib$ssi_infections
-  nssi_inf = mcmc_ssib$data[[1]]
-  ssi_inf = mcmc_ssib$data[[2]]
+  non_ss = list_data_ssib$non_ss
+  ss = list_data_ssib$ss
+  ns_inf = mcmc_ssib$data[[1]]
+  ss_inf = mcmc_ssib$data[[2]]
   title = bquote('True vs Inferred: Non SSIs (aqua), SSI (or)')
   
-  #NSSI TRUE
-  plot(seq_along(nssi_data), nssi_data,  type = 'l',
+  #nsI TRUE
+  plot(seq_along(non_ss), non_ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
        main = title,
-       col = col_nssi,
+       col = col_ns,
        lwd = lwd, 
        cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
   
-  #NSSI INFERRED (dashed)
-  lines(seq_along(nssi_inf), nssi_inf, lty = 2, col = col_nssi, lwd = lwd)
+  #nsI INFERRED (dashed)
+  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
   
   #SSI TRUE
-  lines(seq_along(ssi_data), ssi_data, col = col_ssi, lwd = lwd)
+  lines(seq_along(ss), ss, col = col_ss, lwd = lwd)
   
   #SSI INFERRED (dashed)
-  lines(seq_along(ssi_inf), ssi_inf, lty = 2, col = col_ssi, lwd = lwd)
+  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
   
 }
 
 PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
                               cex = 1.7, lwd = 2.0, 
-                           col_ssi = 'aquamarine', col_nssi = 'orange'){
+                           col_ss = 'aquamarine', col_ns = 'orange'){
   
   #TRUE VALUES
   par(mfrow = c(1,1))
-  nssi_data = list_data_ssib$nssi_infections
-  ssi_data = list_data_ssib$ssi_infections
+  non_ss = list_data_ssib$non_ss
+  ss = list_data_ssib$ss
   
   #MCMC INFERRED
-  nssi_inf = mcmc_ssib$data[[1]]
-  ssi_inf = mcmc_ssib$data[[2]]
+  ns_inf = mcmc_ssib$data[[1]]
+  ss_inf = mcmc_ssib$data[[2]]
   lower_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_lower_ci)
   lower_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_lower_ci)
   upper_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_upper_ci)
@@ -185,20 +186,20 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, mean)
   
   #************
-  #NSSI TRUE
+  #nsI TRUE
   title = bquote('Non Super-Spreading Infections - True vs Inferred')
-  y_lim = c(0, max(nssi_data, upper_ci_ns))
-  plot(seq_along(nssi_data), nssi_data,  type = 'l',
+  y_lim = c(0, max(non_ss, upper_ci_ns))
+  plot(seq_along(non_ss), non_ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
        main = title, ylim = y_lim, lwd = lwd + 1.5)
-       #col = col_nssi, lwd = lwd)
+       #col = col_ns, lwd = lwd)
        #cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
   
-  #NSSI INFERRED (dashed)
+  #nsI INFERRED (dashed)
   #Mean
-  lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_nssi, lwd = lwd)
+  lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_ns, lwd = lwd)
   #Final
-  lines(seq_along(nssi_inf), nssi_inf, lty = 2, col = col_nssi, lwd = lwd)
+  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
   
   #CIs
   x = seq_along(upper_ci_ns)
@@ -207,23 +208,23 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
   legend('topleft', c('True', 'Mean inferred', 'Final inferred','95% CIs'),
-         col = c('black', col_nssi, col_nssi, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+         col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
 
   #************
   #SSI TRUE
   title = bquote('Super-Spreading Infections - True vs Inferred')
-  y_lim = c(0, max(ssi_data, upper_ci_ss))
-  plot(seq_along(ssi_data), ssi_data,  type = 'l',
+  y_lim = c(0, max(ss, upper_ci_ss))
+  plot(seq_along(ss), ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
        main = title, ylim = y_lim, lwd = lwd + 1.5) 
-       #col = col_ssi
+       #col = col_ss
        #cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
   
   #SSI INFERRED (dashed)
   #Mean
-  lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ssi, lwd = lwd)
+  lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ss, lwd = lwd)
   #Final
-  lines(seq_along(ssi_inf), ssi_inf, lty = 2, col = col_ssi, lwd = lwd)
+  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
 
   #CIs
   x = seq_along(upper_ci_ss)
@@ -232,5 +233,8 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
   legend('topleft', c('True', 'Mean', 'Final', '95% CIs'),
-         col = c('black', col_ssi, col_ssi, 'gray'), lwd = c(3, 2, 2, 2), lty = c(1,1,2,1))
+         col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2), lty = c(1,1,2,1))
 }
+
+#PLOT
+#plot.ts(mcmc_ssib$non_ss_tot[2:4800, 49], main = 'NS, Day 49', ylab = 'Daily Infection count')

@@ -5,23 +5,21 @@
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
-#' 
+#' c
 PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
-                               r0_sim = 2.0, true_loglike = 0, cex = 1.6,
+                               RESULTS_FOLDER = '~/Github/computing/mcmc/Baseline/',
+                               n_mcmc = 128000, r0_sim = 2.0, true_loglike = 0, cex = 1.8,
                                   PDF = TRUE, ADAPTIVE = TRUE,
-                                  PRIORS = list(EXP = FALSE, UNIF = FALSE, GAMMA = FALSE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
-  
-  #PLOT
-  #plot.new()
-  #MODEL
+                                  PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
+  #MODEL PARAMS
   FLAGS_MODELS = GET_FLAGS_MODELS(BASELINE = TRUE)
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  FLAG_PARAM = GET_PARAM(r0 = TRUE)
   MODEL_COLORS = GET_MODEL_COLORS(); MODEL_COLOR = MODEL_COLORS[1]
   
   if(PDF){
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_mcmc_', time_stamp, '.pdf') 
-    RESULTS_FOLDER = '~/Github/Results/MCMC/Baseline/'
     pdf(paste0(RESULTS_FOLDER, pdf_file), width = 12.0, height = 8.0)
     
     #MARGIN
@@ -33,6 +31,8 @@ PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
   
   #MCMC OUTPUT
   r0_mcmc = mcmc_output$r0_vec; r0_mcmc = unlist(r0_mcmc)
+  r0_lim = c(0.9, 3.0)
+  
   #Limits
   ll_lim_min = min(true_loglike, min(mcmc_output$log_like_vec, na.rm = TRUE))
   ll_lim_max = max(true_loglike, max(mcmc_output$log_like_vec, na.rm = TRUE))
@@ -43,23 +43,24 @@ PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
   #i. EPIDEMIC DATAs
   PLOT_SIM_DATA(epidemic_data, FLAGS_MODELS)
   
-  #i. MCMC TRACE PLOTS
+  #ii. PLOT LOG-LIKELIHOOD
+  PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS, n_mcmc)
+  
+  #iii. MCMC TRACE PLOTS
   PLOT_R0_TRACE(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
   segments(0, r0_sim, length(r0_mcmc), r0_sim, col = 'black', lwd = 2)
   #abline(h = r0_sim, col = 'black', lwd = 2, xlim = c(0, max(r0_mcmc)))
   
   #iv. Cumulative Mean
-  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
+  PLOT_CUMULATIVE_MEAN(r0_mcmc, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, cex = cex)
   segments(0, r0_sim, length(r0_mcmc), r0_sim, col = 'black', lwd = 2)
   
-  #iii. RO SAMPLES - HISTOGRAM
-  PLOT_HISTOGRAM(r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = cex)
+  #v. RO SAMPLES - HISTOGRAM
+  PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, cex = cex)
+  PLOT_PRIOR_DIST(FLAG_PARAM, r0_mcmc, r0_lim)
   segments(r0_sim, 0, r0_sim, 10, col = 'black', lwd = 2)
   #lines(c(0, 9), ylim = c(0, 9), col = 'black', lwd = 2)
   #abline(v = r0_sim, col = 'black', lwd = 2, ylim = c(0, 9))
-  
-  #v. PLOT LOG-LIKE
-  PLOT_LOG_LIKELIHOOD(mcmc_output$log_like_vec, FLAGS_MODELS)
   
   #vi. PLOT SIGMA
   PLOT_SIGMA(mcmc_output$sigma_vec)

@@ -2,12 +2,12 @@
 
 #SIMULATED DATA 
 PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '', 
-                          fig_num = 1, cex = 1.6, main_font = 2.8, axis_font = 2.4,
+                          fig_num = 1, cex = 1.9, main_font = 2.8, axis_font = 2.4,
                           PDF = FALSE){
   
   #PARAMS
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  ylabel = 'Daily Infection count'
+  ylabel = 'Infection count' #Daily
   
   if(PDF){
     pdf_file = paste0('/sim_', model, '_', fig_num, '.pdf') 
@@ -23,7 +23,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '',
   } else if (FLAGS_MODELS$SSE){
     
     data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
-                                   " = 2.0, ", italic(k), " = 0.16"))
+                                   " = 2.0, ", italic(k), " = 0.1"))
   } else if (FLAGS_MODELS$SSI){
     
     data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
@@ -44,7 +44,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '',
        xlab = 'Time', ylab = ylabel,
        main = data_title,
        lwd = 2.5, #3.5,
-       cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
   
   if(PDF){
     dev.off()
@@ -54,7 +54,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '',
 
 #MCMC TRACE
 PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
-                             MODEL_COLOR, cex = 1.6){
+                             MODEL_COLOR, cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -65,12 +65,12 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
        ylab = list_labels$lab, 
        main =  list_labels$main_trace,
        col = MODEL_COLOR,
-       cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+       cex.lab=cex+0.3, cex.axis=cex, cex.main=cex+0.35, cex.sub=cex)
 }
 
 #MCMC HISTOGRAM
 PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR,
-                            cex = 1.6, xlim = c(1.0, 3.0)){
+                            cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -79,15 +79,15 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR,
   
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = list_labels$lab,
-       xlim = xlim,
+       #xlim = xlim,
        border = MODEL_COLOR,
        col = MODEL_COLOR, 
        main = list_labels$main_hist_prior,
-       cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+       cex.lab=cex+0.35, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
 #MCMC TRACE
-PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.6){
+PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   
@@ -96,12 +96,12 @@ PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.6){
        ylab = expression(paste('R'[0])), 
        main =  bquote(paste(italic(R[0]), " Trace - ", .(model)~ "model")),
        col = MODEL_COLOR,
-       cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
 #PLOT CUMULATIVE MEAN
 PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
-                             MODEL_COLOR, cex = 1.6, ylim =  c(1.8, 2.2)){
+                             MODEL_COLOR, cex = 1.8, ylim =  c(1.8, 2.2)){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -113,11 +113,12 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
        col = MODEL_COLOR,
        xlab = 'Time', ylab = list_labels$lab,
        main =  list_labels$main_mean_sim,
-       cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
 #PLOT LOG-LIKE
-PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.5, PLOT_LOGLIKE_MEAN = FALSE){
+PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
+                                PLOT_LOGLIKE_MEAN = FALSE){
   
   'PLOT LOG LIKELIHOOD'
   #PARAMS
@@ -126,8 +127,8 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.5, PL
   #1. TRACE
   plot(seq_along(loglike_vec), loglike_vec, type = 'l',
           xlab = 'Time', ylab = 'Log likelihood', 
-          main = bquote(paste("Log likelihood - ", .(model), " model. N mcmc: ", .(n_mcmc))),
-          cex.lab=cex, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+          main = bquote(paste(.(model), " log likelihood. N mcmc: ", .(n_mcmc))),
+          cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)
   
   if(PLOT_LOGLIKE_MEAN){
     
@@ -139,20 +140,22 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.5, PL
          col = 'black',
          xlab = 'Time', ylab = 'Log likelihood',
          main = bquote(paste("Log likelihood - ", .(model), " model")),
-         cex.lab=cex+0.1, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+         cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
   }
 
 }
 
 #PLOT SIGMA
-PLOT_SIGMA <- function(sigma_vec, cex = 1.6){
+PLOT_SIGMA <- function(sigma_vec, cex = 1.8){
   
+  'Plot adaptive sigma. *Need to fix in write up'
   sigma_vec = sigma_vec[2:length(sigma_vec)]
-  
+  label_sigma = bquote(paste( "Adaptive ", italic(sigma))) 
+    
   plot(seq_along(sigma_vec), sigma_vec, 
-       xlab = 'Time', ylab = 'sigma', 
-          main = bquote(paste("Adaptive sigma")),
-          cex.lab=cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+       xlab = 'Time', ylab = label_sigma, 
+          main =label_sigma,
+          cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
 #****************************************************************************
@@ -233,31 +236,31 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
   
   if(FLAG_PARAM$r0){
     list_labels = list(lab = expression(paste('R'[0])), 
-                       main_trace =  bquote(paste(italic(R[0]), " MCMC Trace - ", .(model)~ "model")),
+                       main_trace =  bquote(paste(italic(R[0]), " MCMC Trace")), #.(model)~ "model")),
                        main_hist = bquote(paste(italic(R[0]), " Posterior. ")),
                        main_hist_prior = bquote(paste(italic(R[0]), " Posterior. Prior: Exponential(1)")),
-                       main_mean_sim = bquote(paste(italic(R[0]), " Cumulative mean. Simulated value = 2.0")),
+                       main_mean_sim = bquote(paste(italic(R[0]), " Cumulative mean. Simulated = 2.0")), #value 
                        main_mean0 = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 
-                                         main_trace =  bquote(paste(italic(alpha), " MCMC Trace - ", .(model)~ "model")),
+                                         main_trace =  bquote(paste(italic(alpha), " MCMC Trace")), #, .(model)~ "model")),
                        main_hist = bquote(paste(italic(alpha), " Posterior. ", .(model)~ "model")),
                        main_hist_prior = bquote(paste(italic(alpha), " Posterior. Prior: Beta(2,2)")),
-                       main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated value = 0.5")),
+                       main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated = 0.5")),
                        main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")))
     
   } else if (FLAG_PARAM$beta){
     list_labels = list(lab = expression(paste(italic(beta))), 
-                                         main_trace =  bquote(paste(italic(beta), " MCMC Trace - ", .(model)~ "model")),
+                                         main_trace =  bquote(paste(italic(beta), " MCMC Trace")), #.(model)~ "model")),
                        main_hist = bquote(paste(italic(beta), " Posterior - ", .(model)~ "model")),
                        main_hist_prior = bquote(paste(italic(beta), " Posterior. Prior: 1 + Gamma(3,3)")),
-                       main_mean_sim = bquote(paste(italic(beta), " Cumulative mean. Simulated value = 10")),
+                       main_mean_sim = bquote(paste(italic(beta), " Cumulative mean. Simulated = 10")),
                        main_mean2 = bquote(paste(italic(beta), " Cumulative mean - ", .(model)~ "model")))
   } else {
     
     list_labels = list(lab = bquote(paste(.(param))), 
-                                         main_trace =  bquote(paste(.(param), " Trace - ", .(model)~ "model")),
+                                         main_trace =  bquote(paste(.(param), " MCMC Trace")), #, .(model)~ "model")), #" Trace - ", .(model)~ "model")),
                        main_hist =  bquote(paste(.(param), " Posterior - ", .(model)~ "model")),
                        main_mean2 =  bquote(paste(.(param), " Cumulative mean - ", .(model)~ "model")))
     
@@ -274,13 +277,13 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
   
   if(FLAG_PARAM$k){
     
-  list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Exponential(1)"))
-  list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 0.1"))
+  list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Exponential(5)"))
+  list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated = 0.1"))
   
   } else if (FLAG_PARAM$a) {
   
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Beta(2,2)"))
-    list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 0.5"))
+    list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated = 0.5"))
     
   } else if (FLAG_PARAM$b) {
     
@@ -290,7 +293,7 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
     } else if (FLAG_PARAM$c){
       
       list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: 1 + Gamma(3,3)"))
-      list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 10"))
+      list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated = 10"))
   }
   
   return(list_labels)
