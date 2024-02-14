@@ -72,13 +72,14 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 
 #' @export
 MCMC_INFER_SSIB_JOINT <- function(epidemic_data, list_ssib_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
-                           param_starts = c(2.0, 0.85, 10),
+                           param_starts = c(3.0, 0.85, 10),
                            mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                               thinning_factor = 10, burn_in_pc = 0.2)){    
   
   #INITIALIASE
   #r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
   #param_starts[1] = r0_start
+  r0_start = param_starts[1]
   time = length(epidemic_data) 
   vec_min = c(0, 0, 1); count_accept = 0; 
   
@@ -100,7 +101,7 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, list_ssib_data, n_mcmc, PRIORS_
   # 
   # #DATA USED!!
   # data = list(non_ss, ss)
-  data = list(unlist(list_data_ssib$non_ss), unlist(list_ssib_data$ss))
+  data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
   #print('ss: '); print(ss); print('non_ss: '); print(non_ss)
   
   #SSI - DATA AUGMENTATION STORE
@@ -230,6 +231,6 @@ MCMC_INFER_SSIB_JOINT <- function(epidemic_data, list_ssib_data, n_mcmc, PRIORS_
               accept_rate = accept_rate, vec_accept_da = vec_accept_da,
               data = data, ss_inf = data[[1]], ns_inf = data[[2]],
               #ss_start = ss_start, ns_start = ns_start,
-              non_ss_tot = non_ss, ss_tot = ss))
-              #r0_start = r0_start))
+              non_ss_tot = non_ss, ss_tot = ss,
+              r0_start = r0_start))
 } 

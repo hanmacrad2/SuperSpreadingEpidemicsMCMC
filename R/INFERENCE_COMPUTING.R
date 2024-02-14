@@ -152,21 +152,23 @@ INFER_SSE <- function(r0_val, k_val, PRIORS_USED, num_days = 50, n_mcmc = 40000)
 # 3. SSI MODEL
 #*******************************************
 #' @export 
-INFER_SSI <- function(r0_val, k_val, PRIORS_USED, num_days = 50, n_mcmc = 40000){ #{40000) {
+INFER_SSI <- function(r0_val, k_val, n_mcmc){ #{40000) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  data_ssi = SIMULATE_EPI_SSI(num_days = num_days, r0 = r0_val, k = k_val)
+  data_ssi = SIMULATE_EPI_SSI(r0 = r0_val, k = k_val)
   epidemic_data = data_ssi$epidemic_data
   
   #MCMC
-  mcmc_output = MCMC_INFER_SSI(epidemic_data, n_mcmc, PRIORS_USED)
+  mcmc_output = MCMC_INFER_SSI(epidemic_data, n_mcmc)
   r0_vec = mcmc_output$ssi_params_matrix[,1]
   k_vec = mcmc_output$ssi_params_matrix[,2]
 
   #Row result
   r0_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
+  r0_row$r0_mcmc = list(r0_vec)
   k_row = GET_INFER_K_ROW(k_val, k_vec)
+  k_row$k_mcmc = list(k_vec)
   
   result_row <- cbind(r0_row, k_row)
   
@@ -209,8 +211,8 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
 #**********************************************
 #* SSIB MODEL
 #* ********************************************
-INFER_SSIB <- function(r0_val, a_val, b_val, PRIORS_USED,
-                       num_days = 50, n_mcmc = 40000) {
+INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc,
+                       num_days = 50) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -218,7 +220,7 @@ INFER_SSIB <- function(r0_val, a_val, b_val, PRIORS_USED,
                                     a = a_val, b = b_val)
   
   #MCMC  
-  mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc, PRIORS_USED)
+  mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc)
 
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, mcmc_output$r0_vec, mcmc_output, epidemic_data)
@@ -243,66 +245,13 @@ INFER_SSIB <- function(r0_val, a_val, b_val, PRIORS_USED,
 #**********************************************
 #* SSIB MODEL -- JOINT UPDATE
 #* ********************************************
-INFER_SSIB_JOINT <- function(r0_val, a_val, b_val, PRIORS_USED,
-                       num_days = 50, n_mcmc = 50000) {
+INFER_SSIB_JOINT <- function(r0_val, a_val, b_val, n_mcmc,
+                       num_days = 50) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
-                                    a = a_val, b = b_val)
-  
-  #SSIB; pass in data
-  # list_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
-  #                                    a = a_val, b = b_val)
-  # 
-  # data = list(non_ss = list_data$non_ss, ss = list_data$ss)
-  # epidemic_data = as.vector(unlist(list_data$total_infections))
-  
-  #MCMC  
-  mcmc_output = MCMC_INFER_SSIB_JOINT(epidemic_data, n_mcmc, PRIORS_USED)
-  
-  #PARAMS
-  ssib_params_matrix = mcmc_output$ssib_params_matrix
-  r0_vec = ssib_params_matrix[,1]
-  a_vec = ssib_params_matrix[,2]
-  b_vec = ssib_params_matrix[,3]
-  
-  #Row result - parameters
-  row_r0 = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
-  row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
-  
-  #alpha
-  FLAG_PARAM = GET_FLAG_PARAM()
-  FLAG_PARAM$a = TRUE
-  row_a = GET_PARAM_INFERENCE(a_val, a_vec, FLAG_PARAM)
-  
-  #beta
-  FLAG_PARAM = GET_FLAG_PARAM()
-  FLAG_PARAM$b = TRUE
-  row_b = GET_PARAM_INFERENCE(b_val, b_vec, FLAG_PARAM)
-  
-  #browser()
-  result_row = cbind(row_r0, row_a, row_b)
-  
-  #SS Data
-  result_row$ss_data = list(mcmc_output$ss_inf)
-  result_row$ns_data = list(mcmc_output$ns_inf)
-  result_row$accept_da = list(mcmc_output$vec_accept_da)
-  
-  return(result_row)
-}
-
-#***********
-#* SSIB
-#* ************
-
-INFER_SSIB_JOINT_II <- function(r0_val, a_val, b_val, n_mcmc, PRIORS_USED,
-                             num_days = 50) {
-  
-  'Inference of baseline simulate data'
-  cat(r0_val)
-  #epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
-  #                                  a = a_val, b = b_val)
+  # epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+  #                                   a = a_val, b = b_val)
   
   #SSIB; pass in data
   list_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
@@ -312,7 +261,7 @@ INFER_SSIB_JOINT_II <- function(r0_val, a_val, b_val, n_mcmc, PRIORS_USED,
   epidemic_data = as.vector(unlist(list_data$total_infections))
   
   #MCMC  
-  mcmc_output = MCMC_INFER_SSIB_JOINT_II(epidemic_data, list_ssib_data, n_mcmc)
+  mcmc_output = MCMC_INFER_SSIB_JOINT(epidemic_data, list_data, n_mcmc)
   
   #PARAMS
   ssib_params_matrix = mcmc_output$ssib_params_matrix
@@ -322,7 +271,7 @@ INFER_SSIB_JOINT_II <- function(r0_val, a_val, b_val, n_mcmc, PRIORS_USED,
   
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
-  row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
+  #row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
   
   #alpha
   FLAG_PARAM = GET_FLAG_PARAM()
@@ -346,23 +295,30 @@ INFER_SSIB_JOINT_II <- function(r0_val, a_val, b_val, n_mcmc, PRIORS_USED,
 }
 
 #**********************************************
-#* SSIB MODEL -- JOINT UPDATE
-#* ********************************************
-INFER_SSIB_ND <- function(r0_val, a_val, b_val,
-                             num_days = 50, n_mcmc = 50000) {
+#* SSIB - JOINT DA
+#************************************************
+
+INFER_SSIB_JOINT_II <- function(r0_val, a_val, b_val, n_mcmc,
+                             num_days = 50) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  list_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
-                                    a = a_val, b = b_val)
+  # epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+  #                                  a = a_val, b = b_val) 
+  epidemic_data = SIMULATE_EPI_SSIB_II(num_days = num_days, r0 = r0_val,
+                                    a = a_val, b = b_val) 
   
-  data = list(non_ss = list_data$non_ss, ss = list_data$ss)
-  epidemic_data = as.vector(unlist(list_data$total_infections))
+  #SSIB; pass in data
+  # list_ssib_data = SIMULATE_EPI_SSIB_LIST(num_days = num_days, r0 = r0_val,
+  #                                    a = a_val, b = b_val)
+  # 
+  # data = list(non_ss = list_ssib_data$non_ss, ss = list_ssib_data$ss)
+  # epidemic_data = as.vector(unlist(list_ssib_data$total_infections))
   
-  print(epidemic_data)
   #MCMC  
-  mcmc_output = MCMC_INFER_SSIB_ND(data, n_mcmc)
-
+  #mcmc_output = MCMC_INFER_SSIB_JOINT_II(epidemic_data, list_ssib_data, n_mcmc)
+  mcmc_output = MCMC_INFER_SSIB_JOINT_II(epidemic_data, n_mcmc)
+  
   #PARAMS
   ssib_params_matrix = mcmc_output$ssib_params_matrix
   r0_vec = ssib_params_matrix[,1]
@@ -371,7 +327,7 @@ INFER_SSIB_ND <- function(r0_val, a_val, b_val,
   
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
-  row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
+  #row_r0$mcmc_r0 = list(mcmc_output$r0_vec)
   
   #alpha
   FLAG_PARAM = GET_FLAG_PARAM()
@@ -387,49 +343,59 @@ INFER_SSIB_ND <- function(r0_val, a_val, b_val,
   result_row = cbind(row_r0, row_a, row_b)
   
   #SS Data
-  result_row$non_ss = list(list_data$non_ss)
-  result_row$ss = list(list_data$ss)
+  result_row$ss_data = list(mcmc_output$ss_inf)
+  result_row$ns_data = list(mcmc_output$ns_inf)
+  result_row$accept_da = mcmc_output$accept_da
+  #result_row$accept_da = list(mcmc_output$vec_accept_da)
   
   return(result_row)
 }
 
-
-#**********************************************
-#* SSIB MODEL
-#* ********************************************
-INFER_SSIB_ORIG <- function(a_val, b_val, c_val, seed_val, 
-                       num_days = 50, n_mcmc = 50000) {
+#***********************
+#*
+#* PLOT PERFORMANCE & INFERENCE RESULTS
+#* 
+#* **********************
+SIM_PERFORMANCE_R0 <- function(df_results){
   
-  'Inference of baseline simulate data'
-  cat(a_val)
-  epidemic_data = simulation_super_spreaders(num_days = num_days, a = a_val,
-                                    b = b_val, c = c_val)
+  #Bias, MAE
+  df_results$MAE = abs(df_results$mean_r0 - df_results$true_r0)
+  df_results$bias = df_results$mean_r0 - df_results$true_r0
+  num_runs = length(df_results$true_r0)
   
-  #MCMC  
-  mcmc_output = MCMC_SSIB_ORIG(epidemic_data, n_mcmc)
+  #Results
+  print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
+  print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
+  print(paste0('mean sd: ', round(mean(df_results$sd_r0), 3)))
+  print(paste0('coverage: ', sum(df_results$coverage_r0)))
+  print(paste0('% coverage: ', sum(df_results$coverage_r0)/num_runs))
   
-  #a
-  FLAG_PARAM = GET_FLAG_PARAM()
-  FLAG_PARAM$a = TRUE
-  row_a = GET_PARAM_INFERENCE(a_val, mcmc_output$a_vec, FLAG_PARAM)
+  #return(df_results)
   
-  #b
-  FLAG_PARAM = GET_FLAG_PARAM()
-  FLAG_PARAM$b = TRUE
-  row_b = GET_PARAM_INFERENCE(b_val, mcmc_output$b_vec, FLAG_PARAM)
-  
-  #c
-  FLAG_PARAM = GET_FLAG_PARAM()
-  FLAG_PARAM$c = TRUE
-  row_c = GET_PARAM_INFERENCE(c_val, mcmc_output$c_vec, FLAG_PARAM)
-  
-  #browser()
-  result_row = cbind(row_a, row_b, row_c)
-  result_row$seed_val = seed_val
-  
-  return(result_row)
 }
 
+SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(a = TRUE)){
+  
+  #Param
+  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
+  print(paste0('Performance metrics of ', param))
+  num_runs = length(df_results$true_r0)
+  
+  #Bias, MAE, coverage 
+  MAE = unlist(as.vector(abs(df_results[paste0('mean_', param)] - df_results[paste0('true_', param)])))
+  bias = unlist(as.vector(df_results[paste0('mean_', param)] - df_results[paste0('true_', param)]))
+  sd = unlist(as.vector(df_results[paste0('sd_', param)]))
+  coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
+  coverage_pc = sum(coverage)/num_runs
+  
+  #Results
+  print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 3)))
+  print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
+  print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
+  print(paste0('coverage: ', sum(coverage)))
+  print(paste0('% coverage: ', coverage_pc))
+  
+}
 
 #ADD GELMAN.DIAG
 #gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))

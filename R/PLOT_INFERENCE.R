@@ -314,46 +314,6 @@ PLOT_INFERENCE_INDIVID_FIXED <- function(df_results, fixed_param, var_param,
   }
 }
 
-#***********************
-#*
-#* PLOT PERFORMANCE & INFERENCE RESULTS
-#* 
-#* **********************
-SIM_PERFORMANCE_R0 <- function(df_results){
-  
-  #Bias, MAE
-  df_results$MAE = abs(df_results$mean_r0 - df_results$true_r0)
-  df_results$bias = df_results$mean_r0 - df_results$true_r0
-  num_runs = length(df_results$true_r0)
-  
-  #Results
-  print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
-  print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
-  print(paste0('mean sd: ', round(mean(df_results$sd_r0), 3)))
-  print(paste0('coverage: ', sum(df_results$coverage_r0)))
-  print(paste0('% coverage: ', sum(df_results$coverage_r0)/num_runs))
-  
-  #return(df_results)
-  
-}
-
-SIM_PERFORMANCE <- function(df_results){
-  
-  #Bias, MAE
-  df_results$MAE = abs(df_results$mean_r0 - df_results$true_r0)
-  df_results$bias = df_results$mean_r0 - df_results$true_r0
-  num_runs = length(df_results$true_r0)
-  
-  #Results
-  print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
-  print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
-  print(paste0('mean sd: ', round(mean(df_results$sd), 3)))
-  print(paste0('coverage: ', sum(df_results$coverage)))
-  print(paste0('% coverage: ', sum(df_results$coverage)/num_runs))
-  
-  #return(df_results)
-  
-}
 
 #*****************************
 #* PLOT PRIORS                       

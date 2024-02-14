@@ -4,9 +4,45 @@
 #* 
 #********************************************************
 
+SIMULATE_EPI_SSIB_II = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
+                                data_start = c(3,2,1),
+                             shape_gamma = 6, scale_gamma = 1) {
+  'Simulate an epidemic with Superspreading individuals'
+  
+  #Params
+  c = (r0*(1 - a))/b #r0 = a_prop*r0 + b*c
+  #alpha = alpha_prop*r0 
+  
+  #Set up
+  total_infections = vector('numeric', num_days)
+  non_ss = vector('numeric', num_days)
+  ss = vector('numeric', num_days)
+  total_infections[1] = data_start[1] #3
+  non_ss[1] =  data_start[2] #2
+  ss[1] =  data_start[3] #1 
+  
+  
+  #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
+  #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - 
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  #Days of Infection Spreading
+  for (t in 2:num_days) {
+    
+    #Regular infecteds (tot_rate = lambda) fix notation
+    lambda_t = sum((non_ss[1:(t-1)] + b*ss[1:(t-1)])*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written. Product of infecteds & their probablilty of infection along the gamma dist at that point in time
+    non_ss[t] = rpois(1, a*r0*lambda_t) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    ss[t] = rpois(1, c*lambda_t)
+    total_infections[t] = non_ss[t] + ss[t]
+  }
+  
+  total_infections
+}
+
 #DATA SIMULATION FUNCTIONS
 SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
-                                  a = 0.5, b = 10,
+                                  a = 0.5, b = 10, data_start = c(3,2,1),
                                   shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
@@ -17,9 +53,9 @@ SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
   total_infections = vector('numeric', num_days)
   non_ss = vector('numeric', num_days)
   ss = vector('numeric', num_days)
-  total_infections[1] = 3
-  non_ss[1] = 2
-  ss[1] = 1 
+  total_infections[1] = data_start[1] #3
+  non_ss[1] =  data_start[2] #2
+  ss[1] =  data_start[3] #1 
   
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
   #Explanation: Gamma is a continuous function so integrate over the density at that point in time (today - previous day)
@@ -109,14 +145,14 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 }
 
 #' @export
-MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
-                                  param_starts = c(2.0, 0.85, 10),
+MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
+                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
                                   mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                      thinning_factor = 10, burn_in_pc = 0.2)){    
   
   #INITIALIASE
   #r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
-  #param_starts[1] = r0_start
+  r0_start = param_starts[1]
   time = length(epidemic_data) 
   vec_min = c(0, 0, 1); count_accept = 0; 
   
@@ -132,14 +168,18 @@ MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIO
   print(paste0('ssib_params', ssib_params))
   
   #SSI - DATA AUGMENTATION PARAMS
-  # ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0)
-  # non_ss = epidemic_data - ss
-  #ss_start = ss; ns_start = non_ss
-  # 
+  ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0)
+  non_ss = epidemic_data - ss
+  #Starting from the truth
+  non_ss[1] = data_start[2]
+  ss[1] = data_start[3]
+  ss_start = ss; ns_start = non_ss
+  
+  
   ##DATA USED
-  data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
-  #data = list(non_ss, ss)
-  #print('ss: '); print(ss); print('non_ss: '); print(non_ss)
+  #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
+  data = list(non_ss, ss)
+  print('ss: '); print(ss); print('non_ss: '); print(non_ss)
   
   #SSI - DATA AUGMENTATION STORE
   non_ss = matrix(0, mcmc_vec_size, time)
@@ -218,6 +258,7 @@ MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIO
     #DATA AUGMENTATION
     #***********************************
     #FOR EACH S_T
+    for (myrep in 1:10){
     data_dash = data
     x = data[[1]] + data[[2]]
     #PARAMS
@@ -227,6 +268,7 @@ MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIO
     
     data_dash[[2]] = proposal_ss
     data_dash[[1]] =  x - proposal_ss #n_t = x_t - s_t
+    data_dash[[1]][1]= data[[1]][1]; data_dash[[2]][1]= data[[2]][1]
     
     logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params) 
     log_accept_ratio = logl_new - log_like - sum(dbinom(proposal_ss, size = x, prob = prob, log = TRUE)) + 
@@ -239,6 +281,7 @@ MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIO
         accept_da = accept_da + 1
         #vec_accept_da[t] =  vec_accept_da[t] + 1
       }
+    }
       
       #Store
       if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
@@ -256,7 +299,7 @@ MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, list_ssib_data, n_mcmc, PRIO
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate, accept_da = accept_da,
               data = data, ss_inf = data[[1]], ns_inf = data[[2]],
-              #ss_start = ss_start, ns_start = ns_start,
-              non_ss_tot = non_ss, ss_tot = ss))
-  #r0_start = r0_start))
+              ss_start = ss_start, ns_start = ns_start,
+              non_ss_tot = non_ss, ss_tot = ss,
+  r0_start = r0_start))
 } 
