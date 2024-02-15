@@ -5,7 +5,7 @@
 #'
 #' @param epidemic_data data from the epidemic, namely daily infection counts
 #' @param mcmc_output mcmc samples from mcmc sampler/algorithm
-#' c
+#' 
 PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
                                RESULTS_FOLDER = '~/Github/computing/mcmc/Baseline/',
                                n_mcmc = 128000, r0_sim = 2.0, true_loglike = 0, cex = 1.8,
@@ -57,7 +57,7 @@ PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
   
   #v. RO SAMPLES - HISTOGRAM
   PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, cex = cex)
-  PLOT_PRIOR_DIST(FLAG_PARAM, r0_mcmc, r0_lim)
+  PLOT_PRIOR_DIST(FLAG_PARAM, r0_lim)
   segments(r0_sim, 0, r0_sim, 10, col = 'black', lwd = 2)
   #lines(c(0, 9), ylim = c(0, 9), col = 'black', lwd = 2)
   #abline(v = r0_sim, col = 'black', lwd = 2, ylim = c(0, 9))

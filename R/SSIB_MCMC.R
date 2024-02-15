@@ -4,8 +4,8 @@
 #* 
 #********************************************************
 
-SIMULATE_EPI_SSIB_II = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
-                                data_start = c(3,2,1),
+SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
+                                data_start = c(3,3,0),
                              shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
@@ -42,7 +42,7 @@ SIMULATE_EPI_SSIB_II = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
 
 #DATA SIMULATION FUNCTIONS
 SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
-                                  a = 0.5, b = 10, data_start = c(3,2,1),
+                                  a = 0.5, b = 10, data_start = c(3,3,1),
                                   shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
@@ -145,8 +145,8 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 }
 
 #' @export
-MCMC_INFER_SSIB_JOINT_II <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
-                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
+                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,3,0),
                                   mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                      thinning_factor = 10, burn_in_pc = 0.2)){    
   

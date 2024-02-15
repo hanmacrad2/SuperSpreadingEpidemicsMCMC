@@ -1,8 +1,8 @@
 #*****************************
-#* PLOT PRIORS                       
+#* PLOT PRIORS - OVERLAPPING PRIOR ON FIGURES                       
 #*****************************
 
-PLOT_PRIOR_DIST <- function(FLAG_PARAM, mcmc_vec, limits){
+PLOT_PRIOR_DIST <- function(FLAG_PARAM, limits = c(0,3), alpha = 0.2){ #0.4
   
   #PRIORS
   x_min = limits[1] #min(mcmc_vec) 
@@ -10,7 +10,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, mcmc_vec, limits){
   x = seq(from = x_min, to = x_max, length = 5000)
               
   if(FLAG_PARAM$r0){
-    #x_min = 0.9; x_max = 3.0
+    #x_min = 2; x_max = 3.0
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dexp(x, 1)
     
@@ -35,11 +35,13 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, mcmc_vec, limits){
   }
   
   #PLOT
-  col_grey = rgb(0.5, 0.5, 0.5, alpha = 0.4)
-  lines(x, y, type = 'l', lty = 1, col = col_grey,  ylim = c(0, max(y)))
+  col_grey = rgb(0.5, 0.5, 0.5, alpha = alpha) #0.4
+  lines(x, y, type = 'l', lty = 1, col = col_grey,   ylim = c(0, 1)) #ylim = c(0, max(y)))
   
   #Filled area
-  polygon(c(x, rev(x)), c(y, rep(min(y), length(y))),
+  # polygon(c(x, rev(x)), c(y, rep(min(y), length(y))),
+  #         col = col_grey, border = NA)
+  polygon(c(x, rev(x)), c(y, rep(0, length(y))),
           col = col_grey, border = NA)
 }
 
