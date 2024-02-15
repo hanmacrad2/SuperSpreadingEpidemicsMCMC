@@ -139,14 +139,19 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
 # 2. SSE MODEL
 #*******************************************
 #' @export 
-INFER_SSE <- function(r0_val, k_val, PRIORS_USED, num_days = 50, n_mcmc = 40000) {
+INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, PLOT_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  epidemic_data = SIMULATE_EPI_SSE(num_days = num_days, r0 = r0_val, k = k_val)
+  
+  epidemic_data = SIMULATE_EPI_SSE(r0 = r0_val, k = k_val)
+  
+  while(sum(epidemic_data) < lt_val){
+    epidemic_data = SIMULATE_EPI_SSE(r0 = r0_val, k = k_val)
+  }
   
   #MCMC
-  mcmc_output = MCMC_INFER_SSE(epidemic_data, n_mcmc, PRIORS_USED)
+  mcmc_output = MCMC_INFER_SSE(epidemic_data, n_mcmc)
   r0_vec = mcmc_output$sse_params_matrix[,1]
   k_vec = mcmc_output$sse_params_matrix[,2]
   
@@ -154,7 +159,13 @@ INFER_SSE <- function(r0_val, k_val, PRIORS_USED, num_days = 50, n_mcmc = 40000)
   r0_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
   k_row = GET_INFER_K_ROW(k_val, k_vec)
   
+  if (PLOT_MCMC){
+    r0_row$r0_mcmc = list(r0_vec)
+    k_row$k_mcmc = list(k_vec) 
+  }
+  
   result_row <- cbind(r0_row, k_row)
+  result_row$accept_rate = mcmc_output$accept_rate
   
   return(result_row)
 }
@@ -185,6 +196,7 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, PLOT_MCMC = FALSE){ #{40000) {
   }
 
   result_row <- cbind(r0_row, k_row)
+  result_row$accept_rate = mcmc_output$accept_rate
   
   return(result_row)
 }
