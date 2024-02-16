@@ -38,31 +38,6 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #PRIORS
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
   
-  # # LABELS
-  # ylab = 'Estimated posterior mean of '
-  # if (FLAG_PARAM$r0) {
-  #   xlab <- expression(paste('True R'[0])) 
-  #   ylab <- expression(paste('Estimated posterior mean of R'[0])) 
-  #   titleX =  bquote(paste(italic(R[0]) ~ " - " ~ .(model)))
-  #   
-  # } else if (FLAG_PARAM$alpha){
-  #   titleX =  bquote(paste(italic(alpha) ~ " - " ~ .(model)))
-  #   xlab = bquote(paste("True " ~ italic(alpha)))
-  #   ylab = bquote(paste(.(ylab) ~ italic(alpha)))
-  #   
-  # } else if (FLAG_PARAM$beta) {
-  #   titleX =  bquote(paste(italic(beta) ~ " - " ~ .(model)))
-  #   xlab = bquote(paste("True " ~ italic(beta)))
-  #   ylab = bquote(paste(.(ylab) ~ italic(beta)))
-  #   
-  # } else {
-  #   xlab <- paste0('True ', true_param)
-  #   ylab <- paste0('Estimated posterior mean of ', true_param)
-  #   titleX =  bquote(paste(.(true_param) ~ " - " ~ .(model))) 
-  #   #titleX = bquote(bold(paste(.(model) ~ "Model Inference - " ~ .(true_param) ))) #~
-  #   #"Inference"))) #. Epidemic length: " ~ .(num_days) ~ ' days')))
-  # }
-  
   #LIMITS
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   y_lim = c(min(true_total, min(df_results[paste0('lower_ci_', true_param)])),
@@ -209,13 +184,25 @@ SCALE_PARAM <- function(vec_param){
 #****************
 #* POSTERIOR & PRIOR PLOTS 
 PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
-                                 i = 2, cex = 1.5, alpha = 0.2, sim_val = 2.5, PDF = TRUE){
+                                 RESULTS_FOLDER, main_font = 1.8,
+                                 i = 2, cex = 1.8, alpha = 0.2, sim_val = 2.5, PDF = TRUE){
   
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))] 
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
   limits = list(xlim = c(2,3), ylim = c(0,1)) #GET_LIMITS(FLAG_PARAM, model)
+  
+  #PLOT
+  plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+  create_folder(plot_folder)
+  
+  if(PDF){
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
+    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
+  }
+  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
   
   #1. DENSITY EXTRACT 
   density_mcmc = density(unlist(df_results[paste0(param, '_mcmc')][2,]))
@@ -229,8 +216,8 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
        xlim = limits$xlim,
        xlab = list_labels$lab, 
        ylab = 'Estimated Posterior Density',
-       cex.lab=cex-0.2, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) 
-  title(main = list(list_labels$main_inf, cex = 1.9, font = 3.0))
+       cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) 
+  title(main = list(list_labels$main_inf, cex = 1.9, font = main_font))
   
   #POLYGON
   x = density_mcmc$x; y = scaled_dx
@@ -252,7 +239,8 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
   }
   
   #3. PRIOR
-  prior_xlim = c(limits$xlim[1] - 0.2, limits$xlim[2] + 0.2)
+  #prior_xlim = c(limits$xlim[1] - 0.2, limits$xlim[2] + 0.2)
+  prior_xlim = c(limits$xlim[1], limits$xlim[2])
   PLOT_PRIOR_DIST(FLAG_PARAM, limits = prior_xlim, alpha = 0.3)
   # x = seq(0, 6, by = 0.01)
   # dx1 = dexp(x, rate = 1)
@@ -260,7 +248,11 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
   # lines(x, dx2, col = "gray", lty = "dashed", lwd = 2)
   
   #PLOT TRUE
-  segments(sim_val, 0, sim_val, 10, col = 'black', lwd = 2)
+  segments(sim_val, 0, sim_val, 1, col = 'black', lwd = 2)
+  
+  if(PDF){
+    dev.off()
+  }
   
 }
 

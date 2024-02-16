@@ -318,7 +318,12 @@ SIM_PERFORMANCE_R0 <- function(df_results){
   
 }
 
-SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(a = TRUE)){
+#*********************************
+#*
+#* PERFORMANCE METRICS
+#* 
+#* **********************************
+SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE)){
   
   #Param
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -326,18 +331,27 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(a = TRUE)){
   num_runs = length(df_results$true_r0)
   
   #Bias, MAE, coverage 
-  MAE = unlist(as.vector(abs(df_results[paste0('mean_', param)] - df_results[paste0('true_', param)])))
-  bias = unlist(as.vector(df_results[paste0('mean_', param)] - df_results[paste0('true_', param)]))
+  mean_est = mean(unlist(df_results[paste0('mean_', param)]))
+  mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
+  lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
+  upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
+  mean_accept_rate = mean(unlist(df_results['accept_rate']))
+  MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
+  bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
   sd = unlist(as.vector(df_results[paste0('sd_', param)]))
   coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
   coverage_pc = sum(coverage)/num_runs
   
   #Results
+  print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
+  print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
   print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 3)))
   print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
   print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
   print(paste0('coverage: ', sum(coverage)))
   print(paste0('% coverage: ', coverage_pc))
+  print(paste0('Accept rate (mean): ', round(mean_accept_rate, 3))) 
+  print(paste0(param, 'Effective Size (mean): ', round(mean_eff, 3)))
   
 }
 
