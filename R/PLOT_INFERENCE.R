@@ -184,14 +184,14 @@ SCALE_PARAM <- function(vec_param){
 #****************
 #* POSTERIOR & PRIOR PLOTS 
 PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
-                                 RESULTS_FOLDER, main_font = 1.8,
-                                 i = 2, cex = 1.8, alpha = 0.2, sim_val = 2.5, PDF = TRUE){
+                                 xlimits, RESULTS_FOLDER, sim_val, main_font = 1.5,
+                                 i = 2, cex = 1.8, alpha = 0.2, PDF = TRUE){
   
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))] 
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
-  limits = list(xlim = c(2,3), ylim = c(0,1)) #GET_LIMITS(FLAG_PARAM, model)
+  limits = list(xlim = xlimits, ylim = c(0,1)) #GET_LIMITS(FLAG_PARAM, model)
   
   #PLOT
   plot_folder = paste0(RESULTS_FOLDER, '/plots/')
@@ -241,7 +241,7 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
   #3. PRIOR
   #prior_xlim = c(limits$xlim[1] - 0.2, limits$xlim[2] + 0.2)
   prior_xlim = c(limits$xlim[1], limits$xlim[2])
-  PLOT_PRIOR_DIST(FLAG_PARAM, limits = prior_xlim, alpha = 0.3)
+  PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = prior_xlim, alpha = 0.3)
   # x = seq(0, 6, by = 0.01)
   # dx1 = dexp(x, rate = 1)
   # dx2 = SCALE_PARAM(dx1)
@@ -250,13 +250,19 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
   #PLOT TRUE
   segments(sim_val, 0, sim_val, 1, col = 'black', lwd = 2)
   
+  #LEGEND
+  prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
+  legend_list = c(paste0('Estimated Posteriors of ', param), prior_title)
+  GET_LEGEND(legend_list, COLOR_ALPHA)
+  
   if(PDF){
     dev.off()
   }
   
 }
 
-GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha){
+#GET ALPHA COLOUR
+GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha = 0.2){
   
   rgba_color <- col2rgb(MODEL_COLOR, alpha = TRUE)
   r = rgba_color[,]['red'][1]/255
@@ -266,4 +272,24 @@ GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha){
   COLOR_ALPHA = rgb(r, g, b, alpha = alpha)
   
   return(COLOR_ALPHA)
+}
+
+GET_LEGEND <- function(legend_list, COLOR_ALPHA){
+  
+  #COLOUR
+  COLOR_ALPHA = GET_COLOR_ALPHA(COLOR_ALPHA, alpha = 0.8)
+  
+  #Legend
+  num_conds = length(legend_list)
+  pch_list = rep(19, num_conds)
+  legend('topright', #x = "topleft", y = "topleft", #"center", legend_list,
+         legend_list,
+         cex = 1.1,
+         #inset=c(-inset,0),
+         col = c(COLOR_ALPHA, 'gray'),
+         lwd = rep(3, num_conds),
+         lty = rep(1, num_conds), #c(1, 1),
+         #pch = pch_list, #c(NA, pch_list, NA, NA, NA),
+         text.font = 1.8, #1.45
+         bty = "n")
 }

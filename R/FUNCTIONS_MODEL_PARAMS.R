@@ -82,7 +82,7 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
     list_labels = list(lab = expression(paste('R'[0])), 
                        xlab = expression(paste('True R'[0])), 
                        ylab = expression(paste('Estimated posterior mean of R'[0])), 
-                       main_inf =  bquote(paste(italic(R[0]) ~ " - " ~ .(model), ' Model. Estimated Posteriors & Prior')),
+                       main_inf =  bquote(paste(italic(R[0]) ~ " - " ~ .(model), ' Model')), #. Estimated Posteriors & Prior')),
                        main_trace =  bquote(paste(italic(R[0]), " MCMC Trace")), #.(model)~ "model")),
                        main_hist = bquote(paste(italic(R[0]), " Posterior. ")),
                        main_hist_prior = bquote(paste(italic(R[0]), " Posterior. Prior: Exponential(1)")),

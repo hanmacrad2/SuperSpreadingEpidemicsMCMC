@@ -20,6 +20,8 @@ GET_INFER_R0_ROW <- function(r0_val, r0_vec, mcmc_output, epidemic_data){
   eff_size_r0 = unlist(effectiveSize(as.mcmc(r0_vec)))[[1]])
   
   row_r0$sim_data = list(epidemic_data)
+  row_r0$bias_r0 = row_r0$true_r0 - row_r0$mean_r0
+  row_r0$MAE_r0 = abs(row_r0$true_r0 - row_r0$mean_r0)
     
   return(row_r0)
 }
@@ -75,6 +77,9 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
   row_result <- data.frame(matrix(unlist(values_list), nrow = 1))
   names(row_result) <- col_names
   
+  row_result[paste0('bias_', param_name)] = row_result[,paste0('true_', param_name)] - row_result[paste0('mean_', param_name)]
+  row_result[paste0('MAE_', param_name)] = abs(row_result[,paste0('true_', param_name)] - row_result[paste0('mean_', param_name)])
+  
   return(row_result)
 }
 
@@ -109,7 +114,7 @@ GET_COVERAGE <- function(param_val, mcmc_vec){
 
 #' @export 
 INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
-                            PLOT_MCMC = TRUE) { #100  
+                            STORE_MCMC = TRUE) { #100  
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -128,7 +133,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
   result_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
   result_row$accept_rate = mcmc_output$accept_rate
     
-  if(PLOT_MCMC){
+  if(STORE_MCMC){
     result_row$r0_mcmc = list(r0_vec)
   }
   
@@ -139,7 +144,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
 # 2. SSE MODEL
 #*******************************************
 #' @export 
-INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, PLOT_MCMC = TRUE) {
+INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -159,7 +164,7 @@ INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, PLOT_MCMC = TRUE) {
   r0_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
   k_row = GET_INFER_K_ROW(k_val, k_vec)
   
-  if (PLOT_MCMC){
+  if (STORE_MCMC){
     r0_row$r0_mcmc = list(r0_vec)
     k_row$k_mcmc = list(k_vec) 
   }
@@ -174,7 +179,7 @@ INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, PLOT_MCMC = TRUE) {
 # 3. SSI MODEL
 #*******************************************
 #' @export 
-INFER_SSI <- function(r0_val, k_val, n_mcmc, PLOT_MCMC = FALSE){ #{40000) {
+INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = TRUE){ #{40000) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -190,7 +195,7 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, PLOT_MCMC = FALSE){ #{40000) {
   r0_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
   k_row = GET_INFER_K_ROW(k_val, k_vec)
   
-  if (PLOT_MCMC){
+  if (STORE_MCMC){
     r0_row$r0_mcmc = list(r0_vec)
     k_row$k_mcmc = list(k_vec) 
   }
@@ -205,16 +210,20 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, PLOT_MCMC = FALSE){ #{40000) {
 #**********************************************
 #* SSEB MODEL
 #* ********************************************
-INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
-                       num_days = 50, n_mcmc = 40000) {
+INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  epidemic_data = SIMULATE_EPI_SSEB(num_days = num_days, r0 = r0_val,
+  epidemic_data = SIMULATE_EPI_SSEB(r0 = r0_val,
                                 alpha = alpha_val, beta = beta_val)
   
+  while(sum(epidemic_data) < 30){
+    epidemic_data = SIMULATE_EPI_SSEB(r0 = r0_val,
+                                      alpha = alpha_val, beta = beta_val)
+  }
+  
   #MCMC
-  mcmc_output = MCMC_INFER_SSEB(epidemic_data, n_mcmc, PRIORS_USED)
+  mcmc_output = MCMC_INFER_SSEB(epidemic_data, n_mcmc)
   
   #Row result - parameters
   row_r0 = GET_INFER_R0_ROW(r0_val, mcmc_output$r0_vec, mcmc_output, epidemic_data)
@@ -229,7 +238,20 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
   FLAG_PARAM$beta = TRUE
   row_beta = GET_PARAM_INFERENCE(beta_val, mcmc_output$beta_vec, FLAG_PARAM)
   
+  #COMBINE
   result_row = cbind(row_r0, row_alpha, row_beta)
+  
+  #ACCEPTANCE RATES
+  result_row$accept_r0 = round(mcmc_output$list_accept_rates$accept_rate_r0, 3)
+  result_row$accept_alpha = round(mcmc_output$list_accept_rates$accept_rate_alpha, 3)
+  result_row$accept_beta = round(mcmc_output$list_accept_rates$accept_rate_beta, 3)
+  
+  if (STORE_MCMC){
+    result_row$r0_mcmc = list(mcmc_output$r0_vec)
+    result_row$alpha_mcmc = list(mcmc_output$alpha_vec)
+    result_row$beta_mcmc = list(mcmc_output$beta_vec)
+  }
+  
   
   return(result_row)
 }
@@ -239,12 +261,11 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, PRIORS_USED,
 #* SSIB 
 #************************************************
 
-INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc,
-                             num_days = 50) {
+INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
-  epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
+  epidemic_data = SIMULATE_EPI_SSIB(r0 = r0_val,
                                     a = a_val, b = b_val) 
   
   while(sum(epidemic_data) < 30){
@@ -292,6 +313,12 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc,
   result_row$accept_da = mcmc_output$accept_da
   #result_row$accept_da = list(mcmc_output$vec_accept_da)
   
+  if (STORE_MCMC){
+    result_row$r0_mcmc = list(r0_vec)
+    result_row$a_mcmc = list(a_vec)
+    result_row$b_mcmc = list(b_vec)
+  }
+  
   return(result_row)
 }
 
@@ -335,7 +362,7 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE)){
   mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
   lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
   upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
-  mean_accept_rate = mean(unlist(df_results['accept_rate']))
+  mean_accept_rate = mean(unlist(df_results['accept_r0']))
   MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
   bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
   sd = unlist(as.vector(df_results[paste0('sd_', param)]))
