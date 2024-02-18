@@ -151,8 +151,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
                                                      thinning_factor = 10, burn_in_pc = 0.2)){    
   
   #INITIALIASE
-  #r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
-  r0_start = param_starts[1]
+  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+  param_starts[1] = r0_start
+  beta_start = round(runif(1, 5, 15), 0)
+  param_starts[3] = beta_start
+  
   time = length(epidemic_data) 
   vec_min = c(0, 0, 1); count_accept = 0; 
   
