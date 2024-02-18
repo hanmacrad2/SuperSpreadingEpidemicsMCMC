@@ -225,8 +225,7 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
           col = COLOR_ALPHA, border = NA)
   
   #2. ADDITIONAL PLOTS
-  for (i in c(3:50)){
-    
+  for (i in c(1:length(df_results))){
     
     density_mcmc = density(unlist(df_results[paste0(param, '_mcmc')][i,]))
     scaled_dx = density_mcmc$y/max(density_mcmc$y)
@@ -239,20 +238,15 @@ PLOT_POSTERIOR_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COL
   }
   
   #3. PRIOR
-  #prior_xlim = c(limits$xlim[1] - 0.2, limits$xlim[2] + 0.2)
   prior_xlim = c(limits$xlim[1], limits$xlim[2])
   PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = prior_xlim, alpha = 0.3)
-  # x = seq(0, 6, by = 0.01)
-  # dx1 = dexp(x, rate = 1)
-  # dx2 = SCALE_PARAM(dx1)
-  # lines(x, dx2, col = "gray", lty = "dashed", lwd = 2)
   
   #PLOT TRUE
   segments(sim_val, 0, sim_val, 1, col = 'black', lwd = 2)
   
   #LEGEND
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
-  legend_list = c(paste0('Estimated Posteriors of ', param), prior_title)
+  legend_list = c(paste0('Estimated Posteriors of ', toTitleCase(param)), prior_title)
   GET_LEGEND(legend_list, COLOR_ALPHA)
   
   if(PDF){

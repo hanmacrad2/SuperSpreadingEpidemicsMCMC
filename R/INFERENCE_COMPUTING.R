@@ -60,7 +60,7 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
     generate_column_names("lower_ci", param_name),
     generate_column_names("upper_ci", param_name),
     generate_column_names("coverage", param_name),
-    generate_column_names("esize", param_name)
+    generate_column_names("eff_size_", param_name)
   )
   
   #Values; dataframe
@@ -186,6 +186,11 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = TRUE){ #{40000) {
   data_ssi = SIMULATE_EPI_SSI(r0 = r0_val, k = k_val)
   epidemic_data = data_ssi$epidemic_data
   
+  while(sum(epidemic_data)< 30){
+    data_ssi = SIMULATE_EPI_SSI(r0 = r0_val, k = k_val)
+    epidemic_data = data_ssi$epidemic_data
+  }
+  
   #MCMC
   mcmc_output = MCMC_INFER_SSI(epidemic_data, n_mcmc)
   r0_vec = mcmc_output$ssi_params_matrix[,1]
@@ -242,9 +247,9 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = TRUE) {
   result_row = cbind(row_r0, row_alpha, row_beta)
   
   #ACCEPTANCE RATES
-  result_row$accept_r0 = round(mcmc_output$list_accept_rates$accept_rate_r0, 3)
-  result_row$accept_alpha = round(mcmc_output$list_accept_rates$accept_rate_alpha, 3)
-  result_row$accept_beta = round(mcmc_output$list_accept_rates$accept_rate_beta, 3)
+  result_row$accept_rate_r0 = round(mcmc_output$list_accept_rates$accept_rate_r0, 3)
+  result_row$accept_rate_alpha = round(mcmc_output$list_accept_rates$accept_rate_alpha, 3)
+  result_row$accept_rate_beta = round(mcmc_output$list_accept_rates$accept_rate_beta, 3)
   
   if (STORE_MCMC){
     result_row$r0_mcmc = list(mcmc_output$r0_vec)
@@ -269,8 +274,7 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
                                     a = a_val, b = b_val) 
   
   while(sum(epidemic_data) < 30){
-    epidemic_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0_val,
-                                      a = a_val, b = b_val)
+    epidemic_data = SIMULATE_EPI_SSIB(r0 = r0_val, a = a_val, b = b_val)
   }
   
   #SSIB; pass in data
@@ -310,6 +314,7 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
   #SS Data
   result_row$ss_data = list(mcmc_output$ss_inf)
   result_row$ns_data = list(mcmc_output$ns_inf)
+  result_row$accept_rate = mcmc_output$accept_rate
   result_row$accept_da = mcmc_output$accept_da
   #result_row$accept_da = list(mcmc_output$vec_accept_da)
   
@@ -350,37 +355,47 @@ SIM_PERFORMANCE_R0 <- function(df_results){
 #* PERFORMANCE METRICS
 #* 
 #* **********************************
-SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE)){
-  
-  #Param
-  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
-  print(paste0('Performance metrics of ', param))
-  num_runs = length(df_results$true_r0)
-  
-  #Bias, MAE, coverage 
-  mean_est = mean(unlist(df_results[paste0('mean_', param)]))
-  mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
-  lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
-  upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
-  mean_accept_rate = mean(unlist(df_results['accept_r0']))
-  MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
-  bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
-  sd = unlist(as.vector(df_results[paste0('sd_', param)]))
-  coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
-  coverage_pc = sum(coverage)/num_runs
-  
-  #Results
-  print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
-  print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
-  print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 3)))
-  print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
-  print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
-  print(paste0('coverage: ', sum(coverage)))
-  print(paste0('% coverage: ', coverage_pc))
-  print(paste0('Accept rate (mean): ', round(mean_accept_rate, 3))) 
-  print(paste0(param, 'Effective Size (mean): ', round(mean_eff, 3)))
-  
-}
+SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB = FALSE){
+    
+    #Param
+    param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
+    print(paste0('Performance metrics of ', param))
+    num_runs = length(df_results$true_r0)
+    
+    #Bias, MAE, coverage 
+    mean_est = mean(unlist(df_results[paste0('mean_', param)]))
+    mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
+    lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
+    upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
+    MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
+    bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
+    sd = unlist(as.vector(df_results[paste0('sd_', param)]))
+    coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
+    coverage_pc = sum(coverage)/num_runs
+    
+    if(SSEB){
+      mean_accept_rate = mean(unlist(df_results['accept_r0']))
+      print(paste0('Accept rate r0: ', round(mean_accept_rate, 3))) 
+      
+      mean_accept_rate = mean(unlist(df_results['accept_beta']))
+      print(paste0('Accept rate beta: ', round(mean_accept_rate, 3))) 
+      
+      mean_accept_rate = mean(unlist(df_results['accept_alpha']))
+      print(paste0('Accept rate alpha: ', round(mean_accept_rate, 3))) 
+    }
+   
+    
+    #Results
+    print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
+    print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
+    print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 3)))
+    print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
+    print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
+    print(paste0('coverage: ', sum(coverage)))
+    print(paste0('% coverage: ', coverage_pc))
+    print(paste0(param, 'Effective Size (mean): ', round(mean_eff, 3)))
+    
+  }
 
 #ADD GELMAN.DIAG
 #gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))
