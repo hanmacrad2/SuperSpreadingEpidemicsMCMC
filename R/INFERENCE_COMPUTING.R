@@ -60,7 +60,7 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
     generate_column_names("lower_ci", param_name),
     generate_column_names("upper_ci", param_name),
     generate_column_names("coverage", param_name),
-    generate_column_names("eff_size_", param_name)
+    generate_column_names("eff_size", param_name)
   )
   
   #Values; dataframe
@@ -359,7 +359,7 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     
     #Param
     param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
-    print(paste0('Performance metrics of ', param))
+    print(paste0(param, ' Performance metrics'))
     num_runs = length(df_results$true_r0)
     
     #Bias, MAE, coverage 
@@ -374,17 +374,13 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     coverage_pc = sum(coverage)/num_runs
     
     if(SSEB){
-      mean_accept_rate = mean(unlist(df_results['accept_r0']))
-      print(paste0('Accept rate r0: ', round(mean_accept_rate, 3))) 
-      
-      mean_accept_rate = mean(unlist(df_results['accept_beta']))
-      print(paste0('Accept rate beta: ', round(mean_accept_rate, 3))) 
-      
-      mean_accept_rate = mean(unlist(df_results['accept_alpha']))
-      print(paste0('Accept rate alpha: ', round(mean_accept_rate, 3))) 
+      mean_accept_rate = mean(unlist(df_results[paste0('accept_rate_', param)]))
+      print(paste0('accept rate ', param, ':', round(mean_accept_rate, 3))) 
+    } else {
+      accept_rate = mean(unlist(as.vector(df_results['accept_rate'])))
+      print(paste0('accept rate: ', round(accept_rate, 3))) 
     }
    
-    
     #Results
     print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
     print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))

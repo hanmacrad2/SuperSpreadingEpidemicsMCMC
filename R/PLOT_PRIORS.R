@@ -2,8 +2,8 @@
 #* PLOT PRIORS - OVERLAPPING PRIOR ON FIGURES                       
 #*****************************
 
-PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,1),
-                            alpha = 0.2, LIMIT_PLOT = TRUE){ #0.4
+PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
+                            alpha = 0.2, LIMIT_PLOT = FALSE){ #0.4
   
   #PRIORS
   x_min = xlimits[1] #min(mcmc_vec) 
@@ -14,6 +14,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,1),
     #x_min = 2; x_max = 3.0
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dexp(x, 1)
+    y = y*ylimits[2]*0.75
     
   } else if (FLAG_PARAM$k){
     
@@ -21,6 +22,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,1),
     print(paste0('rate_k', rate_k))
     
     y = dexp(x, rate = rate_k)
+    y = y*1.5
     
   } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
     
