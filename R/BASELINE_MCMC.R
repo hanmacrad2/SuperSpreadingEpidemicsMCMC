@@ -217,16 +217,16 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   count_accept = 0
   
   #SIGMA - INITIALISE
-  sigmaX =  0.5*r0_start
+  sigma_i =  0.5*r0_start
   
   if (FLAGS_LIST$ADAPTIVE){
     
     #SIGMA
-    sigma_vec <- vector('numeric', mcmc_vec_size); sigma_vec[1] =  sigmaX;
+    sigma_vec <- vector('numeric', mcmc_vec_size); sigma_vec[1] =  sigma_i;
     #Other adaptive parameters
     delta = 1/(mcmc_inputs$target_accept_rate*(1-mcmc_inputs$target_accept_rate))
   } else {
-    sigma_vec = sigmaX
+    sigma_vec = sigma_i
   }
   
   #******************************
@@ -236,7 +236,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
     
     #****************************************************** s
     #r0 proposal
-    r0_dash <- r0 + rnorm(1, sd = sigmaX)
+    r0_dash <- r0 + rnorm(1, sd = sigma_i)
     
     if(r0_dash < 0){
       r0_dash = abs(r0_dash)
@@ -257,7 +257,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
       #Sigma (Adaptive)
       if (FLAGS_LIST$ADAPTIVE){
         accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
-        sigmaX =  sigmaX*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
+        sigma_i =  sigma_i*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
       }
     }
     
@@ -269,7 +269,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
       i_thin = i_thin + 1
       
       if (FLAGS_LIST$ADAPTIVE){
-        sigma_vec[i_thin] = sigmaX
+        sigma_vec[i_thin] = sigma_i
       }
     }
   }
