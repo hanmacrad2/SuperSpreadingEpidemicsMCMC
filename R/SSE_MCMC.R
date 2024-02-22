@@ -2,7 +2,7 @@
 
 #SIMULATE
 #' @export
-SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.8, #k = 0.16,
+SIMULATE_EPI_SSE <- function(num_days = 50, r0 = 2.0, k = 0.2, #k = 0.16, 0.8
                              shape_gamma = 6, scale_gamma = 1,
                              epi_data = c(0,0,0), SIM_DATA = TRUE,
                              FLAG_NEGBIN_PARAMATERISATION = list(param_mu = TRUE, param_prob = FALSE)) {
@@ -115,9 +115,9 @@ SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
 #********************************************************
 #' @export
 MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(),
-                           param_starts = c(1.0, 0.1), #Changed 08/01/24 c(1.0, 0.5)
-                           mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
-                                              thinning_factor = 10, burn_in_pc = 0.2),
+                           param_starts = c(2.0, 0.2), #Changed 08/01/24 c(1.0, 0.5)
+                           mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.234, #0.4, 
+                                              v0 = 100, thinning_factor = 10, burn_in_pc = 0.2),
                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
                                              PRIOR = TRUE, BURN_IN = TRUE)){    
   

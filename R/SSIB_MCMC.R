@@ -5,7 +5,7 @@
 #********************************************************
 
 SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
-                                data_start = c(3,3,0),
+                                data_start = c(3,2,1),
                              shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   
@@ -146,8 +146,9 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
-                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,3,0),
-                                  mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.4, v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
+                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
+                                  mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
+                                                     v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                      thinning_factor = 10, burn_in_pc = 0.2)){    
   
   #INITIALIASE
@@ -170,18 +171,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
   ssib_params_matrix[1,] <- param_starts; ssib_params = ssib_params_matrix[1,] 
   print(paste0('ssib_params', ssib_params))
   
-  #SSI - DATA AUGMENTATION PARAMS
+  #DATA - AUGMENTED 
   ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0)
   non_ss = epidemic_data - ss
-  #Starting from the truth
+  #Starting first time point from the truth
   non_ss[1] = data_start[2]
   ss[1] = data_start[3]
   ss_start = ss; ns_start = non_ss
-  
-  
-  ##DATA USED
-  #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
   data = list(non_ss, ss)
+  #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
   print('ss: '); print(ss); print('non_ss: '); print(non_ss)
   
   #SSI - DATA AUGMENTATION STORE
@@ -262,28 +260,33 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
     #***********************************
     #FOR EACH S_T
     for (myrep in 1:10){
-    data_dash = data
-    x = data[[1]] + data[[2]]
-    #PARAMS
-    r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
-    prob = (1 - a)/(a*b + 1 - a)
-    proposal_ss = rbinom(length(x), size = x, prob = prob)
-    
-    data_dash[[2]] = proposal_ss
-    data_dash[[1]] =  x - proposal_ss #n_t = x_t - s_t
-    data_dash[[1]][1]= data[[1]][1]; data_dash[[2]][1]= data[[2]][1]
-    
-    logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params) 
-    log_accept_ratio = logl_new - log_like - sum(dbinom(proposal_ss, size = x, prob = prob, log = TRUE)) + 
-     sum(dbinom(data[[2]], size = x, prob = prob, log = TRUE))
       
-      #METROPOLIS ACCEPTANCE STEP
-      if(log(runif(1)) < log_accept_ratio) {
-        data <- data_dash
-        log_like <- logl_new
-        accept_da = accept_da + 1
-        #vec_accept_da[t] =  vec_accept_da[t] + 1
-      }
+      data_dash = data
+      I_t = data[[1]] + data[[2]] #x = 'epidemic data'
+      
+      #PARAMS
+      r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
+      prob = (1 - a)/(a*b + 1 - a)
+      proposal_ss = rbinom(length(I_t), size = I_t, prob = prob) #Binomial distribution; from the total infections
+      
+      data_dash[[2]] = proposal_ss
+      data_dash[[1]] =  I_t - proposal_ss #n_t = I_t - s_t
+      
+      #Keep first data == truth
+      data_dash[[1]][1]= data[[1]][1]
+      data_dash[[2]][1]= data[[2]][1]
+      
+      logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params) 
+      log_accept_ratio = logl_new - log_like - sum(dbinom(proposal_ss, size = I_t, prob = prob, log = TRUE)) + 
+       sum(dbinom(data[[2]], size = I_t, prob = prob, log = TRUE))
+        
+        #METROPOLIS ACCEPTANCE STEP
+        if(log(runif(1)) < log_accept_ratio) {
+          data <- data_dash
+          log_like <- logl_new
+          accept_da = accept_da + 1
+          #vec_accept_da[t] =  vec_accept_da[t] + 1
+        }
     }
       
       #Store
@@ -295,7 +298,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
   
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
-  accept_da = 100*accept_da/(n_mcmc-1)
+  accept_da = (100*accept_da)/((n_mcmc-1)*10)
   
   #Return a, acceptance rate
   return(list(ssib_params_matrix = ssib_params_matrix,
