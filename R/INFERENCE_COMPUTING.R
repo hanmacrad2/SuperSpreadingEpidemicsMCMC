@@ -20,8 +20,8 @@ GET_INFER_R0_ROW <- function(r0_val, r0_vec, mcmc_output, epidemic_data){
   eff_size_r0 = unlist(effectiveSize(as.mcmc(r0_vec)))[[1]])
   
   row_r0$sim_data = list(epidemic_data)
-  row_r0$bias_r0 = row_r0$true_r0 - row_r0$mean_r0
-  row_r0$MAE_r0 = abs(row_r0$true_r0 - row_r0$mean_r0)
+  row_r0$bias_r0 = row_r0$mean_r0 - row_r0$true_r0
+  row_r0$MAE_r0 = abs(row_r0$mean_r0 - row_r0$true_r0)
     
   return(row_r0)
 }
@@ -36,6 +36,10 @@ GET_INFER_K_ROW <- function(k_val, k_vec){
     upper_ci_k = get_upper_ci(k_vec),
     coverage_k = GET_COVERAGE(k_val, k_vec),
     eff_size_k = unlist(effectiveSize(as.mcmc(k_vec)))[[1]])
+  
+  #Bias
+  row_k$bias_k = row_k$mean_k - row_k$true_k
+  row_k$MAE_k = abs(row_k$mean_k - row_k$true_k)
   
   return(row_k)
 }
@@ -77,8 +81,8 @@ GET_PARAM_INFERENCE <- function(true_val, param_vec, FLAG_PARAM){
   row_result <- data.frame(matrix(unlist(values_list), nrow = 1))
   names(row_result) <- col_names
   
-  row_result[paste0('bias_', param_name)] = row_result[,paste0('true_', param_name)] - row_result[paste0('mean_', param_name)]
-  row_result[paste0('MAE_', param_name)] = abs(row_result[,paste0('true_', param_name)] - row_result[paste0('mean_', param_name)])
+  row_result[paste0('bias_', param_name)] = row_result[,paste0('mean_', param_name)] - row_result[paste0('true_', param_name)]
+  row_result[paste0('MAE_', param_name)] = abs(row_result[,paste0('mean_', param_name)] - row_result[paste0('true_', param_name)])
   
   return(row_result)
 }

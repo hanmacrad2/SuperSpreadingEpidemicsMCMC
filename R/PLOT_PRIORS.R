@@ -3,7 +3,7 @@
 #*****************************
 
 PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
-                            alpha = 0.2, LIMIT_PLOT = FALSE){ #0.4
+                            alpha = 0.2){ #0.4
   
   #PRIORS
   x_min = xlimits[1] #min(mcmc_vec) 
@@ -14,7 +14,6 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
     #x_min = 2; x_max = 3.0
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dexp(x, 1)
-    y = y*ylimits[2]*0.75
     
   } else if (FLAG_PARAM$k){
     
@@ -22,7 +21,6 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
     print(paste0('rate_k', rate_k))
     
     y = dexp(x, rate = rate_k)
-    y = y*1.5
     
   } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
     
@@ -41,16 +39,10 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
   #PLOT
   col_grey = rgb(0.5, 0.5, 0.5, alpha = alpha) 
   
-  if(LIMIT_PLOT){
-    scaled_y = SCALE_PARAM(y)
-    lines(x, scaled_y, type = 'l', lty = 1, col = col_grey, ylim = c(0, 1)) #ylim = c(0, max(y)))
-    polygon(c(x, rev(x)), c(scaled_y, rep(0, length(scaled_y))),
-            col = col_grey, border = NA)
-  } else {
-    lines(x, y, type = 'l', lty = 1, col = col_grey)
-    polygon(c(x, rev(x)), c(y, rep(0, length(y))),
-            col = col_grey, border = NA)
-  }
+  lines(x, y, type = 'l', lty = 1, col = col_grey)
+  polygon(c(x, rev(x)), c(y, rep(0, length(y))),
+          col = col_grey, border = NA)
+
 }
 
 

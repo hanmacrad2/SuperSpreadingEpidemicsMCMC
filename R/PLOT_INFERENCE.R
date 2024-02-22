@@ -4,9 +4,9 @@
 
 #**********************************
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                  cex = 1.75, PDF = TRUE, GT_VAL = 10, inset = 0.485, 
+                                  cex = 1.75, PDF = TRUE, GT_VAL = 10, inset = 0.49, 
                                    FLAG_PARAM = GET_PARAM(r0 = TRUE), 
-                                  FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE)){
+                                  FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE), FIXED = FALSE){
   
   'Plot computed Inference results for all models '
   #PARAMS 
@@ -53,6 +53,12 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
     upper_ci_subset <- unlist(df_subset[paste0('upper_ci_', true_param)])
     lower_ci_subset <- unlist(df_subset[paste0('lower_ci_', true_param)])
     colour <- selected_colors[i]
+    
+    if(FIXED){
+      true_subset <- seq_along(mean_subset)
+      list_labels$xlab = 'iteration'
+      x_lim = c(0, 1000) #length(true_total))
+    }
     
     if (i == 1) {
       
@@ -182,85 +188,10 @@ SCALE_PARAM <- function(vec_param){
 }
 
 #****************
-#* POSTERIOR & PRIOR PLOTS 
-PLOT_POSTERIOR_PRIOR_V0 <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
-                                 xlimits, RESULTS_FOLDER, sim_val, main_font = 1.5,
-                                 i = 2, cex = 1.8, alpha = 0.2, PDF = TRUE){
-  
-  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))] 
-  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
-  COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
-  limits = list(xlim = xlimits, ylim = c(0,1)) #GET_LIMITS(FLAG_PARAM, model)
-  
-  #PLOT
-  plot_folder = paste0(RESULTS_FOLDER, '/plots/')
-  create_folder(plot_folder)
-  
-  if(PDF){
-    time_stamp = GET_CURRENT_TIME_STAMP()
-    pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
-    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
-  }
-  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
-  
-  #1. DENSITY EXTRACT 
-  density_mcmc = density(unlist(df_results[paste0(param, '_mcmc')][2,]))
-  scaled_dx = density_mcmc$y/max(density_mcmc$y)
-  #limits = list(xlim = c((min(density_mcmc$x)- 0.2), (max(density_mcmc$x) + 0.2)), ylim = c(0,1))
-  
-  plot(density_mcmc$x, density_mcmc$y, #scaled_dx,
-       type = 'l', 
-       col = COLOR_ALPHA,
-       #col =  col.alpha(MODEL_COLOR, alpha = 0.15), 
-       xlim = limits$xlim,
-       xlab = list_labels$lab, 
-       ylab = 'Estimated Posterior Density',
-       cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) 
-  title(main = list(list_labels$main_inf, cex = 1.9, font = main_font))
-  
-  #POLYGON
-  x = density_mcmc$x; y = density_mcmc$y #scaled_dx
-  polygon(c(x, rev(x)), c(y, rep(0, length(y))),
-          col = COLOR_ALPHA, border = NA)
-  
-  #2. ADDITIONAL PLOTS
-  num_reps =  nrow(df_results); print(paste0('N reps: ', num_reps))
-  for (i in c(1:num_reps)){
-    
-    density_mcmc = density(unlist(df_results[paste0(param, '_mcmc')][i,]))
-    scaled_dx = density_mcmc$y/max(density_mcmc$y)
-    lines(density_mcmc$x, density_mcmc$y, #scaled_dx,
-          type = 'l', col = MODEL_COLOR)
-    #POLYGON FILL 
-    x = density_mcmc$x; y = density_mcmc$y #scaled_dx
-    polygon(c(x, rev(x)), c(y, rep(0, length(y))),
-            col = COLOR_ALPHA, border = NA)
-  }
-  
-  #3. PRIOR
-  prior_xlim = c(limits$xlim[1], limits$xlim[2])
-  PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = prior_xlim, alpha = 0.3)
-  
-  #PLOT TRUE
-  segments(sim_val, 0, sim_val, 1, col = 'black', lwd = 2)
-  
-  #LEGEND
-  prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
-  legend_list = c(paste0('Estimated Posteriors of ', toTitleCase(param)), prior_title)
-  GET_LEGEND(legend_list, COLOR_ALPHA)
-  
-  if(PDF){
-    dev.off()
-  }
-  
-}
-
-
-#PLOT HIST
+#* POSTERIOR & PRIOR PLOTS + HISTOGRAMS
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
-                            n_repeats = 25, main_font = 1.5,
+                            n_repeats = 25, main_font = 1.5, legend_location = 'topright',
                             cex = 1.8, alpha = 0.2, PDF = TRUE){
   
   #MODEL
@@ -269,29 +200,16 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
+  COLOR_BODER = GET_COLOR_ALPHA(MODEL_COLOUR, 0.4)
   mcmc_vec1 = unlist(df_results[paste0(param, '_mcmc')][1,])
   
   #*********************
-  #LIMITS
-  # x_min = min(unlist(df_results[paste0(param, '_mcmc')]));
-  # x_max = max(unlist(df_results[paste0(param, '_mcmc')]));
-  # xlimits = c(x_min, x_max)
-  
-  #GET Y LIMITS
-  #max_counts <- numeric(num_reps)
-  # for (i in c(1:num_reps)){
-  #   mcmc_vec = unlist(df_results[paste0(param, '_mcmc')][i,])
-  #   max_counts[i] <- max(hist(mcmc_vec, plot = FALSE)$counts)
-  # }
-  # Set the y-axis limit to the maximum y-value among all histograms
-  #ylimits <- c(0, max(max_counts))
-  #*************************
-  
-  #PLOT
-  plot_folder = paste0(RESULTS_FOLDER, '/plots/')
-  create_folder(plot_folder)
   
   if(PDF){
+    
+    #FOLDER
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
     pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
@@ -318,7 +236,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
          xlim = xlimits, ylim = ylimits,
          xlab = list_labels$lab, 
          ylab = 'Estimated Posterior Density',
-         border = NA,
+         border = COLOR_BODER, #NA,
          cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5,
          add = TRUE)
     
@@ -334,7 +252,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   #LEGEND
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
   legend_list = c(paste0('Estimated Posteriors of ', toTitleCase(param)), prior_title)
-  GET_LEGEND(legend_list, COLOR_ALPHA)
+  GET_LEGEND(legend_list, COLOR_ALPHA, legend_location)
   
   if(PDF){
     dev.off()
@@ -356,7 +274,8 @@ GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha = 0.2){
   return(COLOR_ALPHA)
 }
 
-GET_LEGEND <- function(legend_list, COLOR_ALPHA, legend_location = 'topright'){
+GET_LEGEND <- function(legend_list, COLOR_ALPHA,
+                       legend_location = 'topright'){
   
   #COLOUR
   COLOR_ALPHA = GET_COLOR_ALPHA(COLOR_ALPHA, alpha = 0.8)
