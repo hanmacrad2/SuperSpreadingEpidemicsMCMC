@@ -192,7 +192,7 @@ SCALE_PARAM <- function(vec_param){
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
                             n_repeats = 25, main_font = 1.5, legend_location = 'topright',
-                            cex = 1.8, alpha = 0.2, PDF = TRUE){
+                            inset = 0.2, cex = 1.8, alpha = 0.2, border_alpha = NA, PDF = TRUE){
   
   #MODEL
   num_reps =  nrow(df_results); print(paste0('N reps: ', num_reps))
@@ -200,7 +200,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
-  COLOR_BODER = GET_COLOR_ALPHA(MODEL_COLOUR, 0.4)
+  COLOR_BODER = GET_COLOR_ALPHA(MODEL_COLOUR, 0.3)
   mcmc_vec1 = unlist(df_results[paste0(param, '_mcmc')][1,])
   
   #*********************
@@ -212,12 +212,12 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
     create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
-    pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
+    pdf(paste0(plot_folder, pdf_file), width = 12.5, height = 7.0) #13, 8
   }
   par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
   
-  #HIST
-  #ylimits = c(0,20)
+  #HISTOGRAM
+  #title = bquote(.(list_labels$main_inf), ~ '. N repeats = ' ~.(n_repeats))
   hist(mcmc_vec1, freq = FALSE,
        col = COLOR_ALPHA,
        xlim = xlimits, ylim = ylimits,
@@ -225,7 +225,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
        ylab = 'Estimated Posterior Density',
        border = NA,
        cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5,
-       main = list(list_labels$main_inf, cex = 1.9, font = main_font))
+       main = list(list_labels$main_inf, cex = 1.9, font = main_font)) 
   
   #HISTOGRAMS ADDITIONAL 
 
@@ -236,7 +236,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
          xlim = xlimits, ylim = ylimits,
          xlab = list_labels$lab, 
          ylab = 'Estimated Posterior Density',
-         border = COLOR_BODER, #NA,
+         border = border_alpha, #NA,
          cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5,
          add = TRUE)
     
@@ -251,13 +251,36 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   
   #LEGEND
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
-  legend_list = c(paste0('Estimated Posteriors of ', toTitleCase(param)), prior_title)
-  GET_LEGEND(legend_list, COLOR_ALPHA, legend_location)
+  legend_list = c(list_labels$legend_posterior, prior_title,
+                  paste0('True Simulated Value: ', sim_val))
+  GET_LEGEND(legend_list, COLOR_ALPHA, legend_location, inset)
   
   if(PDF){
     dev.off()
   }
   
+}
+
+#LEGEND FUNCTION
+GET_LEGEND <- function(legend_list, COLOR_ALPHA,
+                       legend_location = 'topright', inset = 0.25){
+  
+  #COLOUR
+  COLOR_ALPHA = GET_COLOR_ALPHA(COLOR_ALPHA, alpha = 0.8)
+  
+  #Legend
+  num_conds = length(legend_list)
+  pch_list = rep(19, num_conds)
+  legend(legend_location, #x = "topleft", y = "topleft", #"center", legend_list,
+         legend_list,
+         cex = 1.1,
+         inset=c(-inset,0),
+         col = c(COLOR_ALPHA, 'gray', 'black'),
+         lwd = rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
+         lty = rep(1, num_conds), #c(1, 1),
+         #pch = pch_list, #c(NA, pch_list, NA, NA, NA),
+         text.font = 1.8, #1.45
+         bty = "n")
 }
 
 
@@ -274,23 +297,3 @@ GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha = 0.2){
   return(COLOR_ALPHA)
 }
 
-GET_LEGEND <- function(legend_list, COLOR_ALPHA,
-                       legend_location = 'topright'){
-  
-  #COLOUR
-  COLOR_ALPHA = GET_COLOR_ALPHA(COLOR_ALPHA, alpha = 0.8)
-  
-  #Legend
-  num_conds = length(legend_list)
-  pch_list = rep(19, num_conds)
-  legend(legend_location, #x = "topleft", y = "topleft", #"center", legend_list,
-         legend_list,
-         cex = 1.1,
-         #inset=c(-inset,0),
-         col = c(COLOR_ALPHA, 'gray'),
-         lwd = rep(3, num_conds),
-         lty = rep(1, num_conds), #c(1, 1),
-         #pch = pch_list, #c(NA, pch_list, NA, NA, NA),
-         text.font = 1.8, #1.45
-         bty = "n")
-}
