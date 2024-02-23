@@ -162,7 +162,7 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
 PLOT_SIGMA <- function(sigma_vec, cex = 1.8){
   
   'Plot adaptive sigma. *Need to fix in write up'
-  sigma_vec = sigma_vec[2:length(sigma_vec)]
+  #sigma_vec = sigma_vec[2:length(sigma_vec)]
   label_sigma = bquote(paste( "Adaptive ", italic(sigma))) 
     
   plot(seq_along(sigma_vec), sigma_vec, 

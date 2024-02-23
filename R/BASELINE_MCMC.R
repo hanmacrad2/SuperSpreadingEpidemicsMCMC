@@ -175,7 +175,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
                                                   THIN = TRUE, BURN_IN = TRUE),
                                 mcmc_inputs = list(target_accept_rate = 0.4, thinning_factor = 10, #r0_start = 1.0, #1.2 changed 24/12/23
-                                                      burn_in_pc = 0.2)) {
+                                                      burn_in_pc = 0.2), B = 500) {
   
   'Returns MCMC samples of the reproduction number of the data
   and acceptance rates'
@@ -217,7 +217,7 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   count_accept = 0
   
   #SIGMA - INITIALISE
-  sigma_i =  0.5*r0_start
+  sigma_i =  0.25 #*r0_start
   
   if (FLAGS_LIST$ADAPTIVE){
     
@@ -257,7 +257,8 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
       #Sigma (Adaptive)
       if (FLAGS_LIST$ADAPTIVE){
         accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
-        sigma_i =  sigma_i*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
+        sigma_i =  sigma_i*exp(delta/max(1,1+i-B)*(accept_prob - mcmc_inputs$target_accept_rate))
+        #sigma_i =  sigma_i*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
       }
     }
     

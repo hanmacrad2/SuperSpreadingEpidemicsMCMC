@@ -75,18 +75,18 @@ PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
   }
   
   #PRIORS
-  if(PRIORS$EXP){
-    mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
-    xseq_r0 = seq(0, 3, length.out = 500)
-    dr0e = dexp(xseq_r0, 1) #list_priors$r0[1])
-    lines(xseq_r0, dr0e, type = 'l', lwd = 2)
-    
-  } else if(PRIORS$UNIF){
-    mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
-    xseq_r0 = seq(0, 15, length.out = 1000)
-    dr0e = dunif(xseq_r0, min = 0, max = 10) #list_priors$r0[1])
-    lines(xseq_r0, dr0e, type = 'l', lwd = 2)
-  }
+  # if(PRIORS$EXP){
+  #   mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
+  #   xseq_r0 = seq(0, 3, length.out = 500)
+  #   dr0e = dexp(xseq_r0, 1) #list_priors$r0[1])
+  #   lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+  #   
+  # } else if(PRIORS$UNIF){
+  #   mr0_prior = 'exp(1)' #paste0('exp(', list_priors$r0[1], ')')
+  #   xseq_r0 = seq(0, 15, length.out = 1000)
+  #   dr0e = dunif(xseq_r0, min = 0, max = 10) #list_priors$r0[1])
+  #   lines(xseq_r0, dr0e, type = 'l', lwd = 2)
+  # }
   
   #Results
   df_results <- data.frame(
