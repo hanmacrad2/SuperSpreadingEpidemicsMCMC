@@ -8,7 +8,7 @@
 #' 
 PLOT_BASELINE_MCMC <- function(epidemic_data, mcmc_output,
                                RESULTS_FOLDER = '~/Github/computing/mcmc/Baseline/',
-                               n_mcmc = 128000, r0_sim = 2.0, true_loglike = 0, cex = 1.8,
+                               n_mcmc = 100000, r0_sim = 2.0, true_loglike = 0, cex = 1.8,
                                   PDF = TRUE, ADAPTIVE = TRUE,
                                   PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE)) { #sim_data, mcmc_output, r0_sim, time_elap, seed_count, model_type){
   #MODEL PARAMS

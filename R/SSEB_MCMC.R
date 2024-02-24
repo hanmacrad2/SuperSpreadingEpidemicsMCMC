@@ -278,12 +278,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
       alpha <- alpha_dash
       list_accept_counts$count_accept1 = list_accept_counts$count_accept1 + 1
       log_like = logl_new
-      
-      #Sigma (Adaptive)
-      if (FLAGS_LIST$ADAPTIVE){
-        accept_prob = min(1, exp(log_accept_ratio))
-        sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-      }
+    }
+    
+    #Sigma (Adaptive)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma_alpha =  sigma_alpha*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #************************************************************************ Only if (b > 0)
@@ -303,11 +303,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
       log_like = logl_new
       list_accept_counts$count_accept_r0 = list_accept_counts$count_accept_r0 + 1
       
-      #Sigma (Adpative)
-      if (FLAGS_LIST$ADAPTIVE){
-        accept_prob = min(1, exp(log_accept_ratio))
-        sigma_r0 =  sigma_r0*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-      }
+    }
+    
+    #Sigma (Adpative)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma_r0 =  sigma_r0*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #************************************************************************
@@ -330,12 +331,12 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
       beta <- beta_dash
       log_like <- logl_new
       list_accept_counts$count_accept3 = list_accept_counts$count_accept3 + 1
-      
-      #Sigma (Adpative)
-      if (FLAGS_LIST$ADAPTIVE){
-        accept_prob = min(1, exp(log_accept_ratio))
-        sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
-      }
+    }
+    
+    #Sigma (Adpative)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio))
+      sigma_beta =  sigma_beta*exp(delta/(1+i)*(accept_prob - mcmc_inputs$alpha_star))
     }
     
     #*****************************************************

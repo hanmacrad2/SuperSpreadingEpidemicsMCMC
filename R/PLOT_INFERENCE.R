@@ -192,7 +192,8 @@ SCALE_PARAM <- function(vec_param){
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
                             n_repeats = 25, main_font = 1.5, legend_location = 'topright',
-                            inset = 0.2, cex = 1.8, alpha = 0.2, border_alpha = NA, PDF = TRUE){
+                            inset = 0.2, cex = 1.8, true_height = 0.5, alpha = 0.2, 
+                            border_alpha = NA, PDF = TRUE){
   
   #MODEL
   num_reps =  nrow(df_results); print(paste0('N reps: ', num_reps))
@@ -247,12 +248,14 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   
   #PLOT TRUE
   max_y = ylimits[2]
-  segments(sim_val, 0, sim_val, max_y, col = 'black', lwd = 2)
+  segments(sim_val, 0, sim_val, max_y-true_height, col = 'black', lwd = 1.85) #2
   
   #LEGEND
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
   legend_list = c(list_labels$legend_posterior, prior_title,
                   paste0('True Simulated Value: ', sim_val))
+  #legend_list = c('alpha', prior_title,
+  #                paste0('True Simulated Value: ', sim_val))
   GET_LEGEND(legend_list, COLOR_ALPHA, legend_location, inset)
   
   if(PDF){

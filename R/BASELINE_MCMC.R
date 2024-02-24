@@ -253,13 +253,13 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
       r0 <- r0_dash
       count_accept = count_accept + 1
       log_likelihood = loglike_new
-      
-      #Sigma (Adaptive)
-      if (FLAGS_LIST$ADAPTIVE){
-        accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
-        sigma_i =  sigma_i*exp(delta/max(1,1+i-B)*(accept_prob - mcmc_inputs$target_accept_rate))
-        #sigma_i =  sigma_i*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
-      }
+    }
+    
+    #Sigma (Adaptive)
+    if (FLAGS_LIST$ADAPTIVE){
+      accept_prob = min(1, exp(log_accept_ratio)) #Acceptance PROB = MIN(1, EXP(ACCPET_PROB))
+      #sigma_i =  sigma_i*exp(delta/max(1,1+i-B)*(accept_prob - mcmc_inputs$target_accept_rate))
+      sigma_i =  sigma_i*exp(delta/(1+i)*(accept_prob - mcmc_inputs$target_accept_rate))
     }
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)

@@ -99,7 +99,9 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist = bquote(paste(italic(alpha), " Posterior. ", .(model)~ "model")),
                        main_hist_prior = bquote(paste(italic(alpha), " Posterior. Prior: Beta(2,2)")),
                        main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated = 0.5")),
-                       main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")))
+                       main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")),
+                       #legend_posterior = bquote(paste("Estimated Posteriors of " ~ italic(alpha) ~ '. N = 1000')),
+                       legend_posterior = expression(paste("Estimated Posteriors of  ", alpha, " . N = 1000")))
     
   } else if (FLAG_PARAM$beta){
     list_labels = list(lab = expression(paste(italic(beta))), 
