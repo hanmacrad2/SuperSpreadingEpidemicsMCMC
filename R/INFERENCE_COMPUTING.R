@@ -117,8 +117,8 @@ GET_COVERAGE <- function(param_val, mcmc_vec){
 #**************************************************************
 
 #' @export 
-INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
-                            STORE_MCMC = TRUE) { #100  
+INFER_BASELINE  <- function(r0_val, n_mcmc, PRIORS_USED,
+                            STORE_MCMC = TRUE, lt_val = 20) { #100  
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -131,7 +131,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, lt_val = 20,
   }
   
   #MCMC
-  mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc)
+  mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc, PRIORS_USED = PRIORS_USED)
   r0_vec = mcmc_output$r0_vec
   
   result_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)

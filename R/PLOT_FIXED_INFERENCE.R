@@ -4,7 +4,7 @@
 
 PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
                                    num_days = 50, cex = 1.75, 
-                                   PDF = TRUE, GT = FALSE, GT_VAL = 10, inset = 0.46, #0.46 for non r0 
+                                   PDF = TRUE, GT = TRUE, GT_VAL = 30, inset = 0.46, #0.46 for non r0 
                                    INCLUDE_INFS_5 = FALSE,
                                    PRIORS = list(EXP = TRUE,
                                                  GAMMA = FALSE, UNIF = FALSE, BETA = FALSE, GAMMA_B = FALSE),
@@ -92,7 +92,7 @@ PLOT_FIXED_INFERENCE <- function(df_results, COMP_FOLDER, fig_num = '1',
            main = "", xlab = xlab, ylab = ylab,
            xlim = x_lim, ylim = y_lim,
            col = colour, pch = 16, 
-           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
+           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex) #cex = cex text.font = 4.0,
       title(main = list(titleX, cex = 2.5, font = 3.0))
       
     } else {

@@ -67,7 +67,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
            xlab = list_labels$xlab, ylab = list_labels$ylab,
            xlim = x_lim, ylim = y_lim,
            col = colour, pch = 16, 
-           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = 2.5) #cex = cex text.font = 4.0,
+           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex) #cex = cex text.font = 4.0,
       title(main = list(list_labels$main_inf, cex = 2.5, font = 3.0))
       
     } else {
@@ -191,7 +191,7 @@ SCALE_PARAM <- function(vec_param){
 #* POSTERIOR & PRIOR PLOTS + HISTOGRAMS
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
-                            n_repeats = 25, main_font = 1.5, legend_location = 'topright',
+                            n_repeats = 1000, main_font = 1.5, legend_location = 'topright',
                             inset = 0.2, cex = 1.8, true_height = 0.5, alpha = 0.2, 
                             border_alpha = NA, PDF = TRUE){
   
