@@ -192,7 +192,7 @@ SCALE_PARAM <- function(vec_param){
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
                             n_repeats = 1000, main_font = 1.5, legend_location = 'topright',
-                            inset = 0.2, cex = 1.8, true_height = 0.5, alpha = 0.2, 
+                            inset = 0.2, cex = 1.8, bar_height = 20, true_height = 0.5, alpha = 0.2, 
                             border_alpha = NA, PDF = TRUE){
   
   #MODEL
@@ -214,8 +214,9 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
     pdf(paste0(plot_folder, pdf_file), width = 12.5, height = 7.0) #13, 8
+    par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
   }
-  par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
+ 
   
   #HISTOGRAM
   #title = bquote(.(list_labels$main_inf), ~ '. N repeats = ' ~.(n_repeats))
@@ -248,7 +249,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   
   #PLOT TRUE
   max_y = ylimits[2]
-  segments(sim_val, 0, sim_val, max_y-true_height, col = 'black', lwd = 1.85) #2
+  segments(sim_val, 0, sim_val, bar_height, col = 'black', lwd = 1.85) #2 #max_y-true_height
   
   #LEGEND
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
@@ -256,7 +257,11 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                   paste0('True Simulated Value: ', sim_val))
   #legend_list = c('alpha', prior_title,
   #                paste0('True Simulated Value: ', sim_val))
-  GET_LEGEND(legend_list, COLOR_ALPHA, legend_location, inset)
+  
+  if(PDF){
+    GET_LEGEND(legend_list, COLOR_ALPHA, legend_location, inset)
+  }
+
   
   if(PDF){
     dev.off()

@@ -88,7 +88,7 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist_prior = bquote(paste(italic(R[0]), " Posterior. Prior: Exponential(1)")),
                        main_mean_sim = bquote(paste(italic(R[0]), " Cumulative mean. Simulated = 2.0")), #value 
                        main_mean0 = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")),
-                       legend_posterior = expression(paste('Estimated Posteriors of R'[0], '. N = 1000')))
+                       legend_posterior = expression(paste('SSIB Model - Estimated Posteriors of R'[0], ' N = 1000')))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 

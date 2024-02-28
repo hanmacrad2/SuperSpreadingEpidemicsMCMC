@@ -347,8 +347,8 @@ SIM_PERFORMANCE_R0 <- function(df_results){
   print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
   print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
   print(paste0('mean sd: ', round(mean(df_results$sd_r0), 3)))
-  print(paste0('coverage: ', sum(df_results$coverage_r0)))
-  print(paste0('% coverage: ', sum(df_results$coverage_r0)/num_runs))
+  print(paste0('coverage: ', sum(df_results$coverage)))
+  print(paste0('% coverage: ', sum(df_results$coverage)/num_runs))
   
   #return(df_results)
   
@@ -375,7 +375,7 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
     sd = unlist(as.vector(df_results[paste0('sd_', param)]))
     coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
-    coverage_pc = sum(coverage)/num_runs
+    coverage_pc = 100*(sum(coverage)/num_runs)
     
     if(SSEB){
       mean_accept_rate = mean(unlist(df_results[paste0('accept_rate_', param)]))
