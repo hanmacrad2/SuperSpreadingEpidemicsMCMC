@@ -147,6 +147,7 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
                                   param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
+                            rep_da = 50, 
                                   mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
                                                      v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                      thinning_factor = 10, burn_in_pc = 0.2)){    
@@ -259,7 +260,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
     #DATA AUGMENTATION
     #***********************************
     #FOR EACH S_T
-    for (myrep in 1:10){
+    for (myrep in 1:rep_da){
       
       data_dash = data
       I_t = data[[1]] + data[[2]] #x = 'epidemic data'
@@ -267,8 +268,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
       #PARAMS
       r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
       prob = (1 - a)/(a*b + 1 - a)
-      proposal_ss = rbinom(length(I_t), size = I_t, prob = prob) #Binomial distribution; from the total infections
-      
+      q =  (data[[2]]/pmax(I_t,1) + prob)/2 #for lambda = 1
+      proposal_ss = rbinom(length(I_t), size = I_t, prob = q) #Binomial distribution; from the total infections
+      q2 = (proposal_ss/pmax(I_t,1) + prob)/2 #prob is the same as a is the same 
+        
       data_dash[[2]] = proposal_ss
       data_dash[[1]] =  I_t - proposal_ss #n_t = I_t - s_t
       
@@ -277,8 +280,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
       data_dash[[2]][1]= data[[2]][1]
       
       logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params) 
-      log_accept_ratio = logl_new - log_like - sum(dbinom(proposal_ss, size = I_t, prob = prob, log = TRUE)) + 
-       sum(dbinom(data[[2]], size = I_t, prob = prob, log = TRUE))
+      log_accept_ratio = logl_new - log_like -  sum(dbinom(proposal_ss, size = I_t, prob = q, log = TRUE)) + 
+        sum(dbinom(data[[2]], size = I_t, prob = q2, log = TRUE))
         
         #METROPOLIS ACCEPTANCE STEP
         if(log(runif(1)) < log_accept_ratio) {
@@ -298,7 +301,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED
   
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
-  accept_da = (100*accept_da)/((n_mcmc-1)*10)
+  accept_da = (100*accept_da)/((n_mcmc-1)*rep_da)
   
   #Return a, acceptance rate
   return(list(ssib_params_matrix = ssib_params_matrix,
