@@ -319,13 +319,14 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
   result_row$ss_data = list(mcmc_output$ss_inf)
   result_row$ns_data = list(mcmc_output$ns_inf)
   result_row$accept_rate = mcmc_output$accept_rate
-  result_row$accept_da = mcmc_output$accept_da
+  #result_row$accept_da = mcmc_output$accept_da
   #result_row$accept_da = list(mcmc_output$vec_accept_da)
   
   if (STORE_MCMC){
     result_row$r0_mcmc = list(r0_vec)
     result_row$a_mcmc = list(a_vec)
     result_row$b_mcmc = list(b_vec)
+    result_row$log_like_vec = list(mcmc_output$log_like_vec)
   }
   
   return(result_row)
