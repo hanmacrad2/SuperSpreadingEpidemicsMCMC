@@ -210,6 +210,11 @@ get_ci_matrix <- function(mcmc_matrix, level = 0.95){
   return(list(vec_lower = vec_lower, vec_upper = vec_upper))
 }
 
+colMedians <- function(matrix_values) {
+  apply(matrix_values, 2, median)
+}
+
+#TIME 
 #CURRENT DATE TIME FOLDER
 GET_FOLDER_TIME_STAMP <- function(folder_type){
   

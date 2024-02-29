@@ -42,7 +42,7 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
 
 #DATA SIMULATION FUNCTIONS
 SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
-                                  a = 0.5, b = 10, data_start = c(3,3,1),
+                                  a = 0.5, b = 10, data_start = c(3,2,1),
                                   shape_gamma = 6, scale_gamma = 1) {
   'Simulate an epidemic with Superspreading individuals'
   

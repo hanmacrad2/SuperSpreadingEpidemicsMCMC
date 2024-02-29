@@ -2,7 +2,7 @@
 PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
                            n_mcmc, list_epi_data, cex = 1.8, RESULTS_FOLDER = '~/Github/computing/mcmc/SSIB/',
                            PDF = TRUE, JOINT = TRUE, PARAM_I = FALSE,
-                           sim_vals = list(r0 = 2, a= 0.85, b = 10), 
+                           sim_vals = list(r0 = 2, a= 0.5, b = 10), 
                            mcmc_specs = list(burn_in_pc = 0.2,
                                              thinning_factor = 10)){
   
@@ -52,6 +52,7 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   
   #LIMITS
   r0_lim = c(min(r0_mcmc), max(r0_mcmc)) #r0_lim = c(1.85, 2.2); 
+  r0_lim = c(1,3)
   a_lim = c(0,1)
   b_lim = c(min(b_mcmc), max(b_mcmc))
   
@@ -79,7 +80,7 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   
   #HIST R0
   r0_mcmc_hist = subset(r0_mcmc, r0_mcmc > r0_lim[1])
-  PLOT_MCMC_HIST(r0_mcmc_hist, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex) #, xlim = r0_lim)
+  PLOT_MCMC_HIST(r0_mcmc, FLAGS_MODELS, FLAG_PARAM1, MODEL_COLOR, cex = cex, xlim = r0_lim)
   PLOT_PRIOR_DIST(FLAG_PARAM1, r0_mcmc, r0_lim)
   segments(sim_vals$r0, 0, sim_vals$r0, 5.0, col = 'black', lwd = 2)
   
@@ -90,7 +91,7 @@ PLOT_SSIB_MCMC <- function(epidemic_data, mcmc_output,
   
   #HIST b
   #b_mcmc_hist = subset(b_mcmc, b_mcmc > 5)
-  PLOT_MCMC_HIST(b_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex) #, xlim = b_lim)
+  PLOT_MCMC_HIST(b_mcmc, FLAGS_MODELS, FLAG_PARAM3, MODEL_COLOR, cex = cex, xlim = b_lim)
   PLOT_PRIOR_DIST(FLAG_PARAM3, b_mcmc, b_lim)
   segments(sim_vals$b, 0, sim_vals$b, 0.12, col = 'black', lwd = 2)
   
@@ -145,9 +146,9 @@ PLOT_SSIB_DATA <- function(mcmc_ssib, list_data_ssib, cex, lwd = 2.0,
   ss = list_data_ssib$ss
   ns_inf = mcmc_ssib$data[[1]]
   ss_inf = mcmc_ssib$data[[2]]
-  title = bquote('True vs Inferred: Non SSIs (aqua), SSI (or)')
+  title = bquote('True vs Inferred: Non SSIs (aqua), SSI (orange)')
   
-  #nsI TRUE
+  #NS TRUE
   plot(seq_along(non_ss), non_ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
        main = title,
@@ -184,6 +185,8 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   upper_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_upper_ci)
   mean_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, mean)
   mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, mean)
+  mean_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, median)
+  mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, median)
   
   #************
   #nsI TRUE
@@ -198,8 +201,9 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   #nsI INFERRED (dashed)
   #Mean
   lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_ns, lwd = lwd)
-  #Final
-  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
+  
+  #Final DOTTED
+  #lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
   
   #CIs
   x = seq_along(upper_ci_ns)
@@ -207,8 +211,9 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           c(upper_ci_ns, rev(lower_ci_ns)),
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
-  legend('topleft', c('True', 'Mean inferred', 'Final inferred','95% CIs'),
-         col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+  #mean
+  #legend('topleft', c('True', 'Median inferred', 'Final inferred','95% CIs'),
+  #       col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
 
   #************
   #SSI TRUE
@@ -223,8 +228,9 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   #SSI INFERRED (dashed)
   #Mean
   lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ss, lwd = lwd)
-  #Final
-  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
+  
+  #Final (DOTTED)
+  #lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
 
   #CIs
   x = seq_along(upper_ci_ss)
@@ -232,8 +238,9 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           c(upper_ci_ss, rev(lower_ci_ss)),
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
-  legend('topleft', c('True', 'Mean', 'Final', '95% CIs'),
-         col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2), lty = c(1,1,2,1))
+  #legend('topleft', c('True', 'Mean', 'Final', '95% CIs'),
+  #       col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
+  #       lty = c(1,1,2,1))
 }
 
 #PLOT

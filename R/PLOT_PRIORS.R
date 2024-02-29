@@ -11,7 +11,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
   x = seq(from = x_min, to = x_max, length = 5000)
               
   if(FLAG_PARAM$r0){
-    #x_min = 2; x_max = 3.0
+    x_min = 0; x_max = 10
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dexp(x, 1)
     
@@ -24,14 +24,14 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0,3), ylimits = c(0,15),
     
   } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
     
-    #x_min = 0; x_max = 1
-    #x = seq(from = x_min, to = x_max, length = 5000)
+    x_min = 0; x_max = 1
+    x = seq(from = x_min, to = x_max, length = 5000)
     y = dbeta(x, shape1 = 2, shape2 = 2)
     
   } else if (FLAG_PARAM$beta | FLAG_PARAM$b){ 
     
-    #x_min = 0 #min(mcmc_vec) 
-    #x_max = 20 # max(mcmc_vec)
+    x_min = 0 #min(mcmc_vec) 
+    x_max = 20 # max(mcmc_vec)
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dgamma(x-1, shape = 3, scale = 3)
   }

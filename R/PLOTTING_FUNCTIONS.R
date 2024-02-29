@@ -74,7 +74,7 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #********************************************
 #3. MCMC HISTOGRAM
 #********************************************
-PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xlim = c(0,1),
+PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xlim = c(0,10),
                             cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
@@ -84,7 +84,7 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xli
   
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = list_labels$lab,
-       #xlim = xlim,
+       xlim = xlim,
        border = MODEL_COLOR,
        col = MODEL_COLOR, 
        main = list_labels$main_hist_prior,
