@@ -39,8 +39,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
   print('ss: '); print(ss); print('non_ss: '); print(non_ss)
   #STORE
-  non_ss = matrix(0, mcmc_vec_size, time)
-  ss = matrix(0, mcmc_vec_size, time) 
+  ns_tot = matrix(0, mcmc_vec_size, time)
+  ss_tot = matrix(0, mcmc_vec_size, time) 
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
@@ -64,7 +64,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   #MCMC
   for(i in 2:n_mcmc) {
     
-    if(i%%500 == 0) print(paste0('i = ', i))
+    if(i%%1000 == 0) print(paste0('i = ', i))
 
     #PARAMETERS PROPOSAL
     ssib_params_dash = c(ssib_params +
@@ -147,8 +147,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
         ssib_params_matrix[i_thin,] = ssib_params
         log_like_vec[i_thin] <- log_like
         scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
-        non_ss[i_thin, ] = data[[1]] 
-        ss[i_thin, ] = data[[2]]
+        ns_tot[i_thin, ] = data[[1]] 
+        ss_tot[i_thin, ] = data[[2]]
         i_thin = i_thin + 1
       }
     
@@ -159,12 +159,21 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   accept_rate = 100*sum(accept_count)/(n_mcmc-1)
   #accept_da = (100*accept_da)/((n_mcmc-1)*rep_da)
   
+  #SS DATA
+  ns_median = colMedians(ns_tot)
+  ss_median = colMedians(ss_tot)
+  ns_mean = round(colMeans(ns_tot))
+  ss_mean = round(colMeans(ss_tot))
+  
   #Return a, acceptance rate
   return(list(ssib_params_matrix = ssib_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate, 
-              data = data, ss_inf = data[[1]], ns_inf = data[[2]], #MISTAKE
+              data_final = data, 
+              ns_final = data[[1]], ss_final = data[[2]], #FINAL
+              ns_median = ns_median, ss_median = ss_median,
+              ns_mean = ns_mean, ss_mean = ss_mean, 
               ss_start = ss_start, ns_start = ns_start,
-              non_ss_tot = non_ss, ss_tot = ss,
+              non_ss_tot = ns_tot, ss_tot = ss_tot,
               r0_start = r0_start))
 } 
