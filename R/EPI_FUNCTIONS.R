@@ -1,6 +1,27 @@
 #EPIDEMIC FUNCTIONS
 
 #R0 - INITIAL CONDITIONS
+GET_R0_INITIAL_MCMC_SSIB <-function(epi_data){
+  
+  'INITIALSE R0 DEPENDING ON DATA'
+  if(sum(epi_data)<=10){
+    r0_start = runif(1, 0.95, 1.1)
+  } else if( sum(epi_data)> 10 && sum(epi_data)<= 30){
+    r0_start = runif(1, 1, 1.15)
+  } else if( sum(epi_data)> 30 && sum(epi_data)<= 100){
+    r0_start = runif(1, 1, 1.4)  
+  } else if( sum(epi_data)> 100 && sum(epi_data)<= 1000){
+    r0_start = runif(1, 1.15, 2.1)
+  }  else if( sum(epi_data)>= 1000 && sum(epi_data)<= 10000){
+    r0_start = runif(1, 1.5, 2.8)
+  } else if (sum(epi_data) > 10000){
+    r0_start = runif(1, 2, 4)
+  }
+  
+  return(r0_start)
+}
+
+#R0 - INITIAL CONDITIONS
 GET_R0_INITIAL_MCMC <-function(epi_data){
   
   'INITIALSE R0 DEPENDING ON DATA'
