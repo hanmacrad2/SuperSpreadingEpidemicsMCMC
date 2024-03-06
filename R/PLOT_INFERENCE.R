@@ -42,6 +42,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   y_lim = c(min(true_total, min(df_results[paste0('lower_ci_', true_param)])),
             max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
+  y_lim = c(0, 40)
   
   #PLOT EACH SUBSET (DATA TOTAL)
   for (i in 1:length(subset_df_list)) {

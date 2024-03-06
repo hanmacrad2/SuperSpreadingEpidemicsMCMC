@@ -117,8 +117,8 @@ GET_COVERAGE <- function(param_val, mcmc_vec){
 #**************************************************************
 
 #' @export 
-INFER_BASELINE  <- function(r0_val, n_mcmc, PRIORS_USED,
-                            STORE_MCMC = TRUE, lt_val = 20) { #100  
+INFER_BASELINE  <- function(r0_val, n_mcmc, #PRIORS_USED,
+                            STORE_MCMC = FALSE, lt_val = 20) { #100  
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -131,7 +131,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, PRIORS_USED,
   }
   
   #MCMC
-  mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc, PRIORS_USED = PRIORS_USED)
+  mcmc_output = MCMC_INFER_BASELINE(epidemic_data, n_mcmc) #PRIORS_USED = PRIORS_USED)
   r0_vec = mcmc_output$r0_vec
   
   result_row = GET_INFER_R0_ROW(r0_val, r0_vec, mcmc_output, epidemic_data)
@@ -148,7 +148,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, PRIORS_USED,
 # 2. SSE MODEL
 #*******************************************
 #' @export 
-INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = TRUE) {
+INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = FALSE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -183,7 +183,7 @@ INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = TRUE) {
 # 3. SSI MODEL
 #*******************************************
 #' @export 
-INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = TRUE){ #{40000) {
+INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = FALSE){ #{40000) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -219,7 +219,7 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = TRUE){ #{40000) {
 #**********************************************
 #* SSEB MODEL
 #* ********************************************
-INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = TRUE) {
+INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = FALSE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -270,7 +270,7 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = TRUE) {
 #* SSIB 
 #************************************************
 
-INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
+INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = FALSE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -289,7 +289,6 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = TRUE) {
   # epidemic_data = as.vector(unlist(list_ssib_data$total_infections))
   
   #MCMC  
-  #mcmc_output = MCMC_INFER_SSIB_JOINT_II(epidemic_data, list_ssib_data, n_mcmc)
   mcmc_output = MCMC_INFER_SSIB(epidemic_data, n_mcmc)
   
   #PARAMS
