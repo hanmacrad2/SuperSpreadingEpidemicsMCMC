@@ -1,7 +1,7 @@
 #EPIDEMIC FUNCTIONS
 
 #R0 - INITIAL CONDITIONS
-GET_R0_INITIAL_MCMC_SSIB <-function(epi_data){
+GET_R0_INITIAL_MCMC <-function(epi_data){ #_SSIB
   
   'INITIALSE R0 DEPENDING ON DATA'
   if(sum(epi_data)<=10){
@@ -22,7 +22,7 @@ GET_R0_INITIAL_MCMC_SSIB <-function(epi_data){
 }
 
 #R0 - INITIAL CONDITIONS
-GET_R0_INITIAL_MCMC <-function(epi_data){
+GET_R0_INITIAL_MCMC_V0 <-function(epi_data){
   
   'INITIALSE R0 DEPENDING ON DATA'
   if(sum(epi_data)<=10){

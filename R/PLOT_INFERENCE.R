@@ -4,7 +4,7 @@
 
 #**********************************
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                  cex = 1.75, PDF = TRUE, GT_VAL = 10, inset = 0.49, 
+                                  cex = 1.7, PDF = TRUE, GT_VAL = 30, inset = 0.49, #cex = 1.75
                                    FLAG_PARAM = GET_PARAM(r0 = TRUE), 
                                   FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE), FIXED = FALSE){
   
@@ -85,7 +85,8 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
     
     #POINTS
     points(true_subset, mean_subset, type = "p",
-           col = colour, pch = 16)
+           col = colour, pch = 16,
+           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex)
   }
   
   #TRUE line
@@ -112,7 +113,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
 
 #SUBSET THE DATASET
 SUBSET_DFS <- function(df_results, filter_param, param, FLAG_PARAM,
-                       GT = TRUE, GT_VAL = 10, num_conds = 5, #5
+                       GT = TRUE, GT_VAL = 30, num_conds = 5, #5
                        FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
   
   'SUBSET DATAFRAME OF RESULTS'

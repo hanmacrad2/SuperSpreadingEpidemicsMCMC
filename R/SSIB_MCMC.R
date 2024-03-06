@@ -1,9 +1,8 @@
 #********************************************************
 #*
 #1. SSIB MCMC JOINT
-#* 
+# 
 #********************************************************
-
 SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
                                 data_start = c(3,2,1),
                              shape_gamma = 6, scale_gamma = 1) {
@@ -40,6 +39,7 @@ SIMULATE_EPI_SSIB = function(num_days = 50, r0 = 2.0, a = 0.5, b = 10,
   total_infections
 }
 
+#************************
 #DATA SIMULATION FUNCTIONS
 SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
                                   a = 0.5, b = 10, data_start = c(3,2,1),
@@ -78,6 +78,7 @@ SIMULATE_EPI_SSIB_LIST = function(num_days = 50, r0 = 2.0,
   return(list_ssib_data)
 }
 
+#***************
 #LOG LIKE
 LOG_LIKE_SSIB_JOINT <- function(data, ssib_params, 
                                 shape_gamma = 6, scale_gamma = 1){
@@ -112,6 +113,7 @@ LOG_LIKE_SSIB_JOINT <- function(data, ssib_params,
   return(loglike)
 }
 
+#****************
 #PRIOR
 SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
   
@@ -144,22 +146,29 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
   return(prior)  
 }
 
+
+#*************************
+#* MCMC 
+#*************************
+
 #' @export
-MCMC_INFER_SSIB_V0 <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
-                                  param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
-                            rep_da = 10, 
-                                  mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
-                                                     v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
-                                                     thinning_factor = 10, burn_in_pc = 0.2)){    
+MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
+                            PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
+                            param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
+                            rep_da = 50, 
+                            mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.0234, #0.4 
+                                               v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
+                                               thinning_factor = 10, burn_in_pc = 0.2)){    
   
   #INITIALIASE
-  r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
+  r0_start = GET_R0_INITIAL_MCMC_SSIB(epidemic_data)
   param_starts[1] = r0_start
   beta_start = round(runif(1, 5, 15), 0)
   param_starts[3] = beta_start
   
   time = length(epidemic_data) 
   vec_min = c(0, 0, 1); count_accept = 0; 
+  vec_accept = vector('numeric', n_mcmc); vec_accept[1] = 0
   
   #THINNING FACTOR + BURN-IN
   thinning_factor = mcmc_inputs$thinning_factor;  i_thin = 1
@@ -182,12 +191,9 @@ MCMC_INFER_SSIB_V0 <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_U
   data = list(non_ss, ss)
   #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
   print('ss: '); print(ss); print('non_ss: '); print(non_ss)
-  
-  #SSI - DATA AUGMENTATION STORE
-  non_ss = matrix(0, mcmc_vec_size, time)
-  ss = matrix(0, mcmc_vec_size, time) 
-  vec_accept_da = vector('numeric', length = time)
-  accept_da = 0
+  #STORE
+  ns_tot = matrix(0, mcmc_vec_size, time)
+  ss_tot = matrix(0, mcmc_vec_size, time) 
   
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
@@ -196,40 +202,81 @@ MCMC_INFER_SSIB_V0 <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_U
   print(paste0('log_like 0', log_like))
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
-  scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
-  c_star = (2.38^2)/mcmc_inputs$dim; termX = mcmc_inputs$v0 + mcmc_inputs$dim
+  #j = 0 #Counter for update of params AND data aug
+  c_star = (2.38^2)/mcmc_inputs$dim; 
+  termX = mcmc_inputs$v0 + mcmc_inputs$dim
   delta = 1/(mcmc_inputs$target_acceptance_rate*(1 - mcmc_inputs$target_acceptance_rate))
   x_bar = 0.5*(ssib_params + ssib_params_matrix[1,])
   sigma_i = diag(mcmc_inputs$dim); scaling = 1
   sigma_i = (1/(termX + 3))*(tcrossprod(ssib_params_matrix[1,]) + tcrossprod(ssib_params) -
                                2*tcrossprod(x_bar) + (termX + 1)*sigma_i) #CHANGE TO USE FUNCTIONS
+  #Store
+  scaling_vec <- vector('numeric', mcmc_vec_size)
+  scaling_vec[1] <- 1
   
   #MCMC
   for(i in 2:n_mcmc) {
     
     if(i%%1000 == 0) print(paste0('i = ', i))
     
-    #PROPOSAL
-    ssib_params_dash = c(ssib_params + mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
+    #PARAMETERS PROPOSAL
+    ssib_params_dash = c(ssib_params +
+                           mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
     
     #POSTIVE ONLY
     if (min(ssib_params_dash - vec_min) >= 0 && ssib_params_dash[2] < 1){ 
       
-      #LOG LIKELIHOOD
-      logl_new = LOG_LIKE_SSIB_JOINT(data, ssib_params_dash) 
-      
-      #ACCEPTANCE RATIO
-      log_accept_ratio = logl_new - log_like
-      
-      #PRIORS
-      log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR_JOINT(ssib_params, ssib_params_dash, PRIORS_USED)
-      
-      #METROPOLIS ACCEPTANCE STEP
-      if(!(is.na(log_accept_ratio)) && log(runif(1)) < log_accept_ratio) {
-        ssib_params <- ssib_params_dash
-        count_accept = count_accept + 1
-        log_like = logl_new
-      }
+      #************************************
+      #DATA AUGMENTATION
+      #***********************************
+      #FOR EACH S_T
+      for (myrep in 1:rep_da){
+        
+        #PARAMETERS
+        r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
+        r0_dash = ssib_params_dash[1];  a_dash = ssib_params_dash[2]; b_dash = ssib_params_dash[3]
+        #PROBABILITIES
+        prob = (1 - a)/(a*b + 1 - a)
+        prob2 = (1 - a_dash)/(a_dash*b_dash + 1 - a_dash)
+        #DATA
+        I_t = data[[1]] + data[[2]] #'Total epidemic data
+        data_dash = data
+        
+        #PROPOSAL: SS
+        q = (data[[2]]/pmax(I_t,1) + prob2)/2  #FUNCTION OF PROB_2; NEW PARAMS. #q = lambda*(s/x + p)/(lambda +1) for lambda = 1 
+        s_dash = rbinom(length(I_t), size = I_t, prob = q) #Binomial distribution s_dash
+        q2 = (s_dash/pmax(I_t,1) + prob)/2 ##q = lambda*(s/x + p)/(lambda +1) for lambda = 1
+        
+        data_dash[[2]] = s_dash
+        data_dash[[1]] =  I_t - s_dash #n_t = I_t - s_t
+        
+        #Datapoint: t=1; set to the true/original value
+        data_dash[[1]][1]= data[[1]][1]
+        data_dash[[2]][1]= data[[2]][1]
+        
+        #********
+        #LOG-LIKELIHOOD -> ACCEPTANCE RATIO
+        logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params_dash)
+        
+        #ACCEPTANCE RATIO
+        log_accept_ratio = logl_new - log_like
+        
+        #PARAMETER PRIORS
+        log_accept_ratio = log_accept_ratio + SET_SSIB_PRIOR_JOINT(ssib_params, ssib_params_dash, PRIORS_USED)
+        
+        #PROPOSAL RATIOS
+        log_accept_ratio = log_accept_ratio + sum(dbinom(data[[2]], size = I_t, prob = q2, log = TRUE)) -
+          sum(dbinom(s_dash, size = I_t, prob = q, log = TRUE))   
+        
+        #METROPOLIS ACCEPTANCE STEP
+        if(log(runif(1)) < log_accept_ratio) {
+          ssib_params <- ssib_params_dash #PARAMETER UPDATE 
+          data <- data_dash #DATA UPDATE 
+          log_like <- logl_new
+          vec_accept[i] = vec_accept[i] + 1 
+        }
+        
+      }#END DATA AUGMENTAION REPS
       
       #SIGMA - ADAPTIVE SHAPING
       xbar_prev = x_bar
@@ -243,7 +290,7 @@ MCMC_INFER_SSIB_V0 <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_U
       
     } else {
       accept_prob = 0
-    }
+    } #END IF PARAMETER PROPOSAL POSTIVE 
     
     #ADAPTIVE SCALING (needs acceptance probability)
     scaling =  scaling*exp(delta/i*(accept_prob - mcmc_inputs$target_acceptance_rate))
@@ -253,67 +300,33 @@ MCMC_INFER_SSIB_V0 <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_U
       ssib_params_matrix[i_thin,] = ssib_params
       log_like_vec[i_thin] <- log_like
       scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
+      ns_tot[i_thin, ] = data[[1]] 
+      ss_tot[i_thin, ] = data[[2]]
       i_thin = i_thin + 1
     }
     
-    #************************************
-    #DATA AUGMENTATION
-    #***********************************
-    #FOR EACH S_T
-    for (myrep in 1:rep_da){
-     
-      #PARAMS
-      r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
-      
-      #DATA
-      I_t = data[[1]] + data[[2]] #x = 'epidemic data'
-      data_dash = data
-      
-      #PROPOSAL
-      prob = (1 - a)/(a*b + 1 - a)
-      q =  (data[[2]]/pmax(I_t,1) + prob)/2  #FUNCTION OF PROB_2; NEW PARAMS 
-      proposal_ss = rbinom(length(I_t), size = I_t, prob = q) #Binomial distribution
-      q2 = (proposal_ss/pmax(I_t,1) + prob)/2 #prob is the same as -> a is the same 
-        
-      data_dash[[2]] = proposal_ss
-      data_dash[[1]] =  I_t - proposal_ss #n_t = I_t - s_t
-      
-      #Keep first data == truth
-      data_dash[[1]][1]= data[[1]][1]
-      data_dash[[2]][1]= data[[2]][1]
-      
-      logl_new = LOG_LIKE_SSIB_JOINT(data_dash, ssib_params)
-      
-      log_accept_ratio = logl_new - log_like + sum(dbinom(data[[2]], size = I_t, prob = q2, log = TRUE)) -
-        sum(dbinom(proposal_ss, size = I_t, prob = q, log = TRUE)) 
-        
-        
-        #METROPOLIS ACCEPTANCE STEP
-        if(log(runif(1)) < log_accept_ratio) {
-          data <- data_dash
-          log_like <- logl_new
-          accept_da = accept_da + 1
-          #vec_accept_da[t] =  vec_accept_da[t] + 1
-        }
-    }
-      
-      #Store
-      if (i%%thinning_factor == 0 && i >= burn_in_start && i_thin <= mcmc_vec_size) {
-        non_ss[i_thin, ] = data[[1]] #TAKE MEAN ACROSS MCMC DIMENSION (PLOT 0 > 50)
-        ss[i_thin, ] = data[[2]]
-      }
-    }
+  } #END MCMC 
   
   #Final stats
-  accept_rate = 100*count_accept/(n_mcmc-1)
-  accept_da = (100*accept_da)/((n_mcmc-1)*rep_da)
+  accept_count = pmin(1, vec_accept) #1 if accepted in that time step at all, 0 otherwise 
+  accept_rate = 100*sum(accept_count)/(n_mcmc-1)
+  #accept_da = (100*accept_da)/((n_mcmc-1)*rep_da)
+  
+  #SS DATA
+  ns_median = colMedians(ns_tot)
+  ss_median = colMedians(ss_tot)
+  ns_mean = round(colMeans(ns_tot))
+  ss_mean = round(colMeans(ss_tot))
   
   #Return a, acceptance rate
   return(list(ssib_params_matrix = ssib_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              accept_rate = accept_rate, accept_da = accept_da,
-              data = data, ss_inf = data[[1]], ns_inf = data[[2]],
+              accept_rate = accept_rate, 
+              data_final = data, 
+              ns_final = data[[1]], ss_final = data[[2]], #FINAL
+              ns_median = ns_median, ss_median = ss_median,
+              ns_mean = ns_mean, ss_mean = ss_mean, 
               ss_start = ss_start, ns_start = ns_start,
-              non_ss_tot = non_ss, ss_tot = ss,
-  r0_start = r0_start))
+              non_ss_tot = ns_tot, ss_tot = ss_tot,
+              r0_start = r0_start))
 } 
