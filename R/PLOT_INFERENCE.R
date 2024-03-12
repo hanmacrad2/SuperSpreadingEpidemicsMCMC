@@ -4,7 +4,7 @@
 
 #**********************************
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                  cex = 1.7, PDF = TRUE, GT_VAL = 30, inset = 0.49, #cex = 1.75
+                                  cex = 1.7, PDF = TRUE, GT_VAL = 30, inset = 0.485, #cex = 1.75
                                    FLAG_PARAM = GET_PARAM(r0 = TRUE), 
                                   FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE), FIXED = FALSE){
   
@@ -17,13 +17,12 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #FLAG_PRIOR = GET_PRIOR(EXP = FALSE)
   filter_param = 'tot_infs'
   
-  #PLOT
-  plot_folder = paste0(COMP_FOLDER, '/plots/')
-  create_folder(plot_folder)
-  
   #PDF
   if(PDF){
-    pdf_file = paste0(model, '_', true_param, '_', fig_num, '.pdf') #'Fig_', 
+    plot_folder = paste0(COMP_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_', true_param, '_', time_stamp, '.pdf')  
     pdf(paste0(plot_folder, pdf_file), width = 13.0, height = 8.0) #13, 8
   }
   par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
@@ -41,8 +40,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #LIMITS
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
   y_lim = c(min(true_total, min(df_results[paste0('lower_ci_', true_param)])),
-            max(true_total, max(df_results[paste0('upper_ci_', true_param)]))) 
-  y_lim = c(0, 40)
+            max(true_total, max(df_results[paste0('upper_ci_', true_param)])))
   
   #PLOT EACH SUBSET (DATA TOTAL)
   for (i in 1:length(subset_df_list)) {
@@ -85,9 +83,9 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
              lower_ci_subset, lwd = 0.5, col = colour)
     
     #POINTS
-    points(true_subset, mean_subset, type = "p",
-           col = colour, pch = 16,
-           cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex)
+    # points(true_subset, mean_subset, type = "p",
+    #        col = colour, pch = 16,
+    #        cex.lab=cex, cex.axis=cex-0.3, cex.sub=cex-0.3, cex = cex)
   }
   
   #TRUE line
@@ -214,7 +212,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
     plot_folder = paste0(RESULTS_FOLDER, '/plots/')
     create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
-    pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf') #'Fig_', 
+    pdf_file = paste0(model, '_', param, '_', time_stamp, '.pdf')  
     pdf(paste0(plot_folder, pdf_file), width = 12.5, height = 7.0) #13, 8
     par(mar=c(5.2, 4.8, 3.0, 19.45), xpd=TRUE) #Margins; bottom, left, top, right
   }

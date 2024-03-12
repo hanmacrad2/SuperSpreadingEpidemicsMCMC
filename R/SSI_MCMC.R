@@ -147,6 +147,8 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
   param_starts[1] = r0_start
+  #k_start = runif(1, 0.1, 0.5)
+  #param_starts[2] = k_start
   
   #MCMC PARAMS + VECTORS
   num_days = length(epidemic_data); 
