@@ -28,7 +28,8 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
   
   #GAMMA
   if (PRIORS_USED$SSEB$beta$GAMMA) {
-    shape = list_priors$gamma[1]; scale = list_priors$gamma[2]
+    shape = list_priors$beta[1]
+    scale = list_priors$beta[2]
     samps_prior_beta = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
   }
@@ -177,6 +178,7 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
 GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   
   #List priors
+  browser()
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
@@ -306,7 +308,7 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, FLAGS_MODELS){
   
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
-    
+  
     log_prior_density = GET_DENSITY_PRIOR_SSEB(theta_samples)
     
     #2. SSE

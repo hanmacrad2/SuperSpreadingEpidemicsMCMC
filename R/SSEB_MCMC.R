@@ -154,8 +154,8 @@ SET_SSEB_PRIOR <- function(param, param_dash,
     
     #gamma PRIOR ON beta
     if (PRIORS_USED$SSEB$beta$GAMMA) {
-      shape = list_priors$gamma[1]
-      scale = list_priors$gamma[2]
+      shape = list_priors$beta[1]
+      scale = list_priors$beta[2]
       prior = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
         dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
     }
@@ -167,7 +167,7 @@ SET_SSEB_PRIOR <- function(param, param_dash,
 #************************************************************************
 #1. SSEB MCMC
 #************************************************************************
-MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc = 40000,
+MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                             PRIORS_USED = GET_PRIORS_USED(),
                             param_starts = list(alpha_start = 0.5, beta_start = 10, r0_start = 1.0),
                             mcmc_inputs =  list(alpha_star = 0.3, thinning_factor = 10, burn_in_pc = 0.2), 
