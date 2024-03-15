@@ -126,7 +126,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   param_starts[1] = r0_start
   
   #MCMC PARAMS + VECTORS
-  print(paste0('PRIORS USED;', PRIORS_USED))
+  #print(paste0('PRIORS USED;', PRIORS_USED))
   print(paste0('PARAM STARTING POINTS;', param_starts))
   i_thin = 1
   num_days = length(epidemic_data)

@@ -24,7 +24,6 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
   mcmc_param_samples = mcmc_output$ssib_params_matrix # matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$b_vec), ncol = 3)
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   
-  browser()
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   

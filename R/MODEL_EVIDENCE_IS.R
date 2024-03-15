@@ -56,7 +56,6 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                               sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
-  browser()
   log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data, FLAGS_MODELS)
   
   #PROPOSAL 

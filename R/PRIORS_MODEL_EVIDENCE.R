@@ -54,19 +54,19 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
-  #ALPHA 
+  #r0
+  if (PRIORS_USED$SSIB$r0$EXP) {
+    samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
+  }
+  
+  #a 
   if (PRIORS_USED$SSIB$a$BETA) {
     shape1 = list_priors$a[1]
     shape2 = list_priors$a[2]
     samps_prior_a = rbeta(samp_size_prior, shape1, shape2)
   }
   
-  #r0
-  if (PRIORS_USED$SSIB$r0$EXP) {
-    samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
-  }
-  
-  #GAMMA
+  #b
   if (PRIORS_USED$SSIB$b$GAMMA) {
     shape = list_priors$b[1]
     scale = list_priors$b[2]
@@ -75,7 +75,7 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
   }
   
   #THETA_SAMPLES_PRIOR
-  theta_samples_prior_ssib = matrix(c(samps_prior_a, samps_prior_r0, samps_prior_b),
+  theta_samples_prior_ssib = matrix(c(samps_prior_r0, samps_prior_a, samps_prior_b),
                                     ncol = n_dim)
   
   return(theta_samples_prior_ssib)  
@@ -178,23 +178,23 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
 GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
   
   #List priors
-  browser()
   PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
-  #ALPHA
-  if (PRIORS_USED$SSIB$a$BETA) {
-    shape1 = list_priors$a[1]
-    shape2 = list_priors$a[2]
-    log_prior_density_a = dbeta(theta_samples[,1], shape1, shape2, log = TRUE)
-  }
   
   #r0
   if (PRIORS_USED$SSIB$r0$EXP) {
-    log_prior_density_r0 = dexp(theta_samples[,2], rate = list_priors$r0[1], log = TRUE)
+    log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
   }
   
-  #GAMMA
+  #a
+  if (PRIORS_USED$SSIB$a$BETA) {
+    shape1 = list_priors$a[1]
+    shape2 = list_priors$a[2]
+    log_prior_density_a = dbeta(theta_samples[,2], shape1, shape2, log = TRUE)
+  }
+  
+  #b
   if (PRIORS_USED$SSIB$b$GAMMA) {
     shape = list_priors$b[1]
     scale = list_priors$b[2]
@@ -202,15 +202,8 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
     
   }
   
-  #EXP
-  # if(PRIORS_USED$SSIB$a$EXP){
-  #   log_prior_density = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-  #     dexp((theta_samples[,3] - 1), log = TRUE) 
-  #   
-  # }
-  # 
   #THETA_SAMPLES_PRIOR
-  log_prior_density = log_prior_density_a + log_prior_density_r0 + log_prior_density_b
+  log_prior_density = log_prior_density_r0 + log_prior_density_a + log_prior_density_b
   
   return(log_prior_density)  
 }
