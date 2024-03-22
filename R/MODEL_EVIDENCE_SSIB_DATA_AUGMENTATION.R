@@ -15,7 +15,6 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
                                                             SSEB = FALSE, SSIB = TRUE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
-  browser()
   #PARAMS
   vector_estimate_terms = rep(NA, num_is_samps)
   lambda_vec = get_lambda(epidemic_data) 
@@ -109,7 +108,7 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000, # bet
       alpha_vec = as.vector(table(mcmc_output$ss_mcmc[wh_mcmc,t])) #table returns counts of each category 
       #Normalise
       #Increase over-dispersion (reduce the tail on model evidence distribution). Outliers greatly increasing variance
-      alpha_vec = alpha_vec*max(beta/sum(alpha_vec), 1) #+ rep(prior_dir/length(categories), length(categories))
+      alpha_vec = alpha_vec*max(beta/sum(alpha_vec), 1) + rep(prior_dir/length(categories), length(categories))
       #alpha_vec = (alpha_vec*beta)/sum(alpha_vec) #+ rep(prior_dir/length(categories), length(categories))  #sum(alpha) = effective sample size of the prior
       
       #beta = effective sample size #Jim Burger: prior_dir = 0.8
