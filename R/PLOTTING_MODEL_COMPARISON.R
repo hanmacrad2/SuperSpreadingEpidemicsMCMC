@@ -10,7 +10,7 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '') {
   #PLOT MODEL PROBABILITIES
   
   #SETUP
-  title = paste0('Posterior Model Probabilities. ', title)
+  title = paste0(title, ' Posterior Model Probabilities. ')
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
   bar_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
@@ -28,7 +28,7 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '') {
 BOX_PLOT_POST_PROBS <- function(df_results, title = '') {
   
   # SETUP
-  title <- paste0('Posterior Model Probabilities. ', title)
+  title <- paste0(title, ' Posterior Model Probabilities. ')
   
   box_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
   
@@ -63,7 +63,7 @@ BOX_PLOT_MOD_EV_MULT <- function(df_results, title = 'Model Evidence') {
 BOX_PLOT_POST_PROBS_MULT <- function(df_results, title = '') {
   
   # SETUP
-  title <- paste0('Posterior Model Probabilities. ', title)
+  title <- paste0(title, ' - Posterior Model Probabilities')
   
   box_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
   model_names = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB')

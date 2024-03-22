@@ -53,11 +53,11 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
     lower_ci_subset <- unlist(df_subset[paste0('lower_ci_', true_param)])
     colour <- selected_colors[i]
     
-    if(FIXED){
-      true_subset <- seq_along(mean_subset)
-      list_labels$xlab = 'iteration'
-      x_lim = c(0, 1000) #length(true_total))
-    }
+    # if(FIXED){
+    #   true_subset <- seq_along(mean_subset)
+    #   list_labels$xlab = 'iteration'
+    #   x_lim = c(0, 1000) #length(true_total))
+    # }
     
     if (i == 1) {
       
