@@ -15,13 +15,13 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
                                                             SSEB = FALSE, SSIB = TRUE)) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
-  
+  browser()
   #PARAMS
   vector_estimate_terms = rep(NA, num_is_samps)
   lambda_vec = get_lambda(epidemic_data) 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
-  mcmc_param_samples = mcmc_output$ssib_params_matrix # matrix(c(mcmc_output$alpha_vec, mcmc_output$r0_vec, mcmc_output$b_vec), ncol = 3)
+  mcmc_param_samples = mcmc_output$ssib_params_matrix 
   imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
   
   theta_samples = imp_samp_comps$theta_samples
@@ -32,7 +32,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
   theta_samples_proposal_ss = dir_multinom_comps$matrix_rdirmult_samps   
   log_density_dirmult_samps = dir_multinom_comps$density_dirmult_samps   
   
-  log_prior_so = log(1/(1 + epidemic_data[1])) #What is this? s_0?
+  #log_prior_so = log(1/(1 + epidemic_data[1])) #What is this? s_0?
   
   #GET ESTIMATE
   for (i in 1:num_is_samps) {
@@ -45,7 +45,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
     } else {
       loglike = 0 #vector_estimate_terms[i] =  0 #-Inf
     }
-    vector_estimate_terms[i] = loglike + log_prior_density[i] + log_prior_so -
+    vector_estimate_terms[i] = loglike + log_prior_density[i] - #+ log_prior_so 
       log_q[i] - log_density_dirmult_samps[i]
   }
   
@@ -71,7 +71,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
 
 
 #VECTORISED
-PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
+PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000, # beta = 1000
                                      beta = 1000, prior_dir = 0.8){ #beta strictly less than 1 #prior dir: try 0 too
   
   #PARAMS
@@ -108,7 +108,10 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000,
       #Match at previous time point and see where it goes. Conditional dist of st|st-1. Simulate from the part 
       alpha_vec = as.vector(table(mcmc_output$ss_mcmc[wh_mcmc,t])) #table returns counts of each category 
       #Normalise
-      alpha_vec = (alpha_vec*beta)/sum(alpha_vec) #+ rep(prior_dir/length(categories), length(categories))  #sum(alpha) = effective sample size of the prior
+      #Increase over-dispersion (reduce the tail on model evidence distribution). Outliers greatly increasing variance
+      alpha_vec = alpha_vec*max(beta/sum(alpha_vec), 1) #+ rep(prior_dir/length(categories), length(categories))
+      #alpha_vec = (alpha_vec*beta)/sum(alpha_vec) #+ rep(prior_dir/length(categories), length(categories))  #sum(alpha) = effective sample size of the prior
+      
       #beta = effective sample size #Jim Burger: prior_dir = 0.8
       
       if (length(alpha_vec)== 1){ #in case matrix == one dimension 
@@ -150,12 +153,6 @@ LOG_LIKE_DATA_AUG_SSIB <- function(epidemic_data, ss, ssib_params,
   
   #Data
   non_ss = epidemic_data - ss
-  
-  # if(min(non_ss)<0){
-  #   print('WARNING')
-  #   print(non_ss)
-  #   print(ss)
-  # }
   
   #Params
   num_days = length(epidemic_data)
