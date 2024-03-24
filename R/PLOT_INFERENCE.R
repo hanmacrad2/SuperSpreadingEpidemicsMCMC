@@ -4,10 +4,12 @@
 
 #**********************************
 PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
-                                  cex = 1.7, PDF = TRUE, GT_VAL = 30, inset = 0.485, #cex = 1.75
-                                  PLOT_PRIOR_CI = TRUE,
+                                  cex = 1.7, 
+                                  PDF = TRUE, GT_VAL = 50, 
+                                  PLOT_PRIOR_CI = TRUE, 
+                                  num_conds = 5, inset = 0.47, 
                                   FLAG_PARAM = GET_PARAM(r0 = TRUE), 
-                                  FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE), FIXED = FALSE){
+                                  FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE)){
   
   'Plot computed Inference results for all models '
   #PARAMS 
@@ -15,7 +17,6 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   true_total = unlist(df_results[paste0('true_', true_param)])
   model = names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
-  #FLAG_PRIOR = GET_PRIOR(EXP = FALSE)
   filter_param = 'tot_infs'
   
   #PDF
@@ -30,19 +31,21 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   
   
   #DATA SUBSETS
-  list_subset_data = SUBSET_DFS(df_results, filter_param, true_param, FLAG_PARAM, GT_VAL = GT_VAL)
-  subset_df_list = list_subset_data$subset_df_list; legend_list = list_subset_data$legend_list
-  num_conds = list_subset_data$num_conds
+  subset_df_list = GET_SUBSET_DATAFRAME(df_results, filter_param, true_param, FLAG_PARAM, GT_VAL = GT_VAL)
+  legend_list = GET_LEGEND_LIST(true_param, FLAG_PARAM, GT_VAL)
   selected_colors =  GET_SELECTED_COLORS()
   df_results = subset(df_results, tot_infs > GT_VAL)
   
   #PRIORS
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
+  prior_ci = GET_PRIOR_CI(FLAG_PARAM)
   
   #LIMITS
   x_lim = c(min(df_results[paste0('true_', true_param)]), max(df_results[paste0('true_', true_param)]))
-  y_lim = c(min(true_total, min(df_results[paste0('lower_ci_', true_param)])),
-            max(true_total, max(df_results[paste0('upper_ci_', true_param)])))
+  #x_lim = c(prior_ci[[1]], max(df_results[paste0('true_', true_param)]))
+  y_lim = c(min(prior_ci[[1]], true_total, min(df_results[paste0('lower_ci_', true_param)])),
+            max(prior_ci[[2]], true_total, max(df_results[paste0('upper_ci_', true_param)])))
+  #y_lim = x_lim 
   
   #PLOT EACH SUBSET (DATA TOTAL)
   for (i in 1:length(subset_df_list)) {
@@ -85,79 +88,205 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   #PLOT PRIOR_CI
   dark_gray =  gray(0.5)
   if(PLOT_PRIOR_CI){
-    PLOT_PRIOR_CI(FLAG_PARAM, dark_gray)
+    PLOT_PRIOR_CI(FLAG_PARAM, prior_ci, dark_gray, x_lim)
+    #PLOT_PRIOR_CI(FLAG_PARAM, dark_gray, x_lim)
   }
   
   #Legend
-  GET_LEGEND_II(legend_list, prior_title, selected_colors, dark_gray, num_conds)
-  # legend_list = c(legend_list, '', prior_title)
-  # pch_list = rep(19, num_conds + 1)
-  # legend('bottomright', #x = "topleft", y = "topleft", #"center", legend_list,
-  #        legend_list,
-  #        cex = 1.1,
-  #        inset=c(-inset,0),
-  #        col = c('black', selected_colors, 'white', dark_gray),
-  #        lwd = rep(1.8, num_conds+2),
-  #        lty = rep(1, num_conds+2), #c(1, 1),
-  #        pch = c(NA, pch_list, NA, NA),
-  #        #text.font = 1.8, #1.45
-  #        bty = "n")
+  GET_LEGEND(legend_list, prior_title, selected_colors, dark_gray, num_conds, inset = inset)
   
   if(PDF){
     dev.off()
   }
 }
 
+#SUBSET THE DATASET
+GET_SUBSET_DATAFRAME <- function(df_results, filter_param, param, FLAG_PARAM,
+                                 GT = TRUE, GT_VAL = 50, num_conds = 5, #5
+                                 FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
+  
+  'SUBSET DATAFRAME OF RESULTS'
+  
+  #SUBSET DATAFRAME OF RESULTS
+  subset_df_list <- list(
+    df10 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 100), ],
+    df100 = df_results[(df_results[[filter_param]] > 100) & (df_results[[filter_param]] <= 1000), ],
+    df1k = df_results[(df_results[[filter_param]] > 1000) & (df_results[[filter_param]] <= 10000), ],
+    df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ],
+    df100k <- df_results[df_results[[filter_param]] > 100000, ]) 
+  
+  return(subset_df_list)
+  
+}
 
 #LEGEND FUNCTION
-GET_LEGEND_II <- function(legend_list, prior_title,
-                          selected_colors, dark_gray, num_conds, inset = 0.485,
+GET_LEGEND <- function(legend_list, prior_title,
+                       selected_colors, dark_gray, num_conds, 
+                       cex = 1.3, inset = 0.47,
                        legend_location = 'bottomright'){
   
   #COLOURS ADD WHITE
-  selected_colors = c(selected_colors[1], 'white',
+  selected_colors = c('black', selected_colors[1], 'white',
                       selected_colors[2], 'white',
                       selected_colors[3], 'white',
                       selected_colors[4], 'white',
-                      selected_colors[5], 'white',
-                      dark_gray)
+                      selected_colors[5], 'white', 'white',
+                      dark_gray, 'white')
   
   #Legend
-  legend_list = c(legend_list, '', prior_title)
-  pch_list = rep(19, num_conds + 1)
+  legend_list = c(legend_list, '', prior_title, 'Mean & 95% Credible Interval')
+  pch_list = rep(19, 2*num_conds + 2) #dot or line 
   legend(legend_location, 
          legend_list,
-         cex = 1.1,
+         cex = cex,
          inset=c(-inset,0),
-         col = c('black', selected_colors, 'white', dark_gray),
-         lwd = rep(1.8, num_conds+2),
-         lty = rep(1, num_conds+2), 
-         pch = c(NA, pch_list, NA, NA),
+         col = selected_colors,
+         lwd = rep(1.8, 2*(num_conds)+2),
+         lty = rep(1, 2*(num_conds)+2), 
+         pch = c(NA, pch_list),
          bty = "n")
 }
 
-#PLOT_PRIOR_CI
-PLOT_PRIOR_CI <- function(FLAG_PARAM, dark_gray){
+#GET LEGEND LISTS
+GET_LEGEND_LIST <- function(param, FLAG_PARAM,
+                            GT_VAL = 30, GT = TRUE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
   
-  #PLOT 95% CIS OF PRIORS
-  x0 <- 0 # Position it at the start of the x-axis
+  #LEGEND LIST
+  lineI =  paste0(param, " inferred mean & 95% CIs, ")
+  legend_list <- c(paste0(param, " True "),
+                   lineI, 
+                   paste0("infection count: [", GT_VAL, ",100]"), 
+                   lineI,
+                   "infection count: [100, 1k]",
+                   lineI,
+                   "infection count: [1k, 10k]",
+                   lineI,
+                   "infection count: [10k, 100k]",
+                   lineI,
+                   paste0("infection count > 100k")) 
+  
+  
+  #R0 ALPHA OR BETA: EXPRESSIONS 
+  if(FLAG_PARAM$r0) {
+    
+    lineI =  bquote(R[0]~" inferred mean & 95% CIs, ")
+    legend_list <- c(expression(paste(R[0], " True ")),
+                     lineI, 
+                     paste0("infection count: [", GT_VAL, ",100]"), 
+                     lineI,
+                     "infection count: [100, 1k]",
+                     lineI,
+                     "infection count: [1k, 10k]",
+                     lineI,
+                     "infection count: [10k, 100k]",
+                     lineI,
+                     paste0("infection count > 100k")) 
+
+  } else if(FLAG_PARAM$alpha){
+    
+    lineI =  bquote(alpha~" inferred mean & 95% CIs, ")
+    
+    legend_list <- c(expression(paste(alpha, " True ")),
+                     lineI, 
+                     paste0("infection count: [", GT_VAL, ",100]"), 
+                     lineI,
+                     "infection count: [100, 1k]",
+                     lineI,
+                     "infection count: [1k, 10k]",
+                     lineI,
+                     "infection count: [10k, 100k]",
+                     lineI,
+                     paste0("infection count > 100k")) 
+    
+  } else if (FLAG_PARAM$beta){
+    
+    lineI =  bquote(beta~" inferred mean & 95% CIs, ")
+    legend_list <- c(expression(paste(beta, " True ")),
+                     lineI, 
+                     paste0("infection count: [", GT_VAL, ",100]"), 
+                     lineI,
+                     "infection count: [100, 1k]",
+                     lineI,
+                     "infection count: [1k, 10k]",
+                     lineI,
+                     "infection count: [10k, 100k]",
+                     lineI,
+                     paste0("infection count > 100k")) 
+  }
+  
+  return(legend_list)
+}
+
+#PLOT_PRIOR_CI
+PLOT_PRIOR_CI <- function(FLAG_PARAM, prior_ci, dark_gray, x_lim,
+                          x0 = 0, cex = 1.5){
+  
+  #PARAMS
+  x0 = x_lim[[1]]
+  lower_bound = prior_ci[[1]];  
+  upper_bound = prior_ci[[2]]
+  prior_mean = prior_ci[[3]]
   
   if(FLAG_PARAM$r0){
-    y_start <- 0.025
-    y_end <- 3.688
+    x0 <- x0 - 0.07
   } else if (FLAG_PARAM$k) {
-    y_start <- 0.051
-    y_end <- 0.693
-  } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
-    y_start <- 0.035
-    y_end <- 0.965
-  } else if (FLAG_PARAM$beta | FLAG_PARAM$b){
-    y_start <- GET_GAMMA_CI()[1]
-    y_end <- GET_GAMMA_CI()[2]
-  }
+    #y_start <- 0.051; y_end <- 0.693
+  } else if (FLAG_PARAM$alpha){
+    x0 <- x0 - 0.02
+  } else if (FLAG_PARAM$a) {
 
-  #PLOT VERTICAL LINE
+  } else if (FLAG_PARAM$beta) {
+    x0 <- x_lim[1] - 0.25
+  }
+  else if (FLAG_PARAM$b){
+    x0 <- x_lim[1] - 0.5
+  }
+  
+  #PLOT 95% CIS OF PRIORS
+  segments(x0, lower_bound, x0, upper_bound, col = dark_gray, lwd = 2)
+  #MEAN: DOT
+  points(x0, prior_mean, col = dark_gray, cex = cex, pch = 16)
+}
+
+PLOT_PRIOR_CI_V0 <- function(FLAG_PARAM, dark_gray, x_lim,
+                          x0 = 0, cex = 1.5){
+  
+  #PLOT 95% CIS OF PRIORS
+  list_prior_ci = GET_PRIOR_CI(FLAG_PARAM)
+  
+  if(FLAG_PARAM$r0){
+    y_start <- 0.025; y_end <- 3.688
+    prior_mean = 1
+    x0 <- x_lim[1] - 0.1
+  } else if (FLAG_PARAM$k) {
+    y_start <- 0.051; y_end <- 0.693
+  } else if (FLAG_PARAM$alpha){
+    y_start <- 0.035; y_end <- 0.965
+    prior_mean = 0.5
+    x0 <- x0 - 0.02
+  } else if (FLAG_PARAM$a) {
+    y_start <- 0.035; y_end <- 0.965
+    prior_mean = 0.5
+   
+  } else if (FLAG_PARAM$beta) {
+    list_prior_ci = GET_GAMMA_CI()
+    y_start <- list_prior_ci[1]
+    y_end <- list_prior_ci[2]
+    prior_mean = list_prior_ci[3]
+    x0 <- x_lim[1] - 0.25
+  }
+  else if (FLAG_PARAM$b){
+    list_prior_ci = GET_GAMMA_CI()
+    y_start <- list_prior_ci[1]
+    y_end <- list_prior_ci[2]
+    prior_mean = list_prior_ci[3]
+    x0 <- x_lim[1] - 0.5
+  } 
+  
+  #PLOT CI: VERTICAL LINE
   segments(x0, y_start, x0, y_end, col = dark_gray, lwd = 2)
+  #MEAN: DOT
+  points(x0, prior_mean, col = dark_gray, cex = cex, pch = 16)
   
 }
 
@@ -176,82 +305,13 @@ GET_SELECTED_COLORS <-function(){
   return(selected_colors)
 }
 
-#SUBSET THE DATASET
-SUBSET_DFS <- function(df_results, filter_param, param, FLAG_PARAM,
-                       GT = TRUE, GT_VAL = 30, num_conds = 5, #5
-                       FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
-  
-  'SUBSET DATAFRAME OF RESULTS'
-  #Setup
-  #viridis_palette <- viridis(10)
-  
-  #SUBSET DATAFRAME OF RESULTS
-  subset_df_list <- list(
-    df10 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 100), ],
-    df100 = df_results[(df_results[[filter_param]] > 100) & (df_results[[filter_param]] <= 1000), ],
-    df1k = df_results[(df_results[[filter_param]] > 1000) & (df_results[[filter_param]] <= 10000), ],
-    df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
-  
-  #Legend list
-  key = ' estimated mean, infections:' #est infs
-  
-  #LEGEND LIST - DEFAULT 
-  legend_list <- c(paste0(param, " True "),
-                   paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
-                   paste0(param, key, "[100, 1k]"),
-                   paste0(param, key, "[1k, 10k]"),
-                   paste0(param, key, "[10k, 100k]"),
-                   paste0(param, " estimated mean, infections > 100k")) 
-  
-  #selected_colors <- viridis_palette[c(10, 8, 5)] 
-  
-  #R0 ALPHA OR BETA: EXPRESSIONS 
-  if(FLAG_PARAM$r0) {
-    legend_list <- c(expression(paste(R[0], " True ")),
-                     bquote(R[0] ~ .(key) ~ "[" * .(GT_VAL) * ",100]"),
-                     #bquote(R[0]~.(key)~"["~.(GT_VAL)~",100]"),
-                     bquote(R[0]~.(key)~"[100,1k]"),
-                     bquote(R[0]~.(key)~"[1k,10k]"),
-                     bquote(R[0]~.(key)~"[10k,100k]"),
-                     bquote(R[0]~"estimated mean, infections > 100k")) 
-    
-  } else if(FLAG_PARAM$alpha){
-    legend_list <- c(expression(paste(alpha, " True ")),
-                     bquote(alpha~.(key)~"["~.(GT_VAL) ~ ",100]"),
-                     bquote(alpha~.(key)~"[100, 1k]"),
-                     bquote(alpha~.(key)~"[1k, 10k]"),
-                     bquote(alpha~.(key)~"[10k, 100k]"),
-                     bquote(alpha~"estimated mean, infections > 100k")) 
-    
-  } else if (FLAG_PARAM$beta){
-    legend_list <- c(expression(paste(beta, " True ")),
-                     bquote(beta~.(key)~"["~.(GT_VAL)~",100]"),
-                     bquote(beta~.(key)~"[100,1k]"),
-                     bquote(beta~.(key)~"[1k,10k]"),
-                     bquote(beta~.(key)~"[10k,100k]"),
-                     bquote(beta~"estimated mean, infections > 100k")) 
-  }
-  
 
-  #Check for 100k
-  subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
+#**********************************************
+#* 
+#* HISTORGRAM: POSTERIOR & PRIOR PLOTS
+#* 
+#*********************************************
 
-  
-  return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
-              num_conds = num_conds))
-             # selected_colors = selected_colors, num_conds = num_conds))
-}
-
-#POSTERIOR + PRIOR
-SCALE_PARAM <- function(vec_param){
-  
-  vec_scaled = vec_param/max(vec_param)
-  
-  return(vec_scaled)
-}
-
-#****************
-#* POSTERIOR & PRIOR PLOTS + HISTOGRAMS
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
                             n_repeats = 1000, main_font = 1.5, legend_location = 'topright',
@@ -322,9 +382,8 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   #                paste0('True Simulated Value: ', sim_val))
   
   if(PDF){
-    GET_LEGEND(legend_list, COLOR_ALPHA, legend_location, inset)
+    GET_LEGEND_HIST(legend_list, COLOR_ALPHA, legend_location, inset)
   }
-
   
   if(PDF){
     dev.off()
@@ -333,7 +392,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
 }
 
 #LEGEND FUNCTION
-GET_LEGEND <- function(legend_list, COLOR_ALPHA,
+GET_LEGEND_HIST <- function(legend_list, COLOR_ALPHA,
                        legend_location = 'topright', inset = 0.25){
   
   #COLOUR
@@ -368,122 +427,10 @@ GET_COLOR_ALPHA <- function(MODEL_COLOUR, alpha = 0.2){
   return(COLOR_ALPHA)
 }
 
-#SUBSET THE DATASET
-GET_SUBSET_DATAFRAME <- function(df_results, filter_param, param, FLAG_PARAM,
-                       GT = TRUE, GT_VAL = 30, num_conds = 5, #5
-                       FIXED = FALSE) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
+#POSTERIOR + PRIOR
+SCALE_PARAM <- function(vec_param){
   
-  'SUBSET DATAFRAME OF RESULTS'
+  vec_scaled = vec_param/max(vec_param)
   
-  #SUBSET DATAFRAME OF RESULTS
-  subset_df_list <- list(
-    df10 = df_results[(df_results[[filter_param]] > 10) & (df_results[[filter_param]] <= 100), ],
-    df100 = df_results[(df_results[[filter_param]] > 100) & (df_results[[filter_param]] <= 1000), ],
-    df1k = df_results[(df_results[[filter_param]] > 1000) & (df_results[[filter_param]] <= 10000), ],
-    df10k = df_results[(df_results[[filter_param]] > 10000) & (df_results[[filter_param]] <= 100000), ]) 
-  
-  return(subset_df_list)
-  
-}
-#   #Legend list
-#   key = ' estimated mean, infections:' #est infs
-#   
-#   #LEGEND LIST - DEFAULT 
-#   legend_list <- c(paste0(param, " True "),
-#                    paste0(param, " estimated mean & 95% CI, "), 
-#                    paste0("infections: [", GT_VAL, ",100]"), 
-#                    #paste0(param, " estimated mean, infections: [", GT_VAL, ",100]"), 
-#                    #paste0(param, key, "[100, 1k]"),
-#                    paste0(param, key, "[1k, 10k]"),
-#                    paste0(param, key, "[10k, 100k]"),
-#                    paste0(param, " estimated mean, infections > 100k")) 
-#   
-#   selected_colors <- viridis_palette[c(10, 8, 5)] 
-#   
-#   #R0 ALPHA OR BETA: EXPRESSIONS 
-#   if(FLAG_PARAM$r0) {
-#     legend_list <- c(expression(paste(R[0], " True ")),
-#                      bquote(R[0] ~ .(key) ~ "[" * .(GT_VAL) * ",100]"),
-#                      #bquote(R[0]~.(key)~"["~.(GT_VAL)~",100]"),
-#                      bquote(R[0]~.(key)~"[100,1k]"),
-#                      bquote(R[0]~.(key)~"[1k,10k]"),
-#                      bquote(R[0]~.(key)~"[10k,100k]"),
-#                      bquote(R[0]~"estimated mean, infections > 100k")) 
-#     
-#   } else if(FLAG_PARAM$alpha){
-#     legend_list <- c(expression(paste(alpha, " True ")),
-#                      bquote(alpha~.(key)~"["~.(GT_VAL) ~ ",100]"),
-#                      bquote(alpha~.(key)~"[100, 1k]"),
-#                      bquote(alpha~.(key)~"[1k, 10k]"),
-#                      bquote(alpha~.(key)~"[10k, 100k]"),
-#                      bquote(alpha~"estimated mean, infections > 100k")) 
-#     
-#   } else if (FLAG_PARAM$beta){
-#     legend_list <- c(expression(paste(beta, " True ")),
-#                      bquote(beta~.(key)~"["~.(GT_VAL)~",100]"),
-#                      bquote(beta~.(key)~"[100,1k]"),
-#                      bquote(beta~.(key)~"[1k,10k]"),
-#                      bquote(beta~.(key)~"[10k,100k]"),
-#                      bquote(beta~"estimated mean, infections > 100k")) 
-#   }
-#   
-#   #ADD MAGMA COLOURS 
-#   mag_cols = magma(5)
-#   colors_magma <- mag_cols[c(3, 4)]
-#   selected_colors = c(selected_colors, colors_magma)
-#   
-#   #Check for 100k
-#   subset_df_list$df100k <- df_results[df_results[[filter_param]] > 100000, ]
-#   
-#   
-#   return(list(subset_df_list = subset_df_list, legend_list = legend_list, 
-#               selected_colors = selected_colors, num_conds = num_conds))
-# }
-
-#GET LEGEND LISTS
-GET_LEGEND_LIST <- function(param, FLAG_PARAM,
-                       GT = TRUE, GT_VAL = 30) { #FLAG_PARAM = list(r0 = FALSE, k = FALSE, kappa = FALSE, alpha = FALSE, beta = FALSE)){
-
-  #LEGEND LIST
-  lineI =  paste0(param, " estimated mean & 95% CIs, ")
-  legend_list <- c(paste0(param, " True "),
-                   lineI, 
-                   paste0("infections: [", GT_VAL, ",100]"), 
-                   lineI,
-                   "infections: [100, 1k]",
-                   lineI,
-                   "infections: [1k, 10k]",
-                   lineI,
-                   "infections: [10k, 100k]",
-                   lineI,
-                   paste0("infections > 100k")) 
-
-  
-  #R0 ALPHA OR BETA: EXPRESSIONS 
-  if(FLAG_PARAM$r0) {
-    legend_list <- c(expression(paste(R[0], " True ")),
-                     bquote(R[0] ~ .(key) ~ "[" * .(GT_VAL) * ",100]"),
-                     #bquote(R[0]~.(key)~"["~.(GT_VAL)~",100]"),
-                     bquote(R[0]~.(key)~"[100,1k]"),
-                     bquote(R[0]~.(key)~"[1k,10k]"),
-                     bquote(R[0]~.(key)~"[10k,100k]"),
-                     bquote(R[0]~"estimated mean, infections > 100k")) 
-    
-  } else if(FLAG_PARAM$alpha){
-    legend_list <- c(expression(paste(alpha, " True ")),
-                     bquote(alpha~.(key)~"["~.(GT_VAL) ~ ",100]"),
-                     bquote(alpha~.(key)~"[100, 1k]"),
-                     bquote(alpha~.(key)~"[1k, 10k]"),
-                     bquote(alpha~.(key)~"[10k, 100k]"),
-                     bquote(alpha~"estimated mean, infections > 100k")) 
-    
-  } else if (FLAG_PARAM$beta){
-    legend_list <- c(expression(paste(beta, " True ")),
-                     bquote(beta~.(key)~"["~.(GT_VAL)~",100]"),
-                     bquote(beta~.(key)~"[100,1k]"),
-                     bquote(beta~.(key)~"[1k,10k]"),
-                     bquote(beta~.(key)~"[10k,100k]"),
-                     bquote(beta~"estimated mean, infections > 100k")) 
-  }
-  
+  return(vec_scaled)
 }
