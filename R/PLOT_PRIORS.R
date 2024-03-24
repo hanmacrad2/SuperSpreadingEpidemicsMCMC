@@ -55,7 +55,7 @@ GET_PRIOR_TITLE <-function(FLAG_PARAM){
   } else if (FLAG_PARAM$k){
     prior_title =  'Prior: Exponential(5)'
   } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
-    prior_title =  'Prior: Beta(2, 2)'
+    prior_title =  'Prior: Beta(2, 2), 95% Credible Interval'
   } else if (FLAG_PARAM$beta | FLAG_PARAM$b){
     prior_title =  'Prior: 1 + Gamma(3, 3)'
   }
@@ -170,3 +170,22 @@ GET_PRIOR_TITLE_FIGURE <-function(PRIORS){
     prior_title =  '1 + Gamma(3, 3) Prior used' 
   }
 }
+
+#***********
+#PRIOR CIs
+library(stats)
+
+GET_GAMMA_CI <- function(shape = 3, scale = 3){
+  
+  # Calculate the lower and upper bounds of the 95% confidence interval
+  lower_bound <- 1 + qgamma(0.025, shape, scale=scale)
+  upper_bound <- 1 + qgamma(0.975, shape, scale=scale)
+  
+  cat("95% Confidence Interval:", lower_bound, "->", upper_bound, "\n")
+  
+  gamma_ci = c(lower_bound, upper_bound)
+  
+  return(gamma_ci)
+}
+
+
