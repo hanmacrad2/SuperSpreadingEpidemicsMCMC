@@ -440,7 +440,7 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
     upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
     MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
-    bias = unlist(as.vector(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)]))
+    bias = unlist(as.vector(df_results[paste0('mean_', param)] - df_results[paste0('true_', param)])) 
     sd = unlist(as.vector(df_results[paste0('sd_', param)]))
     coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
     coverage_pc = 100*(sum(coverage)/num_runs)
