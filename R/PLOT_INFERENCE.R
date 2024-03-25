@@ -230,7 +230,7 @@ PLOT_PRIOR_CI <- function(FLAG_PARAM, prior_ci, dark_gray, x_lim,
   if(FLAG_PARAM$r0){
     x0 <- x0 - 0.07
   } else if (FLAG_PARAM$k) {
-    #y_start <- 0.051; y_end <- 0.693
+    x0 <- x0 - 0.003
   } else if (FLAG_PARAM$alpha){
     x0 <- x0 - 0.02
   } else if (FLAG_PARAM$a) {

@@ -173,8 +173,6 @@ GET_PRIOR_TITLE_FIGURE <-function(PRIORS){
 
 #***********
 #PRIOR CIs
-library(stats)
-
 GET_PRIOR_CI <- function(FLAG_PARAM){
   
   if(FLAG_PARAM$r0){
@@ -182,17 +180,22 @@ GET_PRIOR_CI <- function(FLAG_PARAM){
     upper_bound <- 3.688
     prior_mean = 1
     x0 <- lower_bound - 0.1
+    prior_ci = c(lower_bound, upper_bound, prior_mean)
    
   } else if (FLAG_PARAM$k) {
     lower_bound <- 0.051; upper_bound <- 0.693
+    prior_mean = 0.2
+    prior_ci = c(lower_bound, upper_bound, prior_mean)
     
   } else if (FLAG_PARAM$alpha){
     lower_bound <- 0.035; upper_bound <- 0.965
     prior_mean = 0.5
-    x0 <- x0 - 0.02
+    prior_ci = c(lower_bound, upper_bound, prior_mean)
+    
   } else if (FLAG_PARAM$a) {
     lower_bound <- 0.035; upper_bound <- 0.965
     prior_mean = 0.5
+    prior_ci = c(lower_bound, upper_bound, prior_mean)
     
   } else if (FLAG_PARAM$beta) {
     prior_ci = GET_GAMMA_CI()
@@ -203,7 +206,6 @@ GET_PRIOR_CI <- function(FLAG_PARAM){
     #x0 <- x_lim[1] - 0.5
   } 
   
-  prior_ci = c(lower_bound, upper_bound, prior_mean)
   return(prior_ci)
 }
 
