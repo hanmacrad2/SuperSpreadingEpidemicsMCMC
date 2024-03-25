@@ -456,7 +456,7 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     #Results
     print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
     print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
-    print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 3)))
+    print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 5)))
     print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
     print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
     print(paste0('coverage: ', sum(coverage)))
