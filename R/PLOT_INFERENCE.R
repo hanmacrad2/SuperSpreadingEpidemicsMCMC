@@ -234,12 +234,12 @@ PLOT_PRIOR_CI <- function(FLAG_PARAM, prior_ci, dark_gray, x_lim,
   } else if (FLAG_PARAM$alpha){
     x0 <- x0 - 0.02
   } else if (FLAG_PARAM$a) {
-
+    x0 <- x0 - 0.025
   } else if (FLAG_PARAM$beta) {
     x0 <- x_lim[1] - 0.25
   }
   else if (FLAG_PARAM$b){
-    x0 <- x_lim[1] - 0.5
+    x0 <- x_lim[1] - 0.65
   }
   
   #PLOT 95% CIS OF PRIORS

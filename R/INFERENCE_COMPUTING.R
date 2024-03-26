@@ -422,6 +422,25 @@ SIM_PERFORMANCE_R0 <- function(df_results){
   
 }
 
+SIM_PERFORMANCE_a <- function(df_results){
+  
+  #Bias, MAE
+  df_results$MAE = abs(df_results$mean_a - df_results$true_a)
+  df_results$bias = df_results$mean_a - df_results$true_a
+  num_runs = length(df_results$true_a)
+  
+  #Results
+  print(paste0('mean bias: ', round(mean(df_results$bias), 3)))
+  print(paste0('MAE: ', round(mean(df_results$MAE), 3)))
+  print(paste0('mean sd: ', round(mean(df_results$sd_a), 3)))
+  print(paste0('coverage: ', sum(df_results$coverage_a)))
+  print(paste0('% coverage: ', sum(df_results$coverage_a)/num_runs))
+  print(paste0(param, 'Effective Size (mean): ', round(mean_eff, 3)))
+  
+  #return(df_results)
+  
+}
+
 #*********************************
 #*
 #* PERFORMANCE METRICS
