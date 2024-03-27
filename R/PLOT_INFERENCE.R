@@ -315,8 +315,8 @@ GET_SELECTED_COLORS <-function(){
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
                             n_repeats = 1000, main_font = 1.5, legend_location = 'topright',
-                            inset = 0.2, cex = 1.8, bar_height = 20, true_height = 0.5, alpha = 0.2, 
-                            border_alpha = NA, PDF = TRUE){
+                            inset = 0.15, cex = 1.8, #inset = 0.2
+                            alpha = 0.2, border_alpha = NA, PDF = TRUE){
   
   #MODEL
   num_reps =  nrow(df_results); print(paste0('N reps: ', num_reps))
@@ -326,6 +326,8 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOUR, alpha)
   COLOR_BODER = GET_COLOR_ALPHA(MODEL_COLOUR, 0.3)
   mcmc_vec1 = unlist(df_results[paste0(param, '_mcmc')][1,])
+  max_y = ylimits[2]
+  bar_height = max_y
   
   #*********************
   
@@ -371,7 +373,6 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = xlimits, ylimits = ylimits, alpha = 0.3)
   
   #PLOT TRUE
-  max_y = ylimits[2]
   segments(sim_val, 0, sim_val, bar_height, col = 'black', lwd = 1.85) #2 #max_y-true_height
   
   #LEGEND

@@ -117,8 +117,8 @@ GET_COVERAGE <- function(param_val, mcmc_vec){
 #**************************************************************
 
 #' @export 
-INFER_BASELINE  <- function(r0_val, n_mcmc, #PRIORS_USED,
-                            STORE_MCMC = FALSE, lt_val = 20) { #100  
+INFER_BASELINE  <- function(r0_val, n_mcmc, #PRIORS_USED, min_val = 20
+                            STORE_MCMC = TRUE, min_val = 50) { #100  
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -126,7 +126,7 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, #PRIORS_USED,
   #DATA
   epidemic_data = SIMULATE_EPI_BASELINE(r0 = r0_val)
   
-  while(sum(epidemic_data) < lt_val){
+  while(sum(epidemic_data) < min_val){
     epidemic_data = SIMULATE_EPI_BASELINE(r0 = r0_val)
   }
   
@@ -148,14 +148,15 @@ INFER_BASELINE  <- function(r0_val, n_mcmc, #PRIORS_USED,
 # 2. SSE MODEL
 #*******************************************
 #' @export 
-INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = FALSE) {
+INFER_SSE <- function(r0_val, k_val, n_mcmc, min_val = 50, #20, 
+                      STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
   
   epidemic_data = SIMULATE_EPI_SSE(r0 = r0_val, k = k_val)
   
-  while(sum(epidemic_data) < lt_val){
+  while(sum(epidemic_data) < min_val){
     epidemic_data = SIMULATE_EPI_SSE(r0 = r0_val, k = k_val)
   }
   
@@ -183,14 +184,15 @@ INFER_SSE <- function(r0_val, k_val, n_mcmc, lt_val = 20, STORE_MCMC = FALSE) {
 # 3. SSI MODEL
 #*******************************************
 #' @export 
-INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = FALSE){ #{40000) {
+INFER_SSI <- function(r0_val, k_val, n_mcmc, min_val = 50, max_val = 5000,
+                      STORE_MCMC = TRUE){ #{40000) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
   data_ssi = SIMULATE_EPI_SSI(r0 = r0_val, k = k_val)
   epidemic_data = data_ssi$epidemic_data
   
-  while(sum(epidemic_data)< 30){
+  while(sum(epidemic_data)< min_val || sum(epidemic_data) > max_val){
     data_ssi = SIMULATE_EPI_SSI(r0 = r0_val, k = k_val)
     epidemic_data = data_ssi$epidemic_data
   }
@@ -219,14 +221,15 @@ INFER_SSI <- function(r0_val, k_val, n_mcmc, STORE_MCMC = FALSE){ #{40000) {
 #**********************************************
 #* SSEB MODEL
 #* ********************************************
-INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = FALSE) {
+INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, min_val = 50,
+                       STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
   epidemic_data = SIMULATE_EPI_SSEB(r0 = r0_val,
                                 alpha = alpha_val, beta = beta_val)
   
-  while(sum(epidemic_data) < 30){
+  while(sum(epidemic_data) < min_val){
     epidemic_data = SIMULATE_EPI_SSEB(r0 = r0_val,
                                       alpha = alpha_val, beta = beta_val)
   }
@@ -270,14 +273,15 @@ INFER_SSEB <- function(r0_val, alpha_val, beta_val, n_mcmc, STORE_MCMC = FALSE) 
 #* SSIB 
 #************************************************
 
-INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = FALSE) {
+INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, min_val = 50, max_val = 5000,
+                       STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
   epidemic_data = SIMULATE_EPI_SSIB(r0 = r0_val,
                                     a = a_val, b = b_val) 
   
-  while(sum(epidemic_data) < 30){
+  while(sum(epidemic_data) < min_val || sum(epidemic_data) > max_val){
     epidemic_data = SIMULATE_EPI_SSIB(r0 = r0_val, a = a_val, b = b_val)
   }
   
@@ -338,7 +342,7 @@ INFER_SSIB <- function(r0_val, a_val, b_val, n_mcmc, STORE_MCMC = FALSE) {
 #************************************************
 
 INFER_SSIB_NO_PRIOR_B <- function(r0_val, a_val, b_val, n_mcmc, SIM_DATA = FALSE,
-                                  STORE_MCMC = FALSE) {
+                                  STORE_MCMC = TRUE) {
   
   'Inference of baseline simulate data'
   cat(r0_val)
@@ -446,6 +450,7 @@ SIM_PERFORMANCE_a <- function(df_results){
 #* PERFORMANCE METRICS
 #* 
 #* **********************************
+#' @export 
 SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB = FALSE){
     
     #Param

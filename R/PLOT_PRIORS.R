@@ -51,13 +51,13 @@ GET_PRIOR_TITLE <-function(FLAG_PARAM){
   
   #PRIORS
   if(FLAG_PARAM$r0){
-    prior_title =  'Prior: Exponential(1),'
+    prior_title =  'Prior: Exponential(1)'
   } else if (FLAG_PARAM$k){
-    prior_title =  'Prior: Exponential(5),'
+    prior_title =  'Prior: Exponential(5)'
   } else if (FLAG_PARAM$alpha | FLAG_PARAM$a){
-    prior_title =  'Prior: Beta(2, 2),'
+    prior_title =  'Prior: Beta(2, 2)'
   } else if (FLAG_PARAM$beta | FLAG_PARAM$b){
-    prior_title =  'Prior: 1 + Gamma(3, 3), '
+    prior_title =  'Prior: 1 + Gamma(3, 3)'
   }
   
   return(prior_title)
