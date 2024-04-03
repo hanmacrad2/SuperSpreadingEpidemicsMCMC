@@ -7,7 +7,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
                                   cex = 1.7, 
                                   PDF = TRUE, GT_VAL = 50, 
                                   PLOT_PRIOR_CI = TRUE, 
-                                  num_conds = 5, inset = 0.47, 
+                                  num_conds = 5, legend_location = 'topright', inset = 0.47, 
                                   FLAG_PARAM = GET_PARAM(r0 = TRUE), 
                                   FLAG_MODEL = GET_FLAGS_MODELS(BASELINE = TRUE)){
   
@@ -93,7 +93,7 @@ PLOT_INFERENCE_RESULTS <- function(df_results, COMP_FOLDER, fig_num = '1',
   }
   
   #Legend
-  GET_LEGEND(legend_list, prior_title, selected_colors, dark_gray, num_conds, inset = inset)
+  GET_LEGEND(legend_list, prior_title, selected_colors, dark_gray, num_conds, legend_location, inset = inset)
   
   if(PDF){
     dev.off()
@@ -121,9 +121,9 @@ GET_SUBSET_DATAFRAME <- function(df_results, filter_param, param, FLAG_PARAM,
 
 #LEGEND FUNCTION
 GET_LEGEND <- function(legend_list, prior_title,
-                       selected_colors, dark_gray, num_conds, 
-                       cex = 1.3, inset = 0.47,
-                       legend_location = 'bottomright'){
+                       selected_colors, dark_gray, num_conds,
+                       legend_location,
+                       cex = 1.3, inset = 0.47){
   
   #COLOURS ADD WHITE
   selected_colors = c('black', selected_colors[1], 'white',
@@ -239,55 +239,13 @@ PLOT_PRIOR_CI <- function(FLAG_PARAM, prior_ci, dark_gray, x_lim,
     x0 <- x_lim[1] - 0.25
   }
   else if (FLAG_PARAM$b){
-    x0 <- x_lim[1] - 0.65
+    x0 <- x_lim[1] - 0.2
   }
   
   #PLOT 95% CIS OF PRIORS
   segments(x0, lower_bound, x0, upper_bound, col = dark_gray, lwd = 2)
   #MEAN: DOT
   points(x0, prior_mean, col = dark_gray, cex = cex, pch = 16)
-}
-
-PLOT_PRIOR_CI_V0 <- function(FLAG_PARAM, dark_gray, x_lim,
-                          x0 = 0, cex = 1.5){
-  
-  #PLOT 95% CIS OF PRIORS
-  list_prior_ci = GET_PRIOR_CI(FLAG_PARAM)
-  
-  if(FLAG_PARAM$r0){
-    y_start <- 0.025; y_end <- 3.688
-    prior_mean = 1
-    x0 <- x_lim[1] - 0.1
-  } else if (FLAG_PARAM$k) {
-    y_start <- 0.051; y_end <- 0.693
-  } else if (FLAG_PARAM$alpha){
-    y_start <- 0.035; y_end <- 0.965
-    prior_mean = 0.5
-    x0 <- x0 - 0.02
-  } else if (FLAG_PARAM$a) {
-    y_start <- 0.035; y_end <- 0.965
-    prior_mean = 0.5
-   
-  } else if (FLAG_PARAM$beta) {
-    list_prior_ci = GET_GAMMA_CI()
-    y_start <- list_prior_ci[1]
-    y_end <- list_prior_ci[2]
-    prior_mean = list_prior_ci[3]
-    x0 <- x_lim[1] - 0.25
-  }
-  else if (FLAG_PARAM$b){
-    list_prior_ci = GET_GAMMA_CI()
-    y_start <- list_prior_ci[1]
-    y_end <- list_prior_ci[2]
-    prior_mean = list_prior_ci[3]
-    x0 <- x_lim[1] - 0.5
-  } 
-  
-  #PLOT CI: VERTICAL LINE
-  segments(x0, y_start, x0, y_end, col = dark_gray, lwd = 2)
-  #MEAN: DOT
-  points(x0, prior_mean, col = dark_gray, cex = cex, pch = 16)
-  
 }
 
 #GET SELECTED COLOURS
@@ -314,8 +272,8 @@ GET_SELECTED_COLORS <-function(){
 
 PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
                             RESULTS_FOLDER, xlimits, ylimits, sim_val, 
-                            n_repeats = 1000, main_font = 1.5, legend_location = 'topright',
-                            inset = 0.15, cex = 1.8, #inset = 0.2
+                            main_font = 1.5, legend_location = 'topright',
+                            inset = 0.12, cex = 1.8, #inset = 0.2
                             alpha = 0.2, border_alpha = NA, PDF = TRUE){
   
   #MODEL
@@ -327,7 +285,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   COLOR_BODER = GET_COLOR_ALPHA(MODEL_COLOUR, 0.3)
   mcmc_vec1 = unlist(df_results[paste0(param, '_mcmc')][1,])
   max_y = ylimits[2]
-  bar_height = max_y
+  bar_height = max_y #- 2
   
   #*********************
   
@@ -356,7 +314,7 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   
   #HISTOGRAMS ADDITIONAL 
 
-  for (i in c(2:n_repeats)){
+  for (i in c(2:num_reps)){
     mcmc_vec = unlist(df_results[paste0(param, '_mcmc')][i,])
     hist(mcmc_vec, freq = FALSE,
          col = COLOR_ALPHA,

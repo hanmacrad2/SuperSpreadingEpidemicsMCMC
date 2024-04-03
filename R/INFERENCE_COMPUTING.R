@@ -451,7 +451,8 @@ SIM_PERFORMANCE_a <- function(df_results){
 #* 
 #* **********************************
 #' @export 
-SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB = FALSE){
+SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
+                            SSEB = FALSE){
     
     #Param
     param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -459,6 +460,11 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     num_runs = length(df_results$true_r0)
     
     #Bias, MAE, coverage 
+    true_val = mean(unlist(df_results[paste0('true_', param)]))
+    min_true = min(unlist(df_results[paste0('true_', param)]))
+    max_true = max(unlist(df_results[paste0('true_', param)]))
+    
+    #Mean
     mean_est = mean(unlist(df_results[paste0('mean_', param)]))
     mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
     lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
@@ -469,23 +475,27 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE), SSEB 
     coverage = unlist(as.vector(df_results[paste0('coverage_', param)]))
     coverage_pc = 100*(sum(coverage)/num_runs)
     
+    #Results
+    print(paste0(param, ' True value (mean): ', round(true_val, 3)))
+    print(paste0(param, ' True value range: [', round(min_true, 3), ',', round(max_true, 3), ']'))
+    print('***** Estimates (Mean): *****')
+    print(paste0(param, ' Mean Estimate: ', round(mean_est, 3)))
+    print(paste0('95% CIs (Mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
+    print(paste0('Bias (mean): ', round(mean(bias, na.rm = TRUE), 5)))
+    print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
+    print(paste0('sd (mean): ', round(mean(sd, na.rm = TRUE), 3)))
+    print(paste0('Coverage: ', sum(coverage)))
+    print(paste0('% Coverage (Mean): ', coverage_pc))
+    print(paste0(param, 'Effective Sample Size (mean): ', round(mean_eff, 3)))
+    
+    #ACCEPT RATE
     if(SSEB){
       mean_accept_rate = mean(unlist(df_results[paste0('accept_rate_', param)]))
       print(paste0('accept rate ', param, ':', round(mean_accept_rate, 3))) 
     } else {
-      accept_rate = mean(unlist(as.vector(df_results['accept_rate'])))
+      accept_rate = mean(unlist((df_results['accept_rate'])))
       print(paste0('accept rate: ', round(accept_rate, 3))) 
     }
-   
-    #Results
-    print(paste0(param, ' mean Estimate: ', round(mean_est, 3)))
-    print(paste0('95% CIs (mean): [', round(lower_ci_mean, 3), ' , ', round(upper_ci_mean, 3), ']'))
-    print(paste0('mean bias: ', round(mean(bias, na.rm = TRUE), 5)))
-    print(paste0('MAE: ', round(mean(MAE, na.rm = TRUE), 3)))
-    print(paste0('mean sd: ', round(mean(sd, na.rm = TRUE), 3)))
-    print(paste0('coverage: ', sum(coverage)))
-    print(paste0('% coverage: ', coverage_pc))
-    print(paste0(param, 'Effective Size (mean): ', round(mean_eff, 3)))
     
   }
 

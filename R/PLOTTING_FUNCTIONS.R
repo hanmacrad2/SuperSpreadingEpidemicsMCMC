@@ -75,19 +75,27 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #3. MCMC HISTOGRAM
 #********************************************
 PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xlim = c(0,10),
-                            cex = 1.8){
+                            cex = 1.8, single_inf = TRUE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   prior = GET_PRIOR_TITLE(FLAG_PARAM)
   
+  if(single_inf){
+    COLOR_BORDER = 'black'
+    hist_title = list_labels$title_hist_inf
+  } else {
+    COLOR_BORDER = MODEL_COLOR
+    hist_title = list_labels$main_hist_prior
+  }
+  
   hist(mcmc_vec, freq = FALSE, breaks = 200,
        xlab = list_labels$lab,
        xlim = xlim,
-       border = MODEL_COLOR,
+       border = COLOR_BORDER,
        col = MODEL_COLOR, 
-       main = list_labels$main_hist_prior,
+       main = hist_title,
        cex.lab=cex+0.35, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
@@ -129,6 +137,7 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #5. PLOT LOG-LIKELIHOOD
 #********************************************
 PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
+                                COL_LOG_LIKE = 'black',
                                 PLOT_LOGLIKE_MEAN = FALSE){
   
   'PLOT LOG LIKELIHOOD'
@@ -138,6 +147,7 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
   #1. TRACE
   plot(seq_along(loglike_vec), loglike_vec, type = 'l',
           xlab = 'Time', ylab = 'Log likelihood', 
+       col = COL_LOG_LIKE,
           main = bquote(paste(.(model), " log likelihood. N mcmc: ", .(n_mcmc))),
           cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)
   

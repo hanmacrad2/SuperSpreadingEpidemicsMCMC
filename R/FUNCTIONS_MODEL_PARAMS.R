@@ -88,7 +88,10 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist_prior = bquote(paste(italic(R[0]), " Posterior. Prior: Exponential(1)")),
                        main_mean_sim = bquote(paste(italic(R[0]), " Cumulative mean. Simulated = 2.0")), #value 
                        main_mean0 = bquote(paste(italic(R[0]), " Cumulative mean - ", .(model)~ "model")),
-                       legend_posterior = expression(paste('Estimated Posteriors of R'[0], '. N = 1000')))
+                       legend_posterior = expression(paste('Estimated Posteriors of R'[0], '. N = 1000')),
+                       legend_mcmc_hist =  expression(paste('Inferred Posterior distribution of R'[0], '. N = 10,000')),
+                       legend_true_val =  expression(paste('True, Simulated value of R'[0], ' = 2.0')),
+                       title_hist_inf = bquote(paste(.(model)~ "model - Posterior distribution of ", italic(R[0]))))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 
