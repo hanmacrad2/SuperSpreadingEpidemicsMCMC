@@ -91,7 +91,9 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        legend_posterior = expression(paste('Estimated Posteriors of R'[0], '. N = 1000')),
                        legend_mcmc_hist =  expression(paste('Inferred Posterior distribution of R'[0], '. N = 10,000')),
                        legend_true_val =  expression(paste('True, Simulated value of R'[0], ' = 2.0')),
-                       title_hist_inf = bquote(paste(.(model)~ "model - Posterior distribution of ", italic(R[0]))))
+                       title_hist_inf1 = bquote(paste(.(model)~ "model - Posterior distribution of ", italic(R[0]))),
+                       title_hist_inf = bquote(paste("The Inferred Posterior distribution of ", italic(R[0]), " in the ", .(model)~ "model")),
+                       cum_mean = expression(paste('The Cumulative mean of R'[0])))
     
   } else if (FLAG_PARAM$alpha) {
     list_labels = list(lab = expression(paste(italic(alpha))), 

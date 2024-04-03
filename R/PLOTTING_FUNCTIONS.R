@@ -118,18 +118,24 @@ PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.8){
 #4. PLOT CUMULATIVE MEAN
 #********************************************
 PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
-                             MODEL_COLOR, cex = 1.8, ylim =  c(1.8, 2.2)){
+                             MODEL_COLOR, cex = 1.8, ylim =  c(1.8, 2.2), SINGLE_INF = TRUE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   cum_mean = cumsum(mcmc_vec)/seq_along(mcmc_vec)
   
+  if(SINGLE_INF){
+    main_title = list_labels$cum_mean
+  } else {
+    main_title = list_labels$main_mean_sim
+  }
+  
   plot(seq_along(cum_mean), cum_mean, 
        ylim = ylim,
        col = MODEL_COLOR,
        xlab = 'Time', ylab = list_labels$lab,
-       main =  list_labels$main_mean_sim,
+       main =  main_title,
        cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
 }
 
@@ -179,4 +185,27 @@ PLOT_SIGMA <- function(sigma_vec, cex = 1.8){
        xlab = 'Time', ylab = label_sigma, 
           main =label_sigma,
           cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+}
+
+#LEGEND
+GET_LEGEND_HIST_SINGLE <- function(legend_list, COLOR_ALPHA,
+                            legend_location = 'topright', inset = 0.25){
+  
+  #COLOUR
+  COLOR_ALPHA = GET_COLOR_ALPHA(COLOR_ALPHA, alpha = 0.8)
+  
+  #Legend
+  num_conds = length(legend_list)
+  pch_list = rep(19, num_conds)
+  legend(legend_location, #x = "topleft", y = "topleft", #"center", legend_list,
+         legend_list,
+         cex = 1.1,
+         inset=c(-inset,0),
+         col = c(COLOR_ALPHA, 'gray', 'black'),
+         lwd = rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
+         lty = rep(1, num_conds), #c(1, 1),
+         #pch = pch_list, #c(NA, pch_list, NA, NA, NA),
+         text.font = 1.8, #1.45
+         pt.cex = 0.7,
+         bty = "n")
 }
