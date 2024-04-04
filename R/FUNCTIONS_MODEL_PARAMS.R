@@ -69,6 +69,7 @@ GET_PARAM <- function(r0 = FALSE, k = FALSE, alpha = FALSE,
   return(FLAG_PARAM)
 }
 
+
 #***************************************************
 #3. PARAMETERS LABELS
 #*******************************************************
@@ -107,7 +108,8 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist_prior = bquote(paste(italic(alpha), " Posterior. Prior: Beta(2,2)")),
                        main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated = 0.5")),
                        main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")),
-                       legend_posterior = expression(paste("Estimated Posteriors of  ", alpha, " . N = 1000")))
+                       legend_posterior = expression(paste("Estimated Posteriors of  ", alpha, " . N = 1000")),
+                       title_trace =  bquote(paste(italic(alpha) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')))
     
   } else if (FLAG_PARAM$beta){
     list_labels = list(lab = expression(paste(italic(beta))), 
@@ -119,9 +121,11 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist_prior = bquote(paste(italic(beta), " Posterior. Prior: 1 + Gamma(3,3)")),
                        main_mean_sim = bquote(paste(italic(beta), " Cumulative mean. Simulated = 10")),
                        main_mean2 = bquote(paste(italic(beta), " Cumulative mean - ", .(model)~ "model")),
-                       legend_posterior = expression(paste("Estimated Posteriors of  ", beta, " . N = 1000")))
+                       legend_posterior = expression(paste("Estimated Posteriors of  ", beta, " . N = 1000")),
+                       title_trace =  bquote(paste(italic(beta) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')))
   } else {
     
+    #sim_val = GET_PARAM_SIM_VAL(FLAG_PARAM)
     list_labels = list(lab = bquote(paste(.(param))), 
                        xlab = paste0('True ', param),
                        ylab = paste0('Estimated posterior mean of ', param),
@@ -130,7 +134,10 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist =  bquote(paste(.(param), " Posterior - ", .(model)~ "model")),
                        main_mean2 =  bquote(paste(.(param), " Cumulative mean - ", .(model)~ "model")),
                        legend_posterior = paste0('Estimated Posteriors of ', param, '. N = 1000'),
-                       title_trace =  bquote(paste(.(param) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')))
+                       #DIDN'T WORK IN LEGEND!! legend_mcmc_hist =  bquote(paste('Inferred Posterior distribution of ', .(param) ~ '. N = 10,000')),
+                       #DIDN'T WORK IN LEGEND!! #legend_true_val =  bquote(paste('True, Simulated value of ', .(param), '= ', .(sim_val))),
+                       title_trace =  bquote(paste(.(param) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')),
+                       title_hist_inf = bquote(paste("The Inferred Posterior distribution of"~ .(param)~ "in the ", .(model) ~ "model")))
     
     list_labels = GET_ADDITIONAL_TITLES(FLAG_PARAM, list_labels)
   } 
@@ -149,6 +156,8 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
     
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Exponential(5)"))
     list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated = 0.1"))
+    list_labels$legend_mcmc_hist = expression(paste('Inferred Posterior distribution of k. N = 10,000'))
+    list_labels$legend_true_val = expression(paste('True, Simulated value of k = 0.1'))
     
   } else if (FLAG_PARAM$a) {
     
@@ -167,6 +176,17 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
   }
   
   return(list_labels)
+}
+
+
+#***********
+GET_PARAM_SIM_VAL <- function (FLAG_PARAM){
+  
+  if(FLAG_PARAM$k){
+    sim_val = 0.1
+  }
+  
+  return(sim_val)
 }
 
 #***************************************************

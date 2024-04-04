@@ -2,12 +2,12 @@
 #* PLOT PRIORS - OVERLAPPING PRIOR ON FIGURES                       
 #*****************************
 
-PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0.9,4.0), 
+PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlim, #xlimits = c(0.9,4.0), 
                             alpha = 0.2){ #0.4
   
   #PRIORS
-  x_min = xlimits[1] #min(mcmc_vec) 
-  x_max = xlimits[2] #max(mcmc_vec)
+  x_min = xlim[1] #min(mcmc_vec) 
+  x_max = xlim[2] #max(mcmc_vec)
   x = seq(from = x_min, to = x_max, length = 5000)
               
   if(FLAG_PARAM$r0){
@@ -18,7 +18,7 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0.9,4.0),
   } else if (FLAG_PARAM$k){
     
     rate_k = GET_LIST_PRIORS_SSE()$k[1]
-    print(paste0('rate_k', rate_k))
+    print(paste0('exponetial prior rate of k: ', rate_k))
     
     y = dexp(x, rate = rate_k)
     
