@@ -2,7 +2,7 @@
 #* PLOT PRIORS - OVERLAPPING PRIOR ON FIGURES                       
 #*****************************
 
-PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits, ylimits, #xlimits = c(0,3), ylimits = c(0,15),
+PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlimits = c(0.9,4.0), 
                             alpha = 0.2){ #0.4
   
   #PRIORS
