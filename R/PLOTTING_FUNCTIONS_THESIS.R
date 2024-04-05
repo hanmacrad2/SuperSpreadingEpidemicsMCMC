@@ -3,7 +3,7 @@
 #********************************************
 #1. SIMULATED DATA 
 #********************************************
-PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER, 
+PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER,
                           cex = 1.1, main_font = 2.5, axis_font = 1.6,
                           PDF = TRUE){
   
@@ -31,7 +31,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER,
   } else if (FLAGS_MODELS$SSI){
     
     data_title = bquote(paste(.(model), " simulated epidemic data: ", italic(R[0]),
-                              " = 2.0, ", k, " = 0.16"))
+                              " = 2.0, ",italic(k), " = 0.2 "))
   } else if (FLAGS_MODELS$SSEB){
     data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
                               " = 2.0, ", alpha, " = 0.5, ", beta, " = 10"))
@@ -95,8 +95,8 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #3. MCMC HISTOGRAM
 #********************************************
 PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
-                            MODEL_COLOR, xlim, ylim,
-                            cex = 1.1, single_inf = TRUE){
+                            MODEL_COLOR, xlim, ylim, 
+                            cex = 1.4, breaks_hist = 100, single_inf = TRUE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -111,22 +111,23 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
     hist_title = list_labels$main_hist_prior
   }
   
-  hist(mcmc_vec, freq = FALSE, breaks = 200,
+  hist(mcmc_vec, freq = FALSE, breaks = breaks_hist,
        xlab = list_labels$lab,
        xlim = xlim,
        ylim = ylim,
        border = COLOR_BORDER,
        col = MODEL_COLOR, 
        main = hist_title,
-       cex.lab=cex+0.35, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
+       cex.lab=cex+0.35, cex.axis=cex+0.3, cex.main=cex+0.2, cex.sub=cex+0.3)
 }
 
 #*************************
 #* HIST + PRIOR 
 PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FOLDER,
                                     MODEL_COLOR, sim_val, xlim, ylim,
-                                    inset = -0.1, 
-                                    cex = 1.25, legend_location = 'topright', 
+                                    inset =  -0.007, cex = 1.45,
+                                    breaks_hist = 100, legend_location = 'topright', 
+                                    diff_max_y_bar_y = 0.05,
                                     PDF = TRUE ){
 
   #PARAMS
@@ -136,7 +137,7 @@ PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FO
   prior_title = GET_PRIOR_TITLE(FLAG_PARAM)
   legend_list = c(list_labels$legend_mcmc_hist, prior_title,
                   list_labels$legend_true_val)
-  true_bar_height = ylim[2] - 0.05
+  true_bar_height = ylim[2] - diff_max_y_bar_y
   
   #PLOTTING
   if(PDF){
@@ -145,14 +146,15 @@ PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FO
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_', param, '_HISTOGRAM_', time_stamp, '.pdf')  
     #pdf(paste0(plot_folder, pdf_file), width = 11.0, height = 7.2) 
-    pdf(paste0(plot_folder, pdf_file), width = 11.5, height = 7.5) 
+    #pdf(paste0(plot_folder, pdf_file), width = 11.5, height = 7.5) 
+    pdf(paste0(plot_folder, pdf_file), width = 14.5, height = 9.0) 
   }
   #MARGIN
-  par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
+  par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
   
   #HIST
   PLOT_MCMC_HIST(mcmc_vec, FLAG_MODEL, FLAG_PARAM, 
-                 MODEL_COLOR, xlim, ylim)
+                 MODEL_COLOR, xlim, ylim, cex = cex, breaks_hist = breaks_hist)
   
   #PRIOR
   PLOT_PRIOR_DIST(FLAG_PARAM, xlim, alpha = 0.4)
@@ -304,7 +306,7 @@ GET_LEGEND_INF_HIST <- function(legend_list, MODEL_COLOR, # inset = 0.25 # legen
 PLOT_TRUE_LINE <- function(sim_val, mcmc_vec, true_bar_height, VERTICAL = FALSE){
   
   if(VERTICAL){
-  segments(sim_val, 0, sim_val, true_bar_height, col = 'black', lwd = 2.5)
+  segments(sim_val, 0, sim_val, true_bar_height, col = 'black', lwd = 2.8)
   } else {
     segments(0, sim_val, length(mcmc_vec), sim_val, col = 'black', lwd = 2)
   }

@@ -108,8 +108,11 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_hist_prior = bquote(paste(italic(alpha), " Posterior. Prior: Beta(2,2)")),
                        main_mean_sim = bquote(paste(italic(alpha), " Cumulative mean. Simulated = 0.5")),
                        main_mean2 = bquote(paste(italic(alpha), " Cumulative mean - ", .(model)~ "model")),
-                       legend_posterior = expression(paste("Estimated Posteriors of  ", alpha, " . N = 1000")),
-                       title_trace =  bquote(paste(italic(alpha) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')))
+                       legend_posterior = expression(paste("Estimated Posteriors of  ", italic(alpha), " . N = 1000")),
+                       legend_mcmc_hist = expression(paste('Inferred Posterior distribution of ', italic(alpha), '. N = 10,000')),
+                       legend_true_val = expression(paste('True, Simulated value of ', italic(alpha), ' = 0.5')),
+                       title_trace =  bquote(paste(italic(alpha) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')),
+                       title_hist_inf = bquote(paste("The Inferred Posterior distribution of"~ italic(alpha) ~ "in the ", .(model) ~ "model")))
     
   } else if (FLAG_PARAM$beta){
     list_labels = list(lab = expression(paste(italic(beta))), 
@@ -122,7 +125,10 @@ GET_PARAM_LABEL <- function(FLAG_PARAM, model) { #model or FLAG_MODELS
                        main_mean_sim = bquote(paste(italic(beta), " Cumulative mean. Simulated = 10")),
                        main_mean2 = bquote(paste(italic(beta), " Cumulative mean - ", .(model)~ "model")),
                        legend_posterior = expression(paste("Estimated Posteriors of  ", beta, " . N = 1000")),
-                       title_trace =  bquote(paste(italic(beta) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')))
+                       legend_mcmc_hist = expression(paste('Inferred Posterior distribution of ', italic(beta), '. N = 10,000')),
+                       legend_true_val = expression(paste('True, Simulated value of ', italic(beta), ' = 10')),
+                       title_trace =  bquote(paste(italic(beta) ~ "of the" ~ .(model), ' Model - MCMC Trace Plot')),
+                       title_hist_inf = bquote(paste("The Inferred Posterior distribution of"~ italic(beta) ~ "in the ", .(model) ~ "model")))
   } else {
     
     #sim_val = GET_PARAM_SIM_VAL(FLAG_PARAM)
