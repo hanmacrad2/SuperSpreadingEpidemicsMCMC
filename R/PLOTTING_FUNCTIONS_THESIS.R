@@ -125,7 +125,7 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #* HIST + PRIOR 
 PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FOLDER,
                                     MODEL_COLOR, sim_val, xlim, ylim,
-                                    inset =  -0.007, cex = 1.45,
+                                    inset =  -0.007, cex = 1.75,
                                     breaks_hist = 100, legend_location = 'topright', 
                                     diff_max_y_bar_y = 0.05,
                                     PDF = TRUE ){
@@ -291,13 +291,13 @@ GET_LEGEND_INF_HIST <- function(legend_list, MODEL_COLOR, # inset = 0.25 # legen
   pch_list = rep(19, num_conds)
   legend(legend_location, #x = "topleft", y = "topleft", #"center", legend_list,
          legend_list,
-         cex = 1.1,
+         cex = 1.45,
          inset=c(inset,0), #c(-inset,0),
          col = c(COLOR_ALPHA, 'gray', 'black'),
          lwd = rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
          lty = rep(1, num_conds), #c(1, 1),
          #pch = pch_list, #c(NA, pch_list, NA, NA, NA),
-         text.font = 1.8, #1.45
+         text.font = 2.3, #1.45
          pt.cex = 0.7,
          bty = "n")
 }
