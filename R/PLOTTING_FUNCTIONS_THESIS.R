@@ -238,9 +238,6 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, RESULTS_FOLDER,
   }
   par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
   
-  #PARAMS
-  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  
   #1. TRACE
   plot(seq_along(loglike_vec), loglike_vec, type = 'l',
        xlab = 'Time', ylab = 'Log likelihood', 
