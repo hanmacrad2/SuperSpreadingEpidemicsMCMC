@@ -30,8 +30,6 @@ PLOT_PRIOR_DIST <- function(FLAG_PARAM, xlim, #xlimits = c(0.9,4.0),
     
   } else if (FLAG_PARAM$beta | FLAG_PARAM$b){ 
     
-    x_min = 0 #min(mcmc_vec) 
-    x_max = 20 # max(mcmc_vec)
     x = seq(from = x_min, to = x_max, length = 5000)
     y = dgamma(x-1, shape = 3, scale = 3)
   }

@@ -167,12 +167,21 @@ PLOT_SSIB_DATA <- function(mcmc_ssib, list_data_ssib, cex, lwd = 2.0,
   
 }
 
-PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
-                              cex = 1.7, lwd = 2.0, 
-                           col_ss = 'aquamarine', col_ns = 'orange'){
+PLOT_SSIB_DATA_CI_ORIG <- function(mcmc_ssib, list_data_ssib, RESULTS_FOLDER,
+                              cex = 1.1, lwd = 2.0, model = 'SSIB',
+                           col_ss = 'aquamarine', col_ns = 'orange', PDF = TRUE){
+  
+  #PLOT
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('NS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = 7.5, height = 5.2) 
+  }
   
   #TRUE VALUES
-  par(mfrow = c(1,1))
+  #par(mfrow = c(1,1))
   non_ss = list_data_ssib$non_ss
   ss = list_data_ssib$ss
   
@@ -189,12 +198,16 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, median)
   
   #************
-  #nsI TRUE
-  title = bquote('Non Super-Spreading Infections - True vs Inferred')
+  #NS TRUE
+  title = bquote(paste('Non Super-Spreading Infections ', .(model), ' model - True vs Inferred'))
   y_lim = c(0, max(non_ss, upper_ci_ns))
   plot(seq_along(non_ss), non_ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
-       main = title, ylim = y_lim, lwd = lwd + 1.5)
+       main = title, 
+       ylim = y_lim, 
+       lwd = 2.0, #3.5,
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
+       #lwd = lwd + 1.5)
        #col = col_ns, lwd = lwd)
        #cex.lab= cex, cex.axis= cex, cex.main= cex, cex.sub=cex)
   
@@ -203,7 +216,7 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_ns, lwd = lwd)
   
   #Final DOTTED
-  #lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
+  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
   
   #CIs
   x = seq_along(upper_ci_ns)
@@ -212,12 +225,23 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
   #mean
-  #legend('topleft', c('True', 'Median inferred', 'Final inferred','95% CIs'),
-  #       col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+  legend('topleft', c('True value', 'Median inferred', 'Final inferred','95% CIs'),
+        col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
 
   #************
   #SSI TRUE
-  title = bquote('Super-Spreading Infections - True vs Inferred')
+  
+  if(PDF){
+    dev.off()
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('SS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = 7.5, height = 5.2) 
+  }
+  
+  title = bquote(paste('Super-Spreading Infections ', .(model), ' model - True vs Inferred'))
+  #title = bquote('Super-Spreading Infections - True vs Inferred')
   y_lim = c(0, max(ss, upper_ci_ss))
   plot(seq_along(ss), ss,  type = 'l',
        xlab = 'Time', ylab = 'Daily infection count',
@@ -230,7 +254,7 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
   lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ss, lwd = lwd)
   
   #Final (DOTTED)
-  #lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
+  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
 
   #CIs
   x = seq_along(upper_ci_ss)
@@ -238,9 +262,13 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib,
           c(upper_ci_ss, rev(lower_ci_ss)),
           col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
   
-  #legend('topleft', c('True', 'Mean', 'Final', '95% CIs'),
-  #       col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
-  #       lty = c(1,1,2,1))
+  legend('topleft', c('True value', 'Median inferred', 'Final inferred', '95% CIs'),
+         col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
+         lty = c(1,1,2,1))
+  
+  if(PDF){
+    dev.off()
+  }
 }
 
 #PLOT

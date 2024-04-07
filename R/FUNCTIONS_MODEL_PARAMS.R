@@ -4,7 +4,8 @@
 #********************************************
 #1. MODELS
 #*******************************************
-GET_FLAGS_MODELS <-function(BASELINE = FALSE, SSE = FALSE, SSI = FALSE , SSEB = FALSE, SSIB = FALSE){
+GET_FLAGS_MODELS <-function(BASELINE = FALSE, SSE = FALSE, SSI = FALSE , SSEB = FALSE, 
+                            SSIB = FALSE){
   
   if(BASELINE){
     FLAGS_MODELS = list(Baseline = TRUE, SSE = FALSE, SSI = FALSE,
@@ -28,6 +29,17 @@ GET_FLAGS_MODELS <-function(BASELINE = FALSE, SSE = FALSE, SSI = FALSE , SSEB = 
                         SSEB = FALSE, SSIB = TRUE) 
     
   }
+  
+  return(FLAGS_MODELS)
+}
+
+GET_FLAGS_MODELS_2 <-function(BASELINE = FALSE, SSE = FALSE, SSI = FALSE , SSEB = FALSE, 
+                            SSIB_NO_DATA_AUG = FALSE){
+  
+  if(SSIB_NO_DATA_AUG){
+    FLAGS_MODELS = list(Baseline = FALSE, SSE = FALSE, SSI = FALSE,
+                        SSEB = FALSE, SSIB = FALSE, SSIB_NO_DA = TRUE) 
+  } 
   
   return(FLAGS_MODELS)
 }
@@ -169,11 +181,15 @@ GET_ADDITIONAL_TITLES <- function(FLAG_PARAM, list_labels){
     
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: Beta(2,2)"))
     list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated = 0.5"))
+    list_labels$legend_mcmc_hist = expression(paste('Inferred Posterior distribution of a. N = 10,000'))
+    list_labels$legend_true_val = expression(paste('True, Simulated value of a = 0.5'))
     
   } else if (FLAG_PARAM$b) {
     
     list_labels$main_hist_prior = bquote(paste(.(param), " Posterior. Prior: 1 + Gamma(3,3)"))
     list_labels$main_mean_sim = bquote(paste(.(param), " Cumulative mean. Simulated value = 10"))
+    list_labels$legend_mcmc_hist = expression(paste('Inferred Posterior distribution of b. N = 10,000'))
+    list_labels$legend_true_val = expression(paste('True, Simulated value of b = 10'))
     
   } else if (FLAG_PARAM$c){
     
