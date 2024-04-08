@@ -3,7 +3,7 @@
 #********************************************
 #1. SIMULATED DATA 
 #********************************************
-PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '', 
+PLOT_SIM_DATA_V1 <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '', 
                           fig_num = 1, cex = 1.9, main_font = 2.8, axis_font = 2.4,
                           PDF = FALSE){
   
@@ -56,7 +56,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER = '',
 #********************************************
 #2. MCMC TRACE
 #********************************************
-PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
+PLOT_MCMC_TRACE_V1 <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
                              MODEL_COLOR, cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
@@ -74,7 +74,7 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #********************************************
 #3. MCMC HISTOGRAM
 #********************************************
-PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xlim = c(0,10),
+PLOT_MCMC_HIST_V1 <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xlim = c(0,10),
                             cex = 1.8, single_inf = TRUE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
@@ -102,7 +102,7 @@ PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM, MODEL_COLOR, xli
 #********************************************
 #3b. R0 MCMC TRACE
 #********************************************
-PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.8){
+PLOT_R0_TRACE_V1 <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.8){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   
@@ -117,7 +117,7 @@ PLOT_R0_TRACE <- function (r0_mcmc, FLAGS_MODELS, MODEL_COLOR, cex = 1.8){
 #********************************************
 #4. PLOT CUMULATIVE MEAN
 #********************************************
-PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
+PLOT_CUMULATIVE_MEAN_V1 <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
                              MODEL_COLOR, cex = 1.8, ylim =  c(1.8, 2.2), SINGLE_INF = TRUE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
@@ -142,7 +142,7 @@ PLOT_CUMULATIVE_MEAN <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #********************************************
 #5. PLOT LOG-LIKELIHOOD
 #********************************************
-PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
+PLOT_LOG_LIKELIHOOD_V1 <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
                                 COL_LOG_LIKE = 'black',
                                 PLOT_LOGLIKE_MEAN = FALSE){
   
@@ -175,7 +175,7 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, n_mcmc, cex = 1.8,
 #********************************************
 #6. PLOT SIGMA
 #*********************************************
-PLOT_SIGMA <- function(sigma_vec, cex = 1.8){
+PLOT_SIGMA_V1 <- function(sigma_vec, cex = 1.8){
   
   'Plot adaptive sigma. *Need to fix in write up'
   sigma_vec = sigma_vec[2:length(sigma_vec)]
@@ -188,7 +188,7 @@ PLOT_SIGMA <- function(sigma_vec, cex = 1.8){
 }
 
 #LEGEND
-GET_LEGEND_HIST_SINGLE <- function(legend_list, COLOR_ALPHA,
+GET_LEGEND_HIST_SINGLE_V1 <- function(legend_list, COLOR_ALPHA,
                             legend_location = 'topright', inset = 0.25){
   
   #COLOUR

@@ -60,12 +60,17 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER,
 #********************************************
 PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
                              RESULTS_FOLDER, MODEL_COLOR, sim_val,
-                             cex = 1.1, PDF = TRUE){
+                             cex = 1.1, PDF = TRUE, FLAG_DATA_AUG = FALSE){
   
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
   list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
-
+  
+  if(FLAG_DATA_AUG){
+    FLAG_MODEL_DA = GET_FLAGS_MODELS_2(SSIB_NO_DA = TRUE)
+    list_labels = GET_PARAM_LABEL_DA(FLAG_PARAM, FLAG_MODEL, FLAG_MODEL_DA) 
+  }
+  
   #PLOTTING
   if(PDF){
     plot_folder = paste0(RESULTS_FOLDER, '/plots/')
@@ -94,13 +99,10 @@ PLOT_MCMC_TRACE <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
 #********************************************
 #3. MCMC HISTOGRAM
 #********************************************
-PLOT_MCMC_HIST <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
+PLOT_MCMC_HIST <- function (mcmc_vec, list_labels, FLAG_PARAM,
                             MODEL_COLOR, xlim, ylim, 
                             cex = 1.4, breaks_hist = 100, single_inf = TRUE){
   
-  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
-  list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
   prior = GET_PRIOR_TITLE(FLAG_PARAM)
   
   if(single_inf){
@@ -127,9 +129,8 @@ PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FO
                                     MODEL_COLOR, sim_val, xlim, ylim,
                                     inset =  -0.007, cex = 1.75,
                                     breaks_hist = 100, legend_location = 'topright', 
-                                    diff_max_y_bar_y = 0.05,
+                                    diff_max_y_bar_y = 0.05, FLAG_DATA_AUG = FALSE,
                                     PDF = TRUE ){
-
   #PARAMS
   model = names(FLAG_MODEL)[which(unlist(FLAG_MODEL))] 
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -138,6 +139,11 @@ PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FO
   legend_list = c(list_labels$legend_mcmc_hist, prior_title,
                   list_labels$legend_true_val)
   true_bar_height = ylim[2] - diff_max_y_bar_y
+  
+  if(FLAG_DATA_AUG){
+    FLAG_MODEL_DA = GET_FLAGS_MODELS_2(SSIB_NO_DA = TRUE)
+    list_labels = GET_PARAM_LABEL_DA(FLAG_PARAM, FLAG_MODEL, FLAG_MODEL_DA) 
+  }
   
   #PLOTTING
   if(PDF){
@@ -153,7 +159,7 @@ PLOT_MCMC_HIST_AND_PRIOR <-function(mcmc_vec, FLAG_MODEL, FLAG_PARAM, RESULTS_FO
   par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
   
   #HIST
-  PLOT_MCMC_HIST(mcmc_vec, FLAG_MODEL, FLAG_PARAM, 
+  PLOT_MCMC_HIST(mcmc_vec, list_labels, FLAG_PARAM, 
                  MODEL_COLOR, xlim, ylim, cex = cex, breaks_hist = breaks_hist)
   
   #PRIOR
@@ -219,13 +225,16 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, RESULTS_FOLDER,
                                 cex = 1.1, n_mcmc = 125000,
                                 #COL_LOG_LIKE = 'black',
                                 PDF = TRUE, PLOT_LOGLIKE_MEAN = FALSE,
-                                SSIB_NO_DA = FALSE){
+                                FLAG_DATA_AUG = FALSE){
   
   'PLOT LOG LIKELIHOOD'
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
   
-  if(SSIB_NO_DA){
-    model = 'SSIB, known SS data'
+  #TITLE OF PLOT
+  if(FLAG_DATA_AUG){
+    title = bquote(paste("The log-likelihood of the ", .(model), " model, Known SS Infections"))
+  } else {
+    title = bquote(paste("The log-likelihood of the ", .(model), " model"))
   }
   
   #PLOTTING
@@ -242,9 +251,7 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, RESULTS_FOLDER,
   plot(seq_along(loglike_vec), loglike_vec, type = 'l',
        xlab = 'Time', ylab = 'Log likelihood', 
        col = COL_LOG_LIKE,
-       #main = paste0('The log-likelihood of the ', model, ' model'),
-       main = bquote(paste("The log-likelihood of the ", .(model), " model")),
-       #main = bquote(paste(.(model), " log likelihood. N mcmc: ", .(n_mcmc))),
+       main = title,
        cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)
   
   if(PDF){
@@ -259,7 +266,8 @@ PLOT_LOG_LIKELIHOOD <- function(loglike_vec, FLAGS_MODELS, RESULTS_FOLDER,
          #ylim = ylim,
          col = 'black',
          xlab = 'Time', ylab = 'Log likelihood',
-         main = bquote(paste("Log likelihood - ", .(model), " model")),
+         main = bquote(paste("Log likelihood - ", .(model), " model")), 
+         #main = bquote(paste(.(model), " log likelihood. N mcmc: ", .(n_mcmc))),
          cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.2, cex.sub=cex)
   }
   
@@ -303,6 +311,36 @@ GET_LEGEND_INF_HIST <- function(legend_list, MODEL_COLOR, # inset = 0.25 # legen
          text.font = 2.3, #1.45
          pt.cex = 0.7,
          bty = "n")
+}
+
+#********************************************
+#3. MCMC HISTOGRAM
+#********************************************
+PLOT_MCMC_HIST_V0 <- function (mcmc_vec, FLAGS_MODELS, FLAG_PARAM,
+                               MODEL_COLOR, xlim, ylim, 
+                               cex = 1.4, breaks_hist = 100, single_inf = TRUE){
+  
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
+  list_labels = GET_PARAM_LABEL(FLAG_PARAM, model)
+  prior = GET_PRIOR_TITLE(FLAG_PARAM)
+  
+  if(single_inf){
+    COLOR_BORDER = 'black'
+    hist_title = list_labels$title_hist_inf
+  } else {
+    COLOR_BORDER = MODEL_COLOR
+    hist_title = list_labels$main_hist_prior
+  }
+  
+  hist(mcmc_vec, freq = FALSE, breaks = breaks_hist,
+       xlab = list_labels$lab,
+       xlim = xlim,
+       ylim = ylim,
+       border = COLOR_BORDER,
+       col = MODEL_COLOR, 
+       main = hist_title,
+       cex.lab=cex+0.35, cex.axis=cex+0.3, cex.main=cex+0.2, cex.sub=cex+0.3)
 }
 
 #SSIB MODEL
