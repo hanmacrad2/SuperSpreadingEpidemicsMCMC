@@ -328,7 +328,8 @@ PLOT_HIST_PRIOR <- function(df_results, FLAG_PARAM, FLAGS_MODELS, MODEL_COLOR,
   }
   
   #PLOT PRIOR
-  PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = xlimits, ylimits = ylimits, alpha = 0.3)
+  PLOT_PRIOR_DIST(FLAG_PARAM, xlimits, alpha = 0.3)
+  #PLOT_PRIOR_DIST(FLAG_PARAM, xlimits = xlimits, ylimits = ylimits, alpha = 0.3)
   
   #PLOT TRUE
   segments(sim_val, 0, sim_val, bar_height, col = 'black', lwd = 1.85) #2 #max_y-true_height

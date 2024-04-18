@@ -55,6 +55,7 @@ PLOT_SIM_DATA <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER,
   }
 }
 
+
 #********************************************
 #2. MCMC TRACE
 #********************************************
@@ -442,6 +443,53 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib, RESULTS_FOLDER,
   legend('topleft', c('True value', 'Median inferred', 'Final inferred', '95% CIs'),
          col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
          lty = c(1,1,2,1))
+  
+  if(PDF){
+    dev.off()
+  }
+}
+
+PLOT_SIM_DATA_SSIB <- function(list_ssib_data, RESULTS_FOLDER,
+                          cex = 1.1, lwd_data = 2.0, model = 'SSIB', 
+                          col_ss = 'aquamarine', col_ns = 'orange',
+                          main_font = 2.5, axis_font = 1.6,
+                          PDF = TRUE){
+  
+  #DATA
+  epidemic_data = list_ssib_data$total_infections
+  non_ss = list_ssib_data$non_ss
+  ss = list_ssib_data$ss
+  ylabel = 'Infection count' 
+  
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_EPI_DATA_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = 7.5, height = 5.2) 
+  }
+  
+  par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
+  
+  #PLOT
+  data_title = bquote(paste(.(model), " simulated data, Known SS Infections. ", italic(R[0]),
+                            " = 2.0, ", a, " = 0.5, ", b, " = 10"))
+  
+  #PLOT
+  plot(seq_along(epidemic_data), epidemic_data,  type = 'l',
+       xlab = 'Time', ylab = ylabel,
+       main = data_title,
+       lwd = lwd_data, 
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.15, cex.sub=cex)  
+  #NS 
+  lines(seq_along(non_ss), non_ss, col = col_ns, lwd = lwd_data)
+  
+  #SS
+  lines(seq_along(ss), ss, col = col_ss, lwd = lwd_data)
+  
+  legend('topleft', c('True value', 'Non super-spreaders', 'super-spreaders'),
+         col = c('black', col_ns, col_ss), lwd = c(2, 2, 2),
+         lty = c(1,1,1))
   
   if(PDF){
     dev.off()
