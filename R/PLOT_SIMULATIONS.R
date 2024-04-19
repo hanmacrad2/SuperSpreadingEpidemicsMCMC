@@ -7,7 +7,7 @@ PLOT_SIMULATION_LIST <- function(list_epidemic_data, list_params,
                                  #plot_width = 11.0, plot_height = 9.0,
                                  plot_width = 13.5, plot_height = 11.0,
                                     cex = 2.3, lwd = 2.45,
-                                 main_font = 2.7, axis_font = 1.6,
+                                 main_font = 3.2, axis_font = 1.6,
                                     PDF = TRUE){
   
   #PARAMS
@@ -68,7 +68,7 @@ GET_MODEL_SIMULATION_TITLE <- function(index, list_params,
     #par(mfrow = c(3,2))
     #par(mar = rep(4.5, 4)) #c(1.5, 5, 4, 1.5)) #bottom, left, top, right
     
-  } else if (FLAGS_MODELS$SSE){
+  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
     
     #PARAMS
     #PLOT TITLE FIRST ROW
@@ -97,9 +97,47 @@ GET_MODEL_SIMULATION_TITLE <- function(index, list_params,
     data_title = bquote(paste(.(model), " simulated epidemic data: ", italic(R[0]),
                               " = 2.0, ",italic(k), " = 0.2 "))
   } else if (FLAGS_MODELS$SSEB){
-    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
-                              " = 2.0, ", alpha, " = 0.5, ", beta, " = 10"))
-    main_font = 2.7
+    
+    if(index <= 2){ #7; beta
+    
+    #data_title = bquote(paste(.(model), " : ", italic(R[0]),
+                              #" = 2.0, ", alpha, " = 0.5, ", beta, " = 10"))
+    
+    r0_param = list_params$r0[index]
+    alpha_param = list_params$alpha[index]
+    beta_param = list_params$beta[index]
+    
+    if(FLAGS_PARAM$r0){
+      data_title = bquote(bold(paste(.(model), ": ", bold(R[bold(0)]),
+                                     " = ", bold(.(r0_param)),
+                                     ", ", bold(alpha), " = ", bold(.(alpha_param)),
+                                     ", ", bold(beta), " = ", bold(.(beta_param))))) 
+    } else if (FLAGS_PARAM$alpha){
+      data_title = bquote(bold(paste(.(model), ": ", bold(k), " = ",
+                                     bold(.(k_param)), ', ',
+                                     bold(R[bold(0)]),
+                                     " = ", bold(.(r0_param)))))
+    } else if (FLAGS_PARAM$beta){
+      data_title = bquote(bold(paste(bold(beta), " = ",
+                                     bold(.(beta_param))))) #, ', ',
+                                     # bold(R[bold(0)]),
+                                     # " = ", bold(.(r0_param)),
+                                     # ', ',
+                                     # bold(alpha),
+                                     # " = ", bold(.(alpha_param)))))
+      
+      # data_title = bquote(bold(paste(.(model), ": ", bold(beta), " = ",
+      #                                bold(.(beta_param)), ', ',
+      #                                bold(R[bold(0)]),
+      #                                " = ", bold(.(r0_param)),
+      #                                ', ',
+      #                                bold(alpha),
+      #                                " = ", bold(.(alpha_param)))))
+    }
+    
+    } else {
+      data_title = ''
+    }
     
   } else if (FLAGS_MODELS$SSIB){
     data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
@@ -119,7 +157,7 @@ GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS){
     par(mfrow = c(3,2))
     par(mar = c(5, 5, 5, 5)) #rep(5, 4)) #c(1.5, 5, 4, 1.5)) #bottom, left, top, right
     
-  } else if (FLAGS_MODELS$SSE){
+  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
     
     #PLOT
     par(mfrow = c(3,3))
@@ -129,13 +167,13 @@ GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS){
   } else if (FLAGS_MODELS$SSI){
     
     #PLOT
-    par(mfrow = c(3,3))
+    #par(mfrow = c(3,3))
     
   } else if (FLAGS_MODELS$SSEB){
     
     #PLOT
-    par(mfrow = c(3,3))
-    
+    par(mfrow = c(3,2))
+    par(mar = c(5, 5, 5, 5))
     
   } else if (FLAGS_MODELS$SSIB){
     
