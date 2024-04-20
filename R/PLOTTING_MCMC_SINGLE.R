@@ -449,8 +449,12 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib, RESULTS_FOLDER,
   }
 }
 
+#************************
+#PLOT_SIM_DATA_SSIB
 PLOT_SIM_DATA_SSIB <- function(list_ssib_data, RESULTS_FOLDER,
-                          cex = 1.1, lwd_data = 2.0, model = 'SSIB', 
+                               list_ssib_params = list(r0 = 2, a = 0.5, b = 10),
+                               model = 'SSIB', 
+                          cex = 1.1, lwd_data = 2.0, 
                           col_ss = 'aquamarine', col_ns = 'orange',
                           main_font = 2.5, axis_font = 1.6,
                           PDF = TRUE){
@@ -472,8 +476,15 @@ PLOT_SIM_DATA_SSIB <- function(list_ssib_data, RESULTS_FOLDER,
   par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
   
   #PLOT
-  data_title = bquote(paste(.(model), " simulated data, Known SS Infections. ", italic(R[0]),
-                            " = 2.0, ", a, " = 0.5, ", b, " = 10"))
+  r0_param = list_ssib_params$r0
+  a_param = list_ssib_params$a
+  b_param = list_ssib_params$b
+  
+  data_title = bquote(bold(paste(.(model), ": ", bold(R[0]),
+                            " = ", .(r0_param), ", ", bold(a), " = ", .(a_param),
+                            ", ", bold(b), ' = ', .(b_param))))
+  #data_title = bquote(paste(.bold((model)), " simulated data, Known SS Infections. ", italic(R[0]),
+                           # " = 2.0, ", a, " = 0.5, ", b, " = 10"))
   
   #PLOT
   plot(seq_along(epidemic_data), epidemic_data,  type = 'l',

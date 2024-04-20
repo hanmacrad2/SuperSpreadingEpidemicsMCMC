@@ -76,6 +76,9 @@ GET_PARAM <- function(r0 = FALSE, k = FALSE, alpha = FALSE,
   } else if (c) {
     FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
                       beta = FALSE, a = FALSE, b = FALSE, c = TRUE)
+  } else {
+    FLAG_PARAM = list(r0 = FALSE, k = FALSE, alpha = FALSE,
+                      beta = FALSE, a = FALSE, b = FALSE, c = FALSE)
   }
   
   return(FLAG_PARAM)
