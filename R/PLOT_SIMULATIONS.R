@@ -7,7 +7,8 @@ PLOT_SIMULATION_LIST <- function(list_epidemic_data, list_params,
                                  #plot_width = 11.0, plot_height = 9.0,
                                  plot_width = 13.5, plot_height = 11.0,
                                     cex = 2.3, lwd = 2.45,
-                                 main_font = 3.2, axis_font = 1.6,
+                                 main_font = 3.5, #3.2, 
+                                 axis_font = 1.6,
                                     PDF = TRUE){
   
   #PARAMS
@@ -24,7 +25,7 @@ PLOT_SIMULATION_LIST <- function(list_epidemic_data, list_params,
   }
   
   #PLOT SETTINGS
-  GET_MODEL_PLOT_SETTINGS(FLAGS_MODELS)
+  GET_MODEL_PLOT_SETTINGS(FLAGS_MODELS, FLAGS_PARAM)
   
   #PLOT
   for(i in 1:length(list_epidemic_data)){
@@ -147,13 +148,13 @@ GET_MODEL_SIMULATION_TITLE_V0 <- function(index, list_params,
 }
 
 #PLOT SETTINGS
-GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS){
+GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS, FLAGS_PARAM){
   
   if(FLAGS_MODELS$Baseline){
     
     #PLOT
     par(mfrow = c(3,2))
-    par(mar = c(5.5, 4.7, 4, 4.7)) #rep(4.5, 4)) #c(1.5, 5, 4, 1.5)) #bottom, left, top, right
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
     par(oma = c(1, 1, 6, 1))
     
   } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
@@ -174,13 +175,25 @@ GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS){
     
     #PLOT
     par(mfrow = c(3,2))
-    par(mar = c(5, 5, 5, 5))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    #par(mar = c(5, 5, 5, 5))
     
   } else if (FLAGS_MODELS$SSIB){
     
     #PLOT
     par(mfrow = c(3,2))
-    par(mar = c(5, 5, 5, 5))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    #par(mar = c(5, 5, 5, 5))
+    
+  } else if (FLAGS_PARAM$beta){
+    
+    #PLOT
+    par(mfrow = c(3,2))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    
   }
 }
 
@@ -195,6 +208,10 @@ PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
                                     main_font = 2.5, axis_font = 1.6,
                                     PDF = TRUE){
   
+  #PARAMS
+  r0_param = list_ssib_params$r0[1]
+  a_param = list_ssib_params$a[1]
+  
   #PLOT
   if(PDF){
     plot_folder = paste0(RESULTS_FOLDER, '/plots/')
@@ -203,10 +220,13 @@ PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
     pdf_file = paste0(model, '_EPI_DATA_', time_stamp, '.pdf')  
     pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
   }
-  par(mfrow = c(2,2))
-  par(mar = c(4.25, 4.7, 4, 4.2))
-  #par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
   
+  #PLOT SETTINGS 
+  par(mfrow = c(2,2))
+  par(mar = c(4.5, 4.7, 3.5, 4.7)) #bottom, left, top, right
+  par(oma = c(1, 1, 4, 1))
+  #par(mar = c(4.25, 4.7, 4, 4.2))
+
   #PLOT
   for(i in 1:length(list_ssib_data_total)){
     
@@ -218,13 +238,13 @@ PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
     ylabel = 'Infection count' 
     
     #PLOT
-    r0_param = list_ssib_params$r0[i]
-    a_param = list_ssib_params$a[i]
     b_param = list_ssib_params$b[i]
     
-    data_title = bquote(bold(paste(.(model), ": ", bold(R[0]),
-                                   " = ", .(r0_param), ", ", bold(a), " = ", .(a_param),
-                                   ", ", bold(b), ' = ', .(b_param))))
+    # data_title = bquote(bold(paste(.(model), ": ", bold(R[0]),
+    #                                " = ", .(r0_param), ", ", bold(a), " = ", .(a_param),
+    #                                ", ", bold(b), ' = ', .(b_param))))
+    
+    data_title = bquote(bold(paste(b, " = ", bold(.(b_param)))))
     
     #PLOT
     plot(seq_along(epidemic_data), epidemic_data,  type = 'l',
@@ -248,6 +268,12 @@ PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
     
   }
   
+  #MAIN TITLE
+  main_title = bquote(paste(.(model), " model data breakdown - varying ", b,
+                            ', constant ', R[0], ' = ', .(r0_param), ', ', 
+                            a, ' = ', .(a_param)))
+  
+  title(main_title, outer = TRUE, cex.main = main_font + 0.2)
   
   if(PDF){
     dev.off()
@@ -256,6 +282,108 @@ PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
 
 #********************************************
 #GET_MODEL_SIMULATION_TITLE
+GET_SIMULATION_TITLE_SSEB <- function(index, list_params, 
+                                       FLAGS_MODELS, FLAGS_PARAM){
+  
+  #TITLE
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  
+  #TITLE
+  if(FLAGS_PARAM$r0){
+    
+    #PARAMS
+    r0_param = list_params$r0[index]
+    alpha_param = list_params$alpha[index]
+    beta_param = list_params$beta[1]
+    
+    main_title = bquote(paste(.(model), " model epidemic data - varying ",
+                              bold(R[0]), ', ', bold(alpha), ', constant ', bold(beta),
+                              ' = ', .(beta_param)))
+    
+    if(index <= 6){
+      data_title = bquote(bold(paste(bold(R[bold(0)]),
+                                     " = ", bold(.(r0_param)),
+                                     ",     ", bold(alpha), " = ", bold(.(alpha_param)))))
+    } else {
+      data_title = bquote(bold(paste(bold(alpha), " = ", bold(.(alpha_param)))))
+      #  ", ", bold(beta), " = ", bold(.(beta_param))))) 
+    }
+    
+    
+  } else if (FLAGS_PARAM$beta){
+    
+    #PARAMS
+    r0_param = list_params$r0[1]
+    alpha_param = list_params$alpha[1]
+    beta_param = list_params$beta[index]
+    
+    main_title = bquote(paste(.(model), " model epidemic data - varying ", bold(beta),
+                              ', constant ', R[0], '= ', .(r0_param), ', ', 
+                              bold(alpha), ' = ', .(alpha_param)))
+    
+    data_title = bquote(bold(paste(bold(beta), " = ", bold(.(beta_param)))))
+  }
+  
+  list_titles = list(data_title=data_title, main_title = main_title)
+  
+  return(list_titles)
+    
+}
+
+
+#SSIB
+#********************************************
+#GET_MODEL_SIMULATION_TITLE
+GET_SIMULATION_TITLE_SSIB <- function(index, list_params, 
+                                      FLAGS_MODELS, FLAGS_PARAM){
+  
+  #TITLE
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  
+  #TITLE
+  if(FLAGS_PARAM$r0){
+    
+    #PARAMS
+    r0_param = list_params$r0[index]
+    a_param = list_params$a[index]
+    b_param = list_params$b[1]
+    
+    main_title = bquote(paste(.(model), " model epidemic data - varying ",
+                            R[0], ', ', a, ', constant ', b,
+                              ' = ', .(b_param)))
+    
+    if(index <= 6){
+      data_title = bquote(bold(paste(R[bold(0)],
+                                     " = ", bold(.(r0_param)),
+                                     ",     ", a, " = ", bold(.(a_param)))))
+    } else {
+      data_title = bquote(bold(paste(bold(a), " = ", bold(.(a_param)))))
+      #  ", ", bold(beta), " = ", bold(.(beta_param))))) 
+    }
+    
+    
+  } else if (FLAGS_PARAM$beta){
+    
+    #PARAMS
+    r0_param = list_params$r0[1]
+    a_param = list_params$a[1]
+    beta_param = list_params$beta[index]
+    
+    main_title = bquote(paste(.(model), " model epidemic data - varying ", bold(beta),
+                              ', constant ', R[0], '= ', .(r0_param), ', ', 
+                              bold(a), ' = ', .(a_param)))
+    
+    data_title = bquote(bold(paste(bold(beta), " = ", bold(.(beta_param)))))
+  }
+  
+  list_titles = list(data_title=data_title, main_title = main_title)
+  
+  return(list_titles)
+  
+}
+
+#************************
+#* GET_MODEL_SIMULATION_TITLE
 GET_MODEL_SIMULATION_TITLE <- function(index, list_params, 
                                        FLAGS_MODELS, FLAGS_PARAM){
   
@@ -300,54 +428,30 @@ GET_MODEL_SIMULATION_TITLE <- function(index, list_params,
         } else {
           data_title = ''
         }
-        
       }
-      
     
   } else if (FLAGS_MODELS$SSI){
     
     data_title = bquote(paste(.(model), " simulated epidemic data: ", italic(R[0]),
                               " = 2.0, ",italic(k), " = 0.2 "))
-  } else if (FLAGS_MODELS$SSEB){
-    
-    if(index <= 7){ #7; beta
-      
-      r0_param = list_params$r0[index]
-      alpha_param = list_params$alpha[index]
-      beta_param = list_params$beta[index]
-      
-      if(FLAGS_PARAM$r0){
-        data_title = bquote(bold(paste(.(model), ": ", bold(R[bold(0)]),
-                                       " = ", bold(.(r0_param)),
-                                       ", ", bold(alpha), " = ", bold(.(alpha_param)),
-                                       ", ", bold(beta), " = ", bold(.(beta_param))))) 
-      } else if (FLAGS_PARAM$alpha){
-        data_title = bquote(bold(paste(.(model), ": ", bold(R[bold(0)]),
-                                       " = ", bold(.(r0_param)),
-                                       ", ", bold(alpha), " = ", bold(.(alpha_param)),
-                                       ", ", bold(beta), " = ", bold(.(beta_param))))) 
-      } else if (FLAGS_PARAM$beta){
-        data_title = bquote(bold(paste(bold(beta), " = ",
-                                       bold(.(beta_param))))) #, ', ',
-      }
-      
-    } else {
-      data_title = ''
-    }
-    
-  } else if (FLAGS_MODELS$SSIB){
-    
-    r0_param = list_params$r0[index]
-    a_param = list_params$a[index]
-    b_param = list_params$b[index]
-    
-    data_title = bquote(bold(paste(.(model), ": ", bold(R[bold(0)]),
-                                   " = ", bold(.(r0_param)),
-                                   ", ", bold(a), " = ", bold(.(a_param)),
-                                   ", ", bold(b), " = ", bold(.(b_param)))))
-  }
   
-  list_titles = list(data_title= data_title, main_title = main_title)
+   } else if (FLAGS_MODELS$SSEB){
+     
+     list_titles = GET_SIMULATION_TITLE_SSEB(index, list_params, 
+                                             FLAGS_MODELS, FLAGS_PARAM)
+     data_title = list_titles$data_title
+     main_title = list_titles$main_title
+     
+   } else if (FLAGS_MODELS$SSIB){
+     
+     list_titles = GET_SIMULATION_TITLE_SSIB(index, list_params, 
+                                             FLAGS_MODELS, FLAGS_PARAM)
+     data_title = list_titles$data_title
+     main_title = list_titles$main_title
+     
+     }
+    
+  list_titles = list(data_title = data_title, main_title = main_title)
   
   return(list_titles)
 }
