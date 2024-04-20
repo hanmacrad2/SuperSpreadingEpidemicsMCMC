@@ -16,7 +16,7 @@ PLOT_SIMULATION_LIST <- function(list_epidemic_data, list_params,
   ylabel = 'Infection count' #Daily
   
   if(PDF){
-    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/')
+    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/plots/')
     create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_EPI_DATA_', param, '_', time_stamp, '.pdf')  
@@ -185,65 +185,6 @@ GET_MODEL_PLOT_SETTINGS <- function(FLAGS_MODELS){
 }
 
 #********************************************
-#1. PLOT_SIMULATION 
-#********************************************
-PLOT_SIMULATION <- function(epidemic_data, FLAGS_MODELS, RESULTS_FOLDER, MODEL_COLOR,
-                            plot_width = 10.0, plot_height = 9.0,
-                            cex = 1.5, main_font = 2.5, axis_font = 1.6,
-                            PDF = TRUE){
-  
-  #PARAMS
-  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  ylabel = 'Infection count' #Daily
-  
-  if(PDF){
-    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/')
-    create_folder(plot_folder)
-    time_stamp = GET_CURRENT_TIME_STAMP()
-    pdf_file = paste0(model, '_EPI_DATA_', time_stamp, '.pdf')  
-    pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
-  }
-  #par(mar = c(5, 5, 4, 1.5)) #bottom, left, top, right
-  
-  if(FLAGS_MODELS$Baseline){
-    par(mfrow = c(3,2))
-    data_title = bquote(paste(.(model), " simulated epidemic data. ", italic(R[0]),
-                              " = 2.0"))
-  } else if (FLAGS_MODELS$SSE){
-    
-    data_title = bquote(paste(.(model), " simulated epidemic data: ", italic(R[0]),
-                              " = 2.0, ", italic(k), " = 0.1"))
-  } else if (FLAGS_MODELS$SSI){
-    
-    data_title = bquote(paste(.(model), " simulated epidemic data: ", italic(R[0]),
-                              " = 2.0, ",italic(k), " = 0.2 "))
-  } else if (FLAGS_MODELS$SSEB){
-    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
-                              " = 2.0, ", alpha, " = 0.5, ", beta, " = 10"))
-    main_font = 2.7
-    
-  } else if (FLAGS_MODELS$SSIB){
-    data_title = bquote(paste(.(model), " simulated data: ", italic(R[0]),
-                              " = 2.0, ", a, " = 0.5, ", b, " = 10"))
-    main_font = 2.7
-  }
-  
-  #PLOT
-  for(i in 1:6){
-    plot(seq_along(epidemic_data), epidemic_data,  type = 'l',
-         xlab = 'Time', ylab = ylabel,
-         main = data_title,
-         col = MODEL_COLOR,
-         lwd = 3.5, #3.5,
-         cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)   
-  }
-
-  if(PDF){
-    dev.off()
-  }
-}
-
-#********************************************
 #* PLOT SSIB SIMULATION LIST
 PLOT_SSIB_SIMULATION_SS_LIST <- function(list_ssib_data_total, RESULTS_FOLDER,
                                     list_ssib_params = list(r0 = 2, a = 0.5, b = 10),
@@ -330,35 +271,38 @@ GET_MODEL_SIMULATION_TITLE <- function(index, list_params,
     
   } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
     
-    #TITLE
-    r0_param = list_params$r0[index]
-    k_param = list_params$k[1]
-    main_title = bquote(paste(.(model), " model epidemic data - varying ",
-                              R[0], ', constant k = ', .(k_param)))
-    if(index <= 3){
+      #TITLE
       r0_param = list_params$r0[index]
       k_param = list_params$k[index]
       
       if(FLAGS_PARAM$r0){
         
+        k_param = list_params$k[1]
+        main_title = bquote(paste(.(model), " model epidemic data - varying ",
+                                  bold(R[0]), ', constant k = ', .(k_param)))
+        
+        if(index <= 3){
         data_title = bquote(bold(paste(bold(R[bold(0)]),
                                        " = ", bold(.(r0_param)))))
-                                      # ", ", bold(k), " = ", bold(.(k_param)))))
-        #data_title = bquote(bold(paste(.(model), ": ", bold(R[bold(0)]),
-        #                               " = ", bold(.(r0_param)),
-        #                               ", ", bold(k), " = ", bold(.(k_param)))))
-        
+        } else {
+          data_title = ''
+        }
+
       } else if (FLAGS_PARAM$k){
-        data_title = bquote(bold(paste(.(model), ": ", bold(k), " = ",
-                                       bold(.(k_param)), ', ',
-                                       bold(R[bold(0)]),
-                                       " = ", bold(.(r0_param)))))
+        
+        r0_param = list_params$r0[1]
+        main_title = bquote(paste(.(model), " model epidemic data - varying ", bold(k), ", constant ",
+                                  R[0], ' = ', .(r0_param)))
+        
+        if(index <= 3){
+          data_title = bquote(bold(paste(bold(k), " = ",
+                                         bold(.(k_param)))))
+        } else {
+          data_title = ''
+        }
+        
       }
       
-      
-    } else {
-      data_title = ''
-    }
     
   } else if (FLAGS_MODELS$SSI){
     
