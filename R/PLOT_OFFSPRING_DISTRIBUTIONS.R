@@ -25,7 +25,12 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   }
   
   #PLOT
-  par(mar = rep(5,4))
+  if(FLAGS_MODELS$SSIB){
+    par(mar = c(4.5, 4.5, 3, 2)) #c(5, 4.7, 4, 4.7))
+  } else {
+    par(mar = rep(5,4))
+  }
+  
   #par(mar = c(5.5, 4.7, 4, 4.7))
   #par(oma = c(1, 1, 1, 1)) #bottom, left, top, right
   
@@ -37,7 +42,7 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   barplot(Z, names.arg = x, 
           col = MODEL_COLOR, #"skyblue",
           main = main_title,
-          xlab = "Number of Offspring",
+          xlab = "Number of Offspring (Z)",
           ylab = "Probability",
           #lwd = lwd, #3.5,
           cex.lab=cex + 0.25, cex.axis=cex + 0.1, 
@@ -140,15 +145,34 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
   if(FLAGS_MODELS$Baseline){
     r0_param = list_params[1]
     #legend_offspring = bquote(paste('Poisson(', R[0], '= )', .(r0_param))) #DIDN'T WORK!!
-    legend_offspring = expression(paste('Z ~ Poisson(R'[0], '= 2.5)'))
+    legend_offspring = expression(paste(' Z ~ Poisson(R'[0], '= 2.5)'))
     
-  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI ||FLAGS_MODELS$SSEB || FLAGS_MODELS$SSIB){
-    legend_offspring = expression(paste('  Z ~ NegBin(k, ', frac('k', paste('R'[0], ' + k')), ' ) | R'[0], '= 2.5, k = 0.1'))
+  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
+    legend_offspring = expression(paste(' Z ~ NegBin(k, ', frac('k', paste('R'[0], ' + k')), ' ) | R'[0], '= 2.5, k = 0.1'))
     #legend_offspring = expression(paste('  NegBin(k, k/R'[0], '+ k )| R'[0], '= 2.5, k = 0.1'))
   
-  } else if (FLAGS_MODELS$SSIB){
-    legend_offspring = expression(paste('  Z ~ 1-p(Poisson(aR'[0], ' +  ', frac(paste('(1 - a)R'[0]), b), ' )'))
+  } else if (FLAGS_MODELS$SSEB) {
+    legend_offspring = expression(atop(
+      paste('  Z ~ Poisson(', alpha * R[0]),
+      paste(' + ', beta, '* Poisson()', paste('(1 - a)R'[0]), ')')))
+    
+  }  else if (FLAGS_MODELS$SSIB){
+    #legend_offspring = expression(paste('  Z ~ 1-p*Poisson(aR'[0], ' +  ', frac(paste('(1 - a)R'[0]), b), ' )'))
                                        # , ', frac('k', paste('R'[0], ' + k')), ' ) | R'[0], '= 2.5, k = 0.1')) 
+    
+      legend_offspring = expression(atop(
+      paste('  Z ~ (1 - p) * Poisson(', a * R[0], ' + ', paste('(1 - a)R'[0]), '/', b, ')'),
+      paste(' + ', p, '* Poisson(', a * b * R[0], ' + ', paste('(1 - a)R'[0]), ')')))
+      #paste('| ', R[0], ' = 2.5, a = 0.5, b = 10')))
+    
+    legend_offspring_wrong = expression(paste(
+      ' Z ~ (1 - p) * Poisson(', a * R[0], ' + ', paste('(1 - a)R'[0]), '/', b, ') \n',
+      p, '* Poisson(', a * b * R[0], ' + ', paste('(1 - a)R'[0]), ') \n',
+      '| ', R[0], ' = 2.5, a = 0.5, b = 10'
+    ))
+    
+    
+    
     }
   
   return(legend_offspring)
@@ -159,17 +183,15 @@ GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
                             legend_location = 'topright', #alpha = 0.2,
                             cex = 1.5, inset = 0.1){
   
-  #COLOUR
-  #COLOR_ALPHA = GET_COLOR_ALPHA(MODEL_COLOR, alpha)
-  
   #PARAM
   legend_caption = GET_OFFSPRING_LEGEND_CAPTION(list_params, FLAGS_MODELS)
   
   #Legend
   legend(legend_location,
-         x.intersp = -0.05,#CONTROLS RELATIVE TO THE PLOT
+         x.intersp = 0.05, #-0.05,#CONTROLS RELATIVE TO THE PLOT
          legend_caption,
          cex = cex,
+         inset = -0.02,
          #inset = c(-inset), #CONTROLS RELATIVE TO THE MARGINS NOT PLOT!
          col = c(MODEL_COLOR),
          lwd = 3, #rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
