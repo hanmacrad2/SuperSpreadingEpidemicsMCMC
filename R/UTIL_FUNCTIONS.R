@@ -190,6 +190,16 @@ get_upper_ci <- function(mcmc_col, level = 0.95){
   return(upper_interval)
 }
 
+# 'GET MEAN AND CIS'
+get_mean_cis <- function(data_col){
+  
+  lower_ci = round(get_lower_ci(data_col), 2)
+  upper_ci = round(get_upper_ci(data_col), 2)
+  mean_col = round(mean(data_col),2)
+  
+  print(paste0('Mean: ', mean_col, ', CI: [', lower_ci, ', ', upper_ci, ' ]'))
+}
+
 #' @export
 get_ci_matrix <- function(mcmc_matrix, level = 0.95){
   

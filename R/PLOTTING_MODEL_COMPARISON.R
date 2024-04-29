@@ -1,10 +1,72 @@
 #***************************
 #PLOT MODEL EVIDENCE RESULTS
 #*****************************
+#library(vioplot)
 
 #************************************
 # SINGLE MODEL COMPARISON RUNS
 #************************************
+VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
+                                         cex = 1.9,
+                                         plot_width = 10.0, plot_height = 7.0,
+                                         MODEL_NAMES = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB'),
+                                         MODEL_COLORS = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', '#DC143C'),
+                                         title = '', PLOT_VIOLIN = TRUE, PDF = TRUE) {
+  
+  # SETUP
+  #old_par <- par(cex = cex)
+  main_title = bquote(paste(.(model), " simulated data - Posterior Probabilities of the models"))
+  xlab = bquote(bold('Model'))
+  ylab = bquote(bold('Posterior Model Probability'))
+  #title <- paste0(title, ' - Posterior Model Probabilities')
+  
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_MODEL_COMPARISON_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
+  }
+  
+  #VIOLIN PLOT
+  if(PLOT_VIOLIN){
+    names(df_results) <- MODEL_NAMES
+    #par(cex = cex)
+    vioplot(df_results, 
+            col = MODEL_COLORS,  names = MODEL_NAMES,
+            main = main_title,
+            xlab = 'Model', 
+            ylab = 'Posterior Model Probability',
+            cex.lab = cex,
+            cex.main = cex, #cex)
+            cex.axis = cex, 
+            cex.names = cex, 
+             cex.sub = cex)
+           
+    #par(old_par) 
+    
+  } else {
+    par(mar = c(5.5, 5, 4, 4.7)) #rep(4.5, 4)) #c(1.5, 5, 4, 1.5)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    boxplot(df_results, col = MODEL_COLORS, names = MODEL_NAMES,
+            main = main_title, 
+            xlab = 'Model', ylab = 'Posterior Model Probability',
+            cex.lab = cex, cex.axis = cex, cex.main = cex, 
+            cex.names = cex, cex.sub = cex)
+  }
+  
+  # Adjust axis labels size
+  #axis(1, cex.axis = cex)
+  #axis(2, cex.axis = cex)
+  
+  if(PDF){
+    dev.off()
+  }
+
+  #legend('topright', legend = colnames(df_results), fill = box_colors)
+  
+}
+
 BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '') {
   
   #PLOT MODEL PROBABILITIES

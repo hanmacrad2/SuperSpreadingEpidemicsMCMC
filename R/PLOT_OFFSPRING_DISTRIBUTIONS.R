@@ -155,6 +155,8 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
     legend_offspring = expression(atop(
       paste('  Z ~ Poisson(', alpha * R[0]),
       paste(' + ', beta, '* Poisson()', paste('(1 - a)R'[0]), ')')))
+    legend_offspring = expression(atop(
+      paste('  Z ~ Poisson(', alpha * R[0], '+ ...')))
     
   }  else if (FLAGS_MODELS$SSIB){
     #legend_offspring = expression(paste('  Z ~ 1-p*Poisson(aR'[0], ' +  ', frac(paste('(1 - a)R'[0]), b), ' )'))

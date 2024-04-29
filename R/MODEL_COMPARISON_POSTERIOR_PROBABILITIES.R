@@ -37,6 +37,24 @@ GET_MODELS_POSTERIOR_PROBS <- function(vec_log_mod_ev, num_models = 5,
 }
 
 
+GET_MODEL_COMP_DF_PLOT <- function(df_mod_ev_plot){
+  
+  'Return: df_post_probs'
+  
+  df_mod_ev_plot <- df_mod_ev_plot[, !colnames(df_mod_ev_plot) %in% "tot_infs"]
+  df_mod_ev_plot <- df_mod_ev_plot[, !colnames(df_mod_ev_plot) %in% "run_number"]
+  df_mod_ev_plot <- df_mod_ev_plot[, !colnames(df_mod_ev_plot) %in% "data_sim"]
+  df_mod_ev_plot <- df_mod_ev_plot[, !colnames(df_mod_ev_plot) %in% "sim_model"]
+  
+  
+  df_post_probs = apply(df_mod_ev_plot, MARGIN=1, FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2, prior_probs_models = rep(0.2, 5)) )
+  df_post_probs = t(df_post_probs)
+  
+  return(df_post_probs)
+  
+}
+
+
 #DATAFRAME OF POSTERIOR PROBS FOR MULTIPLE SIMULATIONS/MODEL EVIDENCE RUNS
 #df_post_probs = apply(df_mod_ev_plot, MARGIN=1, FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2) )
 
