@@ -66,7 +66,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, OUT_FOLDER, PDF = TRUE, fig_num = 
                                use = 'Waitemata', list_mcmc =
                                  list(Baseline = mcmc_baseline, SSE = mcmc_sse,
                                       SSI = mcmc_ssi, SSEB = mcmc_sseb, SSIB = mcmc_ssib), 
-                               list_colors = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') ){
+                               list_colors = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', '#DC143C') ){
   
   
   'PLOT MCMC REAL DATA'

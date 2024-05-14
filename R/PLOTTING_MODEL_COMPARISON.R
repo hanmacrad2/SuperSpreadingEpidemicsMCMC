@@ -137,3 +137,22 @@ BOX_PLOT_POST_PROBS_MULT <- function(df_results, title = '') {
   #legend('topright', legend = colnames(df_results), fill = box_colors)
 }
 
+
+#*******************88
+#FUNCTION
+BOX_PLOT_MC_ERROR <- function(df_mce_column, model_num, ylim){
+  
+  #MODELS
+  num_runs = length(df_mce_column)
+  MODEL_NAMES = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB')
+  MODEL_COLORS <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red')
+  
+  boxplot(df_mce_column, col = MODEL_COLORS[model_num], #names = model_names,
+          main = paste0(MODEL_NAMES[model_num], ' Model - Monte Carlo Error. N = ', num_runs ,
+                        ', sd = ', round(sd(df_mce_column), 2)),
+          xlab =  paste0(MODEL_NAMES[model_num], ' Model'), ylab = 'log Model Evidence',
+          cex.lab = 1.3, cex.axis = 1.3, cex.main = 1.3, 
+          cex.names = 1.3, cex.sub = 1.3,
+          ylim = ylim) 
+  
+}

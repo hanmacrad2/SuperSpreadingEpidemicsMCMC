@@ -3,7 +3,7 @@
 #********************************************
 PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS, 
                                  MODEL_COLOR, RESULTS_FOLDER,
-                                 num_offspring = 25, r0 = 2, 
+                                 num_offspring = 25, 
                                  plot_width = 7.5, plot_height = 5.5,
                                  cex = 1.3, main_font = 1.85, #3.2, 
                                  axis_font = 1.6, PDF = TRUE){
@@ -84,6 +84,7 @@ GET_OFFSPRING_DATA <- function(list_params, FLAGS_MODELS, num_offspring = 25){
     Z = GET_OFFSPRING_SSIB(x, list_params)
   }
   
+  print(sum(x*Z))
   return(list(x = x, Z = Z))
 }
 
@@ -97,13 +98,18 @@ GET_OFFSPRING_SSEB <-function(x, list_params){
   beta_param = list_params[3]
   
   # Simulate X1 from the Poisson distribution with parameter alpha*R0
-  pois1_nsei <- dpois(x, lambda = alpha_param*r0_param)
+  pn <- dpois(x, lambda = alpha_param*r0_param) #sample
   
   # Simulate X2 from the compound Poisson distribution
   inner_lambda <- r0_param*(1 - alpha_param)/beta_param
-  pois2_ssei <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
+  ps <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
   
   # Calculate the total sum Z
+  #Two loops!!; multiple and add terms (in a triangular way)
+  
+  prob0 = pn[1]*ps[1]
+  prob1 = pn[1]*ps[2] + pn[2]*ps[1]
+  
   Z <- pois1_nsei + pois2_ssei
   
   # Output the simulated total number of offspring Z
@@ -179,7 +185,7 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
   
   return(legend_offspring)
 }
-
+=
 #LEGEND 
 GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
                             legend_location = 'topright', #alpha = 0.2,
