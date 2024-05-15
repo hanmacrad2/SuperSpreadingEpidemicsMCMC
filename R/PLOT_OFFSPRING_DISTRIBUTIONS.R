@@ -185,7 +185,7 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
   
   return(legend_offspring)
 }
-=
+
 #LEGEND 
 GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
                             legend_location = 'topright', #alpha = 0.2,
