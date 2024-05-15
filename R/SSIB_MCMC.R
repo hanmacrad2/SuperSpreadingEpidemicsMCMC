@@ -163,8 +163,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   #INITIALIASE
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
   param_starts[1] = r0_start
-  beta_start = round(runif(1, 5, 15), 0)
-  param_starts[3] = beta_start
+  b_start = round(runif(1, 5, 15), 0)
+  param_starts[3] = b_start
   
   time = length(epidemic_data) 
   vec_min = c(0, 0, 1); count_accept = 0; 
