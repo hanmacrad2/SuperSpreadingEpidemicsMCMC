@@ -146,14 +146,47 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
   return(prior)  
 }
 
+SET_SSIB_DATA <- function(epidemic_data, FLAGS_DATA_TYPE, data_start = c(3,2,1)){
+
+  'Initialise Super-spreaders & non super-spreaders data'
+  
+  if(FLAGS_DATA_TYPE$SIM_DATA){
+    
+    #DATA - AUGMENTED 
+    ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0) #10% of ssib data if > 1, else 1, else 0
+    non_ss = epidemic_data - ss
+    
+    #Starting first time point from 
+    non_ss[1] = data_start[2] #Pass in 3,2,1 to first data point
+    ss[1] = data_start[3]
+    
+  } else if (FLAGS_DATA_TYPE$REAL_DATA){
+    
+    #DATA - AUGMENTED 
+    ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0) #10% of ssib data if > 1, else 1, else 0
+    non_ss = epidemic_data - ss
+    # 
+    # if(epidemic_data[1] == 2){
+    #   ss[1] = 0
+    #   non_ss[1] = 2
+    # }
+    
+  }
+  
+  #SS & NS DATA
+  print('ss: '); print(ss); print('non_ss: '); print(non_ss)
+  output = list(ss = ss, non_ss = non_ss)
+  
+  return(output)
+}
 
 #*************************
 #* MCMC 
-#*************************
 
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
-                            PRIORS_USED = GET_PRIORS_USED(), #list_ssib_data
+                            FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE),
+                            PRIORS_USED = GET_PRIORS_USED(),
                             param_starts = c(2.0, 0.5, 10), data_start = c(3,2,1),
                             rep_da = 50, 
                             mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.0234, #0.4 
@@ -181,17 +214,15 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   ssib_params_matrix[1,] <- param_starts; ssib_params = ssib_params_matrix[1,] 
   print(paste0('ssib_params', ssib_params))
   
-  #DATA - AUGMENTED 
-  ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0)
-  non_ss = epidemic_data - ss
-  #Starting first time point from the truth
-  non_ss[1] = data_start[2]
-  ss[1] = data_start[3]
-  ss_start = ss; ns_start = non_ss
+  #DATA
+  print(FLAGS_DATA_TYPE)
+  data_ss = SET_SSIB_DATA(epidemic_data, FLAGS_DATA_TYPE, data_start = data_start)
+  non_ss = unlist(data_ss$non_ss); ss = unlist(data_ss$ss)
   data = list(non_ss, ss)
-  #data = list(unlist(list_ssib_data$non_ss), unlist(list_ssib_data$ss))
-  print('ss: '); print(ss); print('non_ss: '); print(non_ss)
-  #STORE
+  #OUTPUT FROM FUNCTION
+  ss_start = ss; ns_start = non_ss 
+  
+  #STORAGE 
   ns_mcmc = matrix(0, mcmc_vec_size, time)
   ss_mcmc = matrix(0, mcmc_vec_size, time) 
   
@@ -199,10 +230,9 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSIB_JOINT(data, ssib_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
-  print(paste0('log_like 0', log_like))
-  
+  print(paste0('log_like no1: ', log_like))
+
   #ADAPTIVE SHAPING PARAMS + VECTORS
-  #j = 0 #Counter for update of params AND data aug
   c_star = (2.38^2)/mcmc_inputs$dim; 
   termX = mcmc_inputs$v0 + mcmc_inputs$dim
   delta = 1/(mcmc_inputs$target_acceptance_rate*(1 - mcmc_inputs$target_acceptance_rate))
