@@ -55,6 +55,21 @@ GET_MODEL_COMP_DF_PLOT <- function(df_mod_ev_plot){
 }
 
 
-#DATAFRAME OF POSTERIOR PROBS FOR MULTIPLE SIMULATIONS/MODEL EVIDENCE RUNS
-#df_post_probs = apply(df_mod_ev_plot, MARGIN=1, FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2) )
-
+#****************
+#* MAP : MAXIMUM A POSTERIOR
+get_count_map <- function (matrix_probs, model_num){
+  
+  # Function to determine if column 1 is the maximum value in the row
+  is_max_column <- function(row, model_num) {
+    if (row[model_num] == max(row)) {
+      return(1)
+    } else {
+      return(0)
+    }
+  }
+  
+  counts_model_map <- apply(matrix_probs, 1, function(row) is_max_column(row, model_num))
+  
+  # Print the sum of counts
+  print(paste('count_model:', sum(counts_model_map)))
+}
