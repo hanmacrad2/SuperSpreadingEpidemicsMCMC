@@ -7,8 +7,8 @@
 # SINGLE MODEL COMPARISON RUNS
 #************************************
 VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
-                                         cex = 1.9,
-                                         plot_width = 10.0, plot_height = 7.0,
+                                         cex = 2.0,
+                                         plot_width = 12.5, plot_height = 10.0,
                                          MODEL_NAMES = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB'),
                                          MODEL_COLORS = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', '#DC143C'),
                                          title = '', PLOT_VIOLIN = TRUE, PDF = TRUE) {
@@ -16,8 +16,8 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
   # SETUP
   #old_par <- par(cex = cex)
   main_title = bquote(paste(.(model), " simulated data - Posterior Probabilities of the models"))
-  xlab = bquote(bold('Model'))
-  ylab = bquote(bold('Posterior Model Probability'))
+  xlab = bquote('Model')
+  ylab = bquote('Posterior Model Probability')
   #title <- paste0(title, ' - Posterior Model Probabilities')
   
   if(PDF){
@@ -31,17 +31,27 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
   #VIOLIN PLOT
   if(PLOT_VIOLIN){
     names(df_results) <- MODEL_NAMES
-    #par(cex = cex)
+    par(cex = cex)
     vioplot(df_results, 
-            col = MODEL_COLORS,  names = MODEL_NAMES,
+            col = MODEL_COLORS, names = MODEL_NAMES,
             main = main_title,
-            xlab = 'Model', 
-            ylab = 'Posterior Model Probability',
-            cex.lab = cex,
-            cex.main = cex, #cex)
-            cex.axis = cex, 
-            cex.names = cex, 
-             cex.sub = cex)
+            xlab = xlab, 
+            ylab = ylab,
+           cex.lab = 1.5,
+           cex.axis = 1.2,
+           cex.names = 1.2)
+         # cex.main = cex)
+           # cex.axis = cex)
+    # vioplot(df_results, 
+    #         col = MODEL_COLORS,  names = MODEL_NAMES,
+    #         main = main_title,
+    #         xlab = 'Model', 
+    #         ylab = 'Posterior Model Probability',
+    #         cex.lab = cex,
+    #         cex.main = cex, #cex)
+    #         cex.axis = cex, 
+    #         cex.names = cex, 
+    #          cex.sub = cex)
            
     #par(old_par) 
     

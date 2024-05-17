@@ -6,8 +6,9 @@
 
 PLOT_VIOLIN_MODEL_EVIDENCE <- function(vec_results, FLAGS_MODELS, 
                                          MODEL_COLOR, RESULTS_FOLDER,
-                                       FLAG_RESULT_TYPE = list('Importance Sampling' = FALSE, 
-                                                               'Harmonic Mean' = TRUE),
+                                       legend_location = 'topright',
+                                       FLAG_RESULT_TYPE = list('Importance Sampling' = TRUE, 
+                                                               'Harmonic Mean' = FALSE),
                                        y_lim = c(-131, -129),
                                          plot_width = 6.5, plot_height = 5.5,
                                          cex = 1.9, main_font = 2.2, #3.2, 
@@ -48,7 +49,7 @@ PLOT_VIOLIN_MODEL_EVIDENCE <- function(vec_results, FLAGS_MODELS,
           x_axis_labels = c(""), )
          # xaxt = "n") 
   
-  GET_LEGEND_SD_ERROR(sd(vec_results), MODEL_COLOR)
+  GET_LEGEND_SD_ERROR(sd(vec_results), MODEL_COLOR, legend_location = legend_location)
   
   mtext(side = 1, line = 2, 
         bquote(paste(.(model), " model")),
@@ -68,7 +69,7 @@ PLOT_VIOLIN_MODEL_EVIDENCE <- function(vec_results, FLAGS_MODELS,
 
 #GET LEGEND SD OR THE ERROR
 GET_LEGEND_SD_ERROR <- function(sd_error, MODEL_COLOR,
-                                 legend_location = 'bottomright', #,'topright', 
+                                 legend_location = 'topright', #,'topright', 
                                  cex = 1.1, inset = 0.1){
   
   #Legend

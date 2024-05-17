@@ -66,7 +66,6 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   return(imp_samp_comps)  
 } #0.001
 
-
 #**************************************************************************************
 #*
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
