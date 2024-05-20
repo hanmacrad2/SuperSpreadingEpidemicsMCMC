@@ -3,7 +3,7 @@
 #PLOT REAL DATA FUNCTION
 #
 #************************
-PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER,
+PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits,
                                list_mcmc = list(Baseline = mcmc_baseline, SSE = mcmc_sse,
                                       SSI = mcmc_ssi, SSEB = mcmc_sseb, SSIB = mcmc_ssib), 
                                MODEL_COLORS, main_title,
@@ -46,13 +46,18 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER,
       
       list_r0_vec[[model]] = mcmc_output$ssi_params_matrix[,1] 
       
-    } else {
+    } else if (model == 'SSIB') {
+      
+      list_r0_vec[[model]] = mcmc_output$ssib_params_matrix[,1] 
+    }
+    
+    else {
       
       list_r0_vec[[model]] = mcmc_output$r0_vec
     }
     
     #PLOT HIST
-    PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex)
+    PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits)
     
     #TRACE PLOTS
     PLOT_TRACE(list_r0_vec[[model]], model, MODEL_COLORS[i], cex)
@@ -90,7 +95,7 @@ PLOT_TRACE <-function(mcmc_vec, model_name, color_model, cex){
 }
 
 #PLOT SAMPLES
-PLOT_HIST <-function(mcmc_vec, model_name, color_model, cex, xlimits = c(0.6, 1.5)){
+PLOT_HIST <-function(mcmc_vec, model_name, color_model, cex, xlimits){
   
   #TITLE
   hist_title = bquote(paste(.(model_name) ~ "model. ", italic(R[0]),
@@ -109,6 +114,19 @@ PLOT_HIST <-function(mcmc_vec, model_name, color_model, cex, xlimits = c(0.6, 1.
        cex.lab = cex, cex.axis = cex, cex.main = cex, cex.sub=cex)
   
 }
+
+#PLOT TRACE
+PLOT_EPI_DATA <-function(epi_data, title, cex = 2.0){
+  
+  #TITLE
+  trace_title = bquote(paste(.(title)))
+
+  plot(seq_along(epi_data), epi_data,  type = 'l',
+       ylab = 'Time', xlab = 'Infection count', 
+       main = trace_title,
+       cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
+}
+
 
 # #PLOT CUM MEAN
 # PLOT_CUM_MEAN <-function(mcmc_vec, model_name, color_model){

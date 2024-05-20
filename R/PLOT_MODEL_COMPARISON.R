@@ -77,22 +77,22 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
   
 }
 
-BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '') {
+BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', 
+                                MODEL_COLORS = c('#FFD700', '#6BA6E9',
+                                                  '#FF8000', '#6AA84F', '#DC143C')) {
   
   #PLOT MODEL PROBABILITIES
   
   #SETUP
-  title = paste0(title, ' Posterior Model Probabilities. ')
+  title = bquote(paste(.(title),' Posterior Model Probabilities. '))
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
-  bar_colors <- c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', 'red') 
-  
-  barplot(t(df_results), beside = TRUE, col = bar_colors, ylim = c(0, 1),
+  barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
           names.arg = colnames(df_results), main = title,
           xlab = 'Model', ylab = 'Posterior Probability',
           cex.lab=1.5, cex.axis=1.6, cex.main= 1.6, 
           cex.names = 1.6, cex.sub=1.6)
-  legend('topright', legend = colnames(df_results), fill = bar_colors) #, cex = 1.1)
+  legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
   
 }
 

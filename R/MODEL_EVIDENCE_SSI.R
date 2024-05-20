@@ -5,8 +5,8 @@
 # 1. MODEL EVIDENCE (P HAT)
 #************************
 GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA, 
-                                       FLAGS_MODELS = list(BASE = FALSE, SSE = FALSE,
-                                                           SSI = TRUE, SSEB = FALSE, SSIB = FALSE), n_samples = 10000){
+                                       FLAGS_MODELS = GET_FLAGS_MODELS(SSI = TRUE),
+                                       n_samples = 10000){
   
   'Estimate of model evidence for SSI model using Importance Sampling'
   
@@ -67,7 +67,8 @@ GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   prob_prop = prob; prob_prior = 1 - prob_prop
   
   #MCMC SAMPLES
-  mcmc_samples = cbind(mcmc_output$ssi_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)  
+  #mcmc_samples = cbind(mcmc_output$ssi_params_matrix, mcmc_output$eta_matrix) #eta_nonzero_cols)  
+  mcmc_samples = cbind(mcmc_output$ssi_params_matrix, mcmc_output$eta_matrix)
   n_dim = dim(mcmc_samples)[2] 
   means = colMeans(mcmc_samples[,])
 

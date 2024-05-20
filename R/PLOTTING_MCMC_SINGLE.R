@@ -366,14 +366,14 @@ PLOT_SSIB_DATA_CI <- function(mcmc_ssib, list_data_ssib, RESULTS_FOLDER,
   #MCMC INFERRED
   ns_inf = mcmc_ssib$data[[1]]
   ss_inf = mcmc_ssib$data[[2]]
-  lower_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_lower_ci)
-  lower_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_lower_ci)
-  upper_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, get_upper_ci)
-  upper_ci_ss <- apply(mcmc_ssib$ss_tot, 2, get_upper_ci)
-  mean_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, mean)
-  mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, mean)
-  mean_ci_ns <- apply(mcmc_ssib$non_ss_tot, 2, median)
-  mean_ci_ss <- apply(mcmc_ssib$ss_tot, 2, median)
+  lower_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_lower_ci)
+  lower_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_lower_ci)
+  upper_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_upper_ci)
+  upper_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_upper_ci)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, mean)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, mean)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, median)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, median)
   
   #************
   #NS TRUE
@@ -506,6 +506,225 @@ PLOT_SIM_DATA_SSIB <- function(list_ssib_data, RESULTS_FOLDER,
     dev.off()
   }
 }
+
+#************************
+#PLOT_REAL_DATA_SSIB
+PLOT_SSIB_RESULTS_REAL_DATA <- function(mcmc_ssib, epidemic_data, RESULTS_FOLDER = '',
+                              cex = 1.2, lwd = 2.0, model = 'SSIB',
+                              col_ss = 'aquamarine', col_ns = 'orange', PDF = FALSE){
+  
+  #PLOT
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('NS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = 7.75, height = 5.6) 
+  }
+  par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
+  
+  #TRUE VALUES
+  #non_ss = list_data_ssib$non_ss
+  #ss = list_data_ssib$ss
+  
+  #MCMC INFERRED
+  ns_inf = mcmc_ssib$data[[1]]
+  ss_inf = mcmc_ssib$data[[2]]
+  lower_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_lower_ci)
+  lower_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_lower_ci)
+  upper_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_upper_ci)
+  upper_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_upper_ci)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, mean)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, mean)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, median)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, median)
+  
+  #************
+  #NS TRUE
+  title = bquote(paste('Non Super-Spreading Infections, ', .(model), ' model - Real data inferene'))
+  y_lim = c(0, max(upper_ci_ns))
+  plot(seq_along(mean_ci_ns), mean_ci_ns,  type = 'l',
+       xlab = 'Time', ylab = 'Infection count',
+       main = title, 
+       ylim = y_lim, 
+       lwd = 2.0,
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
+  
+  #NS INFERRED (dashed)
+  #Mean
+  #lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_ns, lwd = lwd)
+  
+  #Final DOTTED
+  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
+  
+  #CIs
+  x = seq_along(upper_ci_ns)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ns, rev(lower_ci_ns)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  #mean
+  legend('topleft', c('Median inferred',
+                      'Final inferred','95% CIs'),
+         col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+  
+  #************
+  #SSI TRUE
+  
+  if(PDF){
+    dev.off()
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('SS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), 7.75, height = 5.6) 
+  }
+  par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
+  
+  title = bquote(paste('Super-Spreading Infections, ', .(model), ' model - True vs Inferred'))
+  #title = bquote('Super-Spreading Infections - True vs Inferred')
+  y_lim = c(0, max(upper_ci_ss))
+  plot(seq_along(mean_ci_ss), mean_ci_ss,  type = 'l',
+       xlab = 'Time', ylab = 'Daily infection count',
+       main = title, 
+       ylim = y_lim,
+       lwd = 2.0,
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
+  
+  #SSI INFERRED (dashed)
+  #Mean
+  #lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ss, lwd = lwd)
+  
+  #Final (DOTTED)
+  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
+  
+  #CIs
+  x = seq_along(upper_ci_ss)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ss, rev(lower_ci_ss)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  legend('topleft', c('Median inferred', 'Final inferred', '95% CIs'),
+         col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
+         lty = c(1,1,2,1))
+  
+  if(PDF){
+    dev.off()
+  }
+}
+
+#REAL RESULTS + EPI DATA ONE PLOT
+PLOT_SSIB_RESULTS_REAL_DATA_ONE_PLOT <- function(mcmc_ssib, epidemic_data, RESULTS_FOLDER = '',
+                                        cex = 1.2, lwd = 2.0, model = 'SSIB',
+                                        col_ss = 'aquamarine', col_ns = 'orange', PDF = FALSE){
+  
+  #PLOT
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('NS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = 7.75, height = 5.6) 
+  }
+  par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
+  
+  #TRUE VALUES
+  #non_ss = list_data_ssib$non_ss
+  #ss = list_data_ssib$ss
+  
+  #MCMC INFERRED
+  ns_inf = mcmc_ssib$data[[1]]
+  ss_inf = mcmc_ssib$data[[2]]
+  lower_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_lower_ci)
+  lower_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_lower_ci)
+  upper_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, get_upper_ci)
+  upper_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, get_upper_ci)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, mean)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, mean)
+  mean_ci_ns <- apply(mcmc_ssib$ns_mcmc, 2, median)
+  mean_ci_ss <- apply(mcmc_ssib$ss_mcmc, 2, median)
+  
+  #************
+  #NS TRUE
+  title = bquote(paste('Non Super-Spreading Infections, ', .(model), ' model - Real data inferene'))
+  y_lim = c(0, max(upper_ci_ns))
+  plot(seq_along(epidemic_data), epidemic_data,  type = 'l',
+       xlab = 'Time', ylab = 'Infection count',
+       main = title, 
+       #ylim = y_lim, 
+       lwd = 2.0,
+       cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex) 
+  
+  # plot(seq_along(mean_ci_ns), mean_ci_ns,  type = 'l',
+  #      xlab = 'Time', ylab = 'Infection count',
+  #      main = title, 
+  #      ylim = y_lim, 
+  #      lwd = 2.0,
+  #      cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
+  
+  #NS INFERRED (dashed)
+  #Mean
+  lines(seq_along(mean_ci_ns), mean_ci_ns, col = col_ns, lwd = lwd)
+  
+  #Final DOTTED
+  lines(seq_along(ns_inf), ns_inf, lty = 2, col = col_ns, lwd = lwd)
+  
+  #CIs
+  x = seq_along(upper_ci_ns)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ns, rev(lower_ci_ns)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  #mean
+  legend('topleft', c('Median inferred',
+                      'Final inferred','95% CIs'),
+         col = c('black', col_ns, col_ns, 'gray'), lwd = c(3, 2, 2,2), lty = c(1,1,2,1))
+  
+  #************
+  #SSI TRUE
+  
+  if(PDF){
+    dev.off()
+    plot_folder = paste0(RESULTS_FOLDER, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('SS_data_', model, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), 7.75, height = 5.6) 
+  }
+  par(mar = c(5, 5, 4, 2)) #bottom, left, top, right #1.5
+  
+  # title = bquote(paste('Super-Spreading Infections, ', .(model), ' model - True vs Inferred'))
+  # #title = bquote('Super-Spreading Infections - True vs Inferred')
+  # y_lim = c(0, max(upper_ci_ss))
+  # plot(seq_along(mean_ci_ss), mean_ci_ss,  type = 'l',
+  #      xlab = 'Time', ylab = 'Daily infection count',
+  #      main = title, 
+  #      ylim = y_lim,
+  #      lwd = 2.0,
+  #      cex.lab=cex+0.2, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)  
+  
+  #SSI INFERRED (dashed)
+  #Mean
+  lines(seq_along(mean_ci_ss), mean_ci_ss, col = col_ss, lwd = lwd)
+  
+  #Final (DOTTED)
+  lines(seq_along(ss_inf), ss_inf, lty = 2, col = col_ss, lwd = lwd)
+  
+  #CIs
+  x = seq_along(upper_ci_ss)
+  polygon(c(x, rev(x)),
+          c(upper_ci_ss, rev(lower_ci_ss)),
+          col = rgb(0.8, 0.8, 0.8, 0.5), border = NA)
+  
+  legend('topleft', c('Median inferred', 'Final inferred', '95% CIs'),
+         col = c('black', col_ss, col_ss, 'gray'), lwd = c(3, 2, 2, 2),
+         lty = c(1,1,2,1))
+  
+  if(PDF){
+    dev.off()
+  }
+}
+
 
 #PLOT LINE TRUE VALUE
 PLOT_TRUE_LINE <- function(sim_val, mcmc_vec, true_bar_height, VERTICAL = FALSE){

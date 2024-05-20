@@ -264,6 +264,7 @@ GET_DENSITY_PRIOR_SSI <- function(theta_samples){
 #********************************
 GET_PRIOR_IMPORTANCE_SAMPLES <- function(epidemic_data, samp_size_prior, FLAGS_MODELS){
   
+  'GET_PRIOR_IMPORTANCE_SAMPLES'
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
     #PRIORS
