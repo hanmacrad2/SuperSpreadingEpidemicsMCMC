@@ -253,8 +253,10 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
     ssib_params_dash = c(ssib_params +
                            mvrnorm(1, mu = rep(0, mcmc_inputs$dim), Sigma = scaling*c_star*sigma_i)) 
     
+    
     #POSTIVE ONLY
     if (min(ssib_params_dash - vec_min) >= 0 && ssib_params_dash[2] < 1){ 
+      
       
       #************************************
       #DATA AUGMENTATION
@@ -265,9 +267,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
         #PARAMETERS
         r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
         r0_dash = ssib_params_dash[1];  a_dash = ssib_params_dash[2]; b_dash = ssib_params_dash[3]
+        
         #PROBABILITIES
         prob = (1 - a)/(a*b + 1 - a)
         prob2 = (1 - a_dash)/(a_dash*b_dash + 1 - a_dash)
+        
         #DATA
         I_t = data[[1]] + data[[2]] #'Total epidemic data
         data_dash = data
@@ -303,7 +307,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
           ssib_params <- ssib_params_dash #PARAMETER UPDATE 
           data <- data_dash #DATA UPDATE 
           log_like <- logl_new
-          vec_accept[i] = vec_accept[i] + 1 
+          vec_accept[i] = vec_accept[i] + 1  
         }
         
       }#END DATA AUGMENTAION REPS
@@ -316,13 +320,14 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
                                       -i*tcrossprod(x_bar))
       
       #ACCEPTANCE PROB - ADAPTIVE SCALING
-      accept_prob = min(1, exp(log_accept_ratio))
+      accept_prob = min(1, vec_accept[i]) #1 if accepted, 0 if not accepeted within 50 iterations 
+      #accept_prob = min(1, exp(log_accept_ratio))
       
     } else {
       accept_prob = 0
     } #END IF PARAMETER PROPOSAL POSTIVE 
     
-    #ADAPTIVE SCALING (needs acceptance probability)
+    #ADAPTIVE SCALING (needs acceptance probability) #if accept_prob = 1, this increases
     scaling =  scaling*exp(delta/i*(accept_prob - mcmc_inputs$target_acceptance_rate))
     
     #POPULATE VECTORS (ONLY STORE THINNED SAMPLE)
@@ -339,6 +344,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   
   #Final stats
   accept_count = pmin(1, vec_accept) #1 if accepted in that time step at all, 0 otherwise 
+  
+  
   accept_rate = 100*sum(accept_count)/(n_mcmc-1)
   #accept_da = (100*accept_da)/((n_mcmc-1)*rep_da)
   
