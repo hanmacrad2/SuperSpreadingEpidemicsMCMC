@@ -128,7 +128,6 @@ PROSOSAL_SS_DIR_MULTINOM <- function(x, mcmc_output, num_is_samps = 10000, # bet
         
         density_dirmult_samps[wh_is] = density_dirmult_samps[wh_is] + ddirmnom(x = r_dir_multinom, size = 1, alpha = alpha_vec, log = TRUE) 
       }
-      
     }
     
   }

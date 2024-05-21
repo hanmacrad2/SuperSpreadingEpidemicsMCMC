@@ -188,7 +188,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
                             FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE),
                             PRIORS_USED = GET_PRIORS_USED(),
                            data_start = c(3,2,1),
-                            rep_da = 50, mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
+                            rep_da = 500, mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
                                                v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
                                                thinning_factor = 10, burn_in_pc = 0.2)){    
   
