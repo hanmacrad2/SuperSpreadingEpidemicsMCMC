@@ -127,6 +127,51 @@ PLOT_EPI_DATA <-function(epi_data, title, cex = 2.0){
        cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
 }
 
+#PLOT EPI DATA DATE
+PLOT_EPI_DATA_DATE <-function(df_data, title, cex = 1.0){
+  
+  'PLOT_EPI_DATA_DATE'
+  
+  plot(df_data$date,
+       df_data$cases, 
+       type = "l", 
+       xlab = "Date", 
+       ylab = "Number of Daily Cases", 
+       main = bquote(paste(.(title))),
+       lwd = 1.2, #3.5,
+       cex.lab=cex+0.1, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)
+}
+
+
+PLOT_EPI_DATA_DATE_PDF <- function(df_data, RESULTS_FOLDER, title, data_type, 
+                                   plot_width = 9.5,  
+                                   plot_height = 7.2, cex = 1.0){
+ 
+  #PLOT
+  plot_folder = paste0(RESULTS_FOLDER, 'plots/')
+  #create_folder(plot_folder)
+  time_stamp = GET_CURRENT_TIME_STAMP()
+  pdf_file = paste0(data_type, '_EPI_DATA_', time_stamp, '.pdf')  
+  pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height)
+  
+  #PLOT
+  PLOT_EPI_DATA_DATE(df_data, title)
+  
+  dev.off()
+}
+
+GET_EPI_DATA_PDF <- function(RESULTS_FOLDER, data_type, 
+                                   plot_width = 9.5,  
+                                   plot_height = 7.2){
+  
+  #PLOT
+  plot_folder = paste0(RESULTS_FOLDER, 'plots/')
+  #create_folder(plot_folder)
+  time_stamp = GET_CURRENT_TIME_STAMP()
+  pdf_file = paste0(data_type, '_EPI_DATA_', time_stamp, '.pdf')  
+  pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height)
+  
+}
 
 # #PLOT CUM MEAN
 # PLOT_CUM_MEAN <-function(mcmc_vec, model_name, color_model){
