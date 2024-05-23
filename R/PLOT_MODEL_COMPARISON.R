@@ -77,7 +77,45 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
   
 }
 
-BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', 
+#********************************
+#* POSTERIOR PROBABILITY RESULTS
+BAR_PLOT_POST_PROBS_PDF <- function(list_vec_results, title = '', RESULTS_FOLDER, data_type, 
+                                    PDF = TRUE,
+                                    plot_width = 7.0, plot_height = 5.3, cex = 1.0,
+                                MODEL_COLORS = c('#FFD700', '#6BA6E9',
+                                                 '#FF8000', '#6AA84F', '#DC143C')) {
+  
+  #PLOT MODEL PROBABILITIES
+  #PDF
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, 'plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0('post_prob_', data_type,  '_mcmc_results_', '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
+    
+  }
+  
+  #SETUP
+  par(mar = c(4.5,5,4,4))
+  par(oma = c(1, 1, 5, 1)) 
+  
+  #SETUP
+  title = bquote(paste(.(title),' Posterior Model Probabilities. '))
+  df_results <- as.data.frame(do.call(cbind, list_vec_results))
+  
+  barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
+          names.arg = colnames(df_results), main = title,
+          xlab = 'Model', ylab = 'Posterior Probability',
+          cex.lab=cex+0.25, cex.axis=cex, cex.main= cex + 0.2, 
+          cex.names = cex + 0.2, cex.sub=cex)
+  #legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
+  
+  dev.off()
+}
+
+
+BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', cex = 1.4,
                                 MODEL_COLORS = c('#FFD700', '#6BA6E9',
                                                   '#FF8000', '#6AA84F', '#DC143C')) {
   
@@ -90,9 +128,11 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '',
   barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
           names.arg = colnames(df_results), main = title,
           xlab = 'Model', ylab = 'Posterior Probability',
-          cex.lab=1.5, cex.axis=1.6, cex.main= 1.6, 
-          cex.names = 1.6, cex.sub=1.6)
-  legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
+          cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2,
+          cex.names = cex + 0.2)
+          #cex.lab=1.5, cex.axis=1.6, cex.main= 1.6, 
+          #cex.names = 1.6, cex.sub=1.6)
+  #legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
   
 }
 
