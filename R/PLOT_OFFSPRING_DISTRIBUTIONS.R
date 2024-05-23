@@ -208,7 +208,41 @@ GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
          bty = "n")
 }
 
-
+#SSEB
+GET_OFFSPRING_SSEB_DATA <-function(list_params = c(2.5, 0.5, 10), n_samps = 100000,
+                                   num_offspring = 50){
+  
+  x <- 0:num_offspring
+  
+  # Parameters
+  r0_param = list_params[1]
+  alpha_param = list_params[2]
+  beta_param = list_params[3]
+  
+  # Simulate X1 from the Poisson distribution with parameter alpha*R0
+  pn = rpois(n_samps, lambda = alpha_param*r0_param)
+  #pn <- dpois(x, lambda = alpha_param*r0_param) #sample
+  
+  # Simulate X2 from the compound Poisson distribution
+  inner_lambda <- r0_param*(1 - alpha_param)/beta_param
+  ps =  rpois(n_samps, lambda = beta_param*rpois(n_samps, lambda = inner_lambda))
+  
+  #ps <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
+  p = pn + ps 
+  
+  #Density
+  Z = rep(NA, length = num_offspring + 1)
+  for (i in x){
+    
+    Z[i+1] = sum(p==i)
+  }
+  
+  Z = Z/sum(Z) #probability vector
+  
+  # Output the simulated total number of offspring Z
+  return(Z)
+  
+}
 
 
 
