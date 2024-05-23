@@ -56,9 +56,9 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits, data_type
     }
     
     #SSI 
-    if (model == 'SSI'){
+    if (model == 'SSI' || model == 'SSIB'){
       #PLOT HIST
-      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, c(1.0, 2.2))
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, c(1.0, 2.0))
       
     } else {
       
@@ -184,15 +184,15 @@ GET_EPI_DATA_PDF <- function(RESULTS_FOLDER, data_type,
   
 }
 
-GET_PDF_SETTING <- function(RESULTS_FOLDER, data_type, 
+GET_PDF_SETTING <- function(RESULTS_FOLDER, data_type, result_type,
                              plot_width = 10.0,  
                              plot_height = 9.2){
   
-  #PLOT
+  #PLOT 
   plot_folder = paste0(RESULTS_FOLDER, 'plots/')
   #create_folder(plot_folder)
   time_stamp = GET_CURRENT_TIME_STAMP()
-  pdf_file = paste0(data_type, '_EPI_DATA_', time_stamp, '.pdf')  
+  pdf_file = paste0(result_type, '_', data_type, time_stamp, '.pdf')  
   pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height)
   
 }
