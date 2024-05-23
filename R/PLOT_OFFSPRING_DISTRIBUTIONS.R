@@ -3,7 +3,7 @@
 #********************************************
 PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS, 
                                  MODEL_COLOR, RESULTS_FOLDER,
-                                 num_offspring = 25, 
+                                 num_offspring = 30, 
                                  plot_width = 7.5, plot_height = 5.5,
                                  cex = 1.3, main_font = 1.85, #3.2, 
                                  axis_font = 1.6, PDF = TRUE){
@@ -35,7 +35,7 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   #par(oma = c(1, 1, 1, 1)) #bottom, left, top, right
   
   #DATA
-  list_offspring = GET_OFFSPRING_DATA(list_params, FLAGS_MODELS)
+  list_offspring = GET_OFFSPRING_DATA(list_params, FLAGS_MODELS, num_offspring)
   x = list_offspring$x
   Z = list_offspring$Z
   
@@ -61,7 +61,7 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
 }
 
 #DATA
-GET_OFFSPRING_DATA <- function(list_params, FLAGS_MODELS, num_offspring = 25){
+GET_OFFSPRING_DATA <- function(list_params, FLAGS_MODELS, num_offspring){
   
   #DATA
   x <- 0:num_offspring  # Possible number of offspring
@@ -78,39 +78,47 @@ GET_OFFSPRING_DATA <- function(list_params, FLAGS_MODELS, num_offspring = 25){
     Z = dnbinom(x, size = k_param, prob = prob)  
     
   } else if (FLAGS_MODELS$SSEB){
-    Z = GET_OFFSPRING_SSEB(x, list_params)
+    Z = GET_OFFSPRING_SSEB(x, list_params, num_offspring)
     
   } else if (FLAGS_MODELS$SSIB){
     Z = GET_OFFSPRING_SSIB(x, list_params)
   }
   
   print(sum(x*Z))
+  
   return(list(x = x, Z = Z))
 }
 
 
 #SSEB
-GET_OFFSPRING_SSEB <-function(x, list_params){
+GET_OFFSPRING_SSEB <-function(x, list_params, num_offspring, 
+                              n_samps = 1000000){
   
+  x <- 0:num_offspring
   # Parameters
   r0_param = list_params[1]
   alpha_param = list_params[2]
   beta_param = list_params[3]
   
   # Simulate X1 from the Poisson distribution with parameter alpha*R0
-  pn <- dpois(x, lambda = alpha_param*r0_param) #sample
+  pn = rpois(n_samps, lambda = alpha_param*r0_param)
+  #pn <- dpois(x, lambda = alpha_param*r0_param) #sample
   
   # Simulate X2 from the compound Poisson distribution
   inner_lambda <- r0_param*(1 - alpha_param)/beta_param
-  ps <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
+  ps =  rpois(n_samps, lambda = beta_param*rpois(n_samps, lambda = inner_lambda))
   
-  # Calculate the total sum Z
-  #Two loops!!; multiple and add terms (in a triangular way)
+  #ps <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
+  p = pn + ps 
   
-  prob0 = pn[1]*ps[1]
-  prob1 = pn[1]*ps[2] + pn[2]*ps[1]
+  #Density
+  Z = rep(NA, length = num_offspring + 1)
+  for (i in x){
+    
+    Z[i+1] = sum(p==i)
+  }
   
-  Z <- pois1_nsei + pois2_ssei
+  Z = Z/sum(Z) #probability vector
   
   # Output the simulated total number of offspring Z
   return(Z)
@@ -245,8 +253,6 @@ GET_OFFSPRING_SSEB_DATA <-function(list_params = c(2.5, 0.5, 10), n_samps = 1000
 }
 
 
-
-
 # GET_OFFSPRING_TITLE <- function(list_params, FLAGS_MODELS){
 #   
 #   #PARAMS
@@ -295,4 +301,30 @@ GET_OFFSPRING_SSEB_DATA <-function(list_params = c(2.5, 0.5, 10), n_samps = 1000
 #         ylab = "Probability",
 #         lwd = lwd, #3.5,
 #         cex.lab=cex+0.2, cex.axis=cex, cex.sub=cex-0.2,
-#         cex.main=cex+0.3, cex.main= main_font) 
+# #         cex.main=cex+0.3, cex.main= main_font) 
+# v1GET_OFFSPRING_SSEB <-function(x, list_params){
+#   
+#   # Parameters
+#   r0_param = list_params[1]
+#   alpha_param = list_params[2]
+#   beta_param = list_params[3]
+#   
+#   # Simulate X1 from the Poisson distribution with parameter alpha*R0
+#   pn <- dpois(x, lambda = alpha_param*r0_param) #sample
+#   
+#   # Simulate X2 from the compound Poisson distribution
+#   inner_lambda <- r0_param*(1 - alpha_param)/beta_param
+#   ps <- beta_param*dpois(x, lambda = dpois(1, lambda = inner_lambda))
+#   
+#   # Calculate the total sum Z
+#   #Two loops!!; multiple and add terms (in a triangular way)
+#   
+#   prob0 = pn[1]*ps[1]
+#   prob1 = pn[1]*ps[2] + pn[2]*ps[1]
+#   
+#   Z <- pois1_nsei + pois2_ssei
+#   
+#   # Output the simulated total number of offspring Z
+#   return(Z)
+#   
+# }
