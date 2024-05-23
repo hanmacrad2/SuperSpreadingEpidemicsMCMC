@@ -13,7 +13,7 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   
   #PARAMS
   model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
-  main_title =  bquote(paste(.(model), " model - Offspring Distriubtion"))
+  main_title =  bquote(paste(.(model), " model - Offspring Distribution"))
   param = list_params[1]
   
   if(PDF){
