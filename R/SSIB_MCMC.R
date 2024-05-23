@@ -165,11 +165,11 @@ SET_SSIB_DATA <- function(epidemic_data, FLAGS_DATA_TYPE, data_start = c(3,2,1))
     #DATA - AUGMENTED 
     ss = ifelse(epidemic_data > 1, pmax(1, round(0.1*epidemic_data)), 0) #10% of ssib data if > 1, else 1, else 0
     non_ss = epidemic_data - ss
-    # 
-    # if(epidemic_data[1] == 2){
-    #   ss[1] = 0
-    #   non_ss[1] = 2
-    # }
+
+    if(epidemic_data[1] == 2){
+      ss[1] = 1
+      non_ss[1] = 1
+    }
     
   }
   
