@@ -200,6 +200,15 @@ get_mean_cis <- function(data_col){
   print(paste0('Mean: ', mean_col, ', CI: [', lower_ci, ', ', upper_ci, ' ]'))
 }
 
+get_cis_and_mean <- function(data_vec){
+  
+  lower_ci = round(get_lower_ci(data_vec), 2)
+  upper_ci = round(get_upper_ci(data_vec), 2)
+  mean_vec = round(mean(data_vec), 2)
+  
+  print(paste0('Mean: ', mean_vec, ', CI: [', lower_ci, ', ', upper_ci, ' ]'))
+}
+
 #' @export
 get_ci_matrix <- function(mcmc_matrix, level = 0.95){
   
