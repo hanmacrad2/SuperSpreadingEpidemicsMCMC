@@ -3,12 +3,11 @@
 #PLOT REAL DATA FUNCTION
 #
 #************************
-PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits,
+PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits, data_type, main_title,
                                list_mcmc = list(Baseline = mcmc_baseline, SSE = mcmc_sse,
                                       SSI = mcmc_ssi, SSEB = mcmc_sseb, SSIB = mcmc_ssib), 
-                               MODEL_COLORS, main_title,
-                               plot_margin = c(5.0, 5.2, 4.5, 1.5), cex = 2.0, 
-                               use = 'HongKong',  PDF = TRUE, #Waitemata', 
+                               MODEL_COLORS, plot_margin = c(5.0, 5.2, 4.5, 1.5), cex = 2.0, 
+                              PDF = TRUE,
                               plot_width = 13.5, plot_height = 12.5) {
                                #list_colors = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', '#DC143C') ){
   
@@ -19,7 +18,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits,
     plot_folder = paste0(RESULTS_FOLDER, 'plots/')
     create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
-    pdf_file = paste0('Real_data_mcmc_', use, '_', time_stamp, '.pdf')  
+    pdf_file = paste0('Real_data_', data_type,  '_mcmc_results_', '_', time_stamp, '.pdf')  
     pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
     
   }
@@ -56,9 +55,17 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits,
       list_r0_vec[[model]] = mcmc_output$r0_vec
     }
     
-    #PLOT HIST
-    PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits)
-    
+    #SSI 
+    if (model == 'SSI'){
+      #PLOT HIST
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, c(1.0, 2.2))
+      
+    } else {
+      
+      #PLOT HIST
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits)
+    }
+
     #TRACE PLOTS
     PLOT_TRACE(list_r0_vec[[model]], model, MODEL_COLORS[i], cex)
   }
@@ -128,7 +135,7 @@ PLOT_EPI_DATA <-function(epi_data, title, cex = 2.0){
 }
 
 #PLOT EPI DATA DATE
-PLOT_EPI_DATA_DATE <-function(df_data, title, cex = 1.0){
+PLOT_EPI_DATA_DATE <-function(df_data, title, cex){
   
   'PLOT_EPI_DATA_DATE'
   
@@ -139,23 +146,27 @@ PLOT_EPI_DATA_DATE <-function(df_data, title, cex = 1.0){
        ylab = "Number of Daily Cases", 
        main = bquote(paste(.(title))),
        lwd = 1.2, #3.5,
-       cex.lab=cex+0.1, cex.axis=cex, cex.main=cex+0.3, cex.sub=cex)
+       cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2)
 }
 
 
 PLOT_EPI_DATA_DATE_PDF <- function(df_data, RESULTS_FOLDER, title, data_type, 
-                                   plot_width = 9.5,  
-                                   plot_height = 7.2, cex = 1.0){
+                                   plot_width = 11.0,  
+                                   plot_height = 5.0, cex = 1.0){
  
   #PLOT
   plot_folder = paste0(RESULTS_FOLDER, 'plots/')
-  #create_folder(plot_folder)
+  create_folder(plot_folder)
   time_stamp = GET_CURRENT_TIME_STAMP()
   pdf_file = paste0(data_type, '_EPI_DATA_', time_stamp, '.pdf')  
   pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height)
   
+  #PLOT SETTINGS
+  par(oma = c(1, 1, 1, 1))
+  par(mar = c(4.5,5,4,4))
+  
   #PLOT
-  PLOT_EPI_DATA_DATE(df_data, title)
+  PLOT_EPI_DATA_DATE(df_data, title, cex)
   
   dev.off()
 }
@@ -163,6 +174,19 @@ PLOT_EPI_DATA_DATE_PDF <- function(df_data, RESULTS_FOLDER, title, data_type,
 GET_EPI_DATA_PDF <- function(RESULTS_FOLDER, data_type, 
                                    plot_width = 9.5,  
                                    plot_height = 7.2){
+  
+  #PLOT
+  plot_folder = paste0(RESULTS_FOLDER, 'plots/')
+  #create_folder(plot_folder)
+  time_stamp = GET_CURRENT_TIME_STAMP()
+  pdf_file = paste0(data_type, '_EPI_DATA_', time_stamp, '.pdf')  
+  pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height)
+  
+}
+
+GET_PDF_SETTING <- function(RESULTS_FOLDER, data_type, 
+                             plot_width = 10.0,  
+                             plot_height = 9.2){
   
   #PLOT
   plot_folder = paste0(RESULTS_FOLDER, 'plots/')
