@@ -3,7 +3,7 @@
 #********************************************
 PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS, 
                                  MODEL_COLOR, RESULTS_FOLDER,
-                                 num_offspring, 
+                                 num_offspring, SUPER_SPREADING = FALSE,
                                  plot_width = 7.5, plot_height = 5.5,
                                  cex = 1.3, main_font = 1.85, #3.2, 
                                  axis_font = 1.6, PDF = TRUE){
@@ -18,8 +18,9 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   param = list_params[1]
   
   if(PDF){
-    #plot_folder = paste0(RESULTS_FOLDER, '/', model, '/')
     plot_folder = paste0(RESULTS_FOLDER, '/plot_num_offspring_', num_offspring, '/')
+    #plot_folder = paste0(RESULTS_FOLDER, '/', model, '/')
+    #plot_folder = paste0(RESULTS_FOLDER, '/superspreading_', list_params[3], '/')
     create_folder(plot_folder)
     time_stamp = GET_CURRENT_TIME_STAMP()
     pdf_file = paste0(model, '_Offspring_dist_', param, '_', time_stamp, '.pdf')  
@@ -28,15 +29,21 @@ PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS,
   
   #PLOT
   if(FLAGS_MODELS$SSEB){
-    par(mar = c(5, 5, 5, 1)) #bottom left top right
+    #par(mar = c(5, 5, 5, 1)) #bottom left top right
+    par(mar = c(4.5, 4.5, 3, 2))
   } else if(FLAGS_MODELS$SSIB){
     par(mar = c(4.5, 4.5, 3, 2)) #c(5, 4.7, 4, 4.7))
   } else {
     par(mar = rep(5,4))
   }
+  #SUPER-SPREADING
+  if(SUPER_SPREADING && FLAGS_MODELS$SSEB){
+    #main_title = expression(paste('SSEB model, ', beta, '=' .(list_params[3])))
+    main_title <- bquote(paste(.(model), " model. ", italic(beta), " = ", .(list_params[3])))
+  } else if (SUPER_SPREADING && FLAGS_MODELS$SSIB){
+    main_title = bquote(paste(.(model), ' model. b = ', .(list_params[3])))
+  }
   
-  #par(mar = c(5.5, 4.7, 4, 4.7))
-  #par(oma = c(1, 1, 1, 1)) #bottom, left, top, right
   
   #DATA
   list_offspring = GET_OFFSPRING_DATA(list_params, FLAGS_MODELS, num_offspring)
@@ -205,22 +212,22 @@ GET_OFFSPRING_SSEB_DATA <-function(list_params = c(2.5, 0.5, 10), n_samps = 1000
 #LEGEND 
 GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
                                  legend_location = 'topright', #alpha = 0.2,
-                                 cex = 1.5, inset = -0.02){
+                                 cex = 1.5, inset = 0.07){
   
   #PARAM
   legend_caption = GET_OFFSPRING_LEGEND_CAPTION(list_params, FLAGS_MODELS)
   
   #INSET
-  if (FLAGS_MODELS$SSEB){
-    inset = -0.05
-  }
+  # if (FLAGS_MODELS$SSEB){
+  #   inset = -0.03
+  # }
   
   #Legend
   legend(legend_location,
          x.intersp = 0.05, #-0.05,#CONTROLS RELATIVE TO THE PLOT
          legend_caption,
          cex = cex,
-         inset = inset,
+         inset = c(inset,0),
          #inset = c(-inset), #CONTROLS RELATIVE TO THE MARGINS NOT PLOT!
          col = c(MODEL_COLOR),
          lwd = 3, #rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
@@ -230,15 +237,18 @@ GET_LEGEND_OFFSPRING <- function(list_params, MODEL_COLOR, FLAGS_MODELS,
   
   #BIOMDAL MODELS EXTRA TEXT
   if (FLAGS_MODELS$SSEB){
-    mtext(expression("|" ~ R[0] ~ "= 2.5 " ~ alpha ~ "= 0.5" ~ beta ~ "= 10"),
-          side = 3, line = -6, cex = 1.35, adj = 0.95)
+    #mtext(bquote("|" ~ R[0] ~ "=" ~ .(list_params[1]) ~ "," ~ alpha ~ "=" ~ .(list_params[2]) ~ "," ~ beta ~ "=" ~ .(list_params[3])),
+    #      side = 3, line = -6.7, cex = 1.35, adj = 0.9)
+    
+    mtext(bquote("|" * R[0] * " = " * .(list_params[1]) * ", " * alpha * " = " * .(list_params[2]) * ", " * beta * " = " * .(list_params[3])),
+          side = 3, line = -6.7, cex = 1.35, adj = 0.9)
 
   } else if (FLAGS_MODELS$SSIB){
-    mtext(expression("|" ~ R[0] ~ "=" ~ 2.5 ~ ", a = 0.5, b = 10"),
-          side = 3, line = -6, cex = 1.35, adj = 0.95)
-    #mtext("| R[0] = 2.5, a = 0.5, b = 10", side = 3, line = -6, cex = 1.25, adj = 0.95)
+    mtext(bquote("|" * R[0] * " = " * .(list_params[1]) * ", " * a * " = " * .(list_params[2]) * ", " * b * " = " * .(list_params[3])),
+          side = 3, line = -6.7, cex = 1.35, adj = 0.9)
+
   }
-}
+} 
 
 #**************
 # LEGEND CAPTION
@@ -256,7 +266,7 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
   } else if (FLAGS_MODELS$SSEB) {
     legend_offspring = expression(atop(
       paste('  Z ~ Poisson(', alpha * R[0], ')'),
-      paste('+ Poisson(', beta, '* Poisson(R'[0] (1 - alpha)/beta ), '))'))
+      paste('+ Poisson(', beta, '* Poisson(R'[0], ' (1 -', alpha, ')/',beta,'))')))
     
   }  else if (FLAGS_MODELS$SSIB){
     legend_offspring = expression(atop(
@@ -268,7 +278,7 @@ GET_OFFSPRING_LEGEND_CAPTION <- function(list_params, FLAGS_MODELS){
         paste("Z ~ (1 - p) * Poisson(", a * R[0], " + ", (1 - a) * R[0] / b, ")"),
         paste("+ ", p, " * Poisson(", a * b * R[0], " + ", (1 - a) * R[0], ")"),
         atop(
-          paste("| ", R[0], " = 2.5, a = 0.5, b = 10")
+          paste("| ", R[0], " = 2.5, a = 0.5, b = 5")
         )
       )
     )
