@@ -70,7 +70,11 @@ GET_SIM_DATA <- function(epidemic_data, mcmc_output, iter, FLAGS_MODELS){
     
   } else if (FLAGS_MODELS$SSEB){
     
-    replicate_data = SIMULATE_EPI_SSEB(num_days = num_days)
+    r0 = mcmc_sseb$r0_vec[iter]
+    alpha = mcmc_sseb$alpha_vec[iter]
+    beta = mcmc_sseb$beta_vec[iter]
+    replicate_data = SIMULATE_EPI_SSEB(num_days = num_days, r0 = r0, 
+                                       alpha = alpha, beta = beta)
     
   } else if (FLAGS_MODELS$SSIB){
     
@@ -83,7 +87,7 @@ GET_SIM_DATA <- function(epidemic_data, mcmc_output, iter, FLAGS_MODELS){
 
 RUN_MODEL_CRITICISM <- function(epidemic_data, mcmc_output, 
                                 FLAGS_MODELS = list(BASELINE = FALSE, 
-                                                    SSE = TRUE, SSI = FALSE, SSEB = FALSE,
+                                                    SSE = FALSE, SSI = FALSE, SSEB = FALSE,
                                                     SSIB = FALSE), num_samples = 5000){
   
   #GET SUMMARY STATS
