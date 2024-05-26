@@ -135,7 +135,7 @@ PLOT_EPI_DATA <-function(epi_data, title, cex = 2.0){
 }
 
 #PLOT EPI DATA DATE
-PLOT_EPI_DATA_DATE <-function(df_data, title, cex){
+PLOT_EPI_DATA_DATE <-function(df_data, title, cex, ylim){
   
   'PLOT_EPI_DATA_DATE'
   
@@ -145,6 +145,7 @@ PLOT_EPI_DATA_DATE <-function(df_data, title, cex){
        xlab = "Date", 
        ylab = "Number of Daily Cases", 
        main = bquote(paste(.(title))),
+       ylim = ylim,
        lwd = 1.2, #3.5,
        cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2)
 }

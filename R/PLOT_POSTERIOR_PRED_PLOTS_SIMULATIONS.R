@@ -1,10 +1,6 @@
 #GET POSTERIOR PREDICTIVE VALUES FROM MCMC
 
 
-#FUNCTIONS
-zigzag <- function(xs) {
-  sum(abs(diff(xs)))
-}
 
 #SAMPLE FROM BASELINE MODEL
 #' @export 
@@ -62,7 +58,8 @@ SAMPLE_SSE_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats =5,
                             PLOT = FALSE){
   
   #SAMPLE
-  num_days = length(epi_data); print(paste0('num_days', num_days))
+  num_days = length(epi_data)
+  print(paste0('num_days', num_days))
   n_mcmc = length(mcmc_output$sse_params_matrix[,1])
   #sample_index = sample(1:n_mcmc, 1)
   sample_indices = sample(1:n_mcmc, n_sample_repeats)
@@ -235,7 +232,7 @@ RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, sim_vals,
                                           tolower(model_type), '_', i, '.rds'))
       matrix_sim_temp = SAMPLE_BASELINE_MCMC(mcmc_output)
       matrix_sim_data = rbind(matrix_sim_temp, matrix_sim_data)
-      #print(matrix_sim_data)
+      
     }
     #POSTERIOR PREDICTIVE PLOTS
     POSTERIOR_PREDICTIVE_PLOTS(matrix_sim_data, true_epidemic_data, model_type)
