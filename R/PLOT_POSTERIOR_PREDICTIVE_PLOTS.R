@@ -154,7 +154,7 @@ SAMPLE_SSIB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000
 POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
                                        title, data_type, FLAGS_MODELS, 
                                          MODEL_COLOR, RESULTS_FOLDER, EPI_DATA = TRUE,
-                                       PDF = TRUE, ZIG_ZAG = FALSE,
+                                       PDF = TRUE, ZIG_ZAG = FALSE, ALL_MODELS = FALSE,
                                          plot_width = 9.0, plot_height = 6.5,
                                        cex = 1.0){
   
@@ -173,6 +173,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
     #PDF
     if(PDF){
       #PLOT
+      print('PDF TRUE')
       plot_folder = paste0(RESULTS_FOLDER, 'plots/')
       create_folder(plot_folder)
       time_stamp = GET_CURRENT_TIME_STAMP()
@@ -184,7 +185,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
       par(mar = c(4.5,5,4,4))
     }
     
-    #PLOTS
+    #PLOTS 
     print('upper_bounds'); print(upper_bounds)
     print('lower_bounds'); print(lower_bounds)
    
@@ -194,37 +195,35 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
     }
     
     #PLOT
-    main_title = bquote(paste('Posterior Predictive Plot: ', .(title)))
+    main_title = bquote(paste('Posterior Predictive Plots:', .(title)))
     ylim = c(0, max(true_data, upper_bounds))
-      
-    #plot(1:num_days, true_data, type = 'l', ylim = ylim,
-    #     main = main_title, xlab = 'Time', ylab = 'Infection count', lwd = 2,
-    #     cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2)
     
     if(EPI_DATA){
       plot(1:num_days, true_data, type = 'l', ylim = ylim,
            main = main_title, xlab = 'Time', ylab = 'Infection count', lwd = 2,
            cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2)
     } else {
-      #PLOT EPI DATA DATE
-      #PLOT_EPI_DATA_DATE(df_data, main_title, cex, ylim = ylim)
     }
-         #cex.lab= cex, cex.axis=cex, cex.main=cex, cex.sub=cex)
          
     #PLOT EPI DATA DATE
     PLOT_EPI_DATA_DATE(df_data, main_title, cex, ylim = ylim)
     
     #95 % Credible intervals 
     if (EPI_DATA){
-      lines(1:num_days, upper_bounds, col = MODEL_COLOR, lwd = 2) #, type = 'l') #, ylim = c(-5, 5))
-      lines(1:num_days, lower_bounds, col = MODEL_COLOR, lwd = 2) #, type = 'l')
+      lines(1:num_days, upper_bounds, col = MODEL_COLOR, lwd = 2.5) #, type = 'l') #, ylim = c(-5, 5))
+      lines(1:num_days, lower_bounds, col = MODEL_COLOR, lwd = 2.5) #, type = 'l')
     } else {
-      lines(df_data$date, upper_bounds, col = MODEL_COLOR, lwd = 2) #, type = 'l') #, ylim = c(-5, 5))
-      lines(df_data$date, lower_bounds, col = MODEL_COLOR, lwd = 2) #, type = 'l')
+      lines(df_data$date, upper_bounds, col = MODEL_COLOR, lwd = 2.5) #, type = 'l') #, ylim = c(-5, 5))
+      lines(df_data$date, lower_bounds, col = MODEL_COLOR, lwd = 2.5) #, type = 'l')
     }
     
     #LEGEND
-    GET_LEGEND_POST_PRED(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples)
+    if(ALL_MODELS){
+      GET_LEGEND_POST_PRED_ALL_MODELS(data_type, n_samples)
+    } else {
+      GET_LEGEND_POST_PRED(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples)
+    }
+    
     
     #HISTOGRAM OF ZIG-ZAG 
     if(ZIG_ZAG){
@@ -235,13 +234,14 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
       abline(v = zigzag(true_data), col = 'green', lwd = 2) 
     }
     
-    if(PDF){
+    if(PDF && ALL_MODELS == FALSE){
+      print('PDF && ALL_MODELS == FALSE')
       dev.off()
     }
   }
   
   
-  #LEGEND  
+#LEGEND  
 GET_LEGEND_POST_PRED <- function(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples,
                                  legend_location = 'topleft', 
                                  cex = 1.0, inset = 0.07){
@@ -265,3 +265,49 @@ GET_LEGEND_POST_PRED <- function(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples
          text.font = 1.5, #1.45
          bty = "n")
 }
+
+#LEGEND  
+GET_LEGEND_POST_PRED_ALL_MODELS <- function(data_type, n_samples,
+                                 legend_location = 'topleft', 
+                                 models = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB'),
+                                 MODEL_COLORS = c('#FFD700', '#6BA6E9', '#FF8000', '#6AA84F', '#DC143C'), 
+                                 cex = 1.15, inset = 0.07){
+  
+  #PARAM
+  legend_caption = c(data_type)
+  
+  for (i in 1:length(MODEL_COLORS)){
+    model = models[i]
+    #model = names(FLAGS_MODELS)[unlist(FLAGS_MODELS)[[1]]][i] 
+    print(model)
+    legend_caption = c(legend_caption, paste0(' 95 % CIs of ', model, ' model fits, N = ', (n_samples)))
+  }
+  
+  #Legend
+  legend(legend_location,
+         x.intersp = 0.05, #-0.05,#CONTROLS RELATIVE TO THE PLOT
+         legend_caption,
+         cex = cex,
+         #inset = c(inset,0),
+         #inset = c(-inset), #CONTROLS RELATIVE TO THE MARGINS NOT PLOT!
+         col = c('black', MODEL_COLORS),
+         lwd = 2.0, #rep(3, num_conds-1), #c(rep(3, num_conds-1), 2),
+         lty = 1.5, # rep(1, num_conds), #c(1, 1),
+         text.font = 1.2, #1.45
+         bty = "n")
+}
+
+#GET CI DATA
+GET_CI_PRED_DATA <- function(matrix_sim_data, df_data, MODEL_COLOR){
+  
+  #TEST STATS
+  mean_est <- apply(matrix_sim_data, 2, mean) |> unlist()
+  upper_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.975) |> unlist()
+  lower_bounds <- apply(matrix_sim_data, 2, quantile, probs = 0.025) |> unlist()
+  
+  #PLOT
+  lines(df_data$date, upper_bounds, col = MODEL_COLOR, lwd = 2.5) 
+  lines(df_data$date, lower_bounds, col = MODEL_COLOR, lwd = 2.5) 
+}
+
+

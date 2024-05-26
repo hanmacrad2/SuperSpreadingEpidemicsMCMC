@@ -146,7 +146,7 @@ PLOT_EPI_DATA_DATE <-function(df_data, title, cex, ylim){
        ylab = "Number of Daily Cases", 
        main = bquote(paste(.(title))),
        ylim = ylim,
-       lwd = 1.2, #3.5,
+       lwd = 3.0, #3.5,
        cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2)
 }
 
