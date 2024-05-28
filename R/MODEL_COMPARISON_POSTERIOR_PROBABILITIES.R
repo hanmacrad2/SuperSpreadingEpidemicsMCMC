@@ -11,7 +11,7 @@ GET_MODEL_EVIDENCE <- function(list_mcmc, epidemic_data){
   #***************************
   #1. BASELINE MODEL
   print('BASELINE:')
-  mcmc_baseline = list_mcmc$vec_mcmc_baseline #MCMC_INFER_BASELINE(epidemic_data, n_mcmc)
+  mcmc_baseline = list_mcmc$mcmc_baseline #MCMC_INFER_BASELINE(epidemic_data, n_mcmc)
   #MODEL EVIDENCE 
   mod_ev_base = GET_LOG_MODEL_EVIDENCE_BASELINE(mcmc_baseline$r0_vec, epidemic_data)
   print(mod_ev_base)
@@ -19,7 +19,7 @@ GET_MODEL_EVIDENCE <- function(list_mcmc, epidemic_data){
   
   #SSE 
   print('SSE:')
-  mcmc_sse = list_mcmc$vec_mcmc_sse
+  mcmc_sse = list_mcmc$mcmc_sse
   #MODEL EVIDENCE
   mcmc_samples =  mcmc_sse$sse_params_matrix 
   FLAGS_MODELS = GET_FLAGS_MODELS(SSE = TRUE) 
@@ -29,7 +29,7 @@ GET_MODEL_EVIDENCE <- function(list_mcmc, epidemic_data){
   
   #SSI
   print('SSI:')
-  mcmc_ssi = list_mcmc$vec_mcmc_ssi
+  mcmc_ssi = list_mcmc$mcmc_ssi
   #MODEL EVIDENCE
   mod_ev_ssi = GET_LOG_MODEL_EVIDENCE_SSI(mcmc_ssi, epidemic_data) 
   print(mod_ev_ssi)
@@ -37,7 +37,7 @@ GET_MODEL_EVIDENCE <- function(list_mcmc, epidemic_data){
   
   #SSEB
   print('SSEB:')
-  mcmc_sseb = list_mcmc$vec_mcmc_sseb
+  mcmc_sseb = list_mcmc$mcmc_sseb
   #MODEL EVIDENCE
   mcmc_samples =  matrix(c(mcmc_sseb$alpha_vec, mcmc_sseb$r0_vec,
                            mcmc_sseb$beta_vec), ncol = 3)
@@ -49,7 +49,7 @@ GET_MODEL_EVIDENCE <- function(list_mcmc, epidemic_data){
   
   #SSIB
   print('SSIB:')
-  mcmc_ssib = list_mcmc$vec_mcmc_ssib
+  mcmc_ssib = list_mcmc$mcmc_ssib
   #MODEL EVIDENCE
   mod_ev_ssib = GET_LOG_MODEL_EVIDENCE_SSIB(mcmc_ssib, epidemic_data)
   print(mod_ev_ssib)

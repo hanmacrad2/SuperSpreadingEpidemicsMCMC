@@ -101,7 +101,8 @@ BAR_PLOT_POST_PROBS_PDF <- function(list_vec_results, title = '', RESULTS_FOLDER
   par(oma = c(1, 1, 5, 1)) 
   
   #SETUP
-  title = bquote(paste(.(title),' Posterior Model Probabilities. '))
+  title = bquote(paste('Posterior Model Probabilities - ',.(title)))
+  #title = bquote(paste(.(title),' Posterior Model Probabilities. '))
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
   barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
@@ -122,7 +123,7 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', cex = 1.4,
   #PLOT MODEL PROBABILITIES
   
   #SETUP
-  title = bquote(paste(.(title),' Posterior Model Probabilities. '))
+  title = bquote(paste(.(title),' Posterior Model Probabilities '))
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
   barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),

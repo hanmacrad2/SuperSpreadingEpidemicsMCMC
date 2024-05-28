@@ -25,7 +25,7 @@
 #'RUN_MODEL_CRITICISM(epidemic_data, root_folder, model_type = list(FLAG_BASE = FALSE, FLAG_SSE = FALSE, FLAG_SSI = TRUE))
 #'
 #'
-RUN_MODEL_CRITICISM <- function(epidemic_data, root_folder,
+RUN_MODEL_CRITICISM_V1 <- function(epidemic_data, root_folder,
                                 model_type = list(FLAG_BASE = TRUE, FLAG_SSE = FALSE, FLAG_SSI = FALSE),
                                 modelling_specs = list(n_reps = 1000, n_mcmc = 50000)){
   
@@ -233,7 +233,7 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
     #print('passed II')
     
     #GET P VALUES
-    list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) GET_P_VALUE(df_true_ss[,x], df_summary_stats_rep[,x]))
+    list_p_vals = sapply(1:ncol(df_summary_stats_rep), function(x) GET_P_VALUE_V1(df_true_ss[,x], df_summary_stats_rep[,x]))
     saveRDS(list_p_vals, file = paste0(FOLDER_REP, '/list_p_vals_rep', rep, ".rds"))
     print(list_p_vals)
     
@@ -295,7 +295,7 @@ GET_P_VALUES_TOTAL <- function(root_folder, n_reps){
 #' p_value = GET_P_VALUE(column_true_val, column_summary_stat)
 #' 
 #' 
-GET_P_VALUE <- function(column_true_val, column_summary_stat) {
+GET_P_VALUE_V1 <- function(column_true_val, column_summary_stat) {
   'Get p values - comparing  summary stat columns to true value'
   
   #Final val

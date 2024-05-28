@@ -4,7 +4,7 @@
 
 #SAMPLE FROM BASELINE MODEL
 #' @export 
-SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats = 5,
+SAMPLE_BASELINE_MCMC_V1 <- function(mcmc_output, num_days = 50, n_sample_repeats = 5,
                                  PLOT = FALSE){
   
   #SAMPLE
@@ -26,7 +26,7 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats = 
 }
 
 #2. SSEB
-SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats = 5, 
+SAMPLE_SSEB_MCMC_V1 <- function(mcmc_output, num_days = 50, n_sample_repeats = 5, 
                              PLOT = FALSE){
   
   #SAMPLE
@@ -54,7 +54,7 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats = 5,
   return(matrix_sim_temp)
 }
 
-SAMPLE_SSE_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats =5,
+SAMPLE_SSE_MCMC_V1 <- function(mcmc_output, num_days = 50, n_sample_repeats =5,
                             PLOT = FALSE){
   
   #SAMPLE
@@ -85,7 +85,7 @@ SAMPLE_SSE_MCMC <- function(mcmc_output, num_days = 50, n_sample_repeats =5,
 
 #PLOT POSTERIOR PREDICTIVE DATA
 #' @export
-PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6,
+PLOT_POSTERIOR_PRED_EPI_DATA_V1 <- function(true_epidemic_data, OUTER_FOLDER, true_R0 = 1.6,
                                          run = 1, n_repeats = 100, n_sample_repeats = 5, burn_in = 2000,
                                          FLAGS_MODELS = list(BASE = TRUE, SSEB = TRUE,
                                                              SSE = TRUE, SSIB = FALSE)){
@@ -170,7 +170,7 @@ PLOT_POSTERIOR_PRED_EPI_DATA <- function(true_epidemic_data, OUTER_FOLDER, true_
 
 
 #POSTERIOR PREDICTIVE PLOTS
-POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type, titleX){
+POSTERIOR_PREDICTIVE_PLOTS_V1 <- function(matrix_sim_data, true_data, model_type, titleX){
   
   #SETUP
   par(mfrow = c(1, 2))
@@ -209,7 +209,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, model_type, t
 }
 
 #POSTERIOR PREDICTIVE CHECKING
-RUN_POSTERIOR_PREDICTIVE_PLOTS <- function(true_epidemic_data, sim_vals, 
+RUN_POSTERIOR_PREDICTIVE_PLOTS_V1 <- function(true_epidemic_data, sim_vals, 
                                            OUTER_FOLDER, file_name,
                                            run = 1, num_reps = 50, n_sample_repeats = 100,
                                            SIM_DATA = TRUE, 

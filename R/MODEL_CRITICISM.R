@@ -27,13 +27,14 @@ GET_SUMMARY_STATS <-function(epidemic_data) {
   
   mid_point = length(epidemic_data)/2; end_point = length(epidemic_data)
   
-  summary_stats = c(sum_infects = sum(epidemic_data),
+  summary_stats = c(
+    sum_infects = sum(epidemic_data),
+    sd_infect = sd(epidemic_data),
   sum_1st_half  = sum(epidemic_data[1:mid_point]),
   sum_2nd_half =  sum(epidemic_data[(mid_point+1):end_point]),
   
   median_infect = median(epidemic_data),
   max_infect = max(epidemic_data),
-  sd_infect = sd(epidemic_data),
   
   #Differences
   max_dif = max((diff(epidemic_data))), #Change from absolute difference
@@ -65,7 +66,9 @@ GET_SIM_DATA <- function(epidemic_data, mcmc_output, iter, FLAGS_MODELS){
     
   } else if (FLAGS_MODELS$SSI){
     
-    epidemic_data_vec = SIMULATE_EPI_SSI(num_days = num_days)
+    r0 = mcmc_output$ssi_params_matrix[iter, 1]
+    k = mcmc_output$ssi_params_matrix[iter, 2]
+    epidemic_data_vec = SIMULATE_EPI_SSI(num_days = num_days, r0 = r0, k = k)
     replicate_data = epidemic_data_vec$epidemic_data
     
   } else if (FLAGS_MODELS$SSEB){
@@ -78,7 +81,10 @@ GET_SIM_DATA <- function(epidemic_data, mcmc_output, iter, FLAGS_MODELS){
     
   } else if (FLAGS_MODELS$SSIB){
     
-    replicate_data = SIMULATE_EPI_SSIB(num_days = num_days)
+    r0 = mcmc_output$ssib_params_matrix[iter, 1]
+    a = mcmc_output$ssib_params_matrix[iter, 2]
+    b = mcmc_output$ssib_params_matrix[iter, 3]
+    replicate_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0, a = a, b = b)
     
   } 
   
@@ -100,7 +106,7 @@ RUN_MODEL_CRITICISM <- function(epidemic_data, mcmc_output,
   colnames(replicate_summary_stats) <- stat_names
     
     for (iter in 1:num_samples){
-      if(iter %% 100){
+      if(iter %% 500 == 0){
         print(iter)
       }
       replicate_data = GET_SIM_DATA(epidemic_data, mcmc_output, iter, FLAGS_MODELS)
