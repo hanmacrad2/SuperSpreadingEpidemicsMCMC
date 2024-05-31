@@ -58,7 +58,7 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits, data_type
     #SSI 
     if (model == 'SSI' || model == 'SSIB'){
       #PLOT HIST
-      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, c(1.0, 2.0))
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits) #c(1.0, 2.0))
       
     } else {
       
@@ -140,41 +140,13 @@ PLOT_EPI_DATA <-function(epi_data, title, cex = 2.0){
 #
 #****************************************************************************************************
 
-PLOT_EPI_DATA_DATE <-function(df_data, title, cex, ylim, 
-                              lwd_data = 4.0, SSE = FALSE, by_data = "3 days"){
-  
-  'PLOT_EPI_DATA_DATE'
-  #DATE/ X AXIS
-  if(SSE){
-    xaxt_temp = 'n'
-  } else {
-    xaxt_temp = 's'
-  }
-  
-  plot(df_data$date, df_data$cases, 
-       type = "l", 
-       xlab = "Date", ylab = "Number of Daily Cases", 
-       main = bquote(paste(.(title))),
-       ylim = ylim, lwd = lwd_data, 
-       cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2,
-       xaxt = xaxt_temp)
-  
-  if(SSE){
-    dates_plot = df_data$date 
-    label_dates <- seq(min(dates_plot), max(dates_plot), by = by_data)
-    label_dates <- label_dates[label_dates %in% dates_plot]
-    axis.Date(1, at = label_dates, 
-              labels = format(label_dates, "%b %d"), 
-              cex.axis = cex + 0.2)
-  }
-}
-
 #*******************
 #PLOT_EPI_DATA_DATE_PDF
 PLOT_EPI_DATA_DATE_PDF <- function(df_data, RESULTS_FOLDER, title, data_type, 
-                                   plot_width = 9.5,  
-                                   plot_height = 6.0, cex = 1.3, lwd_data = 2.5, SSE = FALSE){
- 
+                                   plot_width = 11.5,  
+                                   plot_height = 7.5, cex = 1.3, lwd_data = 2.5,
+                                   X_AXIS_DATES = FALSE){
+  
   #PLOT 
   plot_folder = paste0(RESULTS_FOLDER, 'plots/')
   create_folder(plot_folder)
@@ -186,12 +158,52 @@ PLOT_EPI_DATA_DATE_PDF <- function(df_data, RESULTS_FOLDER, title, data_type,
   par(oma = c(1, 1, 1, 1))
   par(mar = c(4.5,5,4,4))
   ylim = c(0, max(df_data$cases))
-    
+  
   #PLOT
-  PLOT_EPI_DATA_DATE(df_data, title, cex, ylim, lwd_data = lwd_data, SSE = SSE)
+  PLOT_EPI_DATA_DATE(df_data, title, cex, ylim, lwd_data = lwd_data, X_AXIS_DATES = X_AXIS_DATES)
   
   dev.off()
 }
+
+PLOT_EPI_DATA_DATE <-function(df_data, title, cex, ylim, 
+                              lwd_data = 2.25, xlab = 'Report date',
+                              X_AXIS_DATES = FALSE, SSE = FALSE, by_data = "3 days"){ #3 days
+  
+  'PLOT_EPI_DATA_DATE'
+  if(X_AXIS_DATES || SSE){
+    xaxt_temp = 'n'
+  } else {
+    xaxt_temp = 's'
+  }
+  
+  #PLOT
+  plot(df_data$date, df_data$cases, 
+       type = "l", 
+       xlab = xlab, 
+       ylab = "Number of Daily Cases", 
+       main = bquote(paste(.(title))),
+       ylim = ylim, lwd = lwd_data, 
+       cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2,
+       xaxt = xaxt_temp)
+  
+  if(X_AXIS_DATES){
+    
+    key_dates = c("2020-03-20", "2021-01-01", "2021-08-20", "2021-12-31")
+    key_date_names = c("March 2020", "2021", "August 2021", "2022")
+    axis.Date(side = 1, at = as.Date(key_dates), 
+              labels = key_date_names, cex.axis = cex+0.2)
+    
+  } else if (SSE){
+    dates_plot = df_data$date
+    label_dates <- seq(min(dates_plot), max(dates_plot), by = by_data)
+    label_dates <- label_dates[label_dates %in% dates_plot]
+    axis.Date(1, at = label_dates,
+             labels = format(label_dates, "%b %d"),
+             cex.axis = cex + 0.2)
+   }
+
+}
+
 
 #*******************
 #GET_EPI_DATA_PDF

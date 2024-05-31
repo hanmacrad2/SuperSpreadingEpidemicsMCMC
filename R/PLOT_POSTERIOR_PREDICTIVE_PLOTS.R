@@ -231,7 +231,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
   
   
 #LEGEND  
-GET_LEGEND_POST_PRED <- function(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples, cred_int
+GET_LEGEND_POST_PRED <- function(FLAGS_MODELS, MODEL_COLOR, data_type, n_samples, cred_int,
                                  legend_location = 'topleft', 
                                  cex = 1.0, inset = 0.07){
   
