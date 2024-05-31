@@ -82,6 +82,7 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
 BAR_PLOT_POST_PROBS_PDF <- function(list_vec_results, title = '', RESULTS_FOLDER, data_type, 
                                     PDF = TRUE,
                                     plot_width = 7.0, plot_height = 5.3, cex = 1.0,
+                                    MODEL_NAMES = c('Baseline','SSE','SSI', 'SSEB', 'SSIB'),
                                 MODEL_COLORS = c('#FFD700', '#6BA6E9',
                                                  '#FF8000', '#6AA84F', '#DC143C')) {
   
@@ -106,9 +107,11 @@ BAR_PLOT_POST_PROBS_PDF <- function(list_vec_results, title = '', RESULTS_FOLDER
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
   barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
-          names.arg = colnames(df_results), main = title,
+          names.arg = MODEL_NAMES, 
+          main = title,
           xlab = 'Model', ylab = 'Posterior Probability',
-          cex.lab=cex+0.25, cex.axis=cex, cex.main= cex + 0.2, 
+          cex.lab=cex+0.25, cex.axis=cex, 
+          cex.main= cex + 0.2, 
           cex.names = cex + 0.2, cex.sub=cex)
   #legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
   
@@ -117,6 +120,7 @@ BAR_PLOT_POST_PROBS_PDF <- function(list_vec_results, title = '', RESULTS_FOLDER
 
 
 BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', cex = 1.4,
+                                MODEL_NAMES = c('Base','SSE','SSI', 'SSEB', 'SSIB'),
                                 MODEL_COLORS = c('#FFD700', '#6BA6E9',
                                                   '#FF8000', '#6AA84F', '#DC143C')) {
   
@@ -126,15 +130,13 @@ BAR_PLOT_POST_PROBS <- function(list_vec_results, title = '', cex = 1.4,
   title = bquote(paste(.(title),' Posterior Model Probabilities '))
   df_results <- as.data.frame(do.call(cbind, list_vec_results))
   
-  barplot(t(df_results), beside = TRUE, col = MODEL_COLORS, ylim = c(0, 1),
-          names.arg = colnames(df_results), main = title,
+  barplot(t(df_results), beside = TRUE, 
+          col = MODEL_COLORS, ylim = c(0, 1),
+          names.arg = MODEL_NAMES, main = title,
           xlab = 'Model', ylab = 'Posterior Probability',
           cex.lab=cex+0.2, cex.axis=cex+0.2, cex.main=cex+0.3, cex.sub=cex+0.2,
           cex.names = cex + 0.2)
-          #cex.lab=1.5, cex.axis=1.6, cex.main= 1.6, 
-          #cex.names = 1.6, cex.sub=1.6)
-  #legend('topright', legend = colnames(df_results), fill = MODEL_COLORS) #, cex = 1.1)
-  
+
 }
 
 

@@ -112,10 +112,74 @@ GET_MODEL_COMP_DF_PLOT <- function(df_mod_ev_plot){
   
 }
 
+#************************************************************************************************
+#* GET MODEL COMPARISON POST PROBS ALL MODELS
+GET_POST_PROB_HEAT_MAP_VALUES <- function(df_post_probs, model_num,
+                                          FLAGS_MODELS, rounding_number = 3){
+  
+  model = names(FLAGS_MODELS)[model_num]
+  print(paste0(model, ': SIMULATION MODEL'))
+  
+  #BASELINE FIRST
+  get_mean_cis(df_post_probs[,1], rounding_number = rounding_number) #run_number = column 1
+  mean_post_prob = get_mean(df_post_probs[,1], rounding_number = rounding_number)
+  vec_means = c(mean_post_prob)
+  list_post_probs = list(Baseline = mean_post_prob)
+  
+  for (i in 2:length(FLAGS_MODELS)){
+    
+    model_fitted = names(FLAGS_MODELS)[i]
+    get_mean_cis(df_post_probs[,i], rounding_number = rounding_number)
+    mean_post_prob = get_mean(df_post_probs[,i], rounding_number = rounding_number)
+    print(paste0(model_fitted, ': FITTED MODEL, mean post prob: ', mean_post_prob))
+    print(paste0('model (should be same): ', colnames(df_post_probs)[i]))
+    list_post_probs[model_fitted] = mean_post_prob
+    vec_means = c(vec_means, mean_post_prob)
+    
+  }
+  
+  print(list_post_probs)
+  print(vec_means)
+  
+  list_results = list(list_post_probs = list_post_probs, vec_means = vec_means)
+  
+  return(list_results)
+}
+
 
 #****************
 #* MAP : MAXIMUM A POSTERIOR
-get_count_map <- function (matrix_probs, model_num){
+
+GET_COUNT_MAP_ALL_MODELS <- function(matrix_probs, model_num, FLAG_MODEL){
+  
+  #MODEL
+  FLAGS_MODELS = list(Baseline = FALSE, SSE = TRUE, SSI = FALSE,
+                      SSEB = FALSE, SSIB = FALSE) 
+  model = names(FLAG_MODEL)[which(unlist(FLAG_MODEL))]
+  model_index = which(unlist(FLAGS_MODELS))[[1]]
+  print(model)
+  
+  for (i in 1:length(FLAGS_MODEL)){
+    is_max_column <- function(row, model_num) {
+      if (row[model_num] == max(row)) {
+        return(1)
+      } else {
+        return(0)
+      }
+    }
+    
+    counts_model_map <- apply(matrix_probs, 1, function(row) is_max_column(row, model_num))
+  }
+  
+  # Function to determine if column 1 is the maximum value in the row
+
+  
+  # Print the sum of counts
+  print(paste('count_model:', sum(counts_model_map)))
+}
+
+
+GET_COUNT_MAP <- function (matrix_probs, model_num){
   
   # Function to determine if column 1 is the maximum value in the row
   is_max_column <- function(row, model_num) {

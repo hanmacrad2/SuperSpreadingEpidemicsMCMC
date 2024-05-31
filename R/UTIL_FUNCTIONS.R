@@ -190,21 +190,31 @@ get_upper_ci <- function(mcmc_col, level = 0.95){
   return(upper_interval)
 }
 
-# 'GET MEAN AND CIS'
-get_mean_cis <- function(data_col){
+# 'GET MEAN'
+get_mean <- function(data_col, rounding_number = 2){
+
+  mean_col = round(mean(data_col), rounding_number)
   
-  lower_ci = round(get_lower_ci(data_col), 2)
-  upper_ci = round(get_upper_ci(data_col), 2)
-  mean_col = round(mean(data_col),2)
+  print(paste0('Mean: ', mean_col))
+  
+  return(mean_col)
+}
+
+# 'GET MEAN AND CIS'
+get_mean_cis <- function(data_col, rounding_number = 2){
+  
+  lower_ci = round(get_lower_ci(data_col), rounding_number)
+  upper_ci = round(get_upper_ci(data_col), rounding_number)
+  mean_col = round(mean(data_col), rounding_number)
   
   print(paste0('Mean: ', mean_col, ', CI: [', lower_ci, ', ', upper_ci, ' ]'))
 }
 
-get_cis_and_mean <- function(data_vec){
+get_cis_and_mean <- function(data_vec, rounding_number = 2){
   
-  lower_ci = round(get_lower_ci(data_vec), 2)
-  upper_ci = round(get_upper_ci(data_vec), 2)
-  mean_vec = round(mean(data_vec), 2)
+  lower_ci = round(get_lower_ci(data_vec), rounding_number)
+  upper_ci = round(get_upper_ci(data_vec), rounding_number)
+  mean_vec = round(mean(data_vec), rounding_number)
   
   print(paste0('Mean: ', mean_vec, ', CI: [', lower_ci, ', ', upper_ci, ' ]'))
 }
