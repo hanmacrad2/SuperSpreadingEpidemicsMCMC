@@ -56,10 +56,12 @@ PLOT_MCMC_REAL_DATA <-function(epidemic_data, RESULTS_FOLDER, xlimits, data_type
     }
     
     #SSI 
-    if (model == 'SSI' || model == 'SSIB'){
+    if (model == 'SSI' ) { #|| model == 'SSIB'){
       #PLOT HIST
-      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits) #c(1.0, 2.0))
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, xlimits) #c(0, 4))
       
+    } else if (model == 'SSIB') {
+      PLOT_HIST(list_r0_vec[[model]], model, MODEL_COLORS[i], cex, c(0.25, 3.35))
     } else {
       
       #PLOT HIST
