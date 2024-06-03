@@ -10,7 +10,7 @@ zigzag <- function(xs) {
 }
 
 #SAMPLE BASELINE
-SAMPLE_BASELINE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
+SAMPLE_BASELINE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 2500,
                             PLOT = FALSE){
   
   #SAMPLE
@@ -28,7 +28,7 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 
     r0 = mcmc_output$r0_vec
     
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_BASELINE(num_days = num_days, r0 = r0)
+    posterior_pred_data = SIMULATE_EPI_BASELINE_REAL(epidemic_data, num_days = num_days, r0 = r0)
     
     matrix_sim_data[i, ] = posterior_pred_data
     
@@ -42,9 +42,44 @@ SAMPLE_BASELINE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 
   return(matrix_sim_data)
 }
 
+#SAMPLE_SSE_MCMC
+SAMPLE_SSI_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 2500,
+                            PLOT = FALSE){
+  
+  #SAMPLE
+  num_days = length(epidemic_data)
+  mcmc_ss = mcmc_output$ssi_params_matrix 
+  
+  n_mcmc = length(mcmc_ss[,1])
+  sample_indices = sample(1:n_mcmc, n_sample_repeats)
+  matrix_sim_data = matrix(nrow = n_sample_repeats, ncol = num_days)
+  
+  #SAMPLE PARAMETERS
+  for (i in 1:n_sample_repeats){
+    
+    sample_index = sample_indices[i] #MCMC SAMPLE
+    
+    #SAMPLE PARAMETERS 
+    r0 = mcmc_ss[sample_index, 1]
+    k = mcmc_ss[sample_index, 2]
+    
+    #POSTERIOR PRED DATA
+    posterior_pred_data = SIMULATE_EPI_SSI_REAL(epidemic_data, num_days = num_days, r0 = r0, k = k)
+    
+    matrix_sim_data[i, ] = posterior_pred_data
+    
+    #PLOT
+    if(PLOT)lines(posterior_pred_data, col = 'orange')
+    
+  }
+  
+  matrix_sim_data[is.na(matrix_sim_data)] <- 0
+  
+  return(matrix_sim_data)
+}
 
 #SAMPLE_SSE_MCMC
-SAMPLE_SSE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
+SAMPLE_SSE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 2500,
                             SSI = FALSE, PLOT = FALSE){
   
   #SAMPLE
@@ -70,7 +105,7 @@ SAMPLE_SSE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
     k = mcmc_ss[sample_index, 2]
     
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_SSE(num_days = num_days, r0 = r0, k = k)
+    posterior_pred_data = SIMULATE_EPI_SSE_REAL(epidemic_data, num_days = num_days, r0 = r0, k = k)
    
     matrix_sim_data[i, ] = posterior_pred_data
     
@@ -85,7 +120,7 @@ SAMPLE_SSE_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
 }
 
 #SAMPLE_SSEB_MCMC
-SAMPLE_SSEB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
+SAMPLE_SSEB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 2500,
                             PLOT = FALSE){
   
   #SAMPLE
@@ -106,7 +141,7 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000
     beta = mcmc_output$beta[sample_index]
     
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_SSEB(num_days = num_days, r0 = r0, alpha = alpha, beta = beta)
+    posterior_pred_data = SIMULATE_EPI_SSEB_REAL(epidemic_data, num_days = num_days, r0 = r0, alpha = alpha, beta = beta)
     
     matrix_sim_data[i, ] = posterior_pred_data
     
@@ -121,7 +156,7 @@ SAMPLE_SSEB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000
 }
 
 #SAMPLE_SSIB_MCMC
-SAMPLE_SSIB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000,
+SAMPLE_SSIB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 2500,
                              PLOT = FALSE){
   
   #SAMPLE
@@ -141,7 +176,7 @@ SAMPLE_SSIB_MCMC <- function(mcmc_output, epidemic_data, n_sample_repeats = 1000
     b = mcmc_output$ssib_params_matrix[sample_index, 3]
     
     #POSTERIOR PRED DATA
-    posterior_pred_data = SIMULATE_EPI_SSIB(num_days = num_days, r0 = r0, a = a, b = b)
+    posterior_pred_data = SIMULATE_EPI_SSIB_REAL(epidemic_data, num_days = num_days, r0 = r0, a = a, b = b)
     
     matrix_sim_data[i, ] = posterior_pred_data
     
@@ -171,7 +206,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
                                        PDF = TRUE, ALL_MODELS = TRUE,
                                          plot_width = 11.0, plot_height = 7.5,
                                        cex = 1.25, lwd_data = 4.0, lwd_models = 3.4, 
-                                       CI = list(CI_95 = FALSE, CI_99 = TRUE)){
+                                       CI = list(CI_95 = TRUE, CI_99 = FALSE)){
   
     #SETUP
     num_days = length(true_data)
@@ -287,7 +322,7 @@ GET_LEGEND_POST_PRED_ALL_MODELS <- function(data_type, n_samples, cred_int,
 
 #GET CI DATA
 GET_CI_PRED_DATA <- function(matrix_sim_data, df_data, MODEL_COLOR, lwd_models = 3.2,
-                             CI = list(CI_95 = FALSE, CI_99 = TRUE)){
+                             CI = list(CI_95 = TRUE, CI_99 = FALSE)){
   
   #QUANTILES
   if(CI$CI_95) {

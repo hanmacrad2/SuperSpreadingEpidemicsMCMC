@@ -167,6 +167,7 @@ GET_OFFSPRING_SSIB <- function(x, list_params){
   # Output the simulated total number of offspring Z
   return(Z)
   
+  
 }
 
 

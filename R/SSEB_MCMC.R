@@ -19,18 +19,18 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 2.0, alpha = 0.5, beta = 10,
   print(paste0('alpha = ', alpha)); print(paste0('beta = ', beta))
   print(paste0('beta = ', beta))
   #Set up
-  total_infecteds = vector('numeric', num_days)
-  nsse_infecteds = vector('numeric', num_days)
-  sse_infecteds = vector('numeric', num_days)
+  total_infections = vector('numeric', num_days)
+  nsse_infections = vector('numeric', num_days)
+  sse_infections = vector('numeric', num_days)
   
   if (SIM_DATA){
-    total_infecteds[1] = 2
-    nsse_infecteds[1] = 2
-    sse_infecteds[1] = 0 
+    total_infections[1] = 2
+    nsse_infections[1] = 2
+    sse_infections[1] = 0 
   } else {
-    total_infecteds[1] = epi_data[1]
-    nsse_infecteds[1] = epi_data[1]
-    sse_infecteds[1] = 0 
+    total_infections[1] = epi_data[1]
+    nsse_infections[1] = epi_data[1]
+    sse_infections[1] = 0 
   }
   
   #Infectiousness (Discrete gamma) - I.e 'Infectiousness Pressure' - Sum of all people
@@ -41,19 +41,19 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 2.0, alpha = 0.5, beta = 10,
   #Days of Infection Spreading
   for (t in 2:num_days) {
     
-    #Regular infecteds (tot_rate = lambda) fix notation
-    lambda_t = sum(total_infecteds[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
-    tot_rate = alpha*r0*lambda_t #Product of infecteds & their probablilty of infection along the gamma dist at that point in time
-    nsse_infecteds[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
+    #Regular infections (tot_rate = lambda) fix notation
+    lambda_t = sum(total_infections[1:(t-1)]*rev(prob_infect[1:(t-1)])) #?Why is it the reversed probability - given the way prob_infect is written
+    tot_rate = alpha*r0*lambda_t #Product of infections & their probablilty of infection along the gamma dist at that point in time
+    nsse_infections[t] = rpois(1, tot_rate) #Assuming number of cases each day follows a poisson distribution. Causes jumps in data 
     
     #Super-spreaders
     n_t = rpois(1, gamma*lambda_t) #Number of super-spreading events (gamma)
-    sse_infecteds[t] = rpois(1, beta*n_t) #z_t: Total infecteds due to super-spreading event - num of events x Num individuals
+    sse_infections[t] = rpois(1, beta*n_t) #z_t: Total infections due to super-spreading event - num of events x Num individuals
     
-    total_infecteds[t] = nsse_infecteds[t] + sse_infecteds[t]
+    total_infections[t] = nsse_infections[t] + sse_infections[t]
   }
   
-  total_infecteds
+  total_infections
 }
 
 #1. LOG LIKELIHOOD
