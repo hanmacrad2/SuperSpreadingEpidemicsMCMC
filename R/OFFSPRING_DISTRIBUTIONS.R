@@ -1,4 +1,39 @@
 #********************************************
+#1. GET OFFSPRING DISTRIBUTIONS
+#********************************************
+GET_OFFSPRING_DISTS <- function(list_params, FLAGS_MODELS, num_offspring){
+  
+  #DATA
+  x <- 0:num_offspring  # Possible number of offspring
+  
+  if(FLAGS_MODELS$Baseline){
+    r0_param = list_params[1]
+    Z = dpois(x, lambda = r0_param)  # Compute PMF
+    #print(sum(x*Z))
+    
+  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
+    
+    r0_param = list_params[1]
+    k_param = list_params[2]
+    prob = k_param/(k_param + r0_param)
+    Z = dnbinom(x, size = k_param, prob = prob)  
+    #print(sum(x*Z))
+    
+  } else if (FLAGS_MODELS$SSEB){
+    Z = GET_OFFSPRING_SSEB(x, list_params, num_offspring)
+    print(sum(x*Z))
+    
+  } else if (FLAGS_MODELS$SSIB){
+    Z = GET_OFFSPRING_SSIB(x, list_params)
+    print(sum(x*Z))
+  }
+  
+  #print(sum(x*Z))
+  
+  return(Z)
+}
+
+#********************************************
 #1. PLOT_OFF SPRING DISTRIBUTIONS
 #********************************************
 PLOT_OFFSPRING_DISTRIBUTIONS <- function(list_params, FLAGS_MODELS, 
@@ -107,10 +142,10 @@ GET_OFFSPRING_DATA <- function(list_params, FLAGS_MODELS, num_offspring){
 
 
 #SSEB
-GET_OFFSPRING_SSEB <-function(x, list_params, num_offspring, 
+GET_OFFSPRING_SSEB <-function(x, list_params, 
                               n_samps = 1000000){
   
-  x <- 0:num_offspring
+  #x <- 0:num_offspring
   # Parameters
   r0_param = list_params[1]
   alpha_param = list_params[2]
@@ -128,7 +163,7 @@ GET_OFFSPRING_SSEB <-function(x, list_params, num_offspring,
   p = pn + ps 
   
   #Density
-  Z = rep(NA, length = num_offspring + 1)
+  Z = rep(NA, length = length(x)) #num_offspring + 1)
   for (i in x){
     
     Z[i+1] = sum(p==i)
@@ -166,8 +201,6 @@ GET_OFFSPRING_SSIB <- function(x, list_params){
   
   # Output the simulated total number of offspring Z
   return(Z)
-  
-  
 }
 
 

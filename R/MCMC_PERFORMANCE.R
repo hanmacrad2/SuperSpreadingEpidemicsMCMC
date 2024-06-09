@@ -5,7 +5,7 @@
 #* **********************************
 #' @export 
 SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
-                            SSEB = FALSE){
+                            SSEB = FALSE, PRIOR = FALSE){
   
   #Param
   param = names(FLAG_PARAM)[which(unlist(FLAG_PARAM))]
@@ -13,13 +13,12 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
   num_runs = length(df_results$true_r0)
   
   #Bias, MAE, coverage 
-  true_val = mean(unlist(df_results[paste0('true_', param)]))
+  true_val = mean(unlist(df_ressults[paste0('true_', param)]))
   min_true = min(unlist(df_results[paste0('true_', param)]))
   max_true = max(unlist(df_results[paste0('true_', param)]))
   
   #Mean
   mean_est = mean(unlist(df_results[paste0('mean_', param)]))
-  mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
   lower_ci_mean = mean(unlist(df_results[paste0('lower_ci_', param)]))
   upper_ci_mean = mean(unlist(df_results[paste0('upper_ci_', param)]))
   MAE = unlist(as.vector(abs(df_results[paste0('true_', param)] - df_results[paste0('mean_', param)])))
@@ -39,7 +38,6 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
   print(paste0('sd (mean): ', round(mean(sd, na.rm = TRUE), 3)))
   print(paste0('Coverage: ', sum(coverage)))
   print(paste0('% Coverage (Mean): ', coverage_pc))
-  print(paste0(param, 'Effective Sample Size (mean): ', round(mean_eff, 3)))
   
   #ACCEPT RATE
   if(SSEB){
@@ -48,6 +46,13 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
   } else {
     accept_rate = mean(unlist((df_results['accept_rate'])))
     print(paste0('accept rate: ', round(accept_rate, 3))) 
+  }
+  
+  if(PRIOR){
+    print('no eff size')
+  } else {
+    mean_eff = mean(unlist(df_results[paste0('eff_size_', param)]))
+    print(paste0(param, 'Effective Sample Size (mean): ', round(mean_eff, 3)))
   }
   
 }

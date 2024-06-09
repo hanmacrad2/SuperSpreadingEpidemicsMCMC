@@ -206,7 +206,7 @@ POSTERIOR_PREDICTIVE_PLOTS <- function(matrix_sim_data, true_data, df_data,
                                        PDF = TRUE, ALL_MODELS = TRUE,
                                          plot_width = 11.0, plot_height = 7.5,
                                        cex = 1.25, lwd_data = 4.0, lwd_models = 3.4, 
-                                       CI = list(CI_95 = TRUE, CI_99 = FALSE)){
+                                       CI = list(CI_95 = FALSE, CI_99 = TRUE)){
   
     #SETUP
     num_days = length(true_data)
