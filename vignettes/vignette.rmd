@@ -18,12 +18,11 @@ In this vignette, we will demonstrate how to use the package to
 
 Note that this is just a subset of the full functionality of the package.
 
-```{r setup, include = FALSE}
-knitropts_chunk$set(
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = #
+  comment = "#"
 )
-
 
 ## Example
 ```r
