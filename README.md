@@ -5,12 +5,7 @@ This package contains the code to implement a bayesian modelling framework of ep
 
 ## Installation
 
-You can install the package from CRAN using:
-
-```r
-install.packages("SuperSpreadingEpidemicsMCMC")
-```
-Or you can install the development version from GitHub:
+You can install the package from GitHub using:
 
 ```
 install.packages("devtools")
@@ -26,18 +21,24 @@ This package contains the code to implement a modelling framework encompassing f
 The package also contains other util functions such as plotting functions to plot the mcmc samples and results
 
 ## Example
+```r
 library(SuperSpreadingEpidemicsMCMC)
+
+#Simulate data from each model
 data_baseline <- SIMULATE_EPI_BASELINE(r0 = 2.0)
 data_sse <- SIMULATE_EPI_SSE(r0 = 2.0, k = 0.2)
 data_ssi <- SIMULATE_EPI_SSI(r0 = 2.0, k = 0.2)
 data_sseb <- SIMULATE_EPI_SSE(r0 = 2.0, alpha = 0.5, beta = 10)
 data_ssib <- SIMULATE_EPI_SSIB(r0 = 2.0, a = 0.5, b = 10)
+
+#Infer the parameters using MCMC
 mcmc_baseline <- MCMC_INFER_BASELINE(data_baseline)
 mcmc_sse <- MCMC_INFER_SSE(data_sse)
 mcmc_ssi <- MCMC_INFER_SSI(data_ssi)
 mcmc_sseb <- MCMC_INFER_SSEB(data_sseb)
 mcmc_ssib <- MCMC_INFER_SSIB(data_ssib)
 
+```
 
 ## Authors
 
