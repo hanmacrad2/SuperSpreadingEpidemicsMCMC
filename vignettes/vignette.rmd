@@ -1,0 +1,47 @@
+---
+title Using SuperSpreadingEpidemicsMCMC
+output rmarkdownhtml_vignette
+vignette 
+  %VignetteIndexEntry{Using SuperSpreadingEpidemicsMCMC}
+  %VignetteEngine{knitrrmarkdown}
+  %VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+The `SuperSpreadingEpidemicsMCMC` package provides a comprehensive suite of tools for simulating data from various stochastic models of epidemic transmission, inferring model parameters via MCMC, performing model comparison, conducting posterior predictive checking, and visualizing the results. 
+
+In this vignette, we will demonstrate how to use the package to
+
+1. Simulate data from five different stochastic models of epidemic transmission.
+2. Perform MCMC inference to infer the parameters of each model.
+
+Note that this is just a subset of the full functionality of the package.
+
+```{r setup, include = FALSE}
+knitropts_chunk$set(
+  collapse = TRUE,
+  comment = #
+)
+
+
+## Example
+```r
+library(SuperSpreadingEpidemicsMCMC)
+
+#Simulate data from each model
+data_baseline <- SIMULATE_EPI_BASELINE(r0 = 2.0)
+data_sse <- SIMULATE_EPI_SSE(r0 = 2.0, k = 0.2)
+data_ssi <- SIMULATE_EPI_SSI(r0 = 2.0, k = 0.2)
+data_sseb <- SIMULATE_EPI_SSE(r0 = 2.0, alpha = 0.5, beta = 10)
+data_ssib <- SIMULATE_EPI_SSIB(r0 = 2.0, a = 0.5, b = 10)
+
+#Infer the parameters using MCMC
+mcmc_baseline <- MCMC_INFER_BASELINE(data_baseline)
+mcmc_sse <- MCMC_INFER_SSE(data_sse)
+mcmc_ssi <- MCMC_INFER_SSI(data_ssi)
+mcmc_sseb <- MCMC_INFER_SSEB(data_sseb)
+mcmc_ssib <- MCMC_INFER_SSIB(data_ssib)
+
+```
+
