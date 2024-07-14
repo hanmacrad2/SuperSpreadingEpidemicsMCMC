@@ -9,12 +9,13 @@ You can install the package from CRAN using:
 
 ```r
 install.packages("SuperSpreadingEpidemicsMCMC")
-
+```
 Or you can install the development version from GitHub:
 
-# install.packages("devtools")
-devtools::install_github("hanmacrad2/SuperSpreadingEpidemicsMCMC")```
-
+```
+install.packages("devtools")
+devtools::install_github("hanmacrad2/SuperSpreadingEpidemicsMCMC")
+```
 
 ## Background
 
