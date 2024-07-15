@@ -28,8 +28,15 @@ library(SuperSpreadingEpidemicsMCMC)
 data_baseline <- SIMULATE_EPI_BASELINE(r0 = 2.0)
 data_sse <- SIMULATE_EPI_SSE(r0 = 2.0, k = 0.2)
 data_ssi <- SIMULATE_EPI_SSI(r0 = 2.0, k = 0.2)
-data_sseb <- SIMULATE_EPI_SSE(r0 = 2.0, alpha = 0.5, beta = 10)
+data_sseb <- SIMULATE_EPI_SSEB(r0 = 2.0, alpha = 0.5, beta = 10)
 data_ssib <- SIMULATE_EPI_SSIB(r0 = 2.0, a = 0.5, b = 10)
+
+#Visualise the time series incidence datasets
+plot.ts(data_baseline)
+plot.ts(data_sse)
+plot.ts(data_ssi)
+plot.ts(data_sseb)
+plot.ts(data_ssib)
 
 #Infer the parameters using MCMC
 mcmc_baseline <- MCMC_INFER_BASELINE(data_baseline)
