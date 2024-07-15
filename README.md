@@ -20,8 +20,8 @@ This package contains the code to implement a modelling framework encompassing f
 
 The package also contains other util functions such as plotting functions to plot the mcmc samples and results
 
-## Example
-The code below provides an example of how one can simulate incidence time series data from each of the five models, visualise the time series and then infer the model parameters as fit to the data using the adaptive MCMC algorithms implemented in the functions listed below
+## Code Example
+The code below provides an example of how to simulate incidence time series data from each of the five epidemic transmission models and visualize the resulting time series. Subsequently, the model parameters can be inferred as fit to the data using the adaptive MCMC algorithms implemented in the functions listed below.
 
 ```r
 library(SuperSpreadingEpidemicsMCMC)
