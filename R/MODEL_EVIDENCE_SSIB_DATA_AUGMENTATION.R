@@ -12,7 +12,7 @@
 GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data, 
                                         num_is_samps = 10000, beta = 1000, 
                                         FLAGS_MODELS = list(BASE = FALSE, SSE = FALSE, SSI = FALSE,
-                                                            SSEB = FALSE, SSIB = TRUE)) {   
+                                                            SSEB = FALSE, SSIB = TRUE), PRIORS_USED = GET_PRIORS_USED()) {   
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   #PARAMS
@@ -21,7 +21,7 @@ GET_LOG_MODEL_EVIDENCE_SSIB <- function(mcmc_output, epidemic_data,
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
   mcmc_param_samples = mcmc_output$ssib_params_matrix 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps)
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_param_samples, epidemic_data, FLAGS_MODELS, num_is_samps, PRIORS_USED)
   
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density

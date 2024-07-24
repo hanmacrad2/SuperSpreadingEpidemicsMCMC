@@ -415,7 +415,7 @@ GET_PRIOR_IMPORTANCE_SAMPLES <- function(epidemic_data, samp_size_prior, FLAGS_M
 #* 3b. GET PRIOR DENSITES (LOG) OF IMP SAMPS  
 #*
 #********************************
-GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, FLAGS_MODELS){
+GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, FLAGS_MODELS, PRIORS_USED){
   
   #1. SSEB
   if(FLAGS_MODELS$SSEB){

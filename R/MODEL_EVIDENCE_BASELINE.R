@@ -11,10 +11,12 @@
 #*
 #********************************************************************
 
-GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
+GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples, 
+                                       PRIORS_USED = GET_PRIORS_USED(),
                                        dof = 3, prob = 0.01, r0_sim = 2.0) {    # FLAG_DIM = list(UNI_VAR = FALSE, MULTI_VAR = FALSE)
   
-  list_priors = SET_PRIORS()$list_priors
+  #list_priors = SET_PRIORS()$list_priors
+  list_priors = GET_LIST_PRIORS_BASELINE()
   PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   
   'Get proposal q '
@@ -35,6 +37,14 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   #PRIORS
   if(PRIORS_USED$BASELINE$r0$EXP){
     theta_samples_prior = c(rexp(samp_size_prior))
+    
+  } else if (PRIORS_USED$BASELINE$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    theta_samples_prior = c(runif(samp_size_prior, min = lower_bound, max = upper_bound))
+    #log_prior_density_r0 = dunif(theta_samples[,1], min = lower_bound, max = upper_bound, log = TRUE)
+    
   } else if (PRIORS_USED$BASELINE$r0$GAMMA) {
     gamma_shape = 2 
     theta_samples_prior = c(rgamma(samp_size_prior, shape = 2, scale = gamma_shape*r0_sim))
@@ -49,6 +59,13 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   #PRIOR
   if(PRIORS_USED$BASELINE$r0$EXP){
     log_prior_density = dexp(theta_samples, log = TRUE) 
+    
+  } else if (PRIORS_USED$BASELINE$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    log_prior_density_r0 = dunif(theta_samples, min = lower_bound, max = upper_bound, log = TRUE)
+    
   } else if (PRIORS_USED$BASELINE$r0$GAMMA){
     gamma_shape = 2
     log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
@@ -67,16 +84,16 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
 #* 2. GET P_HATS ESTIMATE OF MODEL EVIDENCE (LOG)
 #*
 #*****************************************************************************************
-GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, 
+GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, PRIORS_USED = GET_PRIORS_USED(),
                                             n_samples = 10000, r0_sim = 1.6) {
   
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PROPOSAL, PRIORS
   list_priors = SET_PRIORS()$list_priors
-  PRIORS_USED =  SET_PRIORS()$PRIORS_USED
+  #PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples)
+  imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples, PRIORS_USED)
   theta_samples = imp_samp_comps$theta_samples 
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
  

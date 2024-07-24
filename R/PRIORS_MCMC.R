@@ -8,6 +8,7 @@ GET_LIST_PRIORS_BASELINE <- function() {
   
   LIST_PRIORS_BASELINE = list(exp = c(1,0), #exp
                          gamma = c(1, 5),
+                         r0_unif = c(0,10),
                          unif =  c(0,10)) #exp(1), exp(0.1)
   
   return(LIST_PRIORS_BASELINE)

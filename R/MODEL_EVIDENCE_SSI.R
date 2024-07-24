@@ -4,7 +4,7 @@
 #************************
 # 1. MODEL EVIDENCE (P HAT)
 #************************
-GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA, 
+GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA, PRIORS_USED = GET_PRIORS_USED(),
                                        FLAGS_MODELS = GET_FLAGS_MODELS(SSI = TRUE),
                                        n_samples = 10000){
   
@@ -17,7 +17,7 @@ GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA,
   lambda_vec = get_lambda(EPI_DATA); 
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q_SSI(mcmc_output, EPI_DATA, FLAGS_MODELS, n_samples) 
+  imp_samp_comps = GET_LOG_PROPOSAL_Q_SSI(mcmc_output, EPI_DATA, FLAGS_MODELS, PRIORS_USED, n_samples) 
   
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
@@ -54,7 +54,7 @@ GET_LOG_MODEL_EVIDENCE_SSI <- function(mcmc_output, EPI_DATA,
 # GET PROPOSAL DENSITY SSI MODEL
 #*
 #********************************************************************
-GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
+GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS, PRIORS_USED,
                                     n_samples, dof = 3, prob = 0.5) { #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
@@ -75,7 +75,7 @@ GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal)
   
-  theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(EPI_DATA, samp_size_prior, FLAGS_MODELS)
+  theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(EPI_DATA, samp_size_prior, FLAGS_MODELS, PRIORS_USED)
   
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
@@ -89,7 +89,7 @@ GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS,
                               sigma = cov(mcmc_samples[,2+wh_non_zero,drop=FALSE]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
 
   #PRIOR DENSITIES 
-  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA, FLAGS_MODELS) #n_dim
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, EPI_DATA, FLAGS_MODELS, PRIORS_USED) #n_dim
   
   #PROPOSAL 
   log_q = log(prob_prop*exp(log_proposal_density) + prob_prior*exp(log_prior_density)) #1 x n_samples

@@ -28,7 +28,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                               n_samples, PRIORS_USED = PRIORS_USED, dof = 3, prob = 0.95) { #0.5  #prob = 0.95 0.9999
+                               n_samples, PRIORS_USED = GET_PRIORS_USED(), dof = 3, prob = 0.95) { #0.5  #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -56,7 +56,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
                               sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 
-  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data, FLAGS_MODELS)
+  log_prior_density = GET_LOG_PRIOR_DENSITY(theta_samples, epidemic_data, FLAGS_MODELS, PRIORS_USED)
   
   #PROPOSAL 
   log_q = log(prob_prop*exp(log_proposal_density) + prob_prior*exp(log_prior_density)) #1 x n_samples
@@ -71,7 +71,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
 #
 #*****************************************************************************************
-GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
+GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data, PRIORS_USED,
                                    FLAGS_MODELS = list(BASELINE = FALSE, SSE = FALSE,
                                                        SSI = FALSE, SSEB = FALSE, SSIB = FALSE), n_samples = 10000) {   
   
@@ -82,7 +82,7 @@ GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data,
   lambda_vec = get_lambda(epidemic_data);
   
   #PROPOSAL, PRIOR, THETA SAMPLES 
-  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples)
+  imp_samp_comps = GET_LOG_PROPOSAL_Q(mcmc_samples, epidemic_data, FLAGS_MODELS, n_samples, PRIORS_USED = PRIORS_USED)
   theta_samples = imp_samp_comps$theta_samples
   log_q = imp_samp_comps$log_q; log_prior_density = imp_samp_comps$log_prior_density
   
