@@ -153,6 +153,12 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
     scale = list_priors$b[2]
     prior = prior + dgamma(b_dash -1, shape = shape, scale = scale, log = TRUE) -
       dgamma(b -1, shape = shape, scale = scale, log = TRUE) 
+    
+  } else if (PRIORS_USED$SSIB$b$UNIF) {
+    lower_bound = list_priors$b_unif[1]
+    upper_bound = list_priors$b_unif[2]
+    prior = dunif(b_dash, min = lower_bound, max = upper_bound, log = TRUE) -
+      dunif(b, min = lower_bound, max = upper_bound, log = TRUE) 
   }
   
   return(prior)  

@@ -28,7 +28,7 @@ LOG_SUM_EXP <- function(vectorX){
 #*
 #********************************************************************
 GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
-                               n_samples, dof = 3, prob = 0.95) { #0.5  #prob = 0.95 0.9999
+                               n_samples, PRIORS_USED = PRIORS_USED, dof = 3, prob = 0.95) { #0.5  #prob = 0.95 0.9999
   
   #PARAMETERS REQUIRED 
   n_dim = dim(mcmc_samples)[2] 
@@ -45,7 +45,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   means = colMeans(mcmc_samples)
   theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
-  theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(epidemic_data, samp_size_prior, FLAGS_MODELS)
+  theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(epidemic_data, samp_size_prior, FLAGS_MODELS, PRIORS_USED)
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
   
   #DEFENSE MIXTURE

@@ -141,6 +141,13 @@ SET_SSEB_PRIOR <- function(param, param_dash,
       shape2 = list_priors$alpha[2]
       prior = dbeta(param_dash, shape1, shape2, log = TRUE) -
         dbeta(param, shape1, shape2, log = TRUE) 
+      
+    } else if (PRIORS_USED$SSEB$alpha$UNIF){
+      
+      lower_bound = list_priors$alpha_unif[1]
+      upper_bound = list_priors$alpha_unif[2]
+      prior = dunif(alpha_dash, min = lower_bound, max = upper_bound, log = TRUE) -
+        dunif(alpha, min = lower_bound, max = upper_bound, log = TRUE) 
     }
     
   } else if (r0_flag) {
@@ -165,6 +172,13 @@ SET_SSEB_PRIOR <- function(param, param_dash,
       scale = list_priors$beta[2]
       prior = dgamma(param_dash-1, shape = shape, scale = scale, log = TRUE) -
         dgamma(param-1, shape = shape, scale = scale, log = TRUE) 
+      
+    } else if (PRIORS_USED$SSEB$beta$UNIF){
+      
+      lower_bound = list_priors$beta_unif[1]
+      upper_bound = list_priors$beta_unif[2]
+      prior = dunif(beta_dash, min = lower_bound, max = upper_bound, log = TRUE) -
+        dunif(beta, min = lower_bound, max = upper_bound, log = TRUE) 
     }
   }
   

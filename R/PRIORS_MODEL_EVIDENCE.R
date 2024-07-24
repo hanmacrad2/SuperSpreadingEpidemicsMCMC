@@ -7,10 +7,10 @@
 #*************************************
 
 #SSEB MODEL
-GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
+GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, PRIORS_USED, n_dim = 3){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSEB()
   
   #ALPHA: HOW TO INCLUDE r0
@@ -19,11 +19,23 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
     shape1 = list_priors$alpha[1]
     shape2 = list_priors$alpha[2]
     samps_prior_alpha = rbeta(samp_size_prior, shape1, shape2)
+    
+  } else if (PRIORS_USED$SSEB$alpha$UNIF){
+    
+    lower_bound = list_priors$alpha_unif[1]
+    upper_bound = list_priors$alpha_unif[2]
+    samps_prior_alpha = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #r0
   if (PRIORS_USED$SSEB$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
+    
+  } else if (PRIORS_USED$SSEB$r0$UNIF) {
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    samps_prior_r0 = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #GAMMA
@@ -32,6 +44,11 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
     scale = list_priors$beta[2]
     samps_prior_beta = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
+  } else if (PRIORS_USED$SSEB$beta$UNIF){
+    
+    lower_bound = list_priors$beta_unif[1]
+    upper_bound = list_priors$beta_unif[2]
+    samps_prior_beta = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #EXP
@@ -48,15 +65,20 @@ GET_PRIOR_SAMPS_SSEB <- function(samp_size_prior, n_dim = 3){
 }
 
 #SSIB MODEL
-GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
+GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, PRIORS_USED, n_dim = 3){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
   #r0
   if (PRIORS_USED$SSIB$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
+    
+  } else if (PRIORS_USED$SSIB$r0$UNIF) {
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    samps_prior_r0 = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #a 
@@ -64,6 +86,12 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
     shape1 = list_priors$a[1]
     shape2 = list_priors$a[2]
     samps_prior_a = rbeta(samp_size_prior, shape1, shape2)
+    
+  } else if (PRIORS_USED$SSIB$a$UNIF){
+    
+    lower_bound = list_priors$a_unif[1]
+    upper_bound = list_priors$a_unif[2]
+    samps_prior_a = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #b
@@ -72,6 +100,11 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
     scale = list_priors$b[2]
     samps_prior_b = 1 + rgamma(samp_size_prior, shape = shape, scale = scale)
     
+  } else if (PRIORS_USED$SSIB$b$UNIF){
+    
+    lower_bound = list_priors$a_unif[1]
+    upper_bound = list_priors$a_unif[2]
+    samps_prior_b = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #THETA_SAMPLES_PRIOR
@@ -82,20 +115,32 @@ GET_PRIOR_SAMPS_SSIB <- function(samp_size_prior, n_dim = 3){
 }
 
 #SSE MODEL
-GET_PRIOR_SAMPS_SSE <- function(samp_size_prior, n_dim = 2){
+GET_PRIOR_SAMPS_SSE <- function(samp_size_prior, PRIORS_USED, n_dim = 2){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE()
   
   #r0
   if (PRIORS_USED$SSE$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
+    
+  } else if (PRIORS_USED$SSE$r0$UNIF) {
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    samps_prior_r0 = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #k
   if (PRIORS_USED$SSE$k$EXP) {
     samps_prior_k = rexp(samp_size_prior, rate = list_priors$k[1])
+    
+  } else if (PRIORS_USED$SSE$k$UNIF) {
+    
+    lower_bound = list_priors$k_unif[1]
+    upper_bound = list_priors$k_unif[2]
+    samps_prior_k = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #THETA_SAMPLES_PRIOR
@@ -108,17 +153,29 @@ GET_PRIOR_SAMPS_SSE <- function(samp_size_prior, n_dim = 2){
 GET_PRIOR_SAMPS_SSI <- function(samp_size_prior, n_dim = 2){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSI()
   
   #r0
   if (PRIORS_USED$SSI$r0$EXP) {
     samps_prior_r0 = rexp(samp_size_prior, rate = list_priors$r0[1])
+    
+  }  else if (PRIORS_USED$SSI$r0$UNIF) {
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    samps_prior_r0 = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #k
   if (PRIORS_USED$SSI$k$EXP) {
     samps_prior_k = rexp(samp_size_prior, rate = list_priors$k[1])
+    
+  } else if (PRIORS_USED$SSI$k$UNIF) {
+    
+    lower_bound = list_priors$k_unif[1]
+    upper_bound = list_priors$k_unif[2]
+    samps_prior_k = runif(samp_size_prior, min = lower_bound, max = upper_bound)
   }
   
   #THETA_SAMPLES_PRIOR
@@ -135,22 +192,36 @@ GET_PRIOR_SAMPS_SSI <- function(samp_size_prior, n_dim = 2){
 #*****************************************************
 
 #SSEB MODEL
-GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
+GET_DENSITY_PRIOR_SSEB <- function(theta_samples, PRIORS_USED){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSEB()
+  
+  #r0
+  if (PRIORS_USED$SSEB$r0$EXP) {
+    log_prior_density_r0 = dexp(theta_samples[,2], rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSEB$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    log_prior_density_r0 = dunif(theta_samples[,2], min = lower_bound, max = upper_bound, log = TRUE)
+    
+  }
   
   #ALPHA 
   if (PRIORS_USED$SSEB$alpha$BETA) {
     shape1 = list_priors$alpha[1]
     shape2 = list_priors$alpha[2]
     log_prior_density_alpha = dbeta(theta_samples[,1], shape1, shape2, log = TRUE)
-  }
-  
-  #r0
-  if (PRIORS_USED$SSEB$r0$EXP) {
-    log_prior_density_r0 = dexp(theta_samples[,2], rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSEB$alpha$UNIF){
+    
+    lower_bound = list_priors$alpha_unif[1]
+    upper_bound = list_priors$alpha_unif[2]
+    log_prior_density_alpha = dunif(theta_samples[,1], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #GAMMA
@@ -159,13 +230,12 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
     scale = list_priors$beta[2]
     log_prior_density_beta = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
+  } else if (PRIORS_USED$SSEB$beta$UNIF){
+    
+    lower_bound = list_priors$beta_unif[1]
+    upper_bound = list_priors$beta_unif[2]
+    log_prior_density_beta = dunif(theta_samples[,3], min = lower_bound, max = upper_bound, log = TRUE)
   }
-  
-  #EXP
-  # if(PRIORS_USED$SSEB$alpha$EXP){
-  #   log_prior_density = dexp(theta_samples[,1], log = TRUE) + dexp(theta_samples[,2], log = TRUE) +
-  #     dexp((theta_samples[,3] - 1), log = TRUE) 
-  # }
   
   #THETA_SAMPLES_PRIOR
   log_prior_density = log_prior_density_alpha + log_prior_density_r0 + log_prior_density_beta
@@ -175,16 +245,23 @@ GET_DENSITY_PRIOR_SSEB <- function(theta_samples){
 
 
 #SSEB MODEL
-GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
+GET_DENSITY_PRIOR_SSIB <- function(theta_samples, PRIORS_USED){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSIB()
   
   
   #r0
   if (PRIORS_USED$SSIB$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSIB$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    log_prior_density_r0 = dunif(theta_samples[,1], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #a
@@ -192,6 +269,13 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
     shape1 = list_priors$a[1]
     shape2 = list_priors$a[2]
     log_prior_density_a = dbeta(theta_samples[,2], shape1, shape2, log = TRUE)
+    
+  } else if (PRIORS_USED$SSIB$a$UNIF){
+    
+    lower_bound = list_priors$a_unif[1]
+    upper_bound = list_priors$a_unif[2]
+    log_prior_density_a = dunif(theta_samples[,2], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #b
@@ -200,6 +284,11 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
     scale = list_priors$b[2]
     log_prior_density_b = dgamma(theta_samples[,3]-1, shape = shape, scale = scale, log = TRUE)
     
+  } else if (PRIORS_USED$SSEB$b$UNIF){
+    
+    lower_bound = list_priors$b_unif[1]
+    upper_bound = list_priors$b_unif[2]
+    log_prior_density_b = dunif(theta_samples[,3], min = lower_bound, max = upper_bound, log = TRUE)
   }
   
   #THETA_SAMPLES_PRIOR
@@ -209,20 +298,34 @@ GET_DENSITY_PRIOR_SSIB <- function(theta_samples){
 }
 
 #SSE MODEL
-GET_DENSITY_PRIOR_SSE <- function(theta_samples){
+GET_DENSITY_PRIOR_SSE <- function(theta_samples, PRIORS_USED){
   
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSE()
   
   #r0
   if (PRIORS_USED$SSE$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSE$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    log_prior_density_r0 = dunif(theta_samples[,1], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #k
   if (PRIORS_USED$SSE$k$EXP) {
     log_prior_density_k = dexp(theta_samples[,2], rate = list_priors$k[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSE$k$UNIF){
+    
+    lower_bound = list_priors$k_unif[1]
+    upper_bound = list_priors$k_unif[2]
+    log_prior_density_k = dunif(theta_samples[,2], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #THETA_SAMPLES_PRIOR
@@ -233,21 +336,35 @@ GET_DENSITY_PRIOR_SSE <- function(theta_samples){
 
 
 #SSE MODEL
-GET_DENSITY_PRIOR_SSI <- function(theta_samples){
+GET_DENSITY_PRIOR_SSI <- function(theta_samples, PRIORS_USED){
   
   #browser()
   #List priors
-  PRIORS_USED = GET_PRIORS_USED()
+  #PRIORS_USED = GET_PRIORS_USED()
   list_priors = GET_LIST_PRIORS_SSI()
   
   #r0
   if (PRIORS_USED$SSI$r0$EXP) {
     log_prior_density_r0 = dexp(theta_samples[,1], rate = list_priors$r0[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSI$r0$UNIF){
+    
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    log_prior_density_r0 = dunif(theta_samples[,1], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #k
   if (PRIORS_USED$SSI$k$EXP) {
     log_prior_density_k = dexp(theta_samples[,2], rate = list_priors$k[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSI$k$UNIF){
+    
+    lower_bound = list_priors$k_unif[1]
+    upper_bound = list_priors$k_unif[2]
+    log_prior_density_k = dunif(theta_samples[,2], min = lower_bound, max = upper_bound, log = TRUE)
+    
   }
   
   #THETA_SAMPLES_PRIOR
@@ -262,31 +379,31 @@ GET_DENSITY_PRIOR_SSI <- function(theta_samples){
 #* #2b. SAMPLES FROM PRIORS 
 #* 
 #********************************
-GET_PRIOR_IMPORTANCE_SAMPLES <- function(epidemic_data, samp_size_prior, FLAGS_MODELS){
+GET_PRIOR_IMPORTANCE_SAMPLES <- function(epidemic_data, samp_size_prior, FLAGS_MODELS, PRIORS_USED){
   
   'GET_PRIOR_IMPORTANCE_SAMPLES'
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
     #PRIORS
-    theta_samples_prior = GET_PRIOR_SAMPS_SSEB(samp_size_prior)
+    theta_samples_prior = GET_PRIOR_SAMPS_SSEB(samp_size_prior, PRIORS_USED)
     
     #2. SSE
   } else if (FLAGS_MODELS$SSE){
     
     #PRIORS 
-    theta_samples_prior = GET_PRIOR_SAMPS_SSE(samp_size_prior)
+    theta_samples_prior = GET_PRIOR_SAMPS_SSE(samp_size_prior, PRIORS_USED)
     
   } else if (FLAGS_MODELS$SSI) {
     
     #PRIORS
-    param_priors = GET_PRIOR_SAMPS_SSI(samp_size_prior)
+    param_priors = GET_PRIOR_SAMPS_SSI(samp_size_prior, PRIORS_USED)
     eta_priors_matrix = GET_SAMPLES_ETA_PRIORS(param_priors, epidemic_data, samp_size_prior)
     theta_samples_prior = cbind(param_priors, eta_priors_matrix)
     
   } else if (FLAGS_MODELS$SSIB) {
     
     #PRIORS
-    theta_samples_prior = GET_PRIOR_SAMPS_SSIB(samp_size_prior)
+    theta_samples_prior = GET_PRIOR_SAMPS_SSIB(samp_size_prior, PRIORS_USED)
     
   }
   
@@ -303,22 +420,22 @@ GET_LOG_PRIOR_DENSITY <- function(theta_samples, epidemic_data, FLAGS_MODELS){
   #1. SSEB
   if(FLAGS_MODELS$SSEB){
   
-    log_prior_density = GET_DENSITY_PRIOR_SSEB(theta_samples)
+    log_prior_density = GET_DENSITY_PRIOR_SSEB(theta_samples, PRIORS_USED)
     
     #2. SSE
   } else if (FLAGS_MODELS$SSE){
     
-    log_prior_density = GET_DENSITY_PRIOR_SSE(theta_samples)
+    log_prior_density = GET_DENSITY_PRIOR_SSE(theta_samples, PRIORS_USED)
     
   } else if (FLAGS_MODELS$SSI) {
     #browser()
-    log_density_params = GET_DENSITY_PRIOR_SSI(theta_samples)
+    log_density_params = GET_DENSITY_PRIOR_SSI(theta_samples, PRIORS_USED)
     log_density_eta_priors = GET_DENSITY_ETA_PRIORS(theta_samples, epidemic_data)
     log_prior_density = log_density_params + log_density_eta_priors
     
   } else if (FLAGS_MODELS$SSIB) {
     
-    log_prior_density = GET_DENSITY_PRIOR_SSIB(theta_samples)
+    log_prior_density = GET_DENSITY_PRIOR_SSIB(theta_samples, PRIORS_USED)
   }
   
   return(log_prior_density)
