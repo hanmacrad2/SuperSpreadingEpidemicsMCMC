@@ -135,6 +135,8 @@ SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
     
   } else if (PRIORS_USED$SSI$k$UNIF) {
     
+    prior = prior + dunif(k_dash, min = list_priors$k_unif[1], max = list_priors$k_unif[2], log = TRUE) -
+      dunif(k, min = list_priors$k_unif[1], max = list_priors$k_unif[2], log = TRUE)
   }
   
   return(prior) 

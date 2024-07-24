@@ -129,13 +129,25 @@ SET_SSIB_PRIOR_JOINT <- function(ssib_params, ssib_params_dash, PRIORS_USED){
     shape2 = list_priors$a[2]
     prior = dbeta(a_dash, shape1, shape2, log = TRUE) -
       dbeta(a, shape1, shape2, log = TRUE) 
+    
+  } else if (PRIORS_USED$SSIB$a$UNIF){
+    lower_bound = list_priors$a_unif[1]
+    upper_bound = list_priors$a_unif[2]
+    prior = dunif(a_dash, min = lower_bound, max = upper_bound, log = TRUE) -
+      dunif(a, min = lower_bound, max = upper_bound, log = TRUE) 
   }
   
   if (PRIORS_USED$SSIB$r0$EXP) {
     prior = prior + dexp(r0_dash, log = TRUE) - dexp(r0, log = TRUE) 
+    
+  } else if (PRIORS_USED$SSIB$r0$UNIF){
+    lower_bound = list_priors$r0_unif[1]
+    upper_bound = list_priors$r0_unif[2]
+    prior = dunif(r0_dash, min = lower_bound, max = upper_bound, log = TRUE) -
+      dunif(r0, min = lower_bound, max = upper_bound, log = TRUE) 
   }
   
-  #GAMMA PRIOR ON c
+  #GAMMA PRIOR ON B
   if (PRIORS_USED$SSIB$b$GAMMA) {
     shape = list_priors$b[1]
     scale = list_priors$b[2]

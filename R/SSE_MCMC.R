@@ -105,7 +105,13 @@ SET_SSE_PRIOR <- function(sse_params, sse_params_dash, PRIORS_USED){
   if (PRIORS_USED$SSE$k$EXP) {
     prior = prior + dexp(k_dash, rate = list_priors$k[1], log = TRUE) -
       dexp(k, rate = list_priors$k[1], log = TRUE) 
+    
+  } else if (PRIORS_USED$SSE$k$UNIF) {
+    
+    prior = prior + dunif(k_dash, min = list_priors$k_unif[1], max = list_priors$k_unif[2], log = TRUE) -
+      dunif(k, min = list_priors$k_unif[1], max = list_priors$k_unif[2], log = TRUE)
   }
+  
   
   return(prior)
 }
