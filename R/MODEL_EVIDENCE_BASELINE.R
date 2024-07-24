@@ -17,7 +17,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
   
   #list_priors = SET_PRIORS()$list_priors
   list_priors = GET_LIST_PRIORS_BASELINE()
-  PRIORS_USED =  SET_PRIORS()$PRIORS_USED
+  #PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   
   'Get proposal q '
   
@@ -64,7 +64,7 @@ GET_LOG_PROPOSAL_Q_UNI_VAR <- function(mcmc_samples, epidemic_data, n_samples,
     
     lower_bound = list_priors$r0_unif[1]
     upper_bound = list_priors$r0_unif[2]
-    log_prior_density_r0 = dunif(theta_samples, min = lower_bound, max = upper_bound, log = TRUE)
+    log_prior_density = dunif(theta_samples, min = lower_bound, max = upper_bound, log = TRUE)
     
   } else if (PRIORS_USED$BASELINE$r0$GAMMA){
     gamma_shape = 2
@@ -90,7 +90,8 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, PRIORS_
   'Estimate of model evidence for SSEB model using Importance Sampling'
   
   #PROPOSAL, PRIORS
-  list_priors = SET_PRIORS()$list_priors
+  list_priors = GET_LIST_PRIORS_BASELINE()
+  #list_priors = SET_PRIORS()$list_priors
   #PRIORS_USED =  SET_PRIORS()$PRIORS_USED
   
   imp_samp_comps = GET_LOG_PROPOSAL_Q_UNI_VAR(mcmc_samples, epidemic_data, n_samples, PRIORS_USED)
@@ -102,15 +103,21 @@ GET_LOG_MODEL_EVIDENCE_BASELINE <- function(mcmc_samples, epidemic_data, PRIORS_
   vec_weights_squared = rep(0, times = n_samples)
   
   #PRIORS 
-  if (PRIORS_USED$BASELINE$r0$EXP){
-    log_prior_density = dexp(theta_samples, log = TRUE)
-    
-  } else if (PRIORS_USED$BASELINE$r0$GAMMA) {
-    gamma_shape = 2
-    log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
-    
-  }
-  
+  # if (PRIORS_USED$BASELINE$r0$EXP){
+  #   log_prior_density = dexp(theta_samples, log = TRUE)
+  #   
+  # } else if (PRIORS_USED$BASELINE$r0$GAMMA) {
+  #   gamma_shape = 2
+  #   log_prior_density = dgamma(theta_samples, shape = gamma_shape, scale = gamma_shape*r0_sim, log = TRUE)
+  #   
+  # } else if (PRIORS_USED$BASELINE$r0$UNIF) {
+  #   
+  #   lower_bound = list_priors$r0_unif[1]
+  #   upper_bound = list_priors$r0_unif[2]
+  #   log_prior_density_r0 = dunif(theta_samples, min = lower_bound, max = upper_bound, log = TRUE)
+  #    
+  # }
+  # 
   #LOG SUM EXP (LOOP)
   vector_log_sum_exp = rep(NA, n_samples)
   

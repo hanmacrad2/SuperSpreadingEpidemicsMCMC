@@ -150,7 +150,7 @@ GET_PRIOR_SAMPS_SSE <- function(samp_size_prior, PRIORS_USED, n_dim = 2){
 }
 
 #SSI MODEL
-GET_PRIOR_SAMPS_SSI <- function(samp_size_prior, n_dim = 2){
+GET_PRIOR_SAMPS_SSI <- function(samp_size_prior, PRIORS_USED, n_dim = 2){
   
   #List priors
   #PRIORS_USED = GET_PRIORS_USED()

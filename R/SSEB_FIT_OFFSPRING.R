@@ -137,34 +137,35 @@ MCMC_INFER_SSEB_OFFSPRING <- function(offspring_data, n_mcmc, PRIORS_USED = GET_
   return(list(sseb_params_matrix = sseb_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
               accept_rate = accept_rate))
-} 
-#MCMC SSEB
-n_mcmc = 62500
-freq_sec_cases_hk = c(199, 57, 18, 6, 5, 1, 2,0,0,0,1,1) 
-mcmc_sseb_offspring = MCMC_INFER_SSEB_OFFSPRING(freq_sec_cases_hk, n_mcmc)
+}
 
-plot.ts(mcmc_sseb_offspring$sseb_params_matrix)
-
-#BEST FIT
-r0 = mean(mcmc_sseb_offspring$sseb_params_matrix[,1])
-alpha = mean(mcmc_sseb_offspring$sseb_params_matrix[,2])
-beta = mean(mcmc_sseb_offspring$sseb_params_matrix[,3])
-
-params_sseb = c(r0, alpha, beta)
-
-#SSEB FIT
-num_offspring <- length(freq_sec_cases_hk)
-x <- 0:(num_offspring - 1)
-sseb_fit <- GET_OFFSPRING_SSEB(x, params_sseb)
-
-#SAVE
-RESULTS_FOLDER = "~/Github/computing/REAL_DATA/4_OFFSPRING_DISTS/OFFSPRING_HK/RESULTS/"
-filename = 'params_sseb_hk1.rds'
-saveRDS(params_sseb, paste0(RESULTS_FOLDER, filename))
-filename = 'sseb_fit_hk1.rds'
-saveRDS(sseb_fit, paste0(RESULTS_FOLDER, filename))
-filename = 'mcmc_sseb_fit_hk1.rds'
-saveRDS(mcmc_sseb_offspring, paste0(RESULTS_FOLDER, filename))
-
-#LOAD MCMC
-mcmc_sseb_offspring = readRDS(paste0(RESULTS_FOLDER, filename))
+# #MCMC SSEB
+# n_mcmc = 62500
+# freq_sec_cases_hk = c(199, 57, 18, 6, 5, 1, 2,0,0,0,1,1) 
+# mcmc_sseb_offspring = MCMC_INFER_SSEB_OFFSPRING(freq_sec_cases_hk, n_mcmc)
+# 
+# plot.ts(mcmc_sseb_offspring$sseb_params_matrix)
+# 
+# #BEST FIT
+# r0 = mean(mcmc_sseb_offspring$sseb_params_matrix[,1])
+# alpha = mean(mcmc_sseb_offspring$sseb_params_matrix[,2])
+# beta = mean(mcmc_sseb_offspring$sseb_params_matrix[,3])
+# 
+# params_sseb = c(r0, alpha, beta)
+# 
+# #SSEB FIT
+# num_offspring <- length(freq_sec_cases_hk)
+# x <- 0:(num_offspring - 1)
+# sseb_fit <- GET_OFFSPRING_SSEB(x, params_sseb)
+# 
+# #SAVE
+# RESULTS_FOLDER = "~/Github/computing/REAL_DATA/4_OFFSPRING_DISTS/OFFSPRING_HK/RESULTS/"
+# filename = 'params_sseb_hk1.rds'
+# saveRDS(params_sseb, paste0(RESULTS_FOLDER, filename))
+# filename = 'sseb_fit_hk1.rds'
+# saveRDS(sseb_fit, paste0(RESULTS_FOLDER, filename))
+# filename = 'mcmc_sseb_fit_hk1.rds'
+# saveRDS(mcmc_sseb_offspring, paste0(RESULTS_FOLDER, filename))
+# 
+# #LOAD MCMC
+# mcmc_sseb_offspring = readRDS(paste0(RESULTS_FOLDER, filename))

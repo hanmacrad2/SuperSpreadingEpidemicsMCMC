@@ -146,69 +146,69 @@ MCMC_INFER_SSIB_OFFSPRING <- function(offspring_data, n_mcmc, PRIORS_USED = GET_
 } 
 
 
-#MCMC SSIB
-n_mcmc = 100000
-freq_sec_cases = c(199, 57, 18, 6, 5, 1, 2,0,0,0,1,1) 
-mcmc_ssib_offspring = MCMC_INFER_SSIB_OFFSPRING(freq_sec_cases, n_mcmc)
-
-plot.ts(mcmc_ssib_offspring$ssib_params_matrix)
-
-#BEST FIT
-r0 = mean(mcmc_ssib_offspring$ssib_params_matrix[,1])
-a = mean(mcmc_ssib_offspring$ssib_params_matrix[,2])
-b = mean(mcmc_ssib_offspring$ssib_params_matrix[,3])
-
-params_ssib = c(r0, a, b)
-
-#SSIB FIT
-num_offspring <- length(freq_sec_cases)
-x <- 0:(num_offspring - 1)
-ssib_fit <- GET_OFFSPRING_SSIB(x, params_ssib)
-
-
-#FIT 1
-#params_ssib1
-#ssib_fit
-#> params_ssib
-#[1] 1.61587271 0.01341351 8.94911074
-
-#SAVE
-RESULTS_FOLDER = "~/Github/computing/REAL_DATA/4_OFFSPRING_DISTS/OFFSPRING_HK/RESULTS/"
-filename = 'params_ssib_hk1.rds'
-saveRDS(params_ssib, paste0(RESULTS_FOLDER, filename))
-filename = 'ssib_fit_hk1.rds'
-saveRDS(ssib_fit, paste0(RESULTS_FOLDER, filename))
-filename = 'mcmc_ssib_fit_hk1.rds'
-saveRDS(mcmc_ssib_offspring, paste0(RESULTS_FOLDER, filename))
-
-file_name = 'mcmc_ssib_offspring_sp.rds'
-saveRDS(mcmc_ssib_offspring_sp, paste0(RESULTS_FOLDER, filename))
-
-filename = 'ssib_fit_sp.rds'
-saveRDS(ssib_fit_sp, paste0(RESULTS_FOLDER, filename))
-
-#LOAD MCMC
-mcmc_ssib_offspring = readRDS(paste0(RESULTS_FOLDER, filename))
-  
-#FIT 2
-params_ssib2 = c(r0, a, b)
-
-#SSIB FIT
-num_offspring <- length(freq_sec_cases)
-x <- 0:(num_offspring - 1)
-ssib_fit2 <- GET_OFFSPRING_SSIB(x, params_ssib)
-
-
-#*******************************
-#SINGAPORE DATA
-n_mcmc = 100000
-sec_cases_sp <- c(160, 20, 6, 5, 0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,
-                  1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1)
-mcmc_ssib_offspring = MCMC_INFER_SSIB_OFFSPRING(freq_sec_cases, n_mcmc)
-
-plot.ts(mcmc_ssib_offspring$ssib_params_matrix)
-
-#BEST FIT
-r0 = mean(mcmc_ssib_offspring$ssib_params_matrix[,1])
-a = mean(mcmc_ssib_offspring$ssib_params_matrix[,2])
-b = mean(mcmc_ssib_offspring$ssib_params_matrix[,3])
+# #MCMC SSIB
+# n_mcmc = 100000
+# freq_sec_cases = c(199, 57, 18, 6, 5, 1, 2,0,0,0,1,1) 
+# mcmc_ssib_offspring = MCMC_INFER_SSIB_OFFSPRING(freq_sec_cases, n_mcmc)
+# 
+# plot.ts(mcmc_ssib_offspring$ssib_params_matrix)
+# 
+# #BEST FIT
+# r0 = mean(mcmc_ssib_offspring$ssib_params_matrix[,1])
+# a = mean(mcmc_ssib_offspring$ssib_params_matrix[,2])
+# b = mean(mcmc_ssib_offspring$ssib_params_matrix[,3])
+# 
+# params_ssib = c(r0, a, b)
+# 
+# #SSIB FIT
+# num_offspring <- length(freq_sec_cases)
+# x <- 0:(num_offspring - 1)
+# ssib_fit <- GET_OFFSPRING_SSIB(x, params_ssib)
+# 
+# 
+# #FIT 1
+# #params_ssib1
+# #ssib_fit
+# #> params_ssib
+# #[1] 1.61587271 0.01341351 8.94911074
+# 
+# #SAVE
+# RESULTS_FOLDER = "~/Github/computing/REAL_DATA/4_OFFSPRING_DISTS/OFFSPRING_HK/RESULTS/"
+# filename = 'params_ssib_hk1.rds'
+# saveRDS(params_ssib, paste0(RESULTS_FOLDER, filename))
+# filename = 'ssib_fit_hk1.rds'
+# saveRDS(ssib_fit, paste0(RESULTS_FOLDER, filename))
+# filename = 'mcmc_ssib_fit_hk1.rds'
+# saveRDS(mcmc_ssib_offspring, paste0(RESULTS_FOLDER, filename))
+# 
+# file_name = 'mcmc_ssib_offspring_sp.rds'
+# saveRDS(mcmc_ssib_offspring_sp, paste0(RESULTS_FOLDER, filename))
+# 
+# filename = 'ssib_fit_sp.rds'
+# saveRDS(ssib_fit_sp, paste0(RESULTS_FOLDER, filename))
+# 
+# #LOAD MCMC
+# mcmc_ssib_offspring = readRDS(paste0(RESULTS_FOLDER, filename))
+#   
+# #FIT 2
+# params_ssib2 = c(r0, a, b)
+# 
+# #SSIB FIT
+# num_offspring <- length(freq_sec_cases)
+# x <- 0:(num_offspring - 1)
+# ssib_fit2 <- GET_OFFSPRING_SSIB(x, params_ssib)
+# 
+# 
+# #*******************************
+# #SINGAPORE DATA
+# n_mcmc = 100000
+# sec_cases_sp <- c(160, 20, 6, 5, 0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,
+#                   1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1)
+# mcmc_ssib_offspring = MCMC_INFER_SSIB_OFFSPRING(freq_sec_cases, n_mcmc)
+# 
+# plot.ts(mcmc_ssib_offspring$ssib_params_matrix)
+# 
+# #BEST FIT
+# r0 = mean(mcmc_ssib_offspring$ssib_params_matrix[,1])
+# a = mean(mcmc_ssib_offspring$ssib_params_matrix[,2])
+# b = mean(mcmc_ssib_offspring$ssib_params_matrix[,3])
