@@ -121,12 +121,20 @@ SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
     
     prior = dgamma(r0_dash, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) -
       dgamma(r0, shape = list_priors$gamma[1], scale = list_priors$gamma[2], log = TRUE) 
+    
+  } else if (PRIORS_USED$SSI$r0$UNIF){
+    
+    prior = dunif(r0_dash, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) -
+      dunif(r0, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) 
   }
   
   if (PRIORS_USED$SSI$k$EXP) {
     
     prior = prior + dexp(k_dash, rate = list_priors$k[1], log = TRUE) -
       dexp(k, rate = list_priors$k[1], log = TRUE)
+    
+  } else if (PRIORS_USED$SSI$k$UNIF) {
+    
   }
   
   return(prior) 

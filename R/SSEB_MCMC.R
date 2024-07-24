@@ -148,7 +148,14 @@ SET_SSEB_PRIOR <- function(param, param_dash,
     if (PRIORS_USED$SSEB$r0$EXP) {
       prior = dexp(param_dash, rate = list_priors$r0[1], log = TRUE) -
         dexp(param, rate = list_priors$r0[1], log = TRUE) 
+      
+      
+    } else if (PRIORS_USED$SSEB$r0$UNIF){
+      
+      prior = dunif(param_dash, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) -
+        dunif(param, min = list_priors$r0_unif[1], max = list_priors$r0_unif[2], log = TRUE) 
     }
+    
     
   } else if (beta_flag) {
     
