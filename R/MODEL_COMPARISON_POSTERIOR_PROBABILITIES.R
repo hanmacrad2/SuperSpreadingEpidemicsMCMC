@@ -112,6 +112,18 @@ GET_MODEL_COMP_DF_PLOT <- function(df_mod_ev_plot){
   
 }
 
+#GET DATAFRAME OF POSTERIOR PROBABILITES
+GET_POST_PROBS_DF <- function(df_mod_ev){
+  
+  'Return: df_post_probs'
+  df_post_probs = apply(df_mod_ev, MARGIN=1, 
+                        FUN=function(x2) GET_MODELS_POSTERIOR_PROBS(x2, prior_probs_models = rep(0.2, 5)) )
+  df_post_probs = t(df_post_probs)
+  
+  return(df_post_probs)
+  
+}
+
 #************************************************************************************************
 #* GET MODEL COMPARISON POST PROBS ALL MODELS
 GET_POST_PROB_HEAT_MAP_VALUES <- function(df_post_probs, model_num,

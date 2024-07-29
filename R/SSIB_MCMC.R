@@ -106,11 +106,38 @@ LOG_LIKE_SSIB_JOINT <- function(data, ssib_params,
       dpois(ss[t], c*lambda_t, log = TRUE) 
   }
   
-  # if(is.nan(loglike)){
-  #   browser()
-  # }
-  
   return(loglike)
+}
+
+#***************
+#LOG LIKE
+LOG_LIKE_SSIB_POINTWISE <- function(data, ssib_params, 
+                                shape_gamma = 6, scale_gamma = 1){
+  
+  #PARAMS
+  r0 = ssib_params[1];  a = ssib_params[2]; b = ssib_params[3]
+  
+  non_ss = data[[1]]; ss = data[[2]]
+  c = (r0*(1 - a))/b
+  
+  #Params
+  num_days = length(non_ss)
+  log_like_vec = length(epidemic_data-1)
+  
+  #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
+    pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  
+  for (t in 2:num_days) { 
+    
+    #INFECTIOUS PRESSURE - SUM OF ALL INDIVIDUALS INFECTIOUSNESS
+    lambda_t = sum((non_ss[1:(t-1)] + b*ss[1:(t-1)])*rev(prob_infect[1:(t-1)]))
+    
+    log_like_vec[t-1] = dpois(non_ss[t], a*r0*lambda_t, log = TRUE) +
+      dpois(ss[t], c*lambda_t, log = TRUE) 
+  }
+  
+  return(log_like_vec)
 }
 
 #****************
@@ -203,7 +230,7 @@ SET_SSIB_DATA <- function(epidemic_data, FLAGS_DATA_TYPE, data_start = c(3,2,1))
 
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
-                            FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE),
+                            FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE, COMPUTE_WAIC = TRUE),
                             PRIORS_USED = GET_PRIORS_USED(),
                            data_start = c(3,2,1),
                             rep_da = 500, mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
@@ -355,10 +382,20 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
       scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
       ns_mcmc[i_thin, ] = data[[1]] #Updating all data at once
       ss_mcmc[i_thin, ] = data[[2]]
+      
+      if (FLAGS_LIST$COMPUTE_WAIC){
+        ll_vec = LOG_LIKE_SSIB_POINTWISE(data, ssib_params)
+        loglike_pointwise_matrix[i_thin,] = ll_vec
+      }
+      
       i_thin = i_thin + 1
     }
     
   } #END MCMC 
+  
+  #COMPUTE WAIC, DIC
+  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  dic_result = GET_DIC(loglike_pointwise_matrix)
   
   #Final stats
   accept_count = pmin(1, vec_accept) #1 if accepted in that time step at all, 0 otherwise 
@@ -379,6 +416,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
               accept_rate = accept_rate, 
               data_final = data, 
               ns_final = data[[1]], ss_final = data[[2]], #FINAL
+              waic_result = waic_result, dic_result = dic_result,
               ns_median = ns_median, ss_median = ss_median,
               ns_mean = ns_mean, ss_mean = ss_mean, 
               ss_start = ss_start, ns_start = ns_start,

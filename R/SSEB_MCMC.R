@@ -73,6 +73,23 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, beta){
 }
 
 
+#1. LOG LIKELIHOOD
+LOG_LIKE_SSEB_POINTWISE <- function(x, lambda_vec, alpha, r0, beta){
+  
+  #Params
+  num_days = length(x); logl = 0
+  gamma = r0*(1 - alpha)/beta #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
+  log_like_vec = length(epidemic_data-1)
+  
+  for (t in 2:num_days) {
+    
+    log_like_vec[t-1] =  PROBABILITY_XT(x[t], lambda_vec[t], gamma, beta, alpha, r0)
+    
+  }
+  
+  return(log_like_vec)
+}
+
 PROBABILITY_XT <- function(xt, lambda_t, gamma, beta, alpha, r0, max_et = 100) {
   
   'Compound Poisson Prob for SSEB model'
@@ -193,7 +210,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                             param_starts = list(alpha_start = 0.5, beta_start = 10, r0_start = 1.0),
                             mcmc_inputs =  list(alpha_star = 0.3, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_alpha = 0.3, sigma_r0 = 0.03, sigma_beta = 3),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE)) {
+                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE)) {
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rate
@@ -231,6 +248,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   alpha_vec <- vector('numeric', mcmc_vec_size); beta_vec <- vector('numeric', mcmc_vec_size)
   gamma_vec <- vector('numeric', mcmc_vec_size); r0_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec <- vector('numeric', mcmc_vec_size);
+  loglike_pointwise_matrix = matrix(nrow = mcmc_vec_size, ncol = length(epidemic_data)-1)
   
   #INITIALISE MCMC[1]
   alpha_vec[1] <- param_starts$alpha_start
@@ -368,9 +386,19 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
       log_like_vec[i_thin] <- log_like
       sigma_list$sigma_alpha_vec[i_thin] = sigma_alpha; sigma_list$sigma_r0_vec[i_thin] = sigma_r0
       sigma_list$sigma_beta_vec[i_thin] = sigma_beta
+      
+      if (FLAGS_LIST$COMPUTE_WAIC){
+        ll_vec = LOG_LIKE_SSEB_POINTWISE(epidemic_data, lambda_vec, alpha, r0, beta)
+        loglike_pointwise_matrix[i_thin,] = ll_vec
+      }
+      
       i_thin = i_thin + 1
     }
   }
+  
+  #COMPUTE WAIC, DIC
+  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  dic_result = GET_DIC(loglike_pointwise_matrix)
   
   #Final stats
   accept_rate_alpha = 100*list_accept_counts$count_accept1/(n_mcmc-1)
@@ -385,6 +413,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   #OUTPUT
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma_list = sigma_list,
+                     waic_result = waic_result, dic_result = dic_result,
                      list_accept_rates = list_accept_rates, 
                      r0_start = r0_start)
   #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')

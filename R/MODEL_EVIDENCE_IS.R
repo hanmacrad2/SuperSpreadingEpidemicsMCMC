@@ -43,7 +43,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   
   #THETA SAMPLES: PROPOSAL + PRIOR (FROM PARAMETRIC APPROXIMATION)
   means = colMeans(mcmc_samples)
-  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
+  theta_samples_proposal = mvtnorm::rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal) 
   theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(epidemic_data, samp_size_prior, FLAGS_MODELS, PRIORS_USED)
   theta_samples = rbind(theta_samples_proposal, theta_samples_prior)
@@ -52,7 +52,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
   matrix_means =  matrix(rep(means, each = n_samples), ncol = n_dim)
   
   #DENSITY OF PROPOSAL
-  log_proposal_density = dmvt(theta_samples - matrix_means,
+  log_proposal_density = mvtnorm::dmvt(theta_samples - matrix_means,
                               sigma = cov(mcmc_samples), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
   
   #PRIOR DENSITIES 

@@ -72,7 +72,7 @@ GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS, PRIORS_U
   n_dim = dim(mcmc_samples)[2] 
   means = colMeans(mcmc_samples[,])
 
-  theta_samples_proposal = rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
+  theta_samples_proposal = mvtnorm::rmvt(samp_size_proposal, sigma = cov(mcmc_samples), df = dof) +
     rep(means, each = samp_size_proposal)
   
   theta_samples_prior = GET_PRIOR_IMPORTANCE_SAMPLES(EPI_DATA, samp_size_prior, FLAGS_MODELS, PRIORS_USED)
@@ -85,7 +85,7 @@ GET_LOG_PROPOSAL_Q_SSI <- function(mcmc_output, EPI_DATA, FLAGS_MODELS, PRIORS_U
   #DENSITY OF PROPOSAL
   wh_non_zero = which(EPI_DATA[1:(length(EPI_DATA)-1)]!= 0)
   
-  log_proposal_density = dmvt(theta_samples[,2+wh_non_zero,drop=FALSE] - matrix_means[,2+wh_non_zero,drop=FALSE], #wh_non_zero: Include wh here to only include non zero eta columns 
+  log_proposal_density = mvtnorm::dmvt(theta_samples[,2+wh_non_zero,drop=FALSE] - matrix_means[,2+wh_non_zero,drop=FALSE], #wh_non_zero: Include wh here to only include non zero eta columns 
                               sigma = cov(mcmc_samples[,2+wh_non_zero,drop=FALSE]), df = dof, log = TRUE) #log of the density of multi-variate t distribution (if x = 1,  y= 2, f(x,y) = -4.52) for examples
 
   #PRIOR DENSITIES 

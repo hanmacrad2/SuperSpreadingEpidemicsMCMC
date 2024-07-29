@@ -100,6 +100,43 @@ LOG_LIKE_SSI <- function(epi_data, infect_curve_ga,
   return(loglike)
 }
 
+#**********************************************
+#LOG LIKELIHOOD
+#**********************************************
+#' @export
+LOG_LIKE_SSI_POINTWISE <- function(epi_data, infect_curve_ga,
+                         ssi_params, eta, FLAG_MCMC = TRUE){ #eta - a vector of length epi_data. eta[1] = infectivity of epi_datat[1]
+  
+  #Params
+  num_days = length(epi_data)
+  r0 = ssi_params[1]; k = ssi_params[2]
+  log_like_vec = length(epidemic_data-1)
+  
+  for (t in 2:num_days) {
+    
+    #POISSON DENSITY
+    total_poi_rate = sum(eta[1:(t-1)]*rev(infect_curve_ga[1:t-1]))
+    
+    if (total_poi_rate < 0) {
+      log_poi_prob = -Inf
+    } else {
+      log_poi_prob = dpois(epi_data[t], lambda = total_poi_rate, log = TRUE) #NaN if eta == negative 
+    }
+    
+    log_like_vec[t-1] = log_poi_prob 
+    
+    if (FLAG_MCMC && epi_data[t-1] > 0) {
+      
+      #ETA; GAMMA
+      log_eta_prob = dgamma(eta[t-1], shape = epi_data[t-1]*k, scale = r0/k, log = TRUE)                  #dgamma with shape 0 == -Inf
+      log_like_vec[t-1] = log_like_vec[t-1] + log_eta_prob
+      
+    } 
+  }
+  
+  return(log_like_vec)
+}
+
 #PRIOR
 SET_SSI_PRIOR <- function(params, params_dash, PRIORS_USED){
   
@@ -152,7 +189,8 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
                               mcmc_inputs = list(dim = 2, 
                                                  target_acceptance_rate = 0.234, #0.4, 
                                                  v0 = 100, thinning_factor = 10, burn_in_pc = 0.2),
-                              FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE)) {    
+                              FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE,
+                                                COMPUTE_WAIC = TRUE)) {    
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
@@ -198,6 +236,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   #LOG LIKELIHOOD
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSI(epidemic_data, infect_curve_ga, ssi_params, eta);  log_like = log_like_vec[1]
+  loglike_pointwise_matrix = matrix(nrow = mcmc_vec_size, ncol = length(epidemic_data)-1)
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -291,11 +330,21 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
       scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
       eta_matrix[i_thin, ] <- eta 
       sigma_eta_matrix[i_thin, ] = sigma_eta
+      
+      if (FLAGS_LIST$COMPUTE_WAIC){
+        ll_vec = LOG_LIKE_SSI_POINTWISE(epidemic_data, infect_curve_ga, ssi_params, eta)
+        loglike_pointwise_matrix[i_thin,] = ll_vec
+      }
+      
       i_thin = i_thin + 1
     }
     
   } #END FOR LOOP
-
+  
+  #COMPUTE WAIC, DIC
+  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  dic_result = GET_DIC(loglike_pointwise_matrix)
+  
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
   accept_rate_da = 100*count_accept_da/((n_mcmc-1)*num_days)
@@ -304,6 +353,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   return(list(ssi_params_matrix = ssi_params_matrix, eta_matrix = eta_matrix,
               sigma_eta_matrix = sigma_eta_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
+              waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, vec_count_accept_da = vec_count_accept_da,
               r0_start = r0_start))
 } 

@@ -74,6 +74,29 @@ LOG_LIKE_SSE <- function(epidemic_data, lambda_vec, sse_params){
   
 }
 
+#************************
+#* LOG LIKELIHOOD sse
+#* ***********************
+#' @export
+LOG_LIKE_SSE_POINTWISE <- function(epidemic_data, lambda_vec, sse_params){
+  
+  #Params
+  r0 = sse_params[1];  k = sse_params[2]
+  num_days = length(epidemic_data); loglike = 0
+  log_like_vec = length(epidemic_data-1)
+  
+  for (t in 2:num_days) {
+    
+    log_like_vec[t-1] = dnbinom(epidemic_data[t],
+                        size = k*lambda_vec[t], mu =  r0*lambda_vec[t], log = TRUE) #Neg Bin parameterisation #1 
+    
+    
+  }
+  
+  return(log_like_vec)
+  
+}
+
 #****************
 #* SET PRIOR SSE
 #* **************
@@ -125,7 +148,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
                            mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.234, #0.4, 
                                               v0 = 100, thinning_factor = 10, burn_in_pc = 0.2),
                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
-                                             PRIOR = TRUE, BURN_IN = TRUE)){    
+                                             PRIOR = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE)){    
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
@@ -162,6 +185,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   log_like_vec <- vector('numeric', mcmc_vec_size)
   log_like_vec[1] <- LOG_LIKE_SSE(epidemic_data, lambda_vec, sse_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
+  loglike_pointwise_matrix = matrix(nrow = mcmc_vec_size, ncol = length(epidemic_data)-1)
   
   #ADAPTIVE SHAPING PARAMS + VECTORS
   scaling_vec <- vector('numeric', mcmc_vec_size); scaling_vec[1] <- 1
@@ -221,7 +245,14 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
       sse_params_matrix[i_thin,] = sse_params
       log_like_vec[i_thin] <- log_like
       scaling_vec[i_thin] <- scaling #Taking role of sigma, overall scaling constant. Sigma becomes estimate of the covariance matrix of the posterior
+      
+      if (FLAGS_LIST$COMPUTE_WAIC){
+        ll_vec = LOG_LIKE_SSE_POINTWISE(epidemic_data, lambda_vec, sse_params)
+        loglike_pointwise_matrix[i_thin,] = ll_vec
+      }
+      
       i_thin = i_thin + 1
+      
     }
     
   } #END FOR LOOP
@@ -229,9 +260,14 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
   
+  #COMPUTE WAIC, DIC
+  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  dic_result = GET_DIC(loglike_pointwise_matrix)
+  
   #Return a, acceptance rate
   return(list(sse_params_matrix = sse_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
+              waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, r0_start = r0_start))
 } 
 
