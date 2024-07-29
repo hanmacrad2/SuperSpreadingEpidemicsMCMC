@@ -96,6 +96,7 @@ LOG_LIKE_BASELINE_POINTWISE <- function(epidemic_data, r0){
   
   #Params
   num_days = length(epidemic_data)
+  log_like_vec = length(epidemic_data-1)
   
   #Infectivity of each individual  - shape and scale of gamma distribution representing the infectivity of each individual 
   shape_gamma = 6; scale_gamma = 1
