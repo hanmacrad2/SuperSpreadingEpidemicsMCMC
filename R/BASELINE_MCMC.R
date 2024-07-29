@@ -84,18 +84,33 @@ LOG_LIKE_BASELINE <- function(epidemic_data, r0){
     lambdaX = r0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
     #log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
     log_likelihood = log_likelihood + dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
-    
-    # if (log_likelihood1 != log_likelihood){
-    #   browser()
-    # }
-    #print(paste0('t: ', t, '. lambaX: ', lambdaX, 'log_likelihood: ', log_likelihood))
+
   }
   
-  # if(log_likelihood > 0 || is.nan(log_likelihood)){
-  #   browser()
-  # }
-  
   log_likelihood
+}
+
+#******************
+# LOG LIKE POINT WISE
+LOG_LIKE_BASELINE_POINTWISE <- function(epidemic_data, r0){
+  
+  #Params
+  num_days = length(epidemic_data)
+  
+  #Infectivity of each individual  - shape and scale of gamma distribution representing the infectivity of each individual 
+  shape_gamma = 6; scale_gamma = 1
+  prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) - pgamma(c(0:(num_days-1)), shape = shape_gamma, scale = scale_gamma)
+  total_rate = 0
+  
+  for (t in 2:num_days) {
+    
+    lambdaX = r0*sum(epidemic_data[1:t-1]*rev(prob_infect[1:t-1]))
+    #log_likelihood1 = log_likelihood + epidemic_data[t]*log(lambdaX) - lambdaX - lfactorial(epidemic_data[t]) #Need to include normalizing constant 
+    log_like_vec[t-1] = dpois(epidemic_data[t], lambda = lambdaX, log = TRUE)
+    
+  }
+  
+  return(log_like_vec)
 }
 
 #****************
@@ -168,12 +183,32 @@ SET_BASELINE_PRIOR <- function(r0, r0_dash, PRIORS_USED){
 #'
 #' #START MCMC
 #' mcmc_baseline_output = SSE_MCMC_ADAPTIVE(epidemic_data, mcmc_inputs)
-#'
+
+GET_DIC <- function(log_lik_matrix) {
+  # log_lik_matrix is a matrix of log-likelihood values
+  # Rows correspond to MCMC samples, columns correspond to data points
+  
+  mean_log_lik <- mean(rowSums(log_lik_matrix))
+  
+  deviance_mean <- -2 * mean_log_lik
+  
+  deviance_mcmc <- -2 * rowSums(log_lik_matrix)
+  
+  p_dic <- 0.5 * var(deviance_mcmc)
+  
+  dic <- deviance_mean + p_dic
+  
+  #return(list(DIC = dic, deviance_mean = deviance_mean, p_dic = p_dic))
+  
+  return(dic)
+}
+
+
 #' @export
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, 
                                 PRIORS_USED = GET_PRIORS_USED(), #PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
-                                                  THIN = TRUE, BURN_IN = TRUE),
+                                                  THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE),
                                 mcmc_inputs = list(target_accept_rate = 0.4, thinning_factor = 10, #r0_start = 1.0, #1.2 changed 24/12/23
                                                       burn_in_pc = 0.2), B = 500) {
   
@@ -208,7 +243,9 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   }
   
   #MCMC VECTORS - INITIALISE
-  r0_vec <- vector('numeric', mcmc_vec_size); log_like_vec <- vector('numeric', mcmc_vec_size)
+  r0_vec <- vector('numeric', mcmc_vec_size); 
+  log_like_vec <- vector('numeric', mcmc_vec_size)
+  loglike_pointwise_matrix = matrix(nrow = mcmc_vec_size, ncol = length(epidemic_data)-1)
   r0_vec[1] <- r0_start
   r0 = r0_vec[1]; 
   
@@ -267,11 +304,17 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
 
       r0_vec[i_thin] <- r0
       log_like_vec[i_thin] <- log_likelihood
-      i_thin = i_thin + 1
       
       if (FLAGS_LIST$ADAPTIVE){
         sigma_vec[i_thin] = sigma_i
       }
+      
+      if (FLAGS_LIST$COMPUTE_WAIC){
+        ll_vec = LOG_LIKE_BASELINE_POINTWISE(epidemic_data, r0)
+        loglike_pointwise_matrix[i_thin,] = ll_vec
+      }
+      
+      i_thin = i_thin + 1
     }
   }
   
@@ -279,7 +322,12 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   accept_rate = 100*count_accept/(n_mcmc-1)
   print(paste0('accept_rate = ', accept_rate))
   
+  #COMPUTE WAIC, DIC
+  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  dic_result = GET_DIC(loglike_pointwise_matrix)
+  
   #Return a, acceptance rate
   return(list(r0_vec = r0_vec, log_like_vec = log_like_vec, sigma_vec = sigma_vec,
+              waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, r0_start = r0_start))
 }
