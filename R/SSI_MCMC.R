@@ -110,7 +110,7 @@ LOG_LIKE_SSI_POINTWISE <- function(epi_data, infect_curve_ga,
   #Params
   num_days = length(epi_data)
   r0 = ssi_params[1]; k = ssi_params[2]
-  log_like_vec = length(epidemic_data-1)
+  log_like_vec = length(epi_data-1)
   
   for (t in 2:num_days) {
     

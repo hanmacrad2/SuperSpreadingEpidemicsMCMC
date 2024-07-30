@@ -57,15 +57,15 @@ SIMULATE_EPI_SSEB <- function(num_days = 50, r0 = 2.0, alpha = 0.5, beta = 10,
 }
 
 #1. LOG LIKELIHOOD
-LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, beta){
+LOG_LIKE_SSEB <- function(epidemic_data, lambda_vec, alpha, r0, beta){
   
   #Params
-  num_days = length(x); logl = 0
+  num_days = length(epidemic_data); logl = 0
   gamma = r0*(1 - alpha)/beta #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
   
   for (t in 2:num_days) {
     
-    logl = logl + PROBABILITY_XT(x[t], lambda_vec[t], gamma, beta, alpha, r0)
+    logl = logl + PROBABILITY_XT(epidemic_data[t], lambda_vec[t], gamma, beta, alpha, r0)
     
   }
   
@@ -74,16 +74,16 @@ LOG_LIKE_SSEB <- function(x, lambda_vec, alpha, r0, beta){
 
 
 #1. LOG LIKELIHOOD
-LOG_LIKE_SSEB_POINTWISE <- function(x, lambda_vec, alpha, r0, beta){
+LOG_LIKE_SSEB_POINTWISE <- function(epidemic_data, lambda_vec, alpha, r0, beta){
   
   #Params
-  num_days = length(x); logl = 0
-  gamma = r0*(1 - alpha)/beta #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
+  num_days = length(epidemic_data)
   log_like_vec = length(epidemic_data-1)
+  gamma = r0*(1 - alpha)/beta #r0 = alpha*r0 + beta*gamma (alpha is the proportion of non ss)
   
   for (t in 2:num_days) {
     
-    log_like_vec[t-1] =  PROBABILITY_XT(x[t], lambda_vec[t], gamma, beta, alpha, r0)
+    log_like_vec[t-1] =  PROBABILITY_XT(epidemic_data[t], lambda_vec[t], gamma, beta, alpha, r0)
     
   }
   
