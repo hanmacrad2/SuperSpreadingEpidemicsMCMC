@@ -230,8 +230,8 @@ SET_SSIB_DATA <- function(epidemic_data, FLAGS_DATA_TYPE, data_start = c(3,2,1))
 
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
-                            FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE, COMPUTE_WAIC = TRUE),
-                            PRIORS_USED = GET_PRIORS_USED(),
+                            FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE),
+                            PRIORS_USED = GET_PRIORS_USED(), COMPUTE_WAIC = TRUE,
                            data_start = c(3,2,1),
                             rep_da = 500, mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
                                                v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
@@ -383,7 +383,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
       ns_mcmc[i_thin, ] = data[[1]] #Updating all data at once
       ss_mcmc[i_thin, ] = data[[2]]
       
-      if (FLAGS_LIST$COMPUTE_WAIC){
+      if (COMPUTE_WAIC){
         ll_vec = LOG_LIKE_SSIB_POINTWISE(data, ssib_params)
         loglike_pointwise_matrix[i_thin,] = ll_vec
       }

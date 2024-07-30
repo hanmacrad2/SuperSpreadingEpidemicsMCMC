@@ -149,6 +149,7 @@ GET_POST_PROB_HEAT_MAP_VALUES <- function(df_post_probs, model_num,
     vec_means = c(vec_means, mean_post_prob)
     
   }
+  vec_means = round(vec_means, 2)
   
   print(list_post_probs)
   print(vec_means)
