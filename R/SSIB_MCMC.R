@@ -122,7 +122,7 @@ LOG_LIKE_SSIB_POINTWISE <- function(data, ssib_params,
   
   #Params
   num_days = length(non_ss)
-  log_like_vec = length(epidemic_data-1)
+  log_like_vec = length(num_days-1)
   
   #INFECTIOUSNESS  - Difference of two GAMMA distributions. Discretized
   prob_infect = pgamma(c(1:num_days), shape = shape_gamma, scale = scale_gamma) -
@@ -276,7 +276,8 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   log_like_vec[1] <- LOG_LIKE_SSIB_JOINT(data, ssib_params) #, FLAG_NEGBIN_PARAMATERISATION)
   log_like = log_like_vec[1]
   print(paste0('log_like no1: ', log_like))
-
+  loglike_pointwise_matrix = matrix(nrow = mcmc_vec_size, ncol = time-1)
+  
   #ADAPTIVE SHAPING PARAMS + VECTORS
   c_star = (2.38^2)/mcmc_inputs$dim; 
   termX = mcmc_inputs$v0 + mcmc_inputs$dim

@@ -499,6 +499,22 @@ SIM_PERFORMANCE <- function(df_results, FLAG_PARAM = GET_PARAM(r0 = TRUE),
     
   }
 
+#GET DIC
+GET_DIC <- function(log_lik_matrix) {
+  
+  mean_log_lik <- mean(rowSums(log_lik_matrix))
+  
+  deviance_mean <- -2 * mean_log_lik
+  
+  deviance_mcmc <- -2 * rowSums(log_lik_matrix)
+  
+  p_dic <- 0.5 * var(deviance_mcmc)
+  
+  dic <- deviance_mean + p_dic
+  
+  #return(list(DIC = dic, deviance_mean = deviance_mean, p_dic = p_dic))
+  return(dic)
+}
 #ADD GELMAN.DIAG
 #gelman.diag(as.mcmc.list(c(1,1,2,1,2,2,1,3,3,1,1,1,1,1,1,1)))
 #df3 = cbind(df1, df2)

@@ -455,3 +455,208 @@ GET_MODEL_SIMULATION_TITLE <- function(index, list_params,
   
   return(list_titles)
 }
+
+#***********************
+#* SPAGHETTI PLOTS
+
+ADD_INFECTION_DATA <- function(list_data, epi_data_new){
+  
+  list_data[[length(list_data) + 1]] <- epi_data_new
+  
+  return(list_data)
+}
+
+ADD_SUBLIST <- function(list_data, sublist){
+  
+  list_data[[length(list_data) + 1]] <- sublist
+  
+  return(list_data)
+}
+
+#PLOT SETTINGS
+GET_MODEL_SPAGHETTI_PLOT_SETTINGS <- function(FLAGS_MODELS, FLAGS_PARAM){
+  
+  if(FLAGS_MODELS$Baseline){
+    
+    #PLOT
+    par(mfrow = c(3,2))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    
+  } else if (FLAGS_MODELS$SSE || FLAGS_MODELS$SSI){
+    
+    #PLOT
+    par(mfrow = c(3,1))
+    #par(mfrow = c(3,3))
+    par(mar = c(5.5, 5, 4, 4.7)) #rep(4.5, 4)) #c(1.5, 5, 4, 1.5)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    #par(mar = c(4.9, 4.9, 5, 5)) 
+    # par(mar = rep(4.8, 4))
+    
+  } else if (FLAGS_MODELS$SSI){
+    
+    #PLOT
+    #par(mfrow = c(3,3))
+    
+  } else if (FLAGS_MODELS$SSEB){
+    
+    #PLOT
+    par(mfrow = c(3,2))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    #par(mar = c(5, 5, 5, 5))
+    
+  } else if (FLAGS_MODELS$SSIB){
+    
+    #PLOT
+    par(mfrow = c(3,2))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    #par(mar = c(5, 5, 5, 5))
+    
+  } else if (FLAGS_PARAM$beta){
+    
+    #PLOT
+    par(mfrow = c(3,2))
+    par(mar = c(5.5, 4.7, 4, 4.7)) #bottom, left, top, right
+    par(oma = c(1, 1, 6, 1))
+    
+  }
+}
+
+#PLOT_SPAGHETTI_DATA
+PLOT_SPAGHETTI_DATA <- function(list_epi_data, list_params,
+                                FLAGS_MODELS, FLAGS_PARAM, 
+                                MODEL_COLOR, RESULTS_FOLDER,
+                                #plot_width = 11.0, plot_height = 9.0,
+                                plot_width = 13.5, plot_height = 11.0,
+                                cex = 2.3, lwd = 2.45,
+                                main_font = 3.5, #3.2, 
+                                axis_font = 1.6,
+                                PDF = FALSE){
+  
+  #PARAMS
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  param = names(FLAGS_PARAM)[which(unlist(FLAGS_PARAM))]
+  ylabel = 'Infection count' #Daily
+  
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_EPI_DATA_', param, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
+  }
+  
+  #PLOT SETTINGS
+  GET_MODEL_PLOT_SETTINGS(FLAGS_MODELS, FLAGS_PARAM)
+  
+  #PLOT
+  for(i in 1:length(list_epi_data)){
+    
+    #PARAMS
+    list_titles = GET_MODEL_SIMULATION_TITLE(i, list_params, 
+                                             FLAGS_MODELS, FLAGS_PARAM)
+    data_title = list_titles$data_title
+    main_title = list_titles$main_title
+    
+    max_y = max(unlist(list_epi_data))
+    epidemic_data = list_epi_data[[i]]
+    
+    if(i == 1){
+      plot(seq_along(epidemic_data), epidemic_data,
+           type = 'l', xlab = 'Time', ylab = ylabel,
+           main = data_title,
+           col = MODEL_COLOR,
+           lwd = lwd, 
+           ylim = c(0, max_y),
+           cex.lab=cex+0.2, cex.axis=cex, cex.sub=cex-0.2,
+           cex.main=cex+0.3, cex.main= main_font)    
+    } else {
+      
+      lines(seq_along(epidemic_data), epidemic_data, 
+            type = 'l', col = MODEL_COLOR, lwd = lwd) 
+    }
+    
+  }
+  
+  
+  #MAIN TITLE
+  title(main_title, outer = TRUE, cex.main = main_font + 0.2)
+  
+  
+  if(PDF){
+    dev.off()
+  }
+}
+
+#PLOT_SPAGHETTI_DATA_LIST
+PLOT_SPAGHETTI_DATA_LIST <- function(lists_data, list_params,
+                                 FLAGS_MODELS, FLAGS_PARAM, 
+                                 MODEL_COLOR, RESULTS_FOLDER,
+                                 #plot_width = 11.0, plot_height = 9.0,
+                                 plot_width = 13.5, plot_height = 11.0,
+                                 cex = 2.3, lwd = 2.45,
+                                 main_font = 3.5, #3.2, 
+                                 axis_font = 1.6,
+                                 PDF = TRUE){
+  
+  #PARAMS
+  model = names(FLAGS_MODELS)[which(unlist(FLAGS_MODELS))]
+  param = names(FLAGS_PARAM)[which(unlist(FLAGS_PARAM))]
+  ylabel = 'Infection count' #Daily
+  
+  if(PDF){
+    plot_folder = paste0(RESULTS_FOLDER, '/', model, '/') #, '/plots/')
+    create_folder(plot_folder)
+    time_stamp = GET_CURRENT_TIME_STAMP()
+    pdf_file = paste0(model, '_EPI_DATA_', param, '_', time_stamp, '.pdf')  
+    pdf(paste0(plot_folder, pdf_file), width = plot_width, height = plot_height) 
+  }
+  
+  #PLOT SETTINGS
+  GET_MODEL_SPAGHETTI_PLOT_SETTINGS(FLAGS_MODELS, FLAGS_PARAM)
+  
+  #PLOT
+  for(j in 1:length(lists_data)) { #for(sub_list in lists_data)
+    
+    #EXTRACT
+    sub_list = lists_data[[j]]
+    list_titles = GET_MODEL_SIMULATION_TITLE(j, list_params, 
+                                             FLAGS_MODELS, FLAGS_PARAM)
+    data_title = list_titles$data_title
+    main_title = list_titles$main_title
+    
+    max_y = max(unlist(sub_list))
+    
+    for(i in 1:length(sub_list)){
+      
+      #PARAMS
+      epidemic_data = sub_list[[i]]
+      
+      if(i == 1){
+        plot(seq_along(epidemic_data), epidemic_data,
+             type = 'l', xlab = 'Time', ylab = ylabel,
+             main = data_title,
+             col = MODEL_COLOR,
+             lwd = lwd, 
+             ylim = c(0, max_y),
+             cex.lab=cex+0.2, cex.axis=cex, cex.sub=cex-0.2,
+             cex.main=cex+0.3, cex.main= main_font)    
+      } else {
+        
+        lines(seq_along(epidemic_data), epidemic_data, 
+              type = 'l', col = MODEL_COLOR, lwd = lwd) 
+      }
+  
+    }
+  }
+  
+  #MAIN TITLE
+  title(main_title, outer = TRUE, cex.main = main_font + 0.2)
+  
+  
+  if(PDF){
+    dev.off()
+  }
+}

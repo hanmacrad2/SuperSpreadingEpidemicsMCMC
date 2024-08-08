@@ -71,7 +71,7 @@ GET_LOG_PROPOSAL_Q <- function(mcmc_samples, epidemic_data, FLAGS_MODELS,
 #* 2. GET ESTIMATE OF MODEL EVIDENCE (LOG) (P_HAT)
 #
 #*****************************************************************************************
-GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data, PRIORS_USED,
+GET_LOG_MODEL_EVIDENCE <- function(mcmc_samples, epidemic_data, PRIORS_USED = GET_PRIORS_USED(),
                                    FLAGS_MODELS = list(BASELINE = FALSE, SSE = FALSE,
                                                        SSI = FALSE, SSEB = FALSE, SSIB = FALSE), n_samples = 10000) {   
   

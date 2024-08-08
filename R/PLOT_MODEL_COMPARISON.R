@@ -6,7 +6,7 @@
 #************************************
 # SINGLE MODEL COMPARISON RUNS
 #************************************
-VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
+VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER, mod_num,
                                          cex = 2.0,
                                          plot_width = 12.5, plot_height = 10.0,
                                          MODEL_NAMES = c('Baseline', 'SSE', 'SSI', 'SSEB', 'SSIB'),
@@ -15,6 +15,7 @@ VIOLIN_PLOT_MODEL_COMPARISON <- function(df_results, RESULTS_FOLDER,
   
   # SETUP
   #old_par <- par(cex = cex)
+  model = MODEL_NAMES[mod_num]
   main_title = bquote(paste(.(model), " simulated data - Posterior Probabilities of the models"))
   xlab = bquote('Model')
   ylab = bquote('Posterior Model Probability')
