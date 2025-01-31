@@ -68,7 +68,7 @@ plot.ts(epi_data_ssi)
 plot.ts(epi_data_sseb)
 plot.ts(epi_data_ssib)
 
-#Infer the model parameters using MCMC
+#MCMC: Infer the model parameters using MCMC
 n_mcmc = 50000
 mcmc_baseline <- MCMC_INFER_BASELINE(epi_data_baseline, n_mcmc)
 mcmc_sse <- MCMC_INFER_SSE(epi_data_sse, n_mcmc)
@@ -76,9 +76,30 @@ mcmc_ssi <- MCMC_INFER_SSI(epi_data_ssi$epidemic_data, n_mcmc)
 mcmc_sseb <- MCMC_INFER_SSEB(epi_data_sseb, n_mcmc)
 mcmc_ssib <- MCMC_INFER_SSIB(epi_data_ssib, n_mcmc)
 
-#Inspect MCMC TRACES 
+
+#Plot & Inspect the MCMC TRACES of the model parameters
+#i.Plot the Inferred parameters of the Baseline model (r0)
 plot.ts(mcmc_baseline$r0_vec)
+
+#ii. Plot the Inferred parameters of the SSE model (r0, k)
 plot.ts(mcmc_sse$sse_params_matrix)
+
+#iii. Plot the Inferred parameters of the SSI model (r0, k)
+plot.ts(mcmc_ssi$ssi_params_matrix)
+
+#iv. Plot the Inferred parameters of the SSEB model (r0, alpha, beta)
+plot.ts(mcmc_sseb$r0_vec)
+plot.ts(mcmc_sseb$alpha_vec)
+plot.ts(mcmc_sseb$beta_vec)
+
+#v. Plot the Inferred parameters of the SSEB model (r0, alpha, beta)
+plot.ts(mcmc_sseb$r0_vec)
+plot.ts(mcmc_sseb$alpha_vec)
+plot.ts(mcmc_sseb$beta_vec)
+
+#iii. Plot the Inferred parameters of the SSIB model (r0, a, b)
+plot.ts(mcmc_ssib$ssib_params_matrix)
+
 
 
 ```
