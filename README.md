@@ -59,7 +59,7 @@ plot.ts(epi_data_ssi)
 plot.ts(epi_data_sseb)
 plot.ts(epi_data_ssib)
 
-#Infer the parameters using MCMC
+#Infer the model parameters using MCMC
 n_mcmc = 50000
 mcmc_baseline <- MCMC_INFER_BASELINE(epi_data_baseline, n_mcmc)
 mcmc_sse <- MCMC_INFER_SSE(epi_data_sse, n_mcmc)
