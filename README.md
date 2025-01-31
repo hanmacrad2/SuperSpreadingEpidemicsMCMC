@@ -11,6 +11,23 @@ You can install the package in R from GitHub using:
 install.packages("devtools")
 devtools::install_github("hanmacrad2/SuperSpreadingEpidemicsMCMC")
 ```
+Load required packages including SuperspreadingEpidemicsMCMC
+
+```
+library(SuperSpreadingEpidemicsMCMC)
+library(coda)
+library(mvtnorm)
+library(MASS)
+library(extraDistr)
+library(RChronoModel)
+library(stringr)
+library(plotrix)
+library(viridis) 
+library(parallel)
+library(scales)
+library(tools)
+library(vioplot)
+```
 
 ## Background
 
@@ -24,7 +41,6 @@ The package also contains other util functions such as plotting functions to plo
 The code below provides an example of how to simulate incidence time series data from each of the five epidemic transmission models and visualize the resulting time series. Subsequently, the model parameters can be inferred as fit to the data using the adaptive MCMC algorithms implemented in the functions listed below.
 
 ```r
-library(SuperSpreadingEpidemicsMCMC)
 
 #Simulate data from each model
 data_baseline <- SIMULATE_EPI_BASELINE(r0 = 2.0)
