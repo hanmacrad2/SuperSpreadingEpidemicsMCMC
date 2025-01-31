@@ -210,7 +210,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
                             param_starts = list(alpha_start = 0.5, beta_start = 10, r0_start = 1.0),
                             mcmc_inputs =  list(alpha_star = 0.3, thinning_factor = 10, burn_in_pc = 0.2), 
                             sigma_starts = list(sigma_alpha = 0.3, sigma_r0 = 0.03, sigma_beta = 3),
-                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE)) {
+                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = FALSE)) {
   
   'Returns MCMC samples of SSEB model parameters (alpha, beta, gamma, r0 = alpha + beta*gamma)
   w/ acceptance rate
@@ -397,8 +397,10 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   }
   
   #COMPUTE WAIC, DIC
+  if (FLAGS_LIST$COMPUTE_WAIC){
   waic_result = WAIC(loglike_pointwise_matrix)$WAIC
   dic_result = GET_DIC(loglike_pointwise_matrix)
+  }
   
   #Final stats
   accept_rate_alpha = 100*list_accept_counts$count_accept1/(n_mcmc-1)
@@ -413,7 +415,7 @@ MCMC_INFER_SSEB <- function(epidemic_data, n_mcmc,
   #OUTPUT
   mcmc_output = list(alpha_vec = alpha_vec, beta_vec = beta_vec, gamma_vec = gamma_vec, r0_vec = r0_vec,
                      log_like_vec = log_like_vec, sigma_list = sigma_list,
-                     waic_result = waic_result, dic_result = dic_result,
+                     #waic_result = waic_result, dic_result = dic_result,
                      list_accept_rates = list_accept_rates, 
                      r0_start = r0_start)
   #saveRDS(mcmc_output, file = 'mcmc_sse_output_poisson_compound.rds')
