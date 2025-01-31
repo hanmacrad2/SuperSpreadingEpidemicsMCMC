@@ -209,7 +209,7 @@ GET_DIC <- function(log_lik_matrix) {
 MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc, 
                                 PRIORS_USED = GET_PRIORS_USED(), #PRIORS = list(EXP = TRUE, UNIF = FALSE, GAMMA = FALSE),
                                 FLAGS_LIST = list(ADAPTIVE = TRUE, 
-                                                  THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE),
+                                                  THIN = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = FALSE),
                                 mcmc_inputs = list(target_accept_rate = 0.4, thinning_factor = 10, #r0_start = 1.0, #1.2 changed 24/12/23
                                                       burn_in_pc = 0.2), B = 500) {
   
@@ -324,11 +324,11 @@ MCMC_INFER_BASELINE <- function(epidemic_data, n_mcmc,
   print(paste0('accept_rate = ', accept_rate))
   
   #COMPUTE WAIC, DIC
-  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
-  dic_result = GET_DIC(loglike_pointwise_matrix)
+  #waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+  #dic_result = GET_DIC(loglike_pointwise_matrix)
   
   #Return a, acceptance rate
   return(list(r0_vec = r0_vec, log_like_vec = log_like_vec, sigma_vec = sigma_vec,
-              waic_result = waic_result, dic_result = dic_result,
+              #waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, r0_start = r0_start))
 }
