@@ -48,6 +48,8 @@ library(tools)
 library(vioplot)
 ```
 
+Use the SuperspreadingEpidemicsMCMC package to simulate epidemics from the models, visualise the time series, fit the models to the data and infer the parameters using MCMC
+
 ```r
 
 #Simulate data from each model of length 50 days and basic reproduction number R0 set to 2.0
