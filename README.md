@@ -27,7 +27,12 @@ Load required packages including SuperspreadingEpidemicsMCMC
 
 ```
 library(SuperSpreadingEpidemicsMCMC)
+
+#If you don't have one of the following R packages installed you can install it using the following command; install.packages("package_name"). For example to install the
+install.packages("coda")
 library(coda)
+
+#Otherwise load packages if you already have them installed
 library(mvtnorm)
 library(MASS)
 library(extraDistr)
