@@ -231,7 +231,7 @@ SET_SSIB_DATA <- function(epidemic_data, FLAGS_DATA_TYPE, data_start = c(3,2,1))
 #' @export
 MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
                             FLAGS_DATA_TYPE = list(SIM_DATA = TRUE, REAL_DATA = FALSE),
-                            PRIORS_USED = GET_PRIORS_USED(), COMPUTE_WAIC = TRUE,
+                            PRIORS_USED = GET_PRIORS_USED(), COMPUTE_WAIC = FALSE,
                            data_start = c(3,2,1),
                             rep_da = 500, mcmc_inputs = list(dim = 3, target_acceptance_rate = 0.234, #0.4 
                                                v0 = 100,  #priors_list = list(alpha_prior = c(1, 0), k_prior = c()),
@@ -395,9 +395,11 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
   } #END MCMC 
   
   #COMPUTE WAIC, DIC
-  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
-  dic_result = GET_DIC(loglike_pointwise_matrix)
-  
+  if(COMPUTE_WAIC){
+    waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+    dic_result = GET_DIC(loglike_pointwise_matrix)
+  }
+
   #Final stats
   accept_count = pmin(1, vec_accept) #1 if accepted in that time step at all, 0 otherwise 
   
@@ -417,7 +419,7 @@ MCMC_INFER_SSIB <- function(epidemic_data, n_mcmc,
               accept_rate = accept_rate, 
               data_final = data, 
               ns_final = data[[1]], ss_final = data[[2]], #FINAL
-              waic_result = waic_result, dic_result = dic_result,
+              #waic_result = waic_result, dic_result = dic_result,
               ns_median = ns_median, ss_median = ss_median,
               ns_mean = ns_mean, ss_mean = ss_mean, 
               ss_start = ss_start, ns_start = ns_start,
