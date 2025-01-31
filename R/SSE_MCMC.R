@@ -261,13 +261,15 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   accept_rate = 100*count_accept/(n_mcmc-1)
   
   #COMPUTE WAIC, DIC
-  waic_result = WAIC(loglike_pointwise_matrix)$WAIC
-  dic_result = GET_DIC(loglike_pointwise_matrix)
+  if(FLAGS_LIST$COMPUTE_WAIC){
+    waic_result = WAIC(loglike_pointwise_matrix)$WAIC
+    dic_result = GET_DIC(loglike_pointwise_matrix)
+  }
   
   #Return a, acceptance rate
   return(list(sse_params_matrix = sse_params_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              waic_result = waic_result, dic_result = dic_result,
+              #waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, r0_start = r0_start))
 } 
 
