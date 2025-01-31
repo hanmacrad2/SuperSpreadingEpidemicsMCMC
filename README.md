@@ -42,26 +42,34 @@ The code below provides an example of how to simulate incidence time series data
 
 ```r
 
-#Simulate data from each model
-data_baseline <- SIMULATE_EPI_BASELINE(r0 = 2.0)
-data_sse <- SIMULATE_EPI_SSE(r0 = 2.0, k = 0.2)
-data_ssi <- SIMULATE_EPI_SSI(r0 = 2.0, k = 0.2)
-data_sseb <- SIMULATE_EPI_SSEB(r0 = 2.0, alpha = 0.5, beta = 10)
-data_ssib <- SIMULATE_EPI_SSIB(r0 = 2.0, a = 0.5, b = 10)
+#Simulate data from each model of length 50 days and basic reproduction number R0 set to 2.0
+num_days = 50
+epi_data_baseline <- SIMULATE_EPI_BASELINE(num_days = num_days, r0 = 2.0)
+epi_data_sse <- SIMULATE_EPI_SSE(num_days = num_days, r0 = 2.0, k = 0.2)
+data_ssi <- SIMULATE_EPI_SSI(num_days = num_days, r0 = 2.0, k = 0.2)
+epi_data_ssi = data_ssi$epidemic_data
+epi_data_sseb <- SIMULATE_EPI_SSEB(num_days = num_days, r0 = 2.0, alpha = 0.5, beta = 10)
+epi_data_ssib <- SIMULATE_EPI_SSIB(num_days = num_days, r0 = 2.0, a = 0.5, b = 10)
 
 #Visualise the time series incidence datasets
-plot.ts(data_baseline)
-plot.ts(data_sse)
-plot.ts(data_ssi)
-plot.ts(data_sseb)
-plot.ts(data_ssib)
+plot.ts(epi_data_baseline)
+plot.ts(epi_data_sse)
+plot.ts(epi_data_ssi)
+plot.ts(epi_data_sseb)
+plot.ts(epi_data_ssib)
 
 #Infer the parameters using MCMC
-mcmc_baseline <- MCMC_INFER_BASELINE(data_baseline)
-mcmc_sse <- MCMC_INFER_SSE(data_sse)
-mcmc_ssi <- MCMC_INFER_SSI(data_ssi)
-mcmc_sseb <- MCMC_INFER_SSEB(data_sseb)
-mcmc_ssib <- MCMC_INFER_SSIB(data_ssib)
+n_mcmc = 50000
+mcmc_baseline <- MCMC_INFER_BASELINE(epi_data_baseline, n_mcmc)
+mcmc_sse <- MCMC_INFER_SSE(epi_data_sse, n_mcmc)
+mcmc_ssi <- MCMC_INFER_SSI(epi_data_ssi$epidemic_data, n_mcmc)
+mcmc_sseb <- MCMC_INFER_SSEB(epi_data_sseb, n_mcmc)
+mcmc_ssib <- MCMC_INFER_SSIB(epi_data_ssib, n_mcmc)
+
+#Inspect MCMC TRACES 
+plot.ts(mcmc_baseline$r0_vec)
+plot.ts(mcmc_sse$sse_params_matrix)
+
 
 ```
 
