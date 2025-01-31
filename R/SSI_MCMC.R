@@ -190,7 +190,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
                                                  target_acceptance_rate = 0.234, #0.4, 
                                                  v0 = 100, thinning_factor = 10, burn_in_pc = 0.2),
                               FLAGS_LIST = list(BURN_IN = TRUE, ADAPTIVE = TRUE, THIN = TRUE,
-                                                COMPUTE_WAIC = TRUE)) {    
+                                                COMPUTE_WAIC = FALSE)) {    
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
@@ -342,8 +342,10 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   } #END FOR LOOP
   
   #COMPUTE WAIC, DIC
+  if (FLAGS_LIST$COMPUTE_WAIC){
   waic_result = WAIC(loglike_pointwise_matrix)$WAIC
   dic_result = GET_DIC(loglike_pointwise_matrix)
+  }
   
   #Final stats
   accept_rate = 100*count_accept/(n_mcmc-1)
@@ -353,7 +355,7 @@ MCMC_INFER_SSI <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
   return(list(ssi_params_matrix = ssi_params_matrix, eta_matrix = eta_matrix,
               sigma_eta_matrix = sigma_eta_matrix,
               log_like_vec = log_like_vec, scaling_vec = scaling_vec, 
-              waic_result = waic_result, dic_result = dic_result,
+              #waic_result = waic_result, dic_result = dic_result,
               accept_rate = accept_rate, vec_count_accept_da = vec_count_accept_da,
               r0_start = r0_start))
 } 
