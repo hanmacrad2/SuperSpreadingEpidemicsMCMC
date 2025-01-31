@@ -148,7 +148,7 @@ MCMC_INFER_SSE <- function(epidemic_data, n_mcmc, PRIORS_USED = GET_PRIORS_USED(
                            mcmc_inputs = list(dim = 2, target_acceptance_rate = 0.234, #0.4, 
                                               v0 = 100, thinning_factor = 10, burn_in_pc = 0.2),
                            FLAGS_LIST = list(ADAPTIVE = TRUE, THIN = TRUE,
-                                             PRIOR = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = TRUE)){    
+                                             PRIOR = TRUE, BURN_IN = TRUE, COMPUTE_WAIC = FALSE)){    
   
   #MCMC INITIAL POINTS
   r0_start = GET_R0_INITIAL_MCMC(epidemic_data)
