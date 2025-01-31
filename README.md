@@ -3,7 +3,7 @@
 
 This package contains the code to implement a bayesian modelling framework of epidemic transmission that encompasses five distinct models. The package also contains the code to implement multi-model comparison between the candidate models using a method of importance sampling to estimate the model evidence of each model. 
 
-The corresponding paper is on archive here; https://arxiv.org/abs/2501.12768
+The corresponding paper is on archive here;  https://arxiv.org/abs/2501.12768
 
 ## Installation
 
