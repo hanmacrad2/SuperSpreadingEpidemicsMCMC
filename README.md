@@ -5,7 +5,7 @@ This package contains the code to implement a bayesian modelling framework of ep
 
 ## Installation
 
-You can install the package from GitHub using:
+You can install the package in R from GitHub using:
 
 ```
 install.packages("devtools")
