@@ -48,7 +48,7 @@ library(tools)
 library(vioplot)
 ```
 
-Use the SuperspreadingEpidemicsMCMC package to simulate epidemics from the models, visualise the time series, fit the models to the data and infer the parameters using MCMC
+Use the SuperspreadingEpidemicsMCMC package to simulate epidemics from the models and visualise the time series
 
 ```r
 
@@ -67,6 +67,12 @@ plot.ts(epi_data_sse)
 plot.ts(epi_data_ssi)
 plot.ts(epi_data_sseb)
 plot.ts(epi_data_ssib)
+
+```
+
+Fit the models to the data and infer the parameters using MCMC
+
+```r
 
 #MCMC: Infer the model parameters using MCMC
 n_mcmc = 50000
