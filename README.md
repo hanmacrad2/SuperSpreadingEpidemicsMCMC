@@ -80,7 +80,7 @@ Fit the models to the data and infer the parameters using MCMC
 n_mcmc = 50000
 mcmc_baseline <- MCMC_INFER_BASELINE(epi_data_baseline, n_mcmc)
 mcmc_sse <- MCMC_INFER_SSE(epi_data_sse, n_mcmc)
-mcmc_ssi <- MCMC_INFER_SSI(epi_data_ssi$epidemic_data, n_mcmc)
+mcmc_ssi <- MCMC_INFER_SSI(epi_data_ssi, n_mcmc)
 mcmc_sseb <- MCMC_INFER_SSEB(epi_data_sseb, n_mcmc)
 mcmc_ssib <- MCMC_INFER_SSIB(epi_data_ssib, n_mcmc)
 
